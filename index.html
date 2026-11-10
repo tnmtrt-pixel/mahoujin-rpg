@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>マイスターの魔法陣 RPG（第1章）</title>
+<link rel="icon" href="img/title/emblem.webp">
+<link rel="apple-touch-icon" href="img/title/icon180.png">
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+1p:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1024;--panel:#141b38;--line:#2e3a6e;--ink:#f1ecd8;--sub:#9fa8cc;--gold:#e8c35a;--blue:#5aa8ff;--red:#ff5a5a;--green:#4fd07a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'M PLUS 1p',system-ui,sans-serif;overscroll-behavior:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:radial-gradient(ellipse at 50% 20%,#1d2a5c 0%,#0b1024 70%)}
+button{font:inherit;color:inherit;border:none;cursor:pointer;touch-action:manipulation}
+.scr{display:none;min-height:100%;max-width:640px;margin:0 auto;padding:12px}
+.scr.on{display:block}
+h1,h2{font-family:'Dela Gothic One',sans-serif;font-weight:400}
+.btn{display:block;width:100%;padding:14px;margin:8px 0;border-radius:14px;background:linear-gradient(#2c4a9a,#1c2f6a);border:1px solid #5a7ad0;font-weight:800;font-size:17px}
+.btn.gold{background:linear-gradient(#d8ae46,#946e1c);border-color:#f3d77a;color:#1b1400}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--sub);font-size:15px}
+.btn:disabled{opacity:.4}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;margin:10px 0}
+.note{font-size:13px;color:var(--sub);line-height:1.7}
+.hd{display:flex;align-items:center;gap:8px}
+.hd h2{margin:0;font-size:20px;flex:1}
+.back{background:transparent;border:1px solid var(--line);border-radius:10px;padding:7px 12px;color:var(--sub);min-height:44px}
+.nw{white-space:nowrap}
+.tag{display:inline-block;font-size:11px;font-weight:800;border-radius:99px;padding:1px 8px;background:#2c4a9a;color:#fff}
+/* タイトル */
+#title{position:fixed;inset:0;max-width:none;margin:0;padding:calc(env(safe-area-inset-top) + 4vh) 16px calc(env(safe-area-inset-bottom) + 3vh);background:#050f3c url(img/title/title_bg.webp) center/cover no-repeat;display:none;flex-direction:column;align-items:center;text-align:center;z-index:5}
+#title.on{display:flex}
+#title .tlogo{width:min(92vw,520px);height:auto;filter:drop-shadow(0 4px 14px #000a);pointer-events:none}
+#title .tsub{font-weight:800;color:#fff;text-shadow:0 2px 6px #000,0 0 12px #000a;margin-top:2px;font-size:clamp(13px,3.6vw,16px)}
+#title .tbtns{margin-top:auto;width:100%;max-width:380px}
+#title .tbtns .btn.ghost{background:#0b1024cc}
+#title .tbtns #btnReset{margin-top:22px;font-size:13px;padding:10px;width:auto;display:inline-block;min-width:160px;min-height:44px}
+#title .tver{font-size:12px;font-weight:700;color:#dfe6ff;text-shadow:0 1px 4px #000;margin-top:6px}
+#title .tnote{font-size:12px;color:#ffd9a0;text-shadow:0 1px 4px #000;margin-top:4px}
+/* 横向きの案内（横向きのレイアウトは作らない） */
+#rotate{display:none;position:fixed;inset:0;z-index:50;background:#0b1024;color:var(--ink);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;font-weight:800;font-size:20px;line-height:1.7}
+#rotate .rph{display:block;width:34px;height:56px;border:3px solid var(--gold);border-radius:8px;margin:0 auto 14px;box-shadow:inset 0 -8px 0 -5px var(--gold)}
+@media (min-aspect-ratio:1/1) and (max-height:499px){#rotate{display:flex}}
+/* 主役選び */
+.cgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cgrid.one{grid-template-columns:minmax(0,min(60%,260px));justify-content:center}
+.cc{background:#0e1430;border:2px solid var(--line);border-radius:16px;padding:8px;text-align:center}
+.cc img{width:100%;aspect-ratio:1/1;object-fit:contain}
+.cc .nm{font-weight:800}
+.cc.sel{border-color:var(--gold);box-shadow:0 0 16px #e8c35a66}
+/* マップ */
+#mapStat,#mapStat2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;padding-bottom:4px}
+#mapStat .mini,#mapStat2 .mini{min-width:0;padding:3px 6px}#mapStat .mini img,#mapStat2 .mini img{width:32px;height:32px}
+.mini{flex:none;display:flex;gap:6px;align-items:center;background:#0e1430;border:1px solid var(--line);border-radius:12px;padding:4px 8px;min-width:150px}
+.mini img{width:38px;height:38px;object-fit:contain}
+.mini .t{font-size:12px;font-weight:800;line-height:1.3;flex:1}
+.hb{height:6px;border-radius:9px;background:#060a1a;overflow:hidden;margin-top:2px}.hb i{display:block;height:100%;background:var(--green)}
+.mb i{background:var(--blue)}.sb i{background:var(--gold)}
+#mapWrap{position:relative;margin:10px auto}
+#mapWrap svg{position:absolute;inset:0;pointer-events:none}
+.node{position:absolute;width:86px;margin-left:-43px;margin-top:-30px;border-radius:14px;background:#16204a;border:2px solid #3a4a8a;padding:5px 2px;text-align:center;font-size:11px;font-weight:800;line-height:1.2}
+.node .i{font-size:22px;display:block;line-height:1}
+.node .i .ic{display:block;margin:0 auto 2px}
+.ic{vertical-align:middle;object-fit:contain;display:inline-block}
+.node.done{border-color:#6fbf6a;background:#1c3020}
+.node.av{border-color:var(--gold);animation:pul 1.2s infinite}
+.node.lock{opacity:.35}
+.node.boss{border-color:#c04848}
+.node.used{opacity:.55;filter:grayscale(.8);border-style:dashed}
+#map.busy #mapWrap,#map.busy .mbar{pointer-events:none}
+@keyframes pul{0%,100%{box-shadow:0 0 0 0 #e8c35a88}50%{box-shadow:0 0 0 7px #e8c35a00}}
+.mbar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.mbar .btn{font-size:13px;padding:10px 2px}
+/* バトル */
+/* 戦闘の背景はノッチ・ホームバーの帯まで広げる（中身は env() の分だけ内側） */
+#battle{display:none;flex-direction:column;position:relative;padding:8px;background-size:cover;background-position:center top;background-color:#0b1024;
+ margin-top:calc(-1 * env(safe-area-inset-top));margin-bottom:calc(-1 * env(safe-area-inset-bottom));height:calc(100% + env(safe-area-inset-top) + env(safe-area-inset-bottom));
+ padding-top:calc(8px + env(safe-area-inset-top));padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+#cmd.wait .cb:not(.tool),#cmd.wait .sk{opacity:.45;pointer-events:none}
+#cmd .cgrid2{grid-template-columns:repeat(4,1fr)}
+#cmd .cb{font-size:14px;padding:10px 2px;min-height:44px}
+#cmd .cb.tool{font-size:12px;background:#121a3a}
+#cmd .cb.tool.on{background:#2f6a3a;border-color:var(--green)}
+#cmd #bSpd.on{background:#3a5aaa;border-color:var(--gold)}
+.foe.in{animation:fin .25s ease-out}
+@keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+#battle.on{display:flex}
+#foes{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;min-height:150px;position:relative}
+.foe{display:flex;flex-direction:column;align-items:center;position:relative;transition:transform .1s}
+.foe svg{width:min(28vw,130px);height:min(28vw,130px)}
+.foe.boss svg{width:min(48vw,220px);height:min(48vw,220px)}
+.foe .fimg{width:min(28vw,130px);height:min(28vw,130px);object-fit:contain;filter:drop-shadow(0 6px 10px #000a);-webkit-user-drag:none}
+.foe.boss .fimg{width:min(62vw,260px);height:min(62vw,260px)}
+.foe.tg .fimg{filter:drop-shadow(0 0 12px #e8c35a)}
+.foe.hit .fimg{filter:drop-shadow(0 0 14px #ff5a5a) brightness(1.4)}
+.foe .fn{font-size:12px;font-weight:800;white-space:nowrap}
+.foe .st{font-size:11px;min-height:1.4em;line-height:1.4em;white-space:nowrap;max-width:min(28vw,120px);overflow:hidden;text-overflow:ellipsis}
+.foe.boss .st{max-width:min(62vw,240px)}
+.foe .hb{width:80px}
+.foe.tg{cursor:pointer}.foe.tg svg{filter:drop-shadow(0 0 10px #e8c35a)}
+.foe.dead{opacity:0;transform:scale(.6);transition:.5s}
+.foe.hit{transform:translateX(6px)}
+.st{font-size:10px;color:var(--gold);min-height:13px}
+#log{background:#060a1aee;border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:14px;line-height:1.6;height:calc(1.6em * 3 + 18px);box-sizing:border-box;overflow:hidden;font-weight:700;display:flex;flex-direction:column;justify-content:flex-end}
+#log>div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
+#log>div:last-child{white-space:normal}  /* 最新の1行だけは折り返す（古い行は上へ押し出される） */
+#log div:last-child{color:#fff}#log div{color:var(--sub)}
+#bparty{display:grid;gap:6px;margin-top:6px}
+.pm{background:#141b38;border:2px solid var(--line);border-radius:12px;padding:5px;position:relative;display:flex;gap:6px;align-items:center;min-height:58px;min-width:0;overflow:hidden}
+.pm .t{min-width:0;flex:1}
+/* ギアフォックスの三面図ミッション */
+.cqstep{font-weight:800;color:var(--gold);font-size:14px;white-space:nowrap}
+.cqmsg{display:flex;gap:8px;align-items:center;background:#141b38;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:8px 0;font-size:14px;line-height:1.6}
+.cqmsg img{width:44px;height:44px;object-fit:cover;object-position:50% 0;border-radius:10px;background:#0b1024;flex:none}
+#cqViews{display:block;width:100%;border-radius:12px}
+.cqcands{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.cqcands .cand{position:relative;background:#141b38;border:2px solid var(--line);border-radius:12px;padding:4px 4px 6px;min-height:44px}
+.cqcands .cand b{position:absolute;left:8px;top:4px;font-size:16px;color:var(--gold)}
+.cqcands .cand canvas{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+.cqrow{display:flex;gap:6px;margin-top:4px}
+.cqrow button{min-height:44px;border-radius:10px;font-weight:800;border:1px solid #5a7ad0;background:linear-gradient(#2c4a9a,#1c2f6a)}
+.cqrow .cqrs{width:44px;flex:none;font-size:18px}.cqrow .cqpick{flex:1;font-size:15px}.cqrow .cqpick:disabled{opacity:.45}
+.cqcands .cand.ok{border-color:var(--green);background:#16351f}.cqcands .cand.ng{border-color:var(--red);background:#3a1620}
+#cqFb{min-height:72px;margin-top:8px;font-size:14px;line-height:1.6;text-align:center}
+#cqFb .okc{color:var(--green);font-weight:800;font-size:18px}#cqFb .ngc{color:var(--red);font-weight:800;font-size:16px}
+.pm img{width:42px;height:42px;object-fit:contain}
+.pm .t{flex:1;min-width:0;font-size:11px;font-weight:800;line-height:1.25}
+.pm .pnm{display:flex;gap:4px;white-space:nowrap;min-width:0}
+.pm .pnm>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.pm .pnm .pnmT{flex:0 1 auto}.pm .pnm .pst{flex:0 1 auto}
+.pm.act{border-color:var(--gold);box-shadow:0 0 10px #e8c35a77}
+.pm.ko{opacity:.4;filter:grayscale(1)}
+.pm.tg{border-color:var(--green);box-shadow:0 0 10px #4fd07a}
+.pm.hit{animation:sh .35s}
+@keyframes sh{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+/* コマンド欄は高さ固定。わざ・どうぐの一覧は欄の下端から上へ重ねて出す（敵・ログ・パーティが動かない） */
+#cmd{margin-top:6px;height:150px;flex:none;position:relative}
+#cmd.over>.cmdBox{position:absolute;left:0;right:0;bottom:0;max-height:calc(100vh - 150px);overflow-y:auto;background:#0b1024f5;border:1px solid var(--line);border-radius:12px;padding:6px;z-index:4;box-shadow:0 -6px 18px #000a}
+#cmd .sk{min-height:44px}
+#bk{min-height:44px}
+.cmdT{font-weight:800;font-size:14px;margin-bottom:4px;display:flex;justify-content:space-between}
+.cgrid2{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cb{padding:11px 4px;border-radius:12px;background:#1c2a5c;border:1px solid #4a63b8;font-weight:800;font-size:15px}
+.cb.sp{background:linear-gradient(#a07a20,#5a420c);border-color:var(--gold)}
+.cb:disabled{opacity:.35}
+.cb small{display:block;font-size:10px;color:var(--sub);font-weight:700}
+.pop{position:absolute;font-family:'Dela Gothic One','M PLUS 1p',system-ui,sans-serif;font-size:26px;color:#fff;text-shadow:0 0 8px #ff4040,0 2px 0 #000;animation:pop .9s forwards;pointer-events:none;z-index:3}
+.pop.h{color:#9fe08a;text-shadow:0 0 8px #2a8a3a,0 2px 0 #000}
+.pop.c{color:var(--gold);font-size:32px}
+@keyframes pop{0%{transform:translateY(0) scale(.6);opacity:0}20%{transform:translateY(-8px) scale(1.15);opacity:1}100%{transform:translateY(-40px);opacity:0}}
+/* なぞり・加工（共通） */
+#craft{display:none;flex-direction:column;height:100%;padding:10px}
+#craft.on{display:flex}
+#craftT{font-weight:800;font-size:17px;text-align:center;color:var(--gold)}
+#craftSub{font-size:13px;color:var(--sub);text-align:center;min-height:20px}
+#stage{position:relative;flex:1;display:flex;align-items:center;justify-content:center;min-height:0;margin:6px 0}
+#cv{touch-action:none;display:block}
+#cv.round{border-radius:50%}
+#cv.box{border-radius:14px;border:1px solid var(--line)}
+#hud{position:absolute;top:2px;left:0;right:0;display:flex;justify-content:space-between;font-weight:800;font-size:14px;pointer-events:none;padding:0 6px}
+#tbar{height:8px;border-radius:99px;background:#060a1a;overflow:hidden;margin:0 8%}
+#tbar>i{display:block;height:100%;background:linear-gradient(90deg,#ff7a5a,#e8c35a)}
+/* 町 */
+#town{display:none;flex-direction:column;height:100%;padding:6px 8px}
+#town.on{display:flex}
+#townTop{display:flex;gap:6px;align-items:center}
+#townTop .ttl{font-weight:800;font-size:15px;color:var(--gold);flex:1}
+#townTop button{background:#141b38;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-weight:800;font-size:13px}
+#townTop .tbtn{padding:6px 7px;line-height:0;min-width:44px;min-height:44px}
+#tWrap{flex:1;position:relative;min-height:0;margin:6px 0 0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0a0e1e}
+#tcv{position:absolute;inset:0;touch-action:none;display:block}
+#dpad{position:absolute;left:10px;bottom:10px;display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px);gap:3px;opacity:.82;pointer-events:none}
+#dpad button{pointer-events:auto}
+#dpad button{background:#1c2a5cd9;border:1px solid #4a63b8;border-radius:14px;font-size:22px;font-weight:800;touch-action:none}
+#dpad button:active,#dpad button.on{background:#3a5aaa}
+#tHint{position:absolute;left:0;right:0;top:0;padding:5px 10px;font-size:11px;color:#dfe6ff;background:linear-gradient(#0a0e1ecc,transparent);pointer-events:none;transition:opacity 1s}
+#tHint.off{opacity:0}
+/* 会話 */
+.ov{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;justify-content:center;z-index:10;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}
+body.talking #dpad{visibility:hidden}
+.ov.on{display:flex}
+#sheet{position:fixed;inset:0;background:#000a;display:none;align-items:flex-end;justify-content:center;z-index:9;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}
+#sheet.on{display:flex}
+#sheet .shp{width:100%;max-width:520px;background:#141b38;border:2px solid var(--gold);border-radius:18px;padding:12px 14px 14px;animation:shup .18s ease-out}
+@keyframes shup{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+#sheet .shh{display:flex;align-items:center;justify-content:space-between;font-weight:800;font-size:18px;color:var(--gold);margin-bottom:8px}
+#sheet .shh span{display:flex;align-items:center;gap:6px}
+#sheet .shh button{background:#0b1024;border:1px solid var(--line);border-radius:10px;width:44px;height:44px;font-size:18px;color:var(--ink)}
+.itr{display:flex;align-items:center;gap:10px;background:#0b1024;border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:6px}
+.itr .itn{flex:1;min-width:0;display:flex;flex-direction:column}
+.itr .itn b{font-size:16px}.itr .itn small{font-size:12px;color:var(--sub)}
+.sk.itb{display:flex;align-items:center;gap:10px;text-align:left}
+.sk.itb .itn{flex:1;display:flex;flex-direction:column}.sk.itb .itn small{font-size:11px;color:var(--sub)}
+.itc{font-weight:800;font-size:18px;color:var(--gold);min-width:44px;text-align:right}.itc.z{color:var(--sub);opacity:.6}
+#talk.ev{background:#000 center top/cover no-repeat}
+#talk .box{width:100%;max-width:600px;height:196px;box-sizing:border-box;background:#141b38f5;border:2px solid var(--gold);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:flex-start;margin-bottom:6vh}
+#talk .box>div:last-child{display:flex;flex-direction:column;height:100%;min-width:0}
+#talk .tface{width:96px;height:104px;flex:none;overflow:hidden;border-radius:10px;background:#0b1024}
+#talk .tface img{display:block;width:180%;margin-left:-40%;margin-top:-4%;max-width:none}
+#talk .who{font-weight:800;color:var(--gold);margin-bottom:4px;min-height:1.4em;flex:none}
+#talk .who:empty{display:none}
+#talk .txt{font-size:15px;line-height:1.7;white-space:pre-wrap;flex:1;overflow-y:auto;min-height:0}
+#talk .nx{text-align:right;font-size:12px;color:var(--sub);margin-top:2px;flex:none}
+#msg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;text-align:center;z-index:8}
+#msg>div{background:#0b1024f2;border:1px solid var(--gold);border-radius:16px;padding:14px 20px;font-weight:800;font-size:18px;line-height:1.6;max-width:86%;opacity:0;transform:scale(.9);transition:.2s}
+#msg.on>div{opacity:1;transform:scale(1)}
+.big{font-family:'Dela Gothic One','M PLUS 1p',system-ui,sans-serif;font-size:30px;color:var(--gold)}
+#resBtns{position:sticky;bottom:0;padding:4px 0 calc(4px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
+#resP .endImg{width:100%;max-width:360px;max-height:45vh;aspect-ratio:1/1.05;object-fit:cover;object-position:top;border-radius:12px;display:block;margin:0 auto 6px}
+.flash{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 60px #ff3030;opacity:0;transition:opacity .15s;z-index:5}.flash.on{opacity:.8}
+/* パーティ詳細 */
+.mem{display:flex;gap:10px;align-items:flex-start}
+.mem img{width:96px;height:96px;object-fit:contain}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:13px;font-weight:800;margin:6px 0}
+.stats div{background:#0e1430;border-radius:8px;padding:4px 6px;display:flex;align-items:center;line-height:1.4}
+.sk{display:flex;justify-content:space-between;gap:6px;align-items:center;padding:8px;border-radius:10px;background:#0e1430;border:2px solid var(--line);margin:4px 0;font-size:13px;width:100%;text-align:left;min-height:44px}
+.sk.on{border-color:var(--gold)}
+.sk small{color:var(--sub)}
+.new{display:inline-block;font-size:10px;font-weight:800;border-radius:99px;padding:0 6px;background:var(--red);color:#fff;margin-left:4px}
+</style>
+</head>
+<body>
+
+<section id="title" class="scr on">
+ <img class="tlogo" src="img/title/logo.webp" alt="マイスターの魔法陣">
+ <div class="tsub">RPG　第1章「夜の工房に灯る」</div>
+ <div class="tver" id="tVer"></div>
+ <div class="tnote" id="tNote"></div>
+ <div class="tbtns">
+  <button class="btn gold" id="btnStart" onclick="goStart()">はじめる</button>
+  <button class="btn ghost" id="btnReset" onclick="askReset()">セーブを消す</button>
+ </div>
+</section>
+
+<section id="pick" class="scr">
+ <div class="hd"><h2>主人公</h2></div>
+ <p class="note">ドド先輩・ギアフォックス・ホー博士の3人は、第1章の3つのエリア（路地裏・廃工場・地下工房）で1人ずつ仲間になります。</p>
+ <div class="cgrid" id="pickGrid"></div>
+ <div class="panel" id="pickInfo" style="display:none"></div>
+ <button class="btn gold" id="pickOk" disabled>ウルフで始める</button>
+</section>
+
+<section id="map" class="scr">
+ <div class="hd"><h2 id="mapTtl">路地裏</h2><span class="note" id="mapInfo"></span></div>
+ <div id="mapStat"></div>
+ <div class="mbar"><button class="btn ghost" onclick="openTown()"><img class="ic" src="img/icon/node_town.webp" alt="" style="width:20px;height:20px"> 町へ</button><button class="btn ghost" onclick="openParty()"><img class="ic" src="img/icon/party.webp" alt="" style="width:22px;height:22px"> パーティ</button><button class="btn ghost" onclick="openItems()"><img class="ic" src="img/icon/bag.webp" alt="" style="width:22px;height:22px"> どうぐ</button><button class="btn ghost" onclick="openHelp()"><img class="ic" src="img/icon/help.webp" alt="" style="width:22px;height:22px"> 説明</button></div>
+ <div id="mapWrap"></div>
+ <div class="note" style="text-align:center">クリアした戦闘マスは何度でも戦える（レベル上げ用）<br>休憩所は1回の出撃につき1回（町にもどると、また使える）</div>
+</section>
+
+<section id="town" class="scr">
+ <div id="townTop"><span class="ttl"><img class="ic" src="img/icon/node_town.webp" alt="" style="width:24px;height:24px"> 夜の工業の街</span><button class="tbtn" onclick="openParty()" aria-label="パーティ"><img class="ic" src="img/icon/party.webp" alt="" style="width:30px;height:30px"></button><button class="tbtn" onclick="openItems()" aria-label="どうぐ"><img class="ic" src="img/icon/bag.webp" alt="" style="width:30px;height:30px"></button><button class="tbtn" onclick="openHelp()" aria-label="説明"><img class="ic" src="img/icon/help.webp" alt="" style="width:30px;height:30px"></button></div>
+ <div id="mapStat2" style="margin-top:4px"></div>
+ <div id="tWrap"><canvas id="tcv"></canvas>
+  <div id="dpad"><span></span><button data-d="0,-1">▲</button><span></span><button data-d="-1,0">◀</button><span></span><button data-d="1,0">▶</button><span></span><button data-d="0,1">▼</button><span></span></div>
+  <div id="tHint">十字キーで歩く・人に当たると話す・扉で工房・<img class="ic" src="img/icon/gate.webp" alt="" style="width:15px;height:15px">門で外へ</div></div>
+</section>
+
+<section id="dest" class="scr">
+ <div class="hd"><button class="back" onclick="openTown()">◀ 町へ</button><h2><img class="ic" src="img/icon/gate.webp" alt="" style="width:28px;height:28px"> 行き先を選ぶ</h2></div>
+ <p class="note">門の向こうへ。解放されたエリアから選ぼう。ボスは推奨Lvより低いとかなり手ごわい。</p>
+ <div id="destList"></div>
+</section>
+
+<section id="party" class="scr">
+ <div class="hd"><button class="back" onclick="backFromMenu()">◀ もどる</button><h2>パーティ</h2></div>
+ <div id="partyList"></div>
+</section>
+
+<section id="shop" class="scr">
+ <div class="hd"><button class="back" onclick="openTown()">◀ 町へ</button><h2><img class="ic" src="img/icon/hammer.webp" alt="" style="width:28px;height:28px"> 古い工房</h2></div>
+ <div class="panel" id="shopBody"></div>
+</section>
+
+<section id="cadq" class="scr">
+ <div class="hd"><button class="back" id="cqBack">◀ あとで</button><h2 id="cqT">三面図</h2><span class="cqstep" id="cqStep"></span></div>
+ <div class="cqmsg" id="cqMsg"></div>
+ <canvas id="cqViews"></canvas>
+ <div class="cqcands" id="cqCands"></div>
+ <div id="cqFb"></div>
+</section>
+
+<section id="craft" class="scr">
+ <div id="craftT"></div>
+ <div id="craftSub"></div>
+ <div id="stage"><canvas id="cv" class="round"></canvas><div id="hud"><span id="hudL"></span><span id="hudR"></span></div></div>
+ <div id="tbar"><i id="tfill"></i></div>
+</section>
+
+<section id="battle" class="scr">
+ <div id="foes"></div>
+ <div id="log"></div>
+ <div id="bparty"></div>
+ <div id="cmd"></div>
+</section>
+
+<section id="result" class="scr">
+ <div class="panel" id="resP"></div>
+ <div id="resBtns"></div>
+</section>
+
+<div id="sheet" onclick="if(event.target===this)closeSheet()"><div class="shp"><div class="shh"><span id="sheetT"></span><button onclick="closeSheet()" aria-label="とじる">✕</button></div><div id="sheetB"></div></div></div>
+<div class="ov" id="talk"><div class="box"><div class="tface"><img id="tImg" alt=""></div><div style="flex:1"><div class="who" id="tWho"></div><div class="txt" id="tTxt"></div><div class="nx">タップで次へ ▶</div></div></div></div>
+<div id="msg"><div id="msgIn"></div></div>
+<div class="flash" id="flash"></div>
+<div id="rotate"><span class="rph"></span>縦向きで遊んでください<div style="font-size:14px;color:var(--sub);margin-top:6px">画面を縦にすると、つづきから遊べます</div></div>
+
+<script>
+'use strict';
+/* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
+const VERSION='0.1.0';
+/* =====================================================================
+   データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
+   ===================================================================== */
+/* =====================================================================
+   第1章 バランス・データ表（ゲームデザイン担当）
+   index.html のデータ表に「そのまま差しかえ」できる const 定義。
+   - JOBS / SKILLS / FOES / ENCOUNTERS / ITEMS / NODE_IC / EXP_NEXT は既存の定義と置きかえる
+   - MAPS / AREAS / BOSS_AI / FOE_SCALE は新規（既存の MAP は MAPS.alley に移す）
+   - 既存のキー（技・敵・路地裏のマスID）は消していないので、古いセーブも読める
+   新しい仕組みが必要な箇所は docs/ch1_spec.md の「実装メモ」を参照
+   ===================================================================== */
+
+/* 職業：b=Lv1の値 g=1レベルごとに増える値。learn=[覚えるLv, 技ID]
+   変更点：設計士・機械保全に Lv1 の攻撃わざ、各職 Lv12 までに 6〜7 個のわざ */
+const JOBS={
+ kaji:  {n:'鍛冶師',   role:'壁役・物理',  icon:'🔨',b:{hp:44,mp:8, atk:12,def:12,mag:4, spd:6}, g:{hp:9,mp:1.4,atk:2.4,def:2.4,mag:.6,spd:1}, uses:'atk',shape:'ch',weapon:'ハンマー',
+   learn:[[1,'taunt'],[2,'tanzou'],[4,'yakiire'],[6,'tekkeki'],[9,'jinarashi'],[12,'hibana']]},
+ senban:{n:'旋盤工',   role:'連続攻撃・会心',icon:'⚙️',b:{hp:36,mp:8, atk:13,def:8, mag:4, spd:11},g:{hp:7.4,mp:1.3,atk:2.8,def:1.7,mag:.6,spd:1.8},uses:'atk',shape:'ma',weapon:'バイト',
+   learn:[[1,'sessaku'],[3,'renzoku'],[5,'seimitsu'],[7,'kousoku'],[10,'nejikiri'],[12,'kyoumen']]},
+ denki: {n:'電気工事士',role:'雷の魔法',     icon:'⚡',b:{hp:28,mp:18,atk:6, def:6, mag:14,spd:9}, g:{hp:5.5,mp:3,  atk:1,  def:1.3,mag:2.8,spd:1.4},uses:'mag',shape:'de',weapon:'テスター杖',
+   learn:[[1,'spark'],[3,'tanraku'],[5,'kanden'],[8,'kouatsu']]},
+ hozen: {n:'機械保全', role:'回復・修理',   icon:'🔧',b:{hp:32,mp:16,atk:8, def:9, mag:11,spd:8}, g:{hp:6.4,mp:2.6,atk:1.4,def:1.8,mag:2.3,spd:1.2},uses:'mag',shape:'me',weapon:'スパナ',
+   learn:[[1,'shuuri'],[1,'shime'],[3,'tenken'],[5,'chuuyu'],[8,'saikidou'],[10,'boushi'],[12,'overhaul']]},
+ sekkei:{n:'設計士',   role:'強化・弱体',   icon:'📐',b:{hp:30,mp:16,atk:7, def:7, mag:12,spd:10},g:{hp:6,mp:2.6,atk:1.2,def:1.5,mag:2.5,spd:1.6},uses:'mag',shape:'hikari',weapon:'製図ペン',
+   learn:[[1,'seizu'],[2,'bunseki'],[4,'kyouka'],[5,'mahoujin'],[8,'kaizen'],[10,'sanmen'],[12,'zumen']]},
+ meister:{n:'マイスター',role:'上級職（転生でなれる）',icon:'👑',b:{hp:40,mp:20,atk:13,def:11,mag:13,spd:11},g:{hp:8,mp:3,atk:2.6,def:2.2,mag:2.6,spd:1.8},uses:'atk',shape:'hikari',weapon:'匠の工具',learn:[]}
+};
+
+/* 技：kind=phys物理 mag魔法 heal回復 buff強化 debuff弱体 charge ため（敵） phase 変身（敵）
+   tg=one敵1 all敵全 ally味方1 allies味方全 self自分 ko戦闘不能の味方
+   新項目：msg=ため・変身のときの文（敵）／ 敵の fx:'stun'（味方をしびれさせる）／ 敵の kind:'buff' tg:'self' */
+const SKILLS={
+ /* 鍛冶師 */
+ taunt:   {n:'挑発',mp:2,kind:'buff',tg:'self',fx:'taunt',t:3,d:'3ターン、敵の攻撃を自分に集める'},
+ tanzou:  {n:'鍛造打ち',mp:4,kind:'phys',tg:'one',pw:1.7,d:'力をこめた重い一撃'},
+ yakiire: {n:'焼き入れ',mp:3,kind:'buff',tg:'self',fx:'def',v:.6,t:3,d:'3ターン、自分の防御+60%'},
+ tekkeki: {n:'鉄壁',mp:6,kind:'buff',tg:'allies',fx:'def',v:.35,t:3,d:'味方全員の防御+35%'},
+ jinarashi:{n:'地ならし',mp:6,kind:'phys',tg:'all',pw:.8,d:'ハンマーで地面をたたき、敵全員を攻撃'},
+ hibana:  {n:'火花散らし',mp:8,kind:'phys',tg:'one',pw:2.2,fx:'defdown',v:.3,t:3,d:'渾身の一撃。敵の防御も30%下げる'},
+ /* 旋盤工 */
+ sessaku: {n:'切削',mp:3,kind:'phys',tg:'one',pw:1.2,fx:'defdown',v:.3,t:3,d:'攻撃して、敵の防御を30%下げる'},
+ renzoku: {n:'連続加工',mp:4,kind:'phys',tg:'one',pw:.8,hits:2,d:'2回連続で攻撃'},
+ seimitsu:{n:'精密仕上げ',mp:5,kind:'phys',tg:'one',pw:1.3,crit:1,d:'必ず会心になる'},
+ kousoku: {n:'高速旋削',mp:7,kind:'phys',tg:'all',pw:.85,d:'敵全員を攻撃'},
+ nejikiri:{n:'ねじ切り',mp:7,kind:'phys',tg:'one',pw:.65,hits:3,d:'3回連続で攻撃'},
+ kyoumen: {n:'鏡面仕上げ',mp:9,kind:'phys',tg:'one',pw:2.0,crit:1,d:'必ず会心になる、仕上げの一撃'},
+ /* 電気工事士（2章以降） */
+ spark:   {n:'スパーク',mp:3,kind:'mag',tg:'one',pw:1.25,d:'雷の魔法'},
+ tanraku: {n:'短絡',mp:6,kind:'mag',tg:'all',pw:.8,d:'敵全員に雷の魔法'},
+ kanden:  {n:'感電',mp:5,kind:'mag',tg:'one',pw:1,fx:'stun',v:.35,d:'35%で敵をしびれさせる'},
+ kouatsu: {n:'高圧放電',mp:9,kind:'mag',tg:'one',pw:2.2,d:'強力な雷の魔法'},
+ /* 機械保全 */
+ shuuri:  {n:'修理',mp:3,kind:'heal',tg:'ally',pw:1.4,d:'味方1人を回復'},
+ shime:   {n:'締め付け',mp:2,kind:'mag',tg:'one',pw:1.1,d:'スパナで敵をしめあげる（魔力で攻撃）'},
+ tenken:  {n:'点検',mp:2,kind:'heal',tg:'ally',pw:.6,fx:'cure',d:'状態異常を治して少し回復'},
+ chuuyu:  {n:'注油',mp:7,kind:'heal',tg:'allies',pw:.8,d:'味方全員を回復'},
+ saikidou:{n:'再起動',mp:10,kind:'heal',tg:'ko',pw:0,fx:'revive',d:'戦闘不能の味方を半分の体力で復活'},
+ boushi:  {n:'防錆コート',mp:6,kind:'buff',tg:'allies',fx:'def',v:.3,t:3,d:'味方全員の防御+30%'},
+ overhaul:{n:'オーバーホール',mp:8,kind:'heal',tg:'ally',pw:3.0,fx:'cure',d:'味方1人を大きく回復し、状態異常も治す'},
+ /* 設計士 */
+ seizu:   {n:'製図の光線',mp:2,kind:'mag',tg:'one',pw:1.2,d:'製図ペンから光の線を放つ魔法'},
+ bunseki: {n:'図面解析',mp:2,kind:'debuff',tg:'one',fx:'defdown',v:.4,t:3,d:'敵の防御を40%下げる'},
+ kyouka:  {n:'強化設計',mp:4,kind:'buff',tg:'ally',fx:'atk',v:.4,t:3,d:'味方1人の攻撃と魔力+40%'},
+ mahoujin:{n:'魔法陣',mp:6,kind:'mag',tg:'all',pw:1,d:'敵全員に魔法陣の力'},
+ kaizen:  {n:'改善提案',mp:6,kind:'buff',tg:'allies',fx:'atk',v:.25,t:3,d:'味方全員の攻撃と魔力+25%'},
+ sanmen:  {n:'三面図の陣',mp:7,kind:'mag',tg:'one',pw:2.1,d:'正面・平面・側面から光をあてる強力な魔法'},
+ zumen:   {n:'図面完成',mp:10,kind:'mag',tg:'all',pw:1.4,d:'完成した図面の力で敵全員を攻撃'},
+
+ /* ---- 敵の技 ---- */
+ e_atk:   {n:'こうげき',kind:'phys',tg:'one',pw:1},
+ e_bite:  {n:'かみつき',kind:'phys',tg:'one',pw:1.4},
+ e_wing:  {n:'サビの羽ばたき',kind:'mag',tg:'all',pw:.6},
+ e_rust:  {n:'サビの息',kind:'mag',tg:'one',pw:1.1,fx:'defdown',v:.25,t:2},
+ e_slam:  {n:'のしかかり',kind:'phys',tg:'one',pw:1.6},
+ e_charge:{n:'力をためている…',kind:'charge',msg:'は力をためている…！（次のターンに大技）'},
+ e_smash: {n:'錆鉄槌',kind:'phys',tg:'one',pw:2.1},
+ e_wave:  {n:'錆の波動',kind:'mag',tg:'all',pw:.9},
+ /* 廃工場 */
+ e_volley:{n:'ボルト乱射',kind:'phys',tg:'all',pw:.55},
+ e_grab:  {n:'つかみ投げ',kind:'phys',tg:'one',pw:1.5},
+ e_spin:  {n:'回転体当たり',kind:'phys',tg:'one',pw:1.25},
+ e_zap:   {n:'漏電',kind:'mag',tg:'one',pw:1,fx:'stun',v:.25},
+ e_flick: {n:'明滅フラッシュ',kind:'mag',tg:'all',pw:.5},
+ e_belt:  {n:'ワイヤー打ち',kind:'phys',tg:'one',pw:1.3},
+ e_steam: {n:'蒸気噴射',kind:'mag',tg:'all',pw:.65,fx:'defdown',v:.2,t:2},
+ e_lift:  {n:'フック巻き上げ',kind:'charge',msg:'はフックを高く巻き上げた！（次のターン、全体に大技）'},
+ e_press: {n:'フック大旋回',kind:'phys',tg:'all',pw:1.35},
+ /* 地下工房 */
+ e_hammer:{n:'錆の大槌',kind:'phys',tg:'one',pw:1.7},
+ e_shield:{n:'錆の盾',kind:'buff',tg:'self',fx:'def',v:.5,t:3,msg:'の防御が上がった！'},
+ e_curse: {n:'図面の呪い',kind:'mag',tg:'one',pw:1.25,fx:'defdown',v:.3,t:2},
+ e_sweep: {n:'薙ぎ払い',kind:'phys',tg:'all',pw:.75},
+ e_crush: {n:'炉王の鉄槌',kind:'phys',tg:'one',pw:2.6},
+ e_crown: {n:'図面のかけらを取りこむ',kind:'phase',msg:'は図面のかけらを炉にくべた！ 炎が錆色に燃え上がる……！'},
+ e_gather:{n:'錆を集める',kind:'charge',msg:'は炉に街じゅうの錆を集めている…！（次のターン、全体に大技）'},
+ e_storm: {n:'錆炎の嵐',kind:'mag',tg:'all',pw:1.45}
+};
+
+/* 敵：ai=[[技,確率],...] か、BOSS_AI のキー（文字列）。boss:1 は章・エリアのボス（レベル補正なし）
+   lvは目安（表示・調整用。ゲームでは使わなくてよい） */
+const FOES={
+ /* 路地裏（Lv1〜5）※番人HP 310→360（見習いの武器でオート勝率が85〜100%に上がったため） */
+ slime:{n:'サビスライム',col:'#c0702a',hp:34,atk:10,def:4,mag:3,spd:4,exp:5,mat:.5,ai:[['e_atk',1]],lv:1},
+ dog:  {n:'サビ犬',col:'#d9a050',hp:27,atk:12,def:3,mag:2,spd:13,exp:6,mat:.4,ai:[['e_atk',.7],['e_bite',.3]],ears:1,lv:2},
+ crow: {n:'サビカラス',col:'#7a5a9a',hp:30,atk:8,def:4,mag:10,spd:11,exp:7,mat:.4,ai:[['e_atk',.5],['e_wing',.3],['e_rust',.2]],wings:1,lv:2},
+ golem:{n:'サビゴーレム',col:'#8a5a3a',hp:90,atk:16,def:11,mag:4,spd:3,exp:18,mat:1,ai:[['e_atk',.6],['e_slam',.4]],big:1,lv:3},
+ boss: {n:'錆の番人サビガルド',col:'#6a2a1a',hp:360,atk:20,def:10,mag:15,spd:7,exp:75,mat:3,boss:1,ai:'boss',lv:4},
+ /* 廃工場（Lv5〜9）※テスト報告 中-1：廃工場・地下工房の通常敵HP×1.15、クレーンHP×1.1、ロストールHP×1.05（攻撃・経験値は据え置き。×1.25/×1.1 ではオート勝率が目標を大きく下回ったため） */
+ bolt: {n:'サビボルト',col:'#9a8a6a',hp:76,atk:21,def:9,mag:5,spd:16,exp:13,mat:.5,ai:[['e_atk',.7],['e_volley',.3]],lv:5},
+ arm:  {n:'サビアーム',col:'#b0603a',hp:161,atk:27,def:13,mag:5,spd:7,exp:23,mat:.7,ai:[['e_atk',.6],['e_grab',.4]],big:1,lv:6},
+ gear: {n:'サビ歯車',col:'#a07040',hp:126,atk:23,def:26,mag:6,spd:9,exp:21,mat:.8,ai:[['e_spin',.6],['e_atk',.4]],lv:6},
+ lamp: {n:'サビ電灯',col:'#c8b040',hp:92,atk:10,def:10,mag:25,spd:12,exp:18,mat:.4,ai:[['e_zap',.5],['e_flick',.5]],wings:1,lv:6},
+ crane:{n:'錆クレーン ギギガント',col:'#5a3a2a',hp:1100,atk:38,def:20,mag:26,spd:6,exp:220,mat:4,boss:1,ai:'crane',lv:8},
+ /* 地下工房（Lv9〜12） */
+ armor:{n:'サビ鎧',col:'#6a5a5a',hp:322,atk:37,def:32,mag:8,spd:8,exp:34,mat:.8,ai:[['e_atk',.5],['e_hammer',.3],['e_shield',.2]],big:1,lv:9},
+ pipe: {n:'サビパイプ',col:'#8a6a4a',hp:207,atk:35,def:18,mag:10,spd:17,exp:28,mat:.6,ai:[['e_atk',.6],['e_bite',.4]],ears:1,lv:9},
+ ghost:{n:'図面の亡霊',col:'#5a6a9a',hp:195,atk:14,def:30,mag:36,spd:14,exp:30,mat:.5,ai:[['e_curse',.5],['e_wave',.3],['e_atk',.2]],wings:1,lv:10},
+ golem2:{n:'錆の大ゴーレム',col:'#6a3a2a',hp:437,atk:42,def:24,mag:8,spd:4,exp:48,mat:1.5,ai:[['e_atk',.5],['e_slam',.5]],big:1,lv:11},
+ rostol:{n:'錆炉王ロストール',col:'#3a1a2a',hp:2100,atk:46,def:26,mag:42,spd:12,exp:350,mat:6,boss:1,ai:'rostol',lv:12}
+};
+
+/* 敵の出現パターン（マスの enc で指定）。どれか1つがランダムに出る */
+const ENCOUNTERS={
+ /* 路地裏 */
+ r1:[['slime'],['slime','slime'],['dog']],
+ r2:[['slime','dog'],['crow','dog'],['dog','dog','slime'],['crow','slime','slime']],
+ r3:[['golem'],['crow','dog','slime'],['golem','slime'],['dog','crow']],
+ /* 廃工場 */
+ f1:[['bolt','bolt'],['bolt','lamp'],['arm'],['bolt','bolt','bolt']],
+ f2:[['arm','bolt'],['gear','lamp'],['gear','bolt'],['lamp','lamp','bolt']],
+ f3:[['arm','gear','bolt'],['gear','lamp','bolt'],['arm','lamp','lamp'],['arm','arm']],
+ /* 地下工房 */
+ u1:[['pipe','pipe'],['armor'],['ghost','pipe'],['pipe','pipe','pipe']],
+ u2:[['armor','pipe','pipe'],['ghost','ghost','pipe'],['golem2','ghost'],['ghost','pipe','pipe']],
+ u3:[['golem2','pipe','pipe'],['armor','ghost','ghost'],['armor','ghost','pipe'],['golem2','armor']]
+};
+
+/* どうぐ（oil2 を追加。古いセーブは G.items.oil2=0 を補うこと） */
+const ITEMS={
+ oil: {n:'オイル',d:'HPを40回復',hp:40},
+ oil2:{n:'高級オイル',d:'HPを120回復',hp:120},
+ cool:{n:'冷却水',d:'MPを20回復',mp:20}
+};
+
+/* エリア：need=解放に必要なクリア済みマスID（null=最初から）。tier=工房でつくれる武器の段階
+   bossLv=ボス戦の推奨Lv（町の看板やエリア選択に表示） */
+const AREAS={
+ alley:  {n:'路地裏',  need:null,     lv:'1〜5', bossLv:4, tier:1, boss:'boss',   bg:'#1a1430'},
+ factory:{n:'廃工場',  need:'boss',   lv:'5〜9', bossLv:8, tier:2, boss:'f_boss', bg:'#1e1a14'},
+ under:  {n:'地下工房',need:'f_boss', lv:'9〜12',bossLv:11,tier:3, boss:'u_boss', bg:'#0e1a1e'}
+};
+const AREA_ORDER=['alley','factory','under'];
+
+/* ボス会話の表（BOSS_TALK・BOSS_WIN）は、台本の定数より後ろ（セーブの少し前）にある */
+
+/* 地図：x=横位置(0〜1) y=段(0〜6) links=つながり need=先にクリアが必要なマス
+   新項目：loot=宝箱の中身 / foe=ボスマスの敵ID / talk=ボス会話のキー / ev=イベントの種類
+   路地裏のマスIDは旧 MAP と同じ（古いセーブの cleared がそのまま使える）。 */
+const MAPS={
+ alley:[
+  {id:'base',n:'町へもどる',t:'base',x:.5,y:0,links:['b1']},
+  {id:'b1',n:'路地の入口',t:'battle',enc:'r1',x:.5,y:1,links:['c1','j1']},
+  {id:'c1',n:'物置き',t:'chest',x:.18,y:2,links:['b2'],loot:{oil:2,cool:1,mat:3}},
+  {id:'j1',n:'出会い',t:'join',x:.82,y:2,links:['b2']},
+  {id:'b2',n:'裏通り',t:'battle',enc:'r2',x:.5,y:3,links:['b3']},
+  {id:'b3',n:'廃材置き場',t:'battle',enc:'r3',x:.75,y:4,links:['rest','boss']},
+  {id:'rest',n:'休憩所',t:'rest',x:.22,y:5,links:['boss']},
+  {id:'boss',n:'錆の番人',t:'boss',foe:'boss',talk:'alley',x:.6,y:5.6,links:[],need:'j1'}
+ ],
+ factory:[
+  {id:'f_base',n:'町へもどる',t:'base',x:.5,y:0,links:['f_b1']},
+  {id:'f_b1',n:'搬入口',t:'battle',enc:'f1',x:.5,y:1,links:['f_c1','f_b2']},
+  {id:'f_c1',n:'工具棚',t:'chest',x:.18,y:2,links:['f_j1'],loot:{oil:1,oil2:1,cool:1,mat:3}},
+  {id:'f_b2',n:'ベルトコンベア',t:'battle',enc:'f2',x:.82,y:2,links:['f_j1']},
+  {id:'f_j1',n:'制御室',t:'join',x:.5,y:3,links:['f_b3','f_c2']},
+  {id:'f_c2',n:'部品ロッカー',t:'chest',x:.18,y:4,links:['f_rest'],loot:{oil2:1,cool:1,mat:2}},
+  {id:'f_b3',n:'クレーン置き場',t:'battle',enc:'f3',x:.82,y:4,links:['f_rest','f_boss']},
+  {id:'f_rest',n:'休憩室',t:'rest',x:.3,y:5,links:['f_boss']},
+  {id:'f_boss',n:'錆クレーン',t:'boss',foe:'crane',talk:'factory',x:.65,y:5.7,links:[],need:'f_j1'}
+ ],
+ under:[
+  {id:'u_base',n:'町へもどる',t:'base',x:.5,y:0,links:['u_b1']},
+  {id:'u_b1',n:'地下への階段',t:'battle',enc:'u1',x:.5,y:1,links:['u_j1','u_c1']},
+  {id:'u_j1',n:'古い作業場',t:'join',x:.18,y:2,links:['u_b2']},
+  {id:'u_c1',n:'資材庫',t:'chest',x:.82,y:2,links:['u_b2'],loot:{oil2:2,cool:2,mat:3}},
+  {id:'u_b2',n:'錆の回廊',t:'battle',enc:'u2',x:.5,y:3,links:['u_rest','u_b3']},
+  {id:'u_rest',n:'匠の休憩所',t:'rest',x:.18,y:4,links:['u_ev']},
+  {id:'u_b3',n:'錆の巣',t:'battle',enc:'u3',x:.82,y:4,links:['u_ev']},
+  {id:'u_ev',n:'鏡の作業台',t:'event',ev:'selfrust',x:.5,y:5,links:['u_boss'],need:'u_j1'},
+  {id:'u_boss',n:'錆の炉',t:'boss',foe:'rostol',talk:'under',x:.5,y:6,links:[],need:'u_ev'}
+ ]
+};
+const NODE_IC={base:'🏙',battle:'⚔️',chest:'🎁',join:'💬',rest:'☕',boss:'👑',event:'🪞'};
+/* アイコン画像（img/icon/）。IC(名前,大きさpx) */
+const IC=(n,s=22)=>`<img class="ic" src="img/icon/${n}.webp" alt="" style="width:${s}px;height:${s}px">`;
+const NODE_ICN={base:'node_town',battle:'node_battle',chest:'node_chest',join:'node_meet',rest:'node_rest',boss:'node_boss',event:'node_rust'};
+const ITEM_IC={oil:'oil',oil2:'oil2',cool:'coolant'};
+const JOB_WEAPON_IC={kaji:'hammer',senban:'bite',denki:'tester',hozen:'spanner',sekkei:'pen',meister:'hammer'};
+const JIC=(job,s=18)=>job==='meister'?IC('meister',s):JOB_WEAPON_IC[job]?IC(JOB_WEAPON_IC[job],s):(JOBS[job]?JOBS[job].icon:'');
+const WIC=(m,s=18)=>JOB_WEAPON_IC[m.job]?IC(JOB_WEAPON_IC[m.job],s):'';
+const SCRAP=(s=18)=>IC('scrap',s);
+
+/* ボスの行動（foeAct から BOSS_AI[f.ai](f) を呼ぶ。返り値＝使う技のID）
+   共通ルール：
+   - f.bp は行動の回数（1から数える）。f.charge に「ため」の次に出す技IDを入れておく
+   - kind:'charge' の技を返したターンは攻撃しない（予告）。次の行動で f.charge の技を必ず出す
+   - kind:'phase' の技を返したら、foeAct 側で「変身」処理（下の rostol を参照）を行う */
+const BOSS_AI={
+ /* 路地裏：錆の番人（旧来の動きと同じ）。4回に1回ため→次に錆鉄槌（単体・大） */
+ boss(f){f.bp++;
+  if(f.charge){const s=f.charge;f.charge=false;return s}
+  if(f.bp%4===0){f.charge='e_smash';return 'e_charge'}
+  const r=Math.random();return r<.35?'e_wave':r<.675?'e_rust':'e_atk'},
+ /* 廃工場：錆クレーン ギギガント。4行動で1周［通常→通常→フック巻き上げ（予告）→フック大旋回（全体・大）］
+    HPが40%以下になると3行動で1周［通常→フック巻き上げ→フック大旋回］に早まる */
+ crane(f){f.bp++;
+  if(f.charge){const s=f.charge;f.charge=false;f.cyc=0;return s}
+  f.cyc=(f.cyc||0)+1;const len=f.hp<=f.max*.4?2:3;
+  if(f.cyc>=len){f.charge='e_press';return 'e_lift'}
+  return Math.random()<.5?'e_belt':'e_steam'},
+ /* 地下工房：錆炉王ロストール（2段階）
+    第1段階（HP50%超）：4行動で1周［薙ぎ払い/錆の息→こうげき/錆の息→ため（予告）→炉王の鉄槌（単体・特大）］
+    HPが50%以下になった次の行動で「変身」（攻撃しない。自分の弱体・しびれを消す。f.ph=2）
+    第2段階：3行動で1周［錆の波動/図面の呪い→錆を集める（予告）→錆炎の嵐（全体・大）］ */
+ rostol(f){f.bp++;
+  if(f.charge){const s=f.charge;f.charge=false;f.cyc=0;return s}
+  if(!f.ph&&f.hp<=f.max*.5){f.ph=2;f.cyc=0;return 'e_crown'}
+  f.cyc=(f.cyc||0)+1;
+  if(f.ph===2){if(f.cyc>=2){f.charge='e_storm';return 'e_gather'}return Math.random()<.6?'e_wave':'e_curse'}
+  if(f.cyc>=3){f.charge='e_crush';return 'e_charge'}
+  return f.cyc===1?(Math.random()<.6?'e_sweep':'e_rust'):(Math.random()<.6?'e_atk':'e_rust')}
+};
+
+/* 通常の敵のレベル補正（旧：1+(平均Lv-3)*0.06）。エリアごとに敵を分けたので 0（補正なし）にする */
+const FOE_SCALE=0;
+
+/* 武器の段階：工房でつくる武器の強さ＝round((WEAPON_BASE.a+WEAPON_BASE.b*品質/100)*WEAPON_TIER[段階])（品質100はさらに+3）。
+   段階は解放済みの一番奥のエリアの AREAS[].tier。なぞり・旋盤の難しさ（CFG の tier）にも同じ段階を渡す */
+const WEAPON_BASE={a:2,b:6};
+const WEAPON_TIER={1:1,2:1.6,3:2.2};
+
+/* 成長：次のLvまでに必要な経験値 */
+const EXP_NEXT=lv=>Math.round(8*Math.pow(lv,1.55));
+const LV_CAP=30, SP_MAX=100;
+
+/* キャラ：job=最初の職業 pass=固有の能力 sp=必殺技（魔法陣をなぞる） */
+const CHARS={
+ wolf:{name:'ウルフ',img:'img/wolf.webp',job:'senban',pass:{n:'熱血',d:'体力が半分以下のとき、攻撃+30%',k:'rage'},
+  sp:{n:'国家資格アタック',d:'敵1体に、なぞりの出来に応じた超ダメージ',shape:'de',tg:'one'},  /* tg:'one'＝敵が2体以上なら狙う敵を選ぶ */
+  lines:['国家資格の前に、まずはお前だ！','よっしゃ、合格ラインだ！','次は…絶対に受かる！']},
+ dodo:{name:'ドド先輩',img:'img/dodo.webp',job:'kaji',pass:{n:'ふかふか羽毛',d:'受けるダメージ−15%',k:'soft'},
+  sp:{n:'ドスコイ・ガード',d:'味方全員の防御を大きく上げ、自分を回復',shape:'ch'},
+  lines:['のんびりいこうよ〜。でも負けないよ？','ふぅ、先輩の意地だね','ちょっと…昼寝しすぎたかな']},
+ fox:{name:'ギアフォックス',img:'img/fox.webp',job:'hozen',pass:{n:'器用な手先',d:'わざの消費MP−1（最低1）',k:'mpcut'},
+  sp:{n:'フルメンテナンス',d:'味方全員を大回復。出来がよいと戦闘不能も復活',shape:'me'},
+  lines:['その構造、ぜんぶ分解してあげる！','設計どおり！','くっ、ネジが一本足りなかった…']},
+ owl:{name:'ホー博士',img:'img/owl.webp',job:'sekkei',pass:{n:'博識',d:'強化・弱体の効果が1ターン長い',k:'long'},
+  sp:{n:'方程式の一撃',d:'敵全員に、なぞりの出来に応じた魔法ダメージ',shape:'hikari'},
+  lines:['計算はすでに終わっておる','ホッホッ、理論どおりじゃ','計算に誤差があったか…']}
+};
+const HEROES=['wolf'];  /* 今はウルフのみ。あとで 'dodo','fox','owl' を戻す（データは各キャラ分そろっている） */
+const JOIN_ORDER=['fox','dodo','owl','wolf'];  /* 主人公以外で、この順に仲間になる */
+
+/* =====================================================================
+   マイスターの魔法陣　第1章「夜の工房に灯る」台本データ
+   ---------------------------------------------------------------------
+   会話1行の形式： [話者ID または null, 表示名, 本文]
+     ・話者IDがあれば立ち絵（img/ID.webp）を出す。null なら絵なし。
+     ・ナレーションは [null,'','本文']。敵のセリフは [null,'敵の名前','本文']。
+     ・本文は1行あたり60字程度まで。改行は \n。
+
+   定数の説明
+   INTRO            主人公ごとの導入。主人公選びの直後に1回。{wolf,dodo,fox,owl}
+   JOIN_TALK        仲間が加入するときの会話。加入キャラのIDで引く。
+                    主人公の名前は出さない（誰が主人公でも成り立つ）。
+   AREA_INTRO       エリアに初めて入ったときの導入。{alley,factory,under}
+                    alley=路地裏 factory=廃工場 under=地下工房
+   MIDBOSS_TALK     路地裏の中ボス「錆の番人サビガルド」戦の前（旧 BOSS_TALK）
+   MIDBOSS_WIN      サビガルドに勝った後（旧 BOSS_WIN）。廃工場が開く。
+   FACTORY_BOSS_TALK 廃工場の中ボス「錆クレーン ギギガント」戦の前
+   FACTORY_BOSS_WIN  ギギガントに勝った後。地下工房が開く。
+   SELF_RUST        主人公ごとの「自分の錆」イベント。章ボス戦の直前
+                    （FINAL_TALK の前）に1回。登場する仲間は主人公以外の3人。
+   FINAL_TALK       地下工房の章ボス「錆炉王（さびろおう）ロストール」戦の前
+   FINAL_WIN        ロストールに勝った後（ENDING の前）
+   ENDING           第1章エンディング。最後に第2章「停電の街」への引き。
+   TOWN_TALK        町のNPCのセリフ。{npcId:{0:[...],1:[...],2:[...],3:[...]}}
+                    段階 0=路地裏クリア前 1=路地裏クリア後 2=廃工場クリア後
+                    3=第1章クリア後。話しかけるたびに配列を順に再生（全行で1会話）。
+   PARTY_TOWN_TALK  町で加入済みの仲間に話しかけたときの一言。
+                    {wolf:[[会話A],[会話B],...]} からランダムに1つ選ぶ想定。
+   ===================================================================== */
+
+const INTRO={
+ wolf:[
+  [null,'','夜の工業の街。街灯がひとつ、またひとつ消えていく。'],
+  ['wolf','ウルフ','……また停電かよ。国家資格の試験まで、あと一週間だってのに。'],
+  ['wolf','ウルフ','工房の旋盤で、もう一回だけ練習を——\nん？ 路地の奥で、オレンジ色のドロドロが動いてる！？'],
+  [null,'','金属を食らう夜の魔物「錆（サビ）」。\nそのとき、工房の棚から一枚の古い図面が光を放った。'],
+  [null,'','図面に描かれた魔法陣——伝説の職人・匠が残したものだ。\nふちには小さく「夜に磨く、未来を創る力」と書かれている。'],
+  ['wolf:serious','ウルフ','よくわかんねぇけど……使えるもんは使う！\n国家資格の前に、まずはお前だ！']
+ ],
+ dodo:[
+  [null,'','夜の工業の街。街灯がひとつ、またひとつ消えていく。'],
+  ['dodo','ドド先輩','ふわぁ……工房で昼寝してたら、夜になっちゃった。\n後輩たち、ちゃんと帰れたかな〜。'],
+  ['dodo','ドド先輩','……ん。あの子たちの通学路に、変なのがいる。\n鉄を、食べてる……？'],
+  [null,'','金属を食らう夜の魔物「錆（サビ）」。\nドドの足もとで、匠の古い図面が静かに光りはじめた。'],
+  ['dodo','ドド先輩','図面が「行け」って言ってるみたいだね〜。\n……うん。のんびりしてる場合じゃない。'],
+  ['dodo','ドド先輩','先輩が、前に立つよ。\nのんびりいこうよ〜。でも負けないよ？']
+ ],
+ fox:[
+  [null,'','夜の工業の街。街灯がひとつ、またひとつ消えていく。'],
+  ['fox','ギアフォックス','街灯が壊れてる……いや、壊されてる？\nボルトが全部、錆びて溶けてる！'],
+  ['fox','ギアフォックス','直しても直しても、次の日には錆だらけ。\nこれ、ただの劣化じゃないでしょ。'],
+  [null,'','工房のすみ、ほこりをかぶった図面が光を放つ。\n伝説の職人・匠が残した魔法陣だ。'],
+  ['fox','ギアフォックス','へぇ……この図面、回路みたいに力が流れてる。\nおもしろいじゃん！'],
+  ['fox','ギアフォックス','壊し続ける奴がいるなら——\nその構造、ぜんぶ分解してあげる！']
+ ],
+ owl:[
+  [null,'','夜の工業の街。街灯がひとつ、またひとつ消えていく。'],
+  ['owl','ホー博士','ホッホッ。この錆の広がり方……自然現象ではないのう。\n路地裏から、円をえがくように広がっておる。'],
+  ['owl','ホー博士','そして、わしが長年追ってきた匠の図面が、\n今夜にかぎって光っておる。偶然ではあるまい。'],
+  [null,'','図面に描かれた魔法陣。それは錆を退ける力を持っていた。'],
+  ['owl','ホー博士','錆はなぜ街に現れ、何を探しておるのか。\nこの謎、解かずにはおれんのう。'],
+  ['owl','ホー博士','計算はすでに終わっておる。\nあとは、確かめるだけじゃ。']
+ ]
+};
+
+const JOIN_TALK={
+ fox:[
+  ['fox','ギアフォックス','ちょっと待って！ そのボルト、錆に食われてる。\nほら、貸して——よし、直った。'],
+  ['fox','ギアフォックス','えっ、その図面、匠の魔法陣じゃん！\nうわ、すご……あとで分解……じゃなくて、見せて！'],
+  ['fox','ギアフォックス','街の機械を壊してるのは、あの錆たちでしょ？\nボクも行く。直す役がいないと困るでしょ！']
+ ],
+ dodo:[
+  [null,'','物かげで、もふもふした何かが寝息を立てている。'],
+  ['dodo','ドド先輩','……ん〜？ おや、こんな夜にどうしたの？\nそっか、錆退治か〜。'],
+  ['dodo','ドド先輩','こんな危ないところを歩いてたなんて。\nきみたちだけじゃ心配だよ〜。'],
+  ['dodo','ドド先輩','前に立つのは、先輩の役目だからね。\nのんびりついていくよ〜。でも負けないよ？']
+ ],
+ owl:[
+  ['owl','ホー博士','ホッホッ。夜ふかしの若いのがおると思えば……\nおぬしたち、その図面をどこで？'],
+  ['owl','ホー博士','……まちがいない、匠の魔法陣じゃ。\nわしは何十年も、この図面の謎を追っておる。'],
+  ['owl','ホー博士','わしの計算と、この魔法陣を組み合わせれば、\nおぬしたちはもっと強くなれるぞい。同行しよう。']
+ ],
+ wolf:[
+  [null,'','鉄を打つような音。錆の魔物が一体、吹っ飛んできた。'],
+  ['wolf:smile','ウルフ','っしゃあ！ ……おい、あんたらも錆と戦ってんのか？'],
+  ['wolf:worry','ウルフ','こいつらのせいで停電ばっかで、\n試験勉強がぜんぜん進まねぇんだよ。'],
+  ['wolf:serious','ウルフ','俺も混ぜろ。試験勉強の邪魔をする奴は、\nまとめてぶっ飛ばす！']
+ ]
+};
+
+const AREA_INTRO={
+ alley:[
+  [null,'','路地裏。消えかけた街灯が、チカチカとまたたいている。'],
+  [null,'','足もとの水たまりが、オレンジ色ににごっている。\n錆は、この奥から広がっているようだ。']
+ ],
+ factory:[
+  [null,'','廃工場。止まったままのベルトコンベアに、\n錆びた部品がずらりと並んでいる。'],
+  [null,'','「まだ使える」と誰かが書いた札が、床に落ちていた。\n奥で、何か巨大なものがきしむ音がする。']
+ ],
+ under:[
+  [null,'','廃工場の床下に、古い階段が続いていた。\nその先は——誰も知らない地下工房。'],
+  [null,'','壁一面に、魔法陣の図面が貼られている。\nどれも、途中で描くのをやめたように、半分しかない。'],
+  [null,'','奥から熱い風。止まったはずの炉が、赤く光っている。']
+ ]
+};
+
+/* 路地裏の中ボス */
+const MIDBOSS_TALK=[
+ [null,'','廃材の山の奥。錆びた鉄骨が、ゆっくりと人の形に起き上がった。'],
+ [null,'錆の番人サビガルド','……タクミノ……ズメン……ヨコセ……'],
+ [null,'','その胸には、折れた工具が何本も突き刺さっている。\n捨てられた道具が、固まってできた体だ。'],
+ [null,'錆の番人サビガルド','……ワレラヲ……ステタ……\nタクミノ……ズメン……ヨコセェェ！']
+];
+const MIDBOSS_WIN=[
+ [null,'','サビガルドは崩れ落ち、その胸から、\n光る図面のかけらがこぼれた。'],
+ [null,'','かけらには、どこかの工場の地図が描かれている。\n——街はずれの、廃工場だ。'],
+ [null,'','路地裏エリア クリア！\n町の門から「廃工場」へ行けるようになった。']
+];
+
+/* 廃工場の中ボス */
+const FACTORY_BOSS_TALK=[
+ [null,'','天井から、巨大なフックが降りてきた。\n錆びたクレーンが、ギギギと首をもたげる。'],
+ [null,'錆クレーン ギギガント','ギギ……ツリアゲル……ゼンブ……ツリアゲル……'],
+ [null,'錆クレーン ギギガント','ダレモ……ウゴカサナイ……ナラ……\nオレガ……ウゴク……ギギギガァァ！'],
+ [null,'','フックが、魔法陣の図面めがけて振り下ろされる！']
+];
+const FACTORY_BOSS_WIN=[
+ [null,'','ギギガントのアームが止まり、ゆっくりと床に下りた。'],
+ [null,'錆クレーン ギギガント','ギ……マタ……ダレカ……ウゴカシテ……クレル……カ……'],
+ [null,'','錆が落ちたクレーンの運転席に、小さな札が残っていた。\n「点検済　匠」——匠の字だ。'],
+ [null,'','床が音を立てて開き、地下へ続く階段が現れた。\n廃工場エリア クリア！ 「地下工房」へ行けるようになった。']
+];
+
+/* 主人公ごとの「自分の錆」イベント（章ボスの直前） */
+const SELF_RUST={
+ wolf:[
+  [null,'','炉の前で、ウルフの足が止まった。\n腕に、うっすらとオレンジ色の錆が浮かんでいる。'],
+  ['wolf:worry','ウルフ','……なんだよ、これ。俺の手が……。'],
+  ['wolf:worry','ウルフ','前の試験、落ちたんだ。手がふるえて、寸法が合わなくて。\nまた落ちたら、俺には才能がねぇってことに——'],
+  ['dodo','ドド先輩','ねぇ、知ってた？ 夜中、工房の灯りがずっとついてたの。\nあれ、きみでしょ〜。'],
+  ['fox','ギアフォックス','旋盤の刃、毎朝ちゃんと手入れしてあったよ。\nあんな使い方、本気の人しかしないでしょ！'],
+  ['owl','ホー博士','結果は一日で決まる。じゃが腕は、毎晩少しずつ\n磨かれてきた。そっちはもう、誰にも消せんのじゃ。'],
+  ['wolf','ウルフ','……そっか。落ちたら、また磨けばいいだけか。'],
+  [null,'','腕の錆が、火花のように散って消えた。'],
+  ['wolf:serious','ウルフ','よっしゃ、気合い入った！\n次は…絶対に受かる！ その前に——親玉、お前だ！']
+ ],
+ dodo:[
+  [null,'','炉の前で、ドドの足が止まった。\nふかふかの羽に、オレンジ色の錆が広がっていく。'],
+  ['dodo','ドド先輩','……昔ね、後輩がピンチのとき、ぼく、昼寝してて\n間に合わなかったことがあるんだ。'],
+  ['dodo','ドド先輩','今度もし、また守れなかったら……\nぼく、先輩って呼ばれる資格、ないよね。'],
+  ['wolf:serious','ウルフ','何言ってんだよ！ 先輩が前にいるから、\n俺たちは前を向いて走れてんだろ！'],
+  ['fox','ギアフォックス','全部ひとりで守らなくていいの！\n先輩がケガしたら、ボクが直すんだから。'],
+  ['owl','ホー博士','ホッホッ。守るとは、いつもそこにおることじゃ。\nおぬしは今夜、一度も後ろに下がっておらんぞい。'],
+  ['dodo','ドド先輩','……そっか。ぼく、ちゃんとここにいるね。'],
+  [null,'','羽の錆が、ふわりと舞って消えた。'],
+  ['dodo','ドド先輩','よーし、もう昼寝はおしまい。\nふぅ、先輩の意地、見せちゃうよ〜！']
+ ],
+ fox:[
+  [null,'','炉の前で、ギアフォックスの足が止まった。\n愛用のドライバーが、みるみる錆びていく。'],
+  ['fox','ギアフォックス','……この炉、おじいちゃんの工房の時計と同じ部品だ。\nあの時計、ボク、直せなかったんだ。'],
+  ['fox','ギアフォックス','ネジが一本足りなくて……。\n直せないものも、あるんだよ。ボクが直せなきゃ、終わりなのに。'],
+  ['dodo','ドド先輩','ひとりで全部直そうとしなくていいんだよ〜。\nほら、手が四つあれば、八つの部品が持てるでしょ。'],
+  ['wolf:smile','ウルフ','足りねぇネジなら、俺が削って作ってやる。\n旋盤工なめんなよ！'],
+  ['owl','ホー博士','部品の寸法なら、わしが図面に起こそう。\n一本のネジは、みなで作ればよいのじゃ。'],
+  ['fox','ギアフォックス','……ボク、ずっとひとりで組み立てようとしてたんだ。'],
+  [null,'','ドライバーの錆がはがれ、刃先が光を取りもどした。'],
+  ['fox','ギアフォックス','よし、部品はそろった！ あとは組み立てるだけ。\nその構造、ぜんぶ分解してあげる！']
+ ],
+ owl:[
+  [null,'','炉の前で、ホー博士の足が止まった。\nめがねのふちに、オレンジ色の錆がにじむ。'],
+  ['owl','ホー博士','……この魔法陣、わしの計算では答えが出んのじゃ。\n昔も、計算をまちがえて大事な試作を失敗させた。'],
+  ['owl','ホー博士','完ぺきな答えが出るまで、動くべきではない。\n若いのを危ない目にあわせるくらいなら……'],
+  ['wolf:serious','ウルフ','博士、俺に言ったよな。「手を動かさなきゃ\n寸法はわからん」って。今度は博士の番だぜ！'],
+  ['fox','ギアフォックス','誤差はボクたちが現場で調整する！\n設計と保全はセットでしょ！'],
+  ['dodo','ドド先輩','まちがえても、ぼくが前で受け止めるよ〜。\nだから博士は、思いきり計算してね。'],
+  ['owl','ホー博士','……ホッホッ。誤差ごと計算に入れる、か。\nわしとしたことが、いちばん大事な数を忘れておった。'],
+  [null,'','めがねの錆が晴れ、図面の線がはっきりと見えた。'],
+  ['owl','ホー博士','仲間という変数を入れれば——\n計算はすでに終わっておる！']
+ ]
+};
+
+/* 地下工房の章ボス */
+const FINAL_TALK=[
+ [null,'','炉の炎の中から、巨大な影が立ち上がる。\n錆びた歯車と、折れた工具と、破れた図面でできた体。'],
+ [null,'錆炉王ロストール','ようこそ、夜の職人たち。\nここは、忘れられたものが流れつく場所だ。'],
+ [null,'錆炉王ロストール','使われなくなった道具。途中で捨てられた夢。\nそれが錆となり、我が体となる。'],
+ [null,'錆炉王ロストール','匠は、我らを置いていった。\nその図面さえあれば……我らは、もう一度——'],
+ [null,'錆炉王ロストール','……語りすぎたな。図面を渡せ。\n渡さぬなら、おまえたちの夢ごと、錆びさせてやろう！']
+];
+const FINAL_WIN=[
+ [null,'','ロストールの体から錆がはがれ落ち、炉の炎が静まっていく。'],
+ [null,'錆炉王ロストール','……そうか。おまえたちは、磨くことをやめないのだな……。'],
+ [null,'錆炉王ロストール','だが覚えておけ。錆は我ひとりではない。\n街の電線にも、止まった機械にも……すでに根を張っている。'],
+ [null,'','崩れた体の中に、一枚の図面が残されていた。\n匠の魔法陣——ただし、右半分だけ。'],
+ [null,'','左半分には、こう書き込まれていた。\n「つづきは、空から」']
+];
+
+const ENDING=[
+ [null,'','地下工房から出ると、東の空がうっすらと明るくなっていた。'],
+ ['owl','ホー博士','錆は、捨てられた道具とあきらめた夢から生まれる……。\nそして、匠の図面を求めておった。'],
+ ['fox','ギアフォックス','図面で錆を消したいのか、それとも\n図面で「もう一度動きたい」のか……どっちなんだろ。'],
+ ['dodo','ドド先輩','ま、今日のところは、みんな無事でよかったよ〜。\n……ふわぁ。帰って寝よっか。'],
+ ['wolf:smile','ウルフ','おう。けど、休んだらまた磨くぞ。\n夜は、まだまだ続くんだからな。'],
+ [null,'','そのとき、朝焼けの空を、小さな光がすっと横切った。\n鳥にしては、まっすぐすぎる。'],
+ [null,'','第1章「夜の工房に灯る」　完'],
+ [null,'','——次の夜。街じゅうの明かりが、いっせいに消えた。'],
+ ['gorilla','ボルトゴリラ','ウホッ！？ 変電所の電線が、錆に食われてやがる！\nおい、そこの職人たち、手を貸してくれ！'],
+ [null,'','第2章「停電の街」へつづく']
+];
+
+/* 町のNPC：段階 0=路地裏クリア前 1=路地裏クリア後 2=廃工場クリア後 3=第1章クリア後 */
+const TOWN_TALK={
+ gorilla:{
+  0:[['gorilla','ボルトゴリラ','停電の原因？ 錆の連中が電線をかじってやがるんだ、ウホッ。'],
+     ['gorilla','ボルトゴリラ','フルパワーでぶっ飛ばしてぇところだが……\nあいつら、電気が効きにくい。何か秘密があるはずだ。']],
+  1:[['gorilla','ボルトゴリラ','路地裏の番人を倒したって？ やるじゃねぇか、ウホッ！'],
+     ['gorilla','ボルトゴリラ','けど変だな。錆を倒したのに、電圧が下がり続けてる。\nどこかで、まだ電気を食ってる奴がいるな。']],
+  2:[['gorilla','ボルトゴリラ','廃工場のクレーンか……昔、あそこの配線は俺がやったんだ。\nきれいな複線図だったぜ。'],
+     ['gorilla','ボルトゴリラ','力まかせじゃ、電気は流れねぇ。\n……親方の口ぐせさ。今さら、身にしみるぜ。']],
+  3:[['gorilla','ボルトゴリラ','地下の親玉まで倒したって！？ 100万ボルトの勝利だな！'],
+     ['gorilla','ボルトゴリラ','……ただな、変電所のほうが、どうも静かすぎる。\nいやな予感がするぜ、ウホッ。']]
+ },
+ mouse:{
+  0:[['mouse','チュータ','チュー……メカロボが動かなくなっちゃった。\n錆が関節に入りこんだみたい。'],
+     ['mouse','チュータ','ロボ、修理しなきゃ……。工房のスパナ、貸してもらえないかな。']],
+  1:[['mouse','チュータ','スパナで関節は少し動いたチュー！\nでも、中の命令が止まってるみたいで……。']],
+  2:[['mouse','チュータ','ロボの頭の中、文字がいっぱい並んでるチュー。\n……これ、プログラムっていうのかな？'],
+     ['mouse','チュータ','ボク、ロボがいないと何もできないから……\nなんとか読めるようになりたいチュー。']],
+  3:[['mouse','チュータ','やったチュー！ 街の錆が少し減ったよ！'],
+     ['mouse','チュータ','ロボが寝言みたいに「パイソン」って言うんだ。\nヘビの夢でも見てるのかな……？']]
+ },
+ robot:{
+  0:[['robot','メカロボ','ピ……ガ……システム……エラー……サビ……検出……']],
+  1:[['robot','メカロボ','ピピ……関節……可動率……12％……\nチュータ……アリガトウ……ゴザイ……マス……']],
+  2:[['robot','メカロボ','ワタシ……古イ型……\nモウ……役ニ……タタナイ……？ ……ガガ……']],
+  3:[['robot','メカロボ','ピ……再起動ニ……必要ナモノ……\n……プログラム……ト……トモダチ……'],
+     [null,'','メカロボの目が、一瞬だけ青く光った気がした。']]
+ },
+ tsukiyo:{
+  0:[['tsukiyo','ツキヨ','今夜は星がよく見える。街の灯りが消えたせいだね。'],
+     ['tsukiyo','ツキヨ','星が告げてる。きみたちの道は、門の向こうから始まるって。']],
+  1:[['tsukiyo','ツキヨ','錆の広がる形、空から見ると円になってる。\nまるで、大きな魔法陣みたいに。'],
+     ['tsukiyo','ツキヨ','次の星は、街はずれの廃工場の上で光ってるよ。']],
+  2:[['tsukiyo','ツキヨ','星が告げてる。きみたちの道は、地下へ続いているって。'],
+     ['tsukiyo','ツキヨ','……地下は星が見えない。わたしには、先が読めない場所。\n気をつけて。']],
+  3:[['tsukiyo','ツキヨ','星読みどおり。……ううん、星読み以上かな。'],
+     ['tsukiyo','ツキヨ','夜明けに、空をまっすぐ飛ぶ光を見た。\nあれは星じゃない。星座の図面にも、のってない。']]
+ },
+ onmyo:{
+  0:[['onmyo','オンミョウ','……その門の先から、陰の気が流れてくる。'],
+     ['onmyo','オンミョウ','……陰と陽、どちらに転ぶか。見届けさせてもらおう。']],
+  1:[['onmyo','オンミョウ','……番人を退けたか。\nだが陰の気は、さらに奥……廃工場から濃く流れている。']],
+  2:[['onmyo','オンミョウ','……地下には、描きかけの図が眠っている。\n途中で止めた図は、陰に転びやすい。'],
+     ['onmyo','オンミョウ','……我も昔、図を描きかけで捨てたことがある。\n……今は、関係のない話だ。']],
+  3:[['onmyo','オンミョウ','……面白い。'],
+     ['onmyo','オンミョウ','……その半分の図面。残りは、星の図面庫か、あるいは空か。\n……いずれ、また会うだろう。']]
+ },
+ rocker:{
+  0:[['rocker','セブンティーン','よう。街が静かすぎて、ギターの音がよく響くぜ。'],
+     ['rocker','セブンティーン','錆の連中、いいリズムで攻めてきやがる。\n……俺の出番は、もう少し先だな。']],
+  1:[['rocker','セブンティーン','番人を倒したって？ 悪くねぇイントロだ。'],
+     ['rocker','セブンティーン','ただ、本番はまだ先だろ。\nアンコールはいらねぇ……と言いたいとこだがな。']],
+  2:[['rocker','セブンティーン','港の倉庫街のほう、最近やけに油くせぇ。\n錆の連中、何かためこんでやがるな。'],
+     ['rocker','セブンティーン','火がついたら、ギターソロじゃすまねぇぜ。']],
+  3:[['rocker','セブンティーン','……やるじゃねぇか。今夜の主役は、お前らだ。'],
+     ['rocker','セブンティーン','けどな、ステージはまだ続く。\n倉庫のほうで火が出たら……そのときは、俺も弾く。']]
+ }
+};
+
+/* 町で加入済みの仲間に話しかけたとき（どれか1つを選ぶ） */
+const PARTY_TOWN_TALK={
+ wolf:[
+  [['wolf','ウルフ','休憩もトレーニングのうちだって、博士が言ってた。\n……ほんとかよ。']],
+  [['wolf:smile','ウルフ','工房で武器を作っとこうぜ。いい刃物は、いい仕事をする！']],
+  [['wolf:worry','ウルフ','試験の過去問、一問だけ解いた。……一問だけな。']]
+ ],
+ dodo:[
+  [['dodo','ドド先輩','ふわぁ……。ちょっとだけ寝ていい？ 五分だけ〜。']],
+  [['dodo','ドド先輩','あせらなくていいよ〜。でも、オイルは持っていこうね。']],
+  [['dodo','ドド先輩','前はぼくが立つから、きみは思いきり行っていいよ〜。']]
+ ],
+ fox:[
+  [['fox','ギアフォックス','街灯のボルト、また一本直しといた！ 設計どおり！']],
+  [['fox','ギアフォックス','ねぇ、工房の旋盤、あとで分解していい？\n……冗談だよ、たぶん。']],
+  [['fox','ギアフォックス','ケガしたら言ってよね。\n直す役がいるんだから、無理しないでしょ！']]
+ ],
+ owl:[
+  [['owl','ホー博士','ホッホッ。錆の出る場所を地図に記すと、\n円になる。……やはり何かの陣じゃのう。']],
+  [['owl','ホー博士','わざは四つまで。組み合わせを考えるのも、\n設計のうちじゃぞい。']],
+  [['owl','ホー博士','夜ふかしは研究の友じゃ。\n……若いのは、ほどほどにの。']]
+ ]
+};
+
+/* ボス会話：マスの talk で引く（台本の定数をまとめる表） */
+const BOSS_TALK={alley:MIDBOSS_TALK,factory:FACTORY_BOSS_TALK,under:FINAL_TALK};
+const BOSS_WIN ={alley:MIDBOSS_WIN, factory:FACTORY_BOSS_WIN, under:FINAL_WIN};
+/* 工房のミニゲームの難しさ（段階 1〜3）
+   SEG=なぞる長さ WID=線の太さ（はみ出し判定の幅） SPU=制限時間の長さ LATHE_T=旋盤の時間 LATHE_STEPS=段の数
+   LATHE_TOL=旋盤で満点になる誤差 LATHE_FALL=誤差がこれだけ増えると0点（[削りすぎ, 削りたりない]）
+   ※第1章ベータ：なぞりの線を約15%細く、旋盤の許容を約3割きびしくした（もとは WID 1:.15 2:.12 3:.10、TOL .03、FALL [.14,.22]） */
+const CFG={SEG:{1:3.0,2:3.8,3:4.6},WID:{1:.13,2:.104,3:.092},SPU:{1:.9,2:.85,3:.8},LATHE_T:{1:4.5,2:5.5,3:6.5},LATHE_STEPS:{1:2,2:3,3:4},LATHE_TOL:.021,LATHE_FALL:[.10,.16]};
+/* 武器のランクのしきい値（q＝(設計＋加工)/2）。SS はさらに設計の到達率100%が必要（もとは S90 A75 B60 C40、SS は q=100） */
+const CRAFT_RANK={SS:98,S:92,A:80,B:65,C:45};
+
+/* ===================== セーブ =====================
+   mmrpg1        … ゲームの進み具合（大域変数 G。版は G.v）
+   mmrpg1_opt    … 設定（戦闘の速さ fast・オート auto）。戦闘中に押しても G はセーブしない
+   mmrpg1_broken … 読めなかったセーブの元の文字列（消さずに退避しておく）
+   G.where       … 再開する場所 {s:'town'} か {s:'map'}（地図は G.area）
+   G.flags.intro=0 … はじまりの会話がまだ（読み終わると 1）
+   G.flags.pendWin … ボスに初めて勝ったが、勝利の会話をまだ読み終えていないマスID
+   G.pendCraft   … 作り終えたが、装備するか選んでいない武器 {id,w}（鉄くずは引いた後）
+   G.restUsed    … この出撃で使った休憩所のマスID（町にもどると空にする） */
+const KEY='mmrpg1',OPT_KEY='mmrpg1_opt',BROKEN_KEY='mmrpg1_broken';
+let SAVE_RAW=null;
+function ld(){try{SAVE_RAW=localStorage.getItem(KEY)}catch(e){SAVE_RAW=null}if(SAVE_RAW==null)return null;try{return JSON.parse(SAVE_RAW)}catch(e){return null}}
+let G=ld();
+let OPT={};try{OPT=JSON.parse(localStorage.getItem(OPT_KEY))||{}}catch(e){OPT={}}if(!OPT||typeof OPT!=='object'||Array.isArray(OPT))OPT={};
+function saveOpt(){try{localStorage.setItem(OPT_KEY,JSON.stringify(OPT))}catch(e){}}
+/* 古いセーブの補い（版番号 G.v。キーは mmrpg1 のまま） */
+const SAVE_V=3;
+let loadNote='';
+function migrate(g){if(!g||typeof g!=='object'||Array.isArray(g)||!Array.isArray(g.party))return null;
+ /* 先に仲間を整理（null・知らないID・重複を除く）。0人なら読めないセーブとして扱う */
+ g.party=g.party.filter((m,i,a)=>m&&typeof m==='object'&&CHARS[m.id]&&a.findIndex(x=>x&&x.id===m.id)===i);
+ if(!g.party.length)return null;
+ if(Number(g.v)>SAVE_V)loadNote='新しい版のセーブを読みこみました（うまく動かないときは、新しい版で遊んでください）';
+ const it=g.items&&typeof g.items==='object'&&!Array.isArray(g.items)?g.items:{};g.items={};Object.keys(ITEMS).forEach(k=>{g.items[k]=Math.max(0,Math.floor(+it[k]||0))});
+ g.mat=Math.max(0,Math.floor(+g.mat||0));g.cleared=Array.isArray(g.cleared)?g.cleared:['base'];if(!g.cleared.includes('base'))g.cleared.push('base');
+ g.joined=Array.isArray(g.joined)?g.joined:[];g.opened=Array.isArray(g.opened)?g.opened:[];g.flags=g.flags&&typeof g.flags==='object'&&!Array.isArray(g.flags)?g.flags:{};
+ g.restUsed=Array.isArray(g.restUsed)?g.restUsed:[];
+ if(!AREAS[g.area])g.area='alley';
+ if(!g.hero||!CHARS[g.hero])g.hero=g.party[0].id;
+ g.party.forEach(m=>{if(!JOBS[m.job])m.job=CHARS[m.id].job;m.lv=clamp(Math.floor(+m.lv)||1,1,LV_CAP);m.exp=m.lv>=LV_CAP?0:Math.max(0,+m.exp||0);m.sp=clamp(+m.sp||0,0,SP_MAX)});
+ /* 主人公がパーティにいなければ戻す（JOIN_ORDER は主人公を飛ばすので、二度と加わらなくなるのを防ぐ） */
+ if(!g.party.some(m=>m.id===g.hero))g.party.unshift(newMember(g.hero,Math.max(...g.party.map(m=>m.lv))));
+ g.party.forEach(m=>{m.learned=Array.isArray(m.learned)?m.learned.filter(s=>SKILLS[s]):[];m.skills=Array.isArray(m.skills)?m.skills.filter(s=>SKILLS[s]&&m.learned.includes(s)).slice(0,4):[];
+  m.fresh=Array.isArray(m.fresh)?m.fresh.filter(s=>SKILLS[s]):[];learnUpTo(m);if(!m.skills.length&&m.learned.length)m.skills.push(m.learned[0]);
+  m.weapon=fixWeapon(m);
+  m.hp=Number.isFinite(m.hp)?clamp(m.hp,0,maxHp(m)):maxHp(m);m.mp=Number.isFinite(m.mp)?clamp(m.mp,0,maxMp(m)):maxMp(m)});
+ if(g.party.every(m=>m.hp<=0))g.party.forEach(m=>{m.hp=maxHp(m)});  /* 全員HP0のセーブは全快させる */
+ fixTown(g);
+ if(!g.where||typeof g.where!=='object'||!['town','map'].includes(g.where.s))g.where={s:'town'};
+ if(g.pendCraft&&!(g.pendCraft.w&&typeof g.pendCraft.w==='object'&&Number.isFinite(+g.pendCraft.w.v)&&g.party.some(m=>m.id===g.pendCraft.id)))delete g.pendCraft;
+ if(g.cleared.includes('b1'))g.flags.ai_alley=1;
+ g.v=SAVE_V;return g}
+let saveWarned=false,saveBlocked=false,inBattle=false;
+function save(){if(!G||saveBlocked)return;try{localStorage.setItem(KEY,JSON.stringify(G))}catch(e){
+  if(!saveWarned){saveWarned=true;setTimeout(()=>say('この端末ではセーブできませんでした<br><span style="font-size:14px">（プライベートブラウズ・容量不足など）</span>',2600),0)}}}
+/* アプリの切りかえ・タブを閉じるとき：安全な場面ならセーブ。戦闘中は G を書かない（戦闘前のセーブから地図で再開する） */
+function saveSafe(){if(!G||inBattle)return;if(TW&&$('town').classList.contains('on')&&!'WR'.includes(tileAt(TW.px,TW.py)))G.town={x:TW.px,y:TW.py};save()}
+window.addEventListener('pagehide',saveSafe);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveSafe()});
+/* 別のタブで同じゲームが進んだら、このタブではセーブを止める（古い内容で上書きしないため） */
+window.addEventListener('storage',e=>{if((e.key!==KEY&&e.key!==null)||saveBlocked||!G)return;saveBlocked=true;
+ say('別のタブで、このゲームのセーブが変わりました<br><span style="font-size:14px">上書きしないよう、このタブではセーブを止めます。<br>このページを読みこみ直してください</span>',4000)});
+/* セーブを消す：ブラウザの confirm() は表示先によっては出ない（常に「いいえ」になる）ので、ゲーム内の確認パネルを使う */
+function askReset(){$('sheetT').textContent='セーブを消す';
+ $('sheetB').innerHTML=`<div style="text-align:center;line-height:1.7;margin:6px 0 10px">セーブを消します。<br><b style="color:var(--red)">もとに戻せません。</b>よろしいですか？</div>
+  <button class="btn" style="background:linear-gradient(#a33,#611);border-color:#e66" id="rsYes">消す</button><button class="btn ghost" id="rsNo">やめる</button>`;
+ $('rsNo').onclick=closeSheet;$('rsYes').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}G=null;closeSheet();
+  $('btnStart').textContent='はじめる';$('btnReset').style.display='none';say('セーブを消しました',1000)};
+ $('sheet').classList.add('on')}
+const $=id=>document.getElementById(id);
+/* 横向きの案内が出ている間はゲームの時間を止める（戦闘の待ち時間・ミニゲームの制限時間） */
+const rotMQ=matchMedia('(min-aspect-ratio:1/1) and (max-height:499px)');let pauseAt=rotMQ.matches?performance.now():0,pausedTotal=0;
+rotMQ.addEventListener?rotMQ.addEventListener('change',e=>{if(e.matches)pauseAt=performance.now();else if(pauseAt){pausedTotal+=performance.now()-pauseAt;pauseAt=0}}):0;
+const gnow=()=>(pauseAt||performance.now())-pausedTotal;
+const wait=ms=>new Promise(r=>{const end=gnow()+ms;(function t(){const left=end-gnow();if(left<=0&&!pauseAt)r();else setTimeout(t,Math.max(16,Math.min(200,left)))})()});
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+/* 入力の一時停止：会話を閉じた直後（ゴーストクリック・連打の抜け）や、コマンド決定の直後。会話の枠へのタップは止めない */
+let inputLock=0;
+function lockInput(ms){inputLock=Math.max(inputLock,performance.now()+ms)}
+/* 止めている間にまた押されたら（連打が続いていたら）、さらに250ms止める。指を止めてから押せば効く */
+['pointerdown','click'].forEach(t=>window.addEventListener(t,e=>{const now=performance.now();if(now<inputLock&&!(e.target.closest&&e.target.closest('#talk'))){e.stopPropagation();e.preventDefault();if(t==='pointerdown')inputLock=Math.max(inputLock,now+250)}},true));
+function show(id){const sh=document.getElementById('sheet');if(sh)sh.classList.remove('on');document.querySelectorAll('body>.pop').forEach(p=>p.remove());document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id));window.scrollTo(0,0)}
+const onScr=id=>$(id).classList.contains('on');
+/* say：重なったときは最後の say だけが消す */
+let sayN=0;
+async function say(html,ms=1300){const my=++sayN;$('msgIn').innerHTML=html;$('msg').classList.add('on');await wait(ms);if(my===sayN)$('msg').classList.remove('on');await wait(170)}
+/* 会話の顔：仲間（CHARS）と、町の人（NPCS。img/ID.webp）。切り出し位置は PORTRAIT */
+const hasFace=id=>!!id&&(!!CHARS[id]||NPCS.some(n=>n.id===id));
+function talk(list,bg){if(!list||!list.length)return Promise.resolve();return new Promise(res=>{let i=0;const T=$('talk');T.classList.toggle('ev',!!bg);T.style.backgroundImage=bg?`url(img/ev/${bg}.webp)`:'';T.classList.add('on');document.body.classList.add('talking');
+ const sh=()=>{const[rid,who,txt]=list[i];const[id,ex]=(rid||'').split(':');const c=id&&CHARS[id];const fb=$('tImg').parentNode,im=$('tImg');
+  const src=!hasFace(id)?'':c?(ex&&(FACES[id]||[]).includes(ex)?`img/face/${id}_${ex}.webp`:c.img):`img/${id}.webp`;
+  fb.style.display=src?'block':'none';if(src){im.onerror=()=>{fb.style.display='none'};im.src=src;portrait(im,id)}$('tWho').textContent=who||'';$('tTxt').textContent=txt};
+ sh();T.onclick=()=>{i++;if(i>=list.length){T.classList.remove('on','ev');T.style.backgroundImage='';T.onclick=null;document.body.classList.remove('talking');lockInput(350);res()}else sh()}})}
+
+/* ================= 音 ================= */
+let AC=null;
+function audio(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}}
+function tone(f,d,type='sine',v=.12,slide=0){if(!AC)return;try{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(slide,AC.currentTime+d);g.gain.value=v;g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g).connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}}
+let lastBuzz=0;
+function buzz(){const n=performance.now();if(n-lastBuzz<120)return;lastBuzz=n;tone(110,.09,'square',.07);$('flash').classList.add('on');setTimeout(()=>$('flash').classList.remove('on'),90)}
+const sfx={start:()=>tone(660,.15,'triangle',.1,990),hit:()=>tone(220,.25,'sawtooth',.12,60),perfect:()=>[784,988,1319].forEach((f,i)=>setTimeout(()=>tone(f,.25,'triangle',.12),i*90)),
+ guard:()=>tone(520,.2,'triangle',.1,780),win:()=>[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.3,'triangle',.12),i*120)),lose:()=>[392,330,262].forEach((f,i)=>setTimeout(()=>tone(f,.35,'sine',.12),i*160)),
+ cut:()=>tone(900+Math.random()*300,.04,'sawtooth',.025)};
+
+/* ================= 魔法陣の形 ================= */
+const TAU=Math.PI*2;
+function poly(n,r=.9,rot=-Math.PI/2,step=1){const p=[];for(let i=0;i<=n;i++){const a=rot+TAU*((i*step)%n)/n;p.push([Math.cos(a)*r,Math.sin(a)*r])}return p}
+function polar(f,a0,a1,N=600){const p=[];for(let i=0;i<=N;i++){const a=a0+(a1-a0)*i/N,r=f(a);p.push([Math.cos(a)*r,Math.sin(a)*r])}return p}
+function shape(type,tier){
+ switch(type){
+  case 'ch':{if(tier===1)return poly(3);
+   if(tier===2){const a=[-.7,.75],b=[.7,.75],c=[.7,-.15],d=[-.7,-.15],t=[0,-.85];return[a,d,t,c,a,b,d,c,b]}
+   const L=1.76,d=.36,lens=[L,L,L,L-d,L-d,L-2*d,L-2*d,L-3*d,L-3*d],dirs=[[1,0],[0,1],[-1,0],[0,-1]];let x=-.88,y=-.88;const p=[[x,y]];
+   lens.forEach((l,i)=>{x+=dirs[i%4][0]*l;y+=dirs[i%4][1]*l;p.push([x,y])});return p}
+  case 'me':{const teeth={1:6,2:8,3:11}[tier],ro=.88,ri=.66,p=[];
+   for(let i=0;i<teeth;i++){const a=-Math.PI/2+TAU*i/teeth,w=TAU/teeth;const seg=(r,b0,b1)=>{for(let k=0;k<=8;k++){const b=b0+(b1-b0)*k/8;p.push([Math.cos(b)*r,Math.sin(b)*r])}};seg(ro,a,a+w*.45);seg(ri,a+w*.5,a+w*.95)}
+   p.push(p[0]);return p}
+  case 'de':{const k={1:7,2:10,3:14}[tier],amp={1:.15,2:.16,3:.17}[tier],p=[];
+   for(let i=0;i<=k*2;i++){const a=-Math.PI/2+TAU*i/(k*2),r=.74+(i%2?amp:-amp);p.push([Math.cos(a)*r,Math.sin(a)*r])}return p}
+  case 'ke':{const n={1:4,2:6,3:8}[tier];return polar(a=>.3+.6*Math.abs(Math.sin(n*(a+Math.PI/2)/2+Math.PI/2)),-Math.PI/2,-Math.PI/2+TAU)}
+  case 'ma':{const turns={1:1.4,2:2,3:2.6}[tier];return polar(a=>.9-.78*((a+Math.PI/2)/(TAU*turns)),-Math.PI/2,-Math.PI/2+TAU*turns,900)}
+  case 'hikari':{const[n,s]={1:[5,2],2:[7,3],3:[9,4]}[tier];return poly(n,.9,-Math.PI/2,s)}
+  case 'yami':{const[n,s]={1:[5,2],2:[7,2],3:[8,3]}[tier];return poly(n,.9,Math.PI/2,s)}
+ }return poly(3)}
+function resample(raw,ds=.012){const out=[raw[0]];let carry=0;
+ for(let i=1;i<raw.length;i++){const[ax,ay]=raw[i-1],[bx,by]=raw[i];const L=Math.hypot(bx-ax,by-ay);if(!L)continue;let t=ds-carry;
+  while(t<=L){out.push([ax+(bx-ax)*t/L,ay+(by-ay)*t/L]);t+=ds}carry=L-(t-ds)}
+ out.push(raw[raw.length-1]);return out}
+
+/* ================= キャンバス共通 ================= */
+const cv=$('cv'),cx=cv.getContext('2d');
+let S=300,SH=300,DPR=1,raf=0;
+function sizeCanvas(ratio=1){const st=$('stage').getBoundingClientRect();S=Math.max(220,Math.min(st.width,(st.height-8)/ratio,760));SH=S*ratio;DPR=Math.min(2,window.devicePixelRatio||1);
+ cv.style.width=S+'px';cv.style.height=SH+'px';cv.width=Math.round(S*DPR);cv.height=Math.round(SH*DPR);cx.setTransform(DPR,0,0,DPR,0,0)}
+function hexA(h,a){const n=parseInt(h.slice(1),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+let handler=null; /* 今動いているミニゲームの入力先 */
+cv.addEventListener('pointerdown',e=>{if(!handler)return;e.preventDefault();audio();try{cv.setPointerCapture(e.pointerId)}catch(_){}handler.down(e)});
+cv.addEventListener('pointermove',e=>{if(!handler)return;e.preventDefault();const evs=e.getCoalescedEvents?e.getCoalescedEvents():[];for(const ev of (evs.length?evs:[e]))handler.move(ev)});
+const upH=e=>{if(handler)handler.up(e)};cv.addEventListener('pointerup',upH);cv.addEventListener('pointercancel',upH);
+document.addEventListener('touchmove',e=>{if(e.target===cv)e.preventDefault()},{passive:false});
+
+/* ================= ミニゲーム①：設計（なぞり） ================= */
+const RUNES='匠磨鍛削締測研溶旋盤図面夜光闇歯車雷爪幻星';
+let runeRot=0;
+function drawRing(ctx,size,color,rot){const k=size*.44,c=size/2;ctx.save();ctx.translate(c,c);ctx.strokeStyle=hexA(color,.35);ctx.lineWidth=1.5;[1.08,1.0].forEach(r=>{ctx.beginPath();ctx.arc(0,0,r*k,0,TAU);ctx.stroke()});
+ ctx.rotate(rot);ctx.fillStyle=hexA(color,.45);ctx.font=`${Math.round(size*.032)}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+ for(let i=0;i<RUNES.length;i++){ctx.save();ctx.rotate(TAU*i/RUNES.length);ctx.fillText(RUNES[i],0,-1.04*k);ctx.restore()}ctx.restore()}
+function runDesign(o){return new Promise(res=>{
+ cv.className='round';sizeCanvas(1);
+ const K=S*.44,toPx=([x,y])=>[S/2+x*K,S/2+y*K];
+ const full=resample(shape(o.type,o.tier)),m=Math.round((o.seg||CFG.SEG[o.tier])/.012);let pts=full;
+ if(full.length>m+2){const s0=Math.floor(Math.random()*(full.length-m));pts=full.slice(s0,s0+m+1)}
+ const n=pts.length,L=(n-1)*.012,small=Math.min(1.6,Math.max(1,480/S));
+ const w=(o.w||CFG.WID[o.tier])*small*(o.wide?1.35:1),time=(L*CFG.SPU[o.tier]+1.4)*1000,endTol=o.full?1:Math.max(2,Math.ceil(w*.5/.012));  /* o.full=最後の点までなぞらないと到達100%にしない（工房） */
+ window.__dbg={kind:'design',pts:pts.map(toPx)};
+ const c={p:0,started:false,drawing:false,t0:0,inL:0,outL:0,last:null,trail:[],done:false,pulse:0};
+ const evPos=e=>{const r=cv.getBoundingClientRect();return[((e.clientX-r.left)-S/2)/K,((e.clientY-r.top)-S/2)/K]};
+ const near=(pos,a,b)=>{let bi=a,bd=1e9;for(let i=a;i<=b;i++){const q=pts[i],d=Math.hypot(q[0]-pos[0],q[1]-pos[1]);if(d<bd){bd=d;bi=i}}return[bi,bd]};
+ $('hudL').textContent=o.label||'';$('hudR').textContent='光る点に触れてスタート';$('tfill').style.width='100%';
+ function finish(){if(c.done)return;c.done=true;handler=null;const reach=c.p>=n-1-endTol?1:c.p/(n-1);if(reach>=1)$('hudR').textContent=`到達 100%　正確 ${(c.inL+c.outL)?Math.round(100*c.inL/(c.inL+c.outL)):100}%`;const tot=c.inL+c.outL,acc=tot>0?c.inL/tot:0;draw();setTimeout(()=>res({reach,acc,score:Math.round(reach*acc*100)}),350)}
+ function step(pos){if(c.last){const seg=Math.hypot(pos[0]-c.last[0],pos[1]-c.last[1]);const[j,d]=near(pos,Math.max(0,c.p-10),Math.min(n-1,c.p+28));const ok=d<=w/2;
+   if(ok)c.inL+=seg;else{c.outL+=seg;if(seg>.002)buzz()}if(d<w*1.7&&j>c.p)c.p=j;c.trail.push([pos[0],pos[1],ok]);if(c.trail.length>90)c.trail.shift();if(c.p>=n-1-endTol)finish()}c.last=pos}
+ handler={down(e){const pos=evPos(e),q=pts[c.p];if(Math.hypot(pos[0]-q[0],pos[1]-q[1])>w*2.4){$('hudR').textContent=c.started?'光っている点から続きを':'光る点に触れてスタート';return}
+   if(!c.started){c.started=true;c.t0=gnow();sfx.start()}c.drawing=true;c.last=pos},
+  move(e){if(c.drawing&&!c.done)step(evPos(e))},up(){c.drawing=false;c.last=null}};
+ function draw(){cx.clearRect(0,0,S,S);runeRot+=.002;c.pulse+=.08;const col=o.color;
+  const g=cx.createRadialGradient(S/2,S/2,0,S/2,S/2,S/2);g.addColorStop(0,hexA(col,.10));g.addColorStop(1,'rgba(0,0,0,0)');cx.fillStyle=g;cx.fillRect(0,0,S,S);
+  drawRing(cx,S,col,runeRot);const P=pts.map(toPx),wpx=w*K;cx.lineCap=cx.lineJoin='round';
+  cx.beginPath();full.forEach((q,i)=>{const r=toPx(q);i?cx.lineTo(...r):cx.moveTo(...r)});cx.strokeStyle=hexA(col,.22);cx.lineWidth=2;cx.stroke();
+  const path=(a,b)=>{cx.beginPath();cx.moveTo(...P[a]);for(let i=a+1;i<=b;i++)cx.lineTo(...P[i])};
+  path(0,n-1);cx.strokeStyle=hexA(col,.18);cx.lineWidth=wpx;cx.stroke();cx.strokeStyle=hexA(col,.55);cx.lineWidth=1.2;cx.setLineDash([4,6]);cx.stroke();cx.setLineDash([]);
+  if(c.p>0){path(0,c.p);cx.save();cx.shadowColor=col;cx.shadowBlur=16;cx.strokeStyle=col;cx.lineWidth=Math.max(4,wpx*.42);cx.stroke();cx.restore()}
+  for(let i=1;i<c.trail.length;i++){const a=toPx(c.trail[i-1]),b=toPx(c.trail[i]);cx.beginPath();cx.moveTo(...a);cx.lineTo(...b);cx.strokeStyle=c.trail[i][2]?'rgba(255,255,255,.75)':'rgba(255,70,70,.95)';cx.lineWidth=3;cx.stroke()}
+  if(!c.done){const q=P[c.p],nx=P[Math.min(n-1,c.p+10)],r=wpx*.55+Math.sin(c.pulse)*3;cx.beginPath();cx.arc(q[0],q[1],Math.max(8,r),0,TAU);cx.fillStyle=c.started?'rgba(255,255,255,.25)':hexA(col,.55);cx.fill();cx.strokeStyle='#fff';cx.lineWidth=2;cx.stroke();
+   const ang=Math.atan2(nx[1]-q[1],nx[0]-q[0]),ar=Math.max(14,wpx*.9);cx.save();cx.translate(q[0]+Math.cos(ang)*ar,q[1]+Math.sin(ang)*ar);cx.rotate(ang);cx.beginPath();cx.moveTo(8,0);cx.lineTo(-5,-6);cx.lineTo(-5,6);cx.closePath();cx.fillStyle='#fff';cx.fill();cx.restore();
+   const e=P[n-1];cx.beginPath();cx.arc(e[0],e[1],6,0,TAU);cx.strokeStyle='#e8c35a';cx.lineWidth=2;cx.stroke()}}
+ cancelAnimationFrame(raf);
+ (function loop(){draw();if(c.done)return;if(c.started){const el=gnow()-c.t0;$('tfill').style.width=Math.max(0,100*(1-el/time))+'%';const tot=c.inL+c.outL;
+   $('hudR').textContent=`到達 ${Math.round(100*c.p/(n-1))}%　正確 ${tot?Math.round(100*c.inL/tot):100}%`;if(el>=time){finish();return}}raf=requestAnimationFrame(loop)})();
+})}
+
+/* ================= ミニゲーム②：加工（旋盤） ================= */
+function makeProfile(tier){const N=160,k=CFG.LATHE_STEPS[tier],cuts=[0];
+ while(cuts.length<k){const v=.15+Math.random()*.7;if(cuts.every(x=>Math.abs(x-v)>.16))cuts.push(v)}cuts.sort((a,b)=>a-b);cuts.push(1);
+ const rs=[];for(let i=0;i<k;i++){let r;do{r=.5+Math.random()*.42}while(i&&Math.abs(r-rs[i-1])<.12);rs.push(+r.toFixed(2))}
+ const taper=tier===3?Math.floor(Math.random()*k):-1;
+ const tgt=[];for(let i=0;i<N;i++){const x=(i+.5)/N;let s=0;while(x>cuts[s+1])s++;
+  if(s===taper){const nx=rs[s+1]??rs[s-1];const t=(x-cuts[s])/(cuts[s+1]-cuts[s]);tgt.push(rs[s]+(nx-rs[s])*t*.6)}else tgt.push(rs[s])}
+ return{N,tgt,cuts,rs,taper}}
+function runLathe(o){return new Promise(res=>{
+ cv.className='box';sizeCanvas(.8);
+ const pr=makeProfile(o.tier),N=pr.N,T=CFG.LATHE_T[o.tier]*1000,LEAD=900;
+ const W=S,H=SH,x0=W*.14,x1=W*.92,cy=H*.6,R0=H*.27,tol=o.tol||CFG.LATHE_TOL,[fOver,fUnder]=CFG.LATHE_FALL;
+ const cur=new Array(N).fill(1);window.__dbg={kind:'lathe',x0,x1,cy,R0,tgt:pr.tgt,T,LEAD};
+ const c={started:false,t0:0,toolR:1.08,downY:0,baseR:1.08,drag:false,lastI:-1,done:false,parts:[],spin:0};
+ const evY=e=>e.clientY-cv.getBoundingClientRect().top;
+ handler={down(e){if(c.done)return;if(!c.started){c.started=true;c.t0=gnow();sfx.start()}c.drag=true;c.downY=evY(e);c.baseR=c.toolR},
+  move(e){if(!c.drag||c.done)return;c.toolR=clamp(c.baseR-(evY(e)-c.downY)/R0,.3,1.12)},up(){c.drag=false}};
+ $('hudL').textContent=o.label||'';$('hudR').textContent='画面に触れてスタート';$('tfill').style.width='100%';
+ const ptsOf=i=>{const e=cur[i]-pr.tgt[i],ae=Math.abs(e);return ae<=tol?1:clamp(1-(ae-tol)/(e<0?fOver:fUnder),0,1)};
+ function score(upTo=N){let s=0;for(let i=0;i<upTo;i++)s+=ptsOf(i);return upTo?s/upTo:1}
+ function finish(){if(c.done)return;c.done=true;handler=null;draw();setTimeout(()=>res({score:Math.round(score()*100)}),400)}
+ function draw(){cx.clearRect(0,0,W,H);c.spin+=.25;
+  const bg=cx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#101a3c');bg.addColorStop(1,'#070b1c');cx.fillStyle=bg;cx.fillRect(0,0,W,H);
+  /* チャック */
+  cx.fillStyle='#3a4466';cx.fillRect(x0-W*.1,cy-R0*1.35,W*.1,R0*2.7);cx.fillStyle='#55618a';for(let j=0;j<3;j++){cx.fillRect(x0-W*.035,cy-R0*1.2+j*R0*.9,W*.03,R0*.55)}
+  /* 材料 */
+  const cw=(x1-x0)/N;
+  /* 材料の陰影は1本のグラデーションを使い回す（毎フレーム160本作らない） */
+  const mg=cx.createLinearGradient(0,cy-R0,0,cy+R0);mg.addColorStop(0,'#5b6584');mg.addColorStop(.3,'#dfe6f5');mg.addColorStop(.5,'#9aa6c4');mg.addColorStop(1,'#3a425e');cx.fillStyle=mg;
+  for(let i=0;i<N;i++){const r=cur[i]*R0,x=x0+i*cw;cx.fillRect(x,cy-r,cw+.6,r*2)}
+  cx.strokeStyle='rgba(255,255,255,.18)';cx.lineWidth=1;for(let k=0;k<6;k++){const yy=Math.sin(c.spin+k*1.05);cx.beginPath();for(let i=0;i<N;i++){const r=cur[i]*R0,x=x0+i*cw,y=cy+yy*r;i?cx.lineTo(x,y):cx.moveTo(x,y)}cx.stroke()}
+  cx.strokeStyle='rgba(255,255,255,.25)';cx.setLineDash([8,6]);cx.beginPath();cx.moveTo(x0-W*.12,cy);cx.lineTo(W,cy);cx.stroke();cx.setLineDash([]);
+  /* 目標の輪郭と寸法 */
+  cx.strokeStyle='#e8c35a';cx.lineWidth=2;cx.setLineDash([6,4]);[-1,1].forEach(sg=>{cx.beginPath();for(let i=0;i<N;i++){const x=x0+(i+.5)*cw,y=cy+sg*pr.tgt[i]*R0;i?cx.lineTo(x,y):cx.moveTo(x,y)}cx.stroke()});cx.setLineDash([]);
+  cx.fillStyle='#e8c35a';cx.font=`800 ${Math.round(W*.032)}px sans-serif`;cx.textAlign='center';
+  for(let s=0;s<pr.rs.length;s++){const xm=x0+(pr.cuts[s]+pr.cuts[s+1])/2*(x1-x0);cx.fillText(s===pr.taper?'テーパー':'φ'+Math.round(pr.rs[s]*40),xm,cy+R0*1.42)}
+  /* 削った部分の評価色 */
+  for(let i=0;i<=Math.min(c.lastI,N-1);i++){const p=ptsOf(i),x=x0+i*cw;cx.fillStyle=p>=1?'#4fd07a':p>.5?'#e8c35a':'#ff5a5a';cx.fillRect(x,cy-R0*1.22,cw+.5,4)}
+  /* 刃物（バイト） */
+  const prog=c.started?(gnow()-c.t0-LEAD)/T:-.08,tx=x0+clamp(prog,-.1,1)*(x1-x0),ty=cy-c.toolR*R0;
+  cx.fillStyle='#c9a03a';cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx-10,ty-18);cx.lineTo(tx+10,ty-18);cx.closePath();cx.fill();
+  cx.fillStyle='#6a7290';cx.fillRect(tx-9,ty-18-H*.25,18,H*.25);
+  cx.strokeStyle='rgba(232,195,90,.35)';cx.beginPath();cx.moveTo(x0,ty);cx.lineTo(x1,ty);cx.stroke();
+  for(const p of c.parts){p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.l--;cx.fillStyle=`rgba(255,${180+Math.random()*60|0},80,${p.l/20})`;cx.fillRect(p.x,p.y,3,3)}c.parts=c.parts.filter(p=>p.l>0);
+  if(!c.started){cx.fillStyle='rgba(255,255,255,.85)';cx.font=`800 ${Math.round(W*.04)}px sans-serif`;cx.fillText('上下にドラッグして刃物の深さを調整',W/2,H*.12)}}
+ cancelAnimationFrame(raf);
+ (function loop(){if(c.done)return;
+  if(c.started){const el=gnow()-c.t0,prog=(el-LEAD)/T,i=Math.floor(prog*N);
+   for(let k=Math.max(0,c.lastI+1);k<=Math.min(N-1,i);k++){if(c.toolR<cur[k]){cur[k]=c.toolR;if(Math.random()<.5){const tx=x0+k*(x1-x0)/N;for(let q=0;q<2;q++)c.parts.push({x:tx,y:cy-c.toolR*R0,vx:Math.random()*4-1,vy:-Math.random()*4,l:20})}if(Math.random()<.15)sfx.cut()}c.lastI=k}
+   $('tfill').style.width=clamp(100*(1-prog),0,100)+'%';$('hudR').textContent=prog<0?'刃物を金色の線へ！':`加工 ${Math.round(score(Math.max(1,c.lastI+1))*100)}点`;
+   if(prog>=1){draw();finish();return}}
+  draw();raf=requestAnimationFrame(loop)})();
+})}
+
+
+
+/* ===================== キャラの能力値 ===================== */
+function stat(m,k){const J=JOBS[m.job];let v=J.b[k]+J.g[k]*(m.lv-1);if(m.weapon&&k===m.weapon.k)v+=m.weapon.v;return Math.floor(v)}
+const maxHp=m=>stat(m,'hp'),maxMp=m=>stat(m,'mp');
+/* はじめの武器：工房で作れば、これより強い武器になる */
+const STARTER_WEAPON=4;
+const starterWeapon=job=>{const J=JOBS[job];return{name:`見習いの${J.weapon}`,k:J.uses,v:STARTER_WEAPON,rank:'C',tier:1}};
+function newMember(id,lv){const m={id,job:CHARS[id].job,lv:1,exp:0,hp:0,mp:0,skills:[],learned:[],fresh:[],weapon:starterWeapon(CHARS[id].job),sp:0};lv=Math.min(LV_CAP,lv);for(let i=1;i<lv;i++)levelUp(m);learnUpTo(m);m.hp=maxHp(m);m.mp=maxMp(m);return m}
+/* 武器の強化（工房）：余った鉄くずで +1〜+5。1段ごとに元の威力 bv の約10%（最低+1）上がる。
+   UPG_COST[n] が +n→+(n+1) に必要な鉄くず。作り直すと強化は消える（新しい武器は +0） */
+const UPG_COST=[2,3,4,5,6],UPG_MAX=5;
+const upgInc=w=>Math.max(1,Math.round((Number.isFinite(w.bv)?w.bv:w.v)*.1));
+const wName=w=>w?w.name+(w.plus?` +${w.plus}`:''):'なし';
+function fixWeapon(m){const w=m.weapon;if(!w||typeof w!=='object'||!Number.isFinite(+w.v))return starterWeapon(m.job);
+ w.v=+w.v;if(w.k!=='atk'&&w.k!=='mag')w.k=JOBS[m.job].uses;if(typeof w.name!=='string'||!w.name)w.name=`${JOBS[m.job].weapon}`;
+ w.plus=clamp(Math.floor(+w.plus||0),0,UPG_MAX);if(!Number.isFinite(+w.bv)){let b=w.v;if(w.plus){for(let t=w.v;t>=1;t--)if(t+w.plus*Math.max(1,Math.round(t*.1))===w.v){b=t;break}}w.bv=b}else w.bv=+w.bv;
+ return w}
+/* 覚えた技が装備しきれないときは m.fresh に入れて、パーティ画面で「NEW」を出す */
+function learnUpTo(m){const got=[];if(!m.fresh)m.fresh=[];JOBS[m.job].learn.forEach(([lv,sk])=>{if(lv<=m.lv&&!m.learned.includes(sk)){m.learned.push(sk);if(m.skills.length<4)m.skills.push(sk);else if(!m.fresh.includes(sk))m.fresh.push(sk);got.push(sk)}});return got}
+function levelUp(m){m.lv++;return learnUpTo(m)}
+
+/* ===================== タイトル・主人公選び ===================== */
+/* 町の座標が壊れていたら（範囲外・壁の中など）開始位置へ戻す */
+function fixTown(g){const t=g.town,ok=t&&Number.isInteger(t.x)&&Number.isInteger(t.y)&&t.y>=0&&t.y<TOWN.length&&t.x>=0&&t.x<TOWN[0].length&&!'#B~FPLST'.includes(tileAt(t.x,t.y));if(!ok)g.town={x:TOWN_START[0],y:TOWN_START[1]}}
+function goStart(){audio();if(G){fixTown(G);if(!G.opened)G.opened=[];resumeGame();return}
+ let sel=null;$('pickGrid').classList.toggle('one',HEROES.length===1);$('pickGrid').innerHTML=HEROES.map(id=>{const c=CHARS[id],J=JOBS[c.job];return `<div class="cc" data-id="${id}"><img src="${c.img}" alt=""><div class="nm">${c.name}</div><span class="tag">${JIC(Object.keys(JOBS).find(k=>JOBS[k]===J))} ${J.n}</span></div>`}).join('');
+ $('pickGrid').querySelectorAll('.cc').forEach(el=>el.onclick=()=>{sel=el.dataset.id;$('pickGrid').querySelectorAll('.cc').forEach(x=>x.classList.toggle('sel',x===el));const c=CHARS[sel],J=JOBS[c.job];
+  $('pickInfo').style.display='block';$('pickInfo').innerHTML=`<b>${c.name}</b>　${JIC(Object.keys(JOBS).find(k=>JOBS[k]===J))} ${J.n}（${J.role}）<div class="note">固有の能力：<b>${c.pass.n}</b>…${c.pass.d}<br>必殺技：<b>${c.sp.n}</b>…${c.sp.d}</div><div style="margin-top:4px">「${c.lines[0]}」</div>`;$('pickOk').disabled=false});
+ if(HEROES.length===1)$('pickGrid').querySelector('.cc').click();
+ $('pickOk').onclick=async()=>{if(G)return;G={v:SAVE_V,hero:sel,party:[newMember(sel,1)],items:{oil:3,oil2:0,cool:1},mat:3,cleared:['base'],joined:[],town:{x:TOWN_START[0],y:TOWN_START[1]},opened:[],area:'alley',flags:{intro:0},restUsed:[],where:{s:'town'}};save();await playIntro()};show('pick')}
+/* はじまりの会話。読み終えてから intro=1 をセーブ（途中で読み込み直しても、もう一度出る） */
+async function playIntro(){openTown();if(TW)TW.busy=true;await talk(INTRO[G.hero]||[]);G.flags.intro=1;save();if(TW)TW.busy=false}
+/* 「つづきから」：読み込み直しの前にいた安全な場面から再開する
+   はじまりの会話の途中 → 会話から／勝利の会話の途中 → 地図＋勝利の会話から／武器の結果を選ぶ前 → 結果画面から／それ以外は町（同じ位置）か地図 */
+function findNode(id){for(const a of Object.keys(MAPS)){const n=MAPS[a].find(q=>q.id===id);if(n)return{area:a,node:n}}return null}
+async function resumeGame(){
+ if(G.flags.intro===0){await playIntro();return}
+ if(G.pendCraft){showCraftResult(G.pendCraft);return}
+ if(G.flags.pendWin){const f=findNode(G.flags.pendWin);if(f&&f.node.t==='boss'){G.area=f.area;openMap();setMapBusy(true);await afterWin(true,f.node,true);return}delete G.flags.pendWin}
+ if(G.where&&G.where.s==='map'&&MAPS[G.area]){openMap();return}
+ openTown()}
+
+/* ===================== 進行（エリア解放・町の段階） ===================== */
+const areaOpen=k=>!AREAS[k].need||G.cleared.includes(AREAS[k].need);
+const areaDone=k=>G.cleared.includes(AREAS[k].boss);
+const openAreas=()=>AREA_ORDER.filter(areaOpen);
+/* 町の段階：0=路地裏クリア前 1=路地裏クリア後 2=廃工場クリア後 3=第1章クリア後 */
+function stage(){return areaDone('under')?3:areaDone('factory')?2:areaDone('alley')?1:0}
+/* 工房の武器の段階：解放済みの一番奥のエリア */
+function craftTier(){return Math.max(...openAreas().map(k=>AREAS[k].tier))}
+const curMap=()=>MAPS[G.area]||MAPS.alley;
+const KANJI_TIER=['','壱','弐','参'];
+
+
+/* ===================== 町（歩き回れるマップ） =====================
+   # 壁・建物  . 道  , 草地  ~ 水路  B 工房の建物  W 工房の扉  R 路地裏への門
+   T 宝箱  L 街灯  F フェンス  S 看板  P 鉄骨・機械
+*/
+const TOWN=[
+"######################",
+"#L.......#BBBB#.....L#",
+"#.,,,....#BBBB#..T...#",
+"#.,,,....#BWBB#......#",
+"#....S...............#",
+"#..........L......PP.#",
+"#.~~~~~~~.........PP.#",
+"#.~~~~~~~....###.....#",
+"#.~~~~~~~....###..,,.#",
+"#..........L......,,.#",
+"#.FFFF...............#",
+"#.....,,,.....#.#....#",
+"#..T..,,,.....#R#..L.#",
+"#L............###....#",
+"######################"];
+const TOWN_START=[11,4];
+const NPCS=[
+ {id:'gorilla',x:4,y:9,lines:[['gorilla','ボルトゴリラ','停電の原因？ 錆の連中が電線をかじってやがるんだ、ウホッ。'],['gorilla','ボルトゴリラ','フルパワーでぶっ飛ばしてぇところだが……あいつら、電気が効きにくい。何か秘密があるはずだ。']]},
+ {id:'mouse',x:17,y:8,lines:[['mouse','チュータ','チュー……メカロボが動かなくなっちゃった。錆が関節に入りこんだみたい。'],['mouse','チュータ','ロボ、修理しなきゃ……。工房のスパナ、貸してもらえないかな。']]},
+ {id:'robot',x:18,y:9,lines:[['robot','メカロボ','ピ……ガ……システム……エラー……サビ……検出……']]},
+ {id:'tsukiyo',x:3,y:2,lines:[['tsukiyo','ツキヨ','今夜は星がよく見える。街の灯りが消えたせいだね。'],['tsukiyo','ツキヨ','星が告げてる。きみたちの道は、地下へ続いているって。']]},
+ {id:'onmyo',x:12,y:12,lines:[['onmyo','オンミョウ','……その門の先から、陰の気が流れてくる。'],['onmyo','オンミョウ','……陰と陽、どちらに転ぶか。見届けさせてもらおう。']]},
+ {id:'rocker',x:20,y:2,lines:[['rocker','セブンティーン','よう。街が静かすぎて、ギターの音がよく響くぜ。'],['rocker','セブンティーン','錆の連中、いいリズムで攻めてきやがる。……俺の出番は、もう少し先だな。']]}
+];
+/* 看板：解放済みのエリアと推奨レベルを出す */
+function signLines(){return [[null,'看板','↑ 古い工房（武器づくり・休憩）\n↓ 渦の門（錆が出るので注意）']].concat([[null,'看板',openAreas().map(k=>`${AREAS[k].n}　推奨Lv ${AREAS[k].lv}（ボス Lv${AREAS[k].bossLv}）${areaDone(k)?'　✓':''}`).join('\n')]])}
+/* NPCのセリフ：TOWN_TALK を進行段階で切りかえる（なければ NPCS の lines） */
+function npcLines(n){const t=TOWN_TALK[n.id];if(t){for(let k=stage();k>=0;k--)if(t[k])return t[k]}return n.lines}
+/* 加入済みの仲間（主人公以外）は工房の前に立つ */
+/* 町の人（パーティに入ったキャラは町の人としては出さない）。仲間は主人公の後ろを隊列でついてくる（townFollowers） */
+function townPeople(){return NPCS.filter(n=>!G.party.some(m=>m.id===n.id))}
+const CHEST_ITEMS={'3,12':{oil:1,cool:1},'17,2':{mat:2}};
+let TW=null;
+function tileAt(x,y){return (TOWN[y]||'')[x]||'#'}
+function blocked(x,y){const t=tileAt(x,y);if('#B~FPLST'.includes(t))return true;return townPeople().some(n=>n.x===x&&n.y===y)}
+function npcAt(x,y){return townPeople().find(n=>n.x===x&&n.y===y)}
+const imgCache={};function img(src){if(!imgCache[src]){const i=new Image();i.src=src;imgCache[src]=i}return imgCache[src]}
+/* 町を開く。キャンバスの大きさは resizeTown() で決める（回転・アドレスバーの出入りでも呼びなおす） */
+let townRaf=0,townLast=0;
+function openTown(){show('town');G.restUsed=[];G.where={s:'town'};save();$('mapStat2').innerHTML=G.party.map(miniHTML).join('');
+ $('tHint').classList.remove('off');clearTimeout(window.__hintT);window.__hintT=setTimeout(()=>$('tHint').classList.add('off'),6000);
+ /* trail：主人公の足あと（直前のマスが先頭）。町に入った直後は空＝仲間は主人公に重なっていて、歩くと開いていく */
+ TW={TS:40,VW:9,VH:9,c2:null,cv2:$('tcv'),px:G.town.x,py:G.town.y,fx:G.town.x,fy:G.town.y,moving:false,dir:null,busy:false,t:0,face:[0,1],dark:document.createElement('canvas'),cam:[0,0],trail:[],ffaces:[],npcFace:{}};
+ resizeTown();cancelAnimationFrame(townRaf);townLast=0;townRaf=requestAnimationFrame(townLoop)}  /* ループは常に1本 */
+function resizeTown(){if(!TW)return;const r=$('tWrap').getBoundingClientRect(),cols=TOWN[0].length,rows=TOWN.length;if(!r.width||!r.height)return;
+ /* 横に約9マス見える大きさ。縦が町より長くならないように調整 */
+ const TS=Math.max(r.width/9.5,r.height/rows,24);TW.TS=TS;TW.VW=Math.min(cols,r.width/TS);TW.VH=Math.min(rows,r.height/TS);
+ const cv2=TW.cv2,d=Math.min(2,devicePixelRatio||1);cv2.style.width=r.width+'px';cv2.style.height=r.height+'px';cv2.width=Math.round(r.width*d);cv2.height=Math.round(r.height*d);
+ TW.c2=cv2.getContext('2d');TW.c2.setTransform(d,0,0,d,0,0)}
+window.addEventListener('resize',()=>{if(TW&&onScr('town'))resizeTown()});
+/* 移動・アニメは経過時間で計算（120Hz の画面でも同じ速さ） */
+function townLoop(now){if(!TW||!G||!onScr('town')){townRaf=0;return}
+ const dt=townLast?clamp((now-townLast)/16.667,0,3):1;townLast=now;TW.t+=.016*dt;
+ if(TW.moving){const sp=.16*dt;const dx=TW.px-TW.fx,dy=TW.py-TW.fy;if(Math.abs(dx)+Math.abs(dy)<=sp){TW.fx=TW.px;TW.fy=TW.py;TW.moving=false;arrived()}else{TW.fx+=Math.sign(dx)*sp;TW.fy+=Math.sign(dy)*sp}}
+ if(TW&&!TW.moving&&!TW.busy&&TW.dir)tryStep(TW.dir[0],TW.dir[1]);
+ if(!TW||!onScr('town')){townRaf=0;return}
+ drawTown();townRaf=requestAnimationFrame(townLoop)}
+function tryStep(dx,dy){TW.face=[dx,dy];const nx=TW.px+dx,ny=TW.py+dy;
+ const n=npcAt(nx,ny);if(n){TW.dir=null;releaseDpad();TW.npcFace[n.id]=[Math.sign(TW.px-n.x),Math.sign(TW.py-n.y)];interact(()=>talk(n.party?pick(PARTY_TOWN_TALK[n.id]||[[[n.id,CHARS[n.id].name,CHARS[n.id].lines[0]]]]):npcLines(n)));return}
+ const t=tileAt(nx,ny);
+ if(t==='T'){TW.dir=null;releaseDpad();const k=nx+','+ny;interact(async()=>{if(G.opened.includes(k)){await say('もう空っぽだ',800);return}G.opened.push(k);const it=CHEST_ITEMS[k]||{oil:1};let msg=[];if(it.oil){G.items.oil+=it.oil;msg.push('オイル×'+it.oil)}if(it.cool){G.items.cool+=it.cool;msg.push('冷却水×'+it.cool)}if(it.mat){G.mat+=it.mat;msg.push('鉄くず×'+it.mat)}save();tone(880,.2,'triangle',.1,1320);await say(IC('node_chest',26)+' '+msg.join('、')+' を手に入れた！',1400)});return}
+ if(t==='S'){TW.dir=null;releaseDpad();interact(()=>talk(signLines()));return}
+ if(blocked(nx,ny))return;
+ TW.trail.unshift([TW.px,TW.py]);if(TW.trail.length>4)TW.trail.length=4;  /* 当たり判定は主人公だけ。仲間は足あとをなぞる */
+ TW.px=nx;TW.py=ny;TW.moving=true}
+async function interact(fn){const tw=TW;tw.busy=true;try{await fn()}finally{tw.busy=false}}
+function arrived(){G.town={x:TW.px,y:TW.py};const t=tileAt(TW.px,TW.py);
+ if(t==='W'){TW.dir=null;releaseDpad();G.town={x:TW.px,y:TW.py+1};save();openShop();return}
+ if(t==='R'){TW.dir=null;releaseDpad();G.town={x:TW.px,y:TW.py-1};save();openDest();return}
+ if(!TW.dir)save()}  /* 立ち止まったらセーブ（歩いた位置を残す） */
+/* 町の中で位置の変わらないもの（街灯・宝箱・門・扉）。毎フレーム全マスを調べないよう、最初に1回だけ集める */
+const TOWN_SPOTS=(()=>{const a={L:[],T:[],R:[],W:[]};TOWN.forEach((row,y)=>[...row].forEach((t,x)=>{if(a[t])a[t].push([x,y])}));return a})();
+/* 開けた宝箱：暗くして緑のチェックを描く */
+function openedMark(c,X,Y,TS){c.save();c.fillStyle='rgba(6,8,20,.72)';c.beginPath();c.arc(X+TS/2,Y+TS/2,TS*.44,0,TAU);c.fill();
+ c.strokeStyle='#7fe39a';c.lineWidth=Math.max(2,TS*.09);c.lineCap=c.lineJoin='round';c.beginPath();c.moveTo(X+TS*.3,Y+TS*.52);c.lineTo(X+TS*.45,Y+TS*.67);c.lineTo(X+TS*.72,Y+TS*.36);c.stroke();c.restore()}
+function drawTown(){const{TS,VW,VH,c2}=TW;if(!c2)return;const W=VW*TS,H=VH*TS,cols=TOWN[0].length,rows=TOWN.length;
+ const camX=clamp(TW.fx-(VW-1)/2,0,Math.max(0,cols-VW)),camY=clamp(TW.fy-(VH-1)/2,0,Math.max(0,rows-VH));
+ const scr=([x,y],ox=0,oy=0)=>[(x-camX+ox)*TS,(y-camY+oy)*TS],vis=(X,Y,m=1)=>X>-TS*m&&Y>-TS*m&&X<W+TS*(m-1)&&Y<H+TS*(m-1);
+ c2.fillStyle='#0a0e1e';c2.fillRect(0,0,W+2,H+2);
+ const bg=townBG();
+ if(bg){const sw=bg.naturalWidth/cols,sh=bg.naturalHeight/rows;c2.drawImage(bg,camX*sw,camY*sh,VW*sw,VH*sh,0,0,W,H);
+  /* 絵の上に重ねる動き：開けた宝箱・門の渦 */
+  TOWN_SPOTS.T.forEach(p=>{if(!G.opened.includes(p[0]+','+p[1]))return;const[X,Y]=scr(p);if(vis(X,Y))openedMark(c2,X,Y,TS)});
+  TOWN_SPOTS.R.forEach(p=>{const[X,Y]=scr(p);if(!vis(X,Y,2))return;c2.save();c2.globalAlpha=.25+Math.sin(TW.t*3)*.12;const g=c2.createRadialGradient(X+TS/2,Y+TS/2,0,X+TS/2,Y+TS/2,TS*.7);g.addColorStop(0,'#d8b8ff');g.addColorStop(1,'rgba(180,140,255,0)');c2.fillStyle=g;c2.fillRect(X-TS,Y-TS,TS*3,TS*3);c2.restore()})}
+ else if(townBGfailed()){const sx=Math.floor(camX),sy=Math.floor(camY);
+  for(let y=sy;y<=Math.min(rows-1,Math.ceil(sy+VH));y++)for(let x=sx;x<=Math.min(cols-1,Math.ceil(sx+VW));x++){const t=tileAt(x,y),X=(x-camX)*TS,Y=(y-camY)*TS;drawTile(c2,t,X,Y,TS,x,y)}}
+ /* 夜の暗さと灯り */
+ const X=(TW.fx-camX)*TS,Y=(TW.fy-camY)*TS;
+ const dk=TW.dark,d=Math.min(2,devicePixelRatio||1),dw=Math.ceil(W*d),dh=Math.ceil(H*d);if(dk.width!==dw||dk.height!==dh){dk.width=dw;dk.height=dh}const g=dk.getContext('2d');g.setTransform(d,0,0,d,0,0);g.globalCompositeOperation='source-over';g.clearRect(0,0,W,H);g.fillStyle='rgba(4,6,20,.5)';g.fillRect(0,0,W,H);g.globalCompositeOperation='destination-out';
+ const glow=(gx,gy,r)=>{if(gx<-r||gy<-r||gx>W+r||gy>H+r)return;const gr=g.createRadialGradient(gx,gy,0,gx,gy,r);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.beginPath();g.arc(gx,gy,r,0,TAU);g.fill()};
+ glow(X+TS/2,Y+TS/2,TS*3.2);
+ TOWN_SPOTS.L.forEach(([x,y])=>glow((x-camX+.5)*TS,(y-camY+.3)*TS,TS*(2.6+Math.sin(TW.t*3+x)*.1)));
+ TOWN_SPOTS.W.concat(TOWN_SPOTS.R).forEach(([x,y])=>glow((x-camX+.5)*TS,(y-camY+.3)*TS,TS*2));
+ c2.drawImage(dk,0,0,W,H);
+ /* 灯りの色 */
+ TOWN_SPOTS.L.forEach(([x,y])=>{const gx=(x-camX+.5)*TS,gy=(y-camY+.2)*TS;if(!vis(gx,gy,3))return;const gr=c2.createRadialGradient(gx,gy,0,gx,gy,TS*2.2);gr.addColorStop(0,'rgba(255,200,110,.22)');gr.addColorStop(1,'rgba(255,200,110,0)');c2.fillStyle=gr;c2.fillRect(gx-TS*2.2,gy-TS*2.2,TS*4.4,TS*4.4)});
+ /* キャラは暗さの上に描く（夜でも見えるように）。y で並べ、手前のキャラを上に重ねる */
+ const list=[];
+ townPeople().forEach(n=>{const[NX,NY]=scr([n.x,n.y]);if(!vis(NX,NY,2))return;
+  list.push({y:n.y,f:()=>{if(!walker(c2,n.id,NX,NY,TS,TW.npcFace[n.id]||[0,1],false,n.x))sprite(c2,`img/${n.id}.webp`,NX,NY,TS,Math.sin(TW.t*2+n.x)*1.5,'#9fb4d6')}})});
+ townFollowers().forEach(fw=>{const[FX,FY]=scr([fw.x,fw.y]);if(!vis(FX,FY,2))return;
+  list.push({y:fw.y,f:()=>{if(!walker(c2,fw.id,FX,FY,TS,fw.face,fw.mv,fw.i))sprite(c2,CHARS[fw.id].img,FX,FY,TS,fw.mv?Math.abs(Math.sin(TW.t*14+fw.i))*-4:0,'#4fd07a')}})});
+ list.push({y:TW.fy+.01,f:()=>{if(!walker(c2,G.hero,X,Y,TS,TW.face,TW.moving,0))sprite(c2,CHARS[G.hero].img,X,Y,TS,TW.moving?Math.abs(Math.sin(TW.t*14))*-4:0,'#e8c35a')}});
+ list.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
+ TW.cam=[camX,camY];
+ /* タップで話しかけられるキャラの位置（画面座標） */
+ TW.hits=townFollowers().map(fw=>{const[FX,FY]=scr([fw.x,fw.y]);return{id:fw.id,party:true,X:FX,Y:FY}}).concat(townPeople().map(n=>{const[NX,NY]=scr([n.x,n.y]);return{id:n.id,n,X:NX,Y:NY}}))}
+/* 町：キャラの絵をタップすると話す（地面のタップでは歩かない） */
+function townTap(e){if(!TW||TW.busy||!TW.hits)return;const r=$('tcv').getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,TS=TW.TS;
+ const h=TW.hits.find(o=>x>=o.X+TS*.1&&x<=o.X+TS*.9&&y>=o.Y-TS*.3&&y<=o.Y+TS*.95);if(!h)return;
+ e.preventDefault();TW.dir=null;releaseDpad();
+ if(h.party&&CADQ_MISSION[h.id]){cadMenu(h.id);return}
+ if(h.party){const L=PARTY_TOWN_TALK[h.id];interact(()=>talk(L&&L.length?pick(L):[[h.id,CHARS[h.id].name,'……']]));return}
+ const n=h.n;TW.npcFace[n.id]=[Math.sign(TW.px-n.x),Math.sign(TW.py-n.y)];interact(()=>talk(n.party?pick(PARTY_TOWN_TALK[n.id]||[[[n.id,CHARS[n.id].name,'……']]]):npcLines(n)))}
+$('tcv').addEventListener('pointerdown',townTap);
+/* 隊列：仲間 i（1〜3）は主人公の i 歩前のマスにいて、主人公と同じ進み具合で次のマスへ動く（ドラクエ式） */
+function townFollowers(){const fs=G.party.filter(m=>m.id!==G.hero).slice(0,3);if(!fs.length)return[];
+ const hero=[TW.px,TW.py],tr=TW.trail,p=TW.moving?clamp(1-(Math.abs(TW.px-TW.fx)+Math.abs(TW.py-TW.fy)),0,1):1;
+ const at=k=>k<=0?hero:(tr[k-1]||(tr.length?tr[tr.length-1]:hero));  /* 足あとが足りないときは最後の足あと（なければ主人公）に重ねる */
+ return fs.map((m,j)=>{const i=j+1,to=at(i),from=at(i+1),dx=to[0]-from[0],dy=to[1]-from[1],mv=TW.moving&&(dx||dy);
+  if(dx||dy)TW.ffaces[j]=[Math.sign(dx),Math.sign(dy)];
+  return{id:m.id,i,x:from[0]+dx*p,y:from[1]+dy*p,face:TW.ffaces[j]||TW.face||[0,1],mv}})}
+/* 歩くキャラ（img/walk/キャラID_向き.webp）。画像があるキャラだけ使い、なければ丸い立ち絵 */
+/* takumi は画像だけ用意（まだ CHARS・NPCS にいない） */
+const WALKERS=['wolf','fox','owl','dodo','gorilla','mouse','robot','tsukiyo','onmyo','rocker','takumi'];
+WALKERS.forEach(id=>['down','left','right','up'].forEach(d=>img(`img/walk/${id}_${d}.webp`)));
+/* face=[dx,dy] の向き、mv=歩いているか、seed=キャラごとに揺れをずらす数 */
+function walker(c,id,X,Y,TS,face,mv,seed=0){if(!WALKERS.includes(id))return false;const[fx,fy]=face||[0,1];const d=fx<0?'left':fx>0?'right':fy<0?'up':'down';
+ const im=img(`img/walk/${id}_${d}.webp`);if(!(im.complete&&im.naturalWidth))return false;
+ const ph=TW.t*14+seed*.7,bob=mv?-Math.abs(Math.sin(ph))*TS*.08:Math.sin(TW.t*2+seed)*TS*.01,tilt=mv&&fx?Math.sin(ph)*.06:0,S=TS*1.3;
+ c.save();c.fillStyle='rgba(0,0,0,.4)';c.beginPath();c.ellipse(X+TS/2,Y+TS*.92,TS*.3,TS*.1,0,0,TAU);c.fill();
+ c.translate(X+TS/2,Y+TS*.95+bob);c.rotate(tilt);c.drawImage(im,-S/2,-S,S,S);c.restore();return true}
+function sprite(c,src,X,Y,TS,bob,col){const im=img(src);c.save();c.fillStyle='rgba(0,0,0,.35)';c.beginPath();c.ellipse(X+TS/2,Y+TS*.9,TS*.32,TS*.1,0,0,TAU);c.fill();
+ c.beginPath();c.arc(X+TS/2,Y+TS*.46+bob,TS*.44,0,TAU);c.fillStyle='#3a4a86';c.fill();c.lineWidth=2;c.strokeStyle=col;c.stroke();c.clip();if(im.complete&&im.naturalWidth)c.drawImage(im,X+TS*.04,Y+TS*.02+bob,TS*.92,TS*.92);c.restore()}
+/* 町のタイル画像（img/tile/）。地面は数マスにまたがる1枚の絵として切り出し、物はマス1つに1枚。読み込み前は drawTileOld で描く */
+const TILE_DIR='img/tile/';
+/* 町の1枚絵（img/town/town.webp）。あればタイルの代わりに使う。町のマス目（TOWN）の範囲全体に引きのばして描く */
+const TOWN_BG_SRC='img/town/town.webp';let townBGimg=null;
+function townBG(){if(!townBGimg){townBGimg=new Image();townBGimg.onerror=()=>{townBGimg.failed=true};townBGimg.src=TOWN_BG_SRC}return !townBGimg.failed&&townBGimg.complete&&townBGimg.naturalWidth?townBGimg:null}
+const townBGfailed=()=>townBGimg&&townBGimg.failed;
+townBG();  /* ページを開いた時点で読み込みを始める */
+function tImg(n){const i=img(TILE_DIR+n+'.webp');return i.complete&&i.naturalWidth?i:null}
+/* 画像 n を n×n マスに引きのばし、そのうち (u,v) のマス分を描く */
+function tPart(c,name,X,Y,TS,u,v,n){const i=tImg(name);if(!i)return false;const w=i.naturalWidth/n,h=i.naturalHeight/n;c.drawImage(i,(((u%n)+n)%n)*w,(((v%n)+n)%n)*h,w,h,X,Y,TS+.5,TS+.5);return true}
+function tWhole(c,name,X,Y,TS){const i=tImg(name);if(!i)return false;c.drawImage(i,X,Y,TS+.5,TS+.5);return true}
+function drawTile(c,t,X,Y,TS,x,y){
+ let ok=false;
+ switch(t){
+  case '.':case 'S':ok=tPart(c,'road',X,Y,TS,x,y,4);break;
+  case ',':ok=tPart(c,'grass',X,Y,TS,x,y,3);break;
+  case '~':ok=tPart(c,'water',X,Y,TS,x,y,3);if(ok){c.fillStyle=`rgba(120,180,255,${.06+Math.sin(TW.t*1.6+x*.7+y)*.05})`;c.fillRect(X,Y,TS,TS)}break;
+  case '#':ok=tPart(c,'wall',X,Y,TS,x,y,3);break;
+  case 'P':ok=tPart(c,'wall',X,Y,TS,x-18,y-5,2);break;
+  case 'B':ok=tPart(c,'workshop',X,Y,TS,x-10,y-1,4);break;
+  case 'W':ok=tWhole(c,'door',X,Y,TS);break;
+  case 'L':ok=tWhole(c,'lamp',X,Y,TS);break;
+  case 'F':ok=tWhole(c,'fence',X,Y,TS);break;
+  case 'T':ok=tWhole(c,'chest',X,Y,TS);if(ok&&G.opened.includes(x+','+y))openedMark(c,X,Y,TS);break;
+  case 'R':ok=tWhole(c,'gate',X,Y,TS);if(ok){c.save();c.globalAlpha=.35+Math.sin(TW.t*3)*.15;c.fillStyle='#b48cff';c.beginPath();c.arc(X+TS/2,Y+TS*.5,TS*.18,0,TAU);c.fill();c.restore()}break;
+ }
+ if(!ok){drawTileOld(c,t,X,Y,TS,x,y);return}
+ if(t==='S'){c.fillStyle='#6a4a2a';c.fillRect(X+TS*.46,Y+TS*.45,TS*.08,TS*.45);c.fillStyle='#c9a06a';c.fillRect(X+TS*.18,Y+TS*.2,TS*.64,TS*.32);c.fillStyle='#3a2a1a';c.font=`800 ${TS*.2}px sans-serif`;c.textAlign='center';c.fillText('看板',X+TS/2,Y+TS*.42)}}
+/* タイル画像は町の1枚絵が読めなかったときだけ使うので、先読みはしない */
+function drawTileOld(c,t,X,Y,TS,x,y){
+ const road=()=>{c.fillStyle=(x+y)%2?'#232a48':'#262e4e';c.fillRect(X,Y,TS,TS);c.strokeStyle='rgba(255,255,255,.04)';c.strokeRect(X+.5,Y+.5,TS-1,TS-1)};
+ switch(t){
+  case '.':road();break;
+  case ',':c.fillStyle='#1e3a2c';c.fillRect(X,Y,TS,TS);c.fillStyle='#2e5a3e';for(let i=0;i<3;i++){c.fillRect(X+((x*7+i*11)%TS),Y+((y*5+i*13)%TS),2,5)}break;
+  case '~':c.fillStyle='#0e2a50';c.fillRect(X,Y,TS,TS);c.strokeStyle='rgba(120,180,255,.35)';c.beginPath();const o=Math.sin(TW.t*2+x)*3;c.moveTo(X+4,Y+TS*.5+o);c.quadraticCurveTo(X+TS/2,Y+TS*.3+o,X+TS-4,Y+TS*.5+o);c.stroke();break;
+  case '#':c.fillStyle='#2a2440';c.fillRect(X,Y,TS,TS);c.fillStyle='#352e52';c.fillRect(X,Y,TS,TS*.35);c.strokeStyle='#1a1630';c.strokeRect(X+.5,Y+.5,TS-1,TS-1);if((x+y)%3===0){c.fillStyle='rgba(255,210,120,.25)';c.fillRect(X+TS*.3,Y+TS*.5,TS*.18,TS*.22)}break;
+  case 'B':c.fillStyle='#4a2e1c';c.fillRect(X,Y,TS,TS);c.fillStyle='#6a3e22';c.fillRect(X,Y,TS,TS*.3);c.strokeStyle='#2a180c';c.strokeRect(X+.5,Y+.5,TS-1,TS-1);if(y===1){c.fillStyle='#e8c35a';c.font=`${TS*.5}px sans-serif`;c.textAlign='center';if(x===11)c.fillText('🔨',X+TS/2,Y+TS*.7)}break;
+  case 'W':c.fillStyle='#4a2e1c';c.fillRect(X,Y,TS,TS);c.fillStyle='#ffb85a';c.fillRect(X+TS*.22,Y+TS*.2,TS*.56,TS*.8);c.fillStyle='#7a4a1a';c.fillRect(X+TS*.62,Y+TS*.6,TS*.06,TS*.06);break;
+  case 'R':road();c.save();c.translate(X+TS/2,Y+TS/2);c.rotate(TW.t*2);c.strokeStyle='#b48cff';c.lineWidth=3;c.beginPath();for(let a=0;a<12;a+=.3){const r=a*TS*.035;c.lineTo(Math.cos(a)*r,Math.sin(a)*r)}c.stroke();c.restore();break;
+  case 'T':road();c.fillStyle=G.opened.includes(x+','+y)?'#5a4a30':'#b07a2a';c.fillRect(X+TS*.18,Y+TS*.32,TS*.64,TS*.5);c.fillStyle='#e8c35a';c.fillRect(X+TS*.18,Y+TS*.48,TS*.64,TS*.06);c.fillRect(X+TS*.46,Y+TS*.44,TS*.08,TS*.14);break;
+  case 'L':road();c.fillStyle='#55618a';c.fillRect(X+TS*.46,Y+TS*.25,TS*.08,TS*.65);c.fillStyle='#ffe0a0';c.beginPath();c.arc(X+TS/2,Y+TS*.22,TS*.12,0,TAU);c.fill();break;
+  case 'F':road();c.strokeStyle='#6a7290';c.lineWidth=2;for(let i=0;i<3;i++){c.beginPath();c.moveTo(X+TS*(.2+i*.3),Y+TS*.3);c.lineTo(X+TS*(.2+i*.3),Y+TS*.9);c.stroke()}c.beginPath();c.moveTo(X,Y+TS*.45);c.lineTo(X+TS,Y+TS*.45);c.stroke();break;
+  case 'S':road();c.fillStyle='#6a4a2a';c.fillRect(X+TS*.46,Y+TS*.45,TS*.08,TS*.45);c.fillStyle='#c9a06a';c.fillRect(X+TS*.18,Y+TS*.2,TS*.64,TS*.32);c.fillStyle='#3a2a1a';c.font=`800 ${TS*.2}px sans-serif`;c.textAlign='center';c.fillText('看板',X+TS/2,Y+TS*.42);break;
+  case 'P':c.fillStyle='#2c3450';c.fillRect(X,Y,TS,TS);c.strokeStyle='#8a5a3a';c.lineWidth=3;c.beginPath();c.moveTo(X+4,Y+4);c.lineTo(X+TS-4,Y+TS-4);c.moveTo(X+TS-4,Y+4);c.lineTo(X+4,Y+TS-4);c.stroke();c.strokeStyle='#5a6280';c.strokeRect(X+3,Y+3,TS-6,TS-6);break;
+  default:road()}}
+/* 入力：十字ボタン（押しっぱなしで歩き続ける）・矢印キー */
+function releaseDpad(){document.querySelectorAll('#dpad button').forEach(b=>b.classList.remove('on'));if(TW)TW.dir=null}
+document.querySelectorAll('#dpad button').forEach(b=>{const d=b.dataset.d.split(',').map(Number);
+ b.addEventListener('pointerdown',e=>{e.preventDefault();audio();if(!TW||TW.busy)return;TW.dir=d;b.classList.add('on')});
+ ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>{b.classList.remove('on');if(TW&&TW.dir===d)TW.dir=null}))});
+/* 画面タップでの移動はしない（十字キーの押しまちがいを防ぐため）。移動は十字キーと矢印キーのみ */
+document.addEventListener('keydown',e=>{if(!$('town').classList.contains('on')||!TW||TW.busy)return;const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();TW.dir=m}});
+document.addEventListener('keyup',e=>{if(TW&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))TW.dir=null});
+
+/* ===================== 地図 ===================== */
+const isDone=n=>n.t==='base'||G.cleared.includes(n.id);
+function nodeState(n){if(isDone(n))return'done';const M=curMap();const adj=M.some(o=>isDone(o)&&o.links.includes(n.id));if(!adj)return'lock';if(n.need&&!G.cleared.includes(n.need))return'need';return'av'}
+function miniHTML(m){const c=CHARS[m.id];return `<div class="mini"><img src="${c.img}" alt=""><div class="t">${c.name} Lv${m.lv}<div class="hb"><i style="width:${100*m.hp/maxHp(m)}%"></i></div><div class="hb mb"><i style="width:${100*m.mp/maxMp(m)}%"></i></div></div></div>`}
+/* 町の門：行き先を選ぶ（解放済みが1つだけなら、そのまま入る） */
+function openDest(){const list=openAreas();if(list.length===1){goArea(list[0]);return}
+ show('dest');const pl=Math.max(...G.party.map(m=>m.lv));
+ $('destList').innerHTML=list.map(k=>{const A=AREAS[k];return `<button class="btn" data-k="${k}" style="text-align:left;font-size:16px;background:linear-gradient(${A.bg},#141b38)">${A.n}<span style="float:right;font-size:13px">${areaDone(k)?IC('clear',20)+' クリア':pl<A.bossLv?IC('warn',20)+' ボスは強い':''}</span><div class="note">推奨Lv ${A.lv}　／　ボス Lv${A.bossLv}　／　パーティ最高 Lv${pl}</div></button>`}).join('')+
+  (list.length<AREA_ORDER.length?`<div class="note" style="text-align:center">？？？（ボスを倒すと、次のエリアが開く）</div>`:'');
+ $('destList').querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>goArea(b.dataset.k))}
+async function goArea(k){audio();if(TW)TW.busy=true;G.area=k;save();await say(`${IC('gate',28)} ${AREAS[k].n}へ……`,700);
+ /* エリアの導入：読み終えてからフラグをセーブ（途中で読み込み直しても、もう一度出る） */
+ if(!G.flags['ai_'+k]){await talk(AREA_INTRO[k]);G.flags['ai_'+k]=1}openMap()}
+/* 地図の入力止め：マスの処理（メッセージ・会話・戦闘）が終わって openMap() が呼ばれるまで、ほかのマスやボタンを受けつけない */
+let mapBusy=false,lastNode=null;
+function setMapBusy(b){mapBusy=b;$('map').classList.toggle('busy',b)}
+function openMap(){show('map');setMapBusy(false);G.where={s:'map'};save();const A=AREAS[G.area]||AREAS.alley,M=curMap();$('mapTtl').textContent=A.n;$('map').style.background=`linear-gradient(${A.bg}cc,transparent 60%)`;
+ $('mapStat').innerHTML=G.party.map(miniHTML).join('');$('mapInfo').innerHTML=`推奨Lv ${A.lv}　${SCRAP()}鉄くず ${G.mat}`;
+ /* 段の高さは画面の高さに合わせて縮める（74〜92px。74 より小さいと上下のマスが重なる） */
+ const W=Math.min(600,document.body.clientWidth-24),RH=Math.round(clamp((window.innerHeight-250)/6.6,74,92)),H=6*RH+100;const X=n=>n.x*W,Y=n=>n.y*RH+40;
+ let h=`<svg width="${W}" height="${H}">`;M.forEach(n=>n.links.forEach(l=>{const o=M.find(q=>q.id===l);if(!o)return;const on=isDone(n)&&isDone(o);h+=`<line x1="${X(n)}" y1="${Y(n)}" x2="${X(o)}" y2="${Y(o)}" stroke="${on?'#e8c35a':'#2e3a6e'}" stroke-width="${on?4:2}" stroke-dasharray="${on?'':'5 5'}"/>`}));h+='</svg>';
+ M.forEach(n=>{const st=nodeState(n),nd=n.need&&M.find(q=>q.id===n.need),used=n.t==='rest'&&G.restUsed.includes(n.id);
+  h+=`<button class="node ${st==='done'?'done':''} ${st==='av'?'av':''} ${st==='lock'||st==='need'?'lock':''} ${n.t==='boss'?'boss':''} ${used?'used':''}" style="left:${X(n)}px;top:${Y(n)}px" data-id="${n.id}"><span class="i">${NODE_ICN[n.t]?IC(NODE_ICN[n.t],36):(NODE_IC[n.t]||'？')}</span>${n.n}${st==='need'?`<br><small>${nd&&nd.t==='join'?'仲間が必要':(nd?nd.n:'')+'が先'}</small>`:used?'<br><small>使用済み</small>':''}</button>`});
+ $('mapWrap').style.width=W+'px';$('mapWrap').style.height=H+'px';$('mapWrap').innerHTML=h;
+ $('mapWrap').querySelectorAll('.node').forEach(b=>b.onclick=()=>enterNode(M.find(n=>n.id===b.dataset.id)));
+ /* 最後に入ったマス（なければ行けるマス）が画面の外なら、そこまでスクロール */
+ const tgt=(lastNode&&$('mapWrap').querySelector(`.node[data-id="${lastNode}"]`))||$('mapWrap').querySelector('.node.av');
+ if(tgt){const r=tgt.getBoundingClientRect();if(r.bottom>window.innerHeight-8||r.top<0)tgt.scrollIntoView({block:'center'})}}
+function lootText(it){return Object.keys(it).map(k=>(k==='mat'?'鉄くず':ITEMS[k]?ITEMS[k].n:k)+'×'+it[k]).join('、')}
+function addLoot(it){Object.keys(it).forEach(k=>{if(k==='mat')G.mat+=it[k];else G.items[k]=(G.items[k]||0)+it[k]})}
+/* メッセージのあとで地図にもどす。そのあいだに別の画面へ移っていたら（町・パーティ等）、引きもどさない */
+function backToMap(){if(onScr('map'))openMap();else setMapBusy(false)}
+async function enterNode(n){if(!n||mapBusy||!onScr('map'))return;const st=nodeState(n);audio();
+ if(st==='lock'){say('まだ行けない',800);return}
+ if(st==='need'){const nd=curMap().find(q=>q.id===n.need);say(nd&&nd.t==='join'?'仲間を見つけてから挑もう':`先に「${nd?nd.n:'？'}」へ行こう`,1000);return}
+ if(n.t==='base'){openTown();return}
+ setMapBusy(true);lastNode=n.id;
+ if(n.t==='rest'){
+  /* 休憩所は1回の出撃につき1回（町にもどると、また使える） */
+  if(G.restUsed.includes(n.id)){await say(IC('node_rest',26)+' この休憩所は使ったばかり<br><span style="font-size:14px">1回の出撃につき1回。町にもどると、また使える</span>',1500);backToMap();return}
+  G.party.forEach(m=>{m.hp=maxHp(m);m.mp=maxMp(m)});G.restUsed.push(n.id);clear(n);save();await say(IC('node_rest',26)+' ひと休み。全員のHPとMPが回復した',1300);backToMap();return}
+ if(n.t==='chest'){if(st==='done'){await say('もう空っぽだ',800);backToMap();return}const it=n.loot||{oil:2,cool:1,mat:3};addLoot(it);clear(n);save();tone(880,.2,'triangle',.1,1320);await say(IC('node_chest',26)+' '+lootText(it)+'を手に入れた！',1600);backToMap();return}
+ if(n.t==='join'){if(st==='done'){await say('ここにはもう誰もいない',800);backToMap();return}
+  const id=JOIN_ORDER.find(x=>x!==G.hero&&!G.joined.includes(x)&&!G.party.some(m=>m.id===x));
+  if(id&&CADQ_MISSION[id]&&!(await cadMission(id))){backToMap();return}
+  if(id){await talk(CADQ_MISSION[id]?[[id,CHARS[id].name,CADQ_MISSION[id].done]].concat(JOIN_TALK[id].slice(id==='dodo'?2:1).filter(l=>l[0])):JOIN_TALK[id]);const lv=Math.min(LV_CAP,Math.max(1,...G.party.map(m=>m.lv)));G.party.push(newMember(id,lv));G.joined.push(id);clear(n);save();await say(`${IC('party',28)} <span class="nw">${CHARS[id].name}が</span><span class="nw">仲間になった！</span><span class="nw">（Lv${lv}）</span>`,1500)}
+  else{clear(n);save();await say('ここにはもう誰もいない',900)}
+  backToMap();return}
+ if(n.t==='event'){if(st==='done'){await say(n.ev==='selfrust'?IC('node_rust',26)+' 鏡の作業台に、仲間と並ぶ自分が映っている。':'ここにはもう何もない',1300);backToMap();return}
+  if(n.ev==='selfrust'){await talk(SELF_RUST[G.hero]||[],EV_IMG.includes('rust_'+G.hero)?'ev_rust_'+G.hero:null);G.party.forEach(m=>{m.hp=maxHp(m);m.mp=maxMp(m)});const h=G.party.find(m=>m.id===G.hero);if(h)h.sp=SP_MAX;G.flags.selfRust=true}
+  clear(n);save();await say(`${IC('shine',30)} 心の錆が消えた！<br><span style="font-size:14px">全員のHP・MPが回復。${CHARS[G.hero].name}の必殺ゲージが満タンになった</span>`,1900);backToMap();return}
+ if(n.t==='battle'){startBattle(pick(ENCOUNTERS[n.enc]),n);return}
+ /* ボス前の会話：読み終えてからフラグをセーブ（途中で読み込み直しても、もう一度出る） */
+ if(n.t==='boss'){const tk='bt_'+n.id;if(!G.flags[tk]){await talk(BOSS_TALK[n.talk]||[]);G.flags[tk]=1;save()}startBattle([n.foe||'boss'],n)}}
+function clear(n){if(n&&n.id&&!G.cleared.includes(n.id))G.cleared.push(n.id)}
+
+/* ===================== パーティ・どうぐ ===================== */
+let menuFrom='town',partyNew={};
+function backFromMenu(){menuFrom==='map'?openMap():openTown()}
+/* NEW の印：パーティ画面を開いたときに出し、データからは消す（開いている間は印を残す） */
+function openParty(){menuFrom=onScr('map')?'map':onScr('town')?'town':menuFrom;
+ partyNew={};G.party.forEach(m=>{partyNew[m.id]=(m.fresh||[]).slice();m.fresh=[]});save();show('party');renderParty()}
+function renderParty(){$('partyList').innerHTML=G.party.map((m,i)=>{const c=CHARS[m.id],J=JOBS[m.job],nw=partyNew[m.id]||[];
+ return `<div class="panel"><div class="mem"><img src="${c.img}" alt=""><div style="flex:1"><b style="font-size:17px">${c.name}</b>　Lv${m.lv}<br><span class="tag">${JIC(Object.keys(JOBS).find(k=>JOBS[k]===J))} ${J.n}</span>
+  <div class="note">${m.lv>=LV_CAP?'レベル最大':`次のLvまで ${EXP_NEXT(m.lv)-m.exp} EXP`}<br>固有：${c.pass.n}（${c.pass.d}）<br>必殺：${c.sp.n}　<span class="nw">ゲージ ${Math.floor(m.sp)}%</span><br>武器：${m.weapon?WIC(m)+wName(m.weapon):'なし'}</div></div></div>
+  <div class="stats"><div>HP ${m.hp}/${maxHp(m)}</div><div>MP ${m.mp}/${maxMp(m)}</div><div>攻撃 ${stat(m,'atk')}</div><div>防御 ${stat(m,'def')}</div><div>魔力 ${stat(m,'mag')}</div><div>素早さ ${stat(m,'spd')}</div></div>
+  <div class="note">わざ（4つまで装備。タップで付け外し）${nw.length?'　<span class="new">NEW</span> は新しく覚えた技':''}</div>${m.learned.map(sk=>{const s=SKILLS[sk];return `<button class="sk ${m.skills.includes(sk)?'on':''}" data-i="${i}" data-sk="${sk}"><span><b>${s.n}</b>${nw.includes(sk)?'<span class="new">NEW</span>':''}　<small>${s.d}</small></span><small>MP${s.mp}</small></button>`}).join('')}</div>`}).join('');
+ /* 付け外しでは画面を作り直さず一覧だけ書きかえ、スクロール位置を保つ */
+ $('partyList').querySelectorAll('.sk').forEach(b=>b.onclick=()=>{const m=G.party[+b.dataset.i],sk=b.dataset.sk;if(m.skills.includes(sk)){if(m.skills.length>1)m.skills=m.skills.filter(x=>x!==sk)}else if(m.skills.length<4){m.skills.push(sk)}else{say('わざは4つまで。<br>どれかを外してから',1100);return}save();const y=window.scrollY;renderParty();window.scrollTo(0,y)})}
+function openItems(){const row=(ic,n,cnt,d)=>`<div class="itr">${IC(ic,46)}<div class="itn"><b>${n}</b><small>${d}</small></div><span class="itc ${cnt?'':'z'}">×${cnt}</span></div>`;
+ $('sheetT').innerHTML=`${IC('bag',30)} どうぐ`;
+ $('sheetB').innerHTML=Object.keys(ITEMS).map(k=>row(ITEM_IC[k],ITEMS[k].n,G.items[k]||0,ITEMS[k].d)).join('')+row('scrap','鉄くず',G.mat,'工房で武器をつくる材料<span class="nw">（2つで1回）</span>。<span class="nw">武器の強化にも使う</span>')+`<div class="note" style="text-align:center;margin-top:8px">回復のどうぐは戦闘中に「どうぐ」から使えます</div>`;
+ $('sheet').classList.add('on')}
+function closeSheet(){$('sheet').classList.remove('on')}
+function openHelp(){talk([[null,'説明','町では十字ボタンで歩ける。人にぶつかると話せる。工房の扉で武器づくりと回復、渦巻きの門から外のエリアへ行ける。'],[null,'説明','エリアは 路地裏 → 廃工場 → 地下工房。ボスを倒すと次のエリアが開く。仲間は各エリアの「握手の絵のマス」（出会い・制御室・古い作業場）で1人ずつ加わる。'],[null,'説明','エリアでは地図のマスをタップして進もう。戦闘のマスはクリア後も何度でも戦えるので、レベル上げに使える。休憩所は1回の出撃につき1回（町にもどると、また使える）。'],[null,'説明','古い工房では、鉄くずで武器をつくれる。設計（図面をなぞる）と加工（旋盤）の出来で、武器の強さが決まる。SS ランクは、図面を最後までなぞりきったときだけ。'],[null,'説明','余った鉄くずは、工房で今の武器の強化（+1〜+5）に使える。新しく作り直すと、強化は消えるので注意。'],[null,'説明','戦闘はコマンド選択。必殺ゲージが100%になると、必殺技が使える。魔法陣をなぞった出来で威力が変わる。'],[null,'説明','ボスが「ため」の予告をしたら、次のターンに大技が来る。ぼうぎょ（ダメージ半分）・挑発・回復で備えよう。'],[null,'説明','設計士の「図面解析」で敵の防御を下げてから攻撃したり、「改善提案」で味方を強くすると、ボス戦がぐっと楽になる。'],[null,'説明','覚えた技が4つをこえたら、パーティ画面で入れかえよう（NEW の印）。'],[null,'説明','負けても工房に運ばれるだけ。レベルと経験値はそのまま残るよ。']])}
+
+/* ===================== 工房（武器づくり・強化） ===================== */
+function openShop(){show('shop');G.party.forEach(m=>{m.hp=maxHp(m);m.mp=maxMp(m)});G.where={s:'town'};save();renderShop()}
+const SHAPE_NAME={ch:'まっすぐな線',ma:'渦巻き',de:'ジグザグ',me:'歯車',hikari:'星形'};
+function renderShop(){const tier=craftTier();
+ $('shopBody').innerHTML=`<div class="note">工房に戻ると全員回復する。鉄くず2つで、仲間の職業に合った武器をつくれる。<br>今つくれる武器の段階：<b style="color:var(--gold)">${KANJI_TIER[tier]}</b>（奥のエリアが開くほど強い武器。そのぶん図面と加工もむずかしい）<br>ランクは設計と加工の出来で D〜S。<b style="color:var(--gold)">SS は、図面を最後までなぞりきったときだけ。</b><br>余った鉄くずで、今の武器を +${UPG_MAX} まで強化できる（作り直すと強化は消える）。</div><div style="font-weight:800;margin:8px 0">${SCRAP(24)}鉄くず ${G.mat}</div>`+
+ G.party.map((m,i)=>{const c=CHARS[m.id],J=JOBS[m.job],w=m.weapon,pl=w?w.plus||0:0,uc=pl<UPG_MAX?UPG_COST[pl]:0,kn=w&&w.k==='atk'?'攻撃':'魔力';
+  return `<div class="panel" style="padding:8px"><button class="btn" data-i="${i}" ${G.mat<2?'disabled':''} style="text-align:left;font-size:15px;margin:0">${c.name}の${J.weapon}をつくる<span style="float:right">${SCRAP()}2</span><div class="note">今の武器：${w?WIC(m)+wName(w)+'（'+kn+'+'+w.v+'）':'なし'}<br>なぞる形：${SHAPE_NAME[J.shape]||''}${pl?`<br><span style="color:#ffb07a">作り直すと、今の強化（+${pl}）は消える</span>`:''}</div></button>
+  <button class="btn ghost" data-u="${i}" ${!w||pl>=UPG_MAX||G.mat<uc?'disabled':''} style="margin:6px 0 0;font-size:14px;color:var(--ink);text-align:left">${!w?'強化できる武器がない':pl>=UPG_MAX?`強化は最大（+${UPG_MAX}）`:`武器を強化する　+${pl}→+${pl+1}（${kn}+${upgInc(w)}）<span style="float:right">${SCRAP()}${uc}</span>`}</button></div>`}).join('')+
+ `<button class="btn ghost" onclick="openTown()">町にもどる</button>`;
+ $('shopBody').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>craftFor(G.party[+b.dataset.i]));
+ $('shopBody').querySelectorAll('[data-u]').forEach(b=>b.onclick=()=>upgradeWeapon(G.party[+b.dataset.u]))}
+function upgradeWeapon(m){const w=m&&m.weapon;if(!w)return;const pl=w.plus||0;if(pl>=UPG_MAX)return;const cost=UPG_COST[pl];if(G.mat<cost)return;
+ if(!Number.isFinite(w.bv))w.bv=w.v;G.mat-=cost;w.plus=pl+1;w.v=w.bv+upgInc(w)*w.plus;save();lockInput(300);tone(880,.15,'triangle',.1,1320);
+ const y=window.scrollY;renderShop();window.scrollTo(0,y);say(`${WIC(m,26)} <span class="nw">${wName(w)}</span> に強化！<br><span style="font-size:14px">${w.k==='atk'?'攻撃':'魔力'} +${w.v}</span>`,1200)}
+/* ランク：q＝(設計＋加工)/2。SS は q が CRAFT_RANK.SS 以上で、しかも設計を最後までなぞった（到達率100%）ときだけ */
+function craftRank(q,reach){return q>=CRAFT_RANK.SS&&reach>=1?'SS':q>=CRAFT_RANK.S?'S':q>=CRAFT_RANK.A?'A':q>=CRAFT_RANK.B?'B':q>=CRAFT_RANK.C?'C':'D'}
+let crafting=false;
+async function craftFor(m){if(crafting||!m||G.mat<2)return;crafting=true;try{
+ const J=JOBS[m.job],c=CHARS[m.id],tier=craftTier();show('craft');
+ $('craftT').textContent=`① 設計　${c.name}の${J.weapon}`;$('craftSub').innerHTML='図面の線をなぞろう（はみ出したら減点）<br>最後までなぞりきると SS をねらえる';
+ const r=await runDesign({type:J.shape,tier,color:'#e8c35a',label:'設計・'+KANJI_TIER[tier],full:true});
+ await say(`設計 <span class="big">${r.score}</span> 点${r.reach<1?`<br><span style="font-size:14px">最後までなぞれなかった（到達 ${Math.round(r.reach*100)}%。SS はなし）</span>`:''}`,r.reach<1?1700:1200);
+ $('craftT').textContent=`② 加工（旋盤）　${J.weapon}`;$('craftSub').textContent='上下にドラッグして、刃物の深さを金色の線に合わせよう';
+ const L=await runLathe({tier,label:'加工・'+KANJI_TIER[tier]});await say(`加工 <span class="big">${L.score}</span> 点`,1100);
+ const q=Math.floor((r.score+L.score)/2),rank=craftRank(q,r.reach),v=Math.round((WEAPON_BASE.a+WEAPON_BASE.b*q/100)*WEAPON_TIER[tier])+(rank==='SS'?3:0);
+ const w={name:`${J.weapon}・${KANJI_TIER[tier]}（${rank}）`,k:J.uses,v,bv:v,plus:0,rank,tier};
+ /* 鉄くずは結果が決まったここで引く。装備を選ぶ前に読み込み直しても、作った武器は G.pendCraft に残る */
+ G.mat-=2;G.pendCraft={id:m.id,w,ds:r.score,ls:L.score,reach:r.reach};save();showCraftResult(G.pendCraft)}finally{crafting=false}}
+function showCraftResult(pc){const m=G.party.find(x=>x.id===pc.id);if(!m){delete G.pendCraft;save();openShop();return}const c=CHARS[m.id],w=pc.w,cw=m.weapon;
+ $('resP').innerHTML=`<div style="text-align:center"><img src="${c.img}" style="width:90px;height:90px;object-fit:contain"><div class="big" style="font-size:52px">${w.rank}</div><b>${w.name}</b><div class="note">設計 ${pc.ds}・加工 ${pc.ls}　→　${w.k==='atk'?'攻撃':'魔力'} +${w.v}${pc.reach<1&&w.rank!=='SS'?'<br>（SS は、図面を最後までなぞったときだけ）':''}</div><div class="note">今の武器：${cw?WIC(m)+wName(cw)+'（+'+cw.v+'）':'なし'}${cw&&cw.plus?`<br><span style="color:#ffb07a">装備すると、今の武器の強化（+${cw.plus}）は消える</span>`:''}</div></div>`;
+ const done=eq=>{if(!G.pendCraft)return;if(eq)m.weapon=w;delete G.pendCraft;save();openShop()};
+ $('resBtns').innerHTML='';addBtn('装備する',()=>done(true),'gold');addBtn('今の武器のままにする',()=>done(false),'ghost');show('result')}
+function addBtn(t,f,cls=''){const b=document.createElement('button');b.className='btn '+cls;b.textContent=t;b.onclick=f;$('resBtns').appendChild(b);return b}
+
+/* ===================== 戦闘 ===================== */
+let BT=null;
+/* 敵のイラスト（img/foe/ID.webp）。ない敵は下の図形で描く。変身後は ID2.webp */
+
+/* ===== ギアフォックスの加入ミッション：三面図を順番に3問（各1問・まちがえたら説明つきで同じ段をやり直し） =====
+   CADQ_STEPS を書きかえると、段の数・大きさ・セリフを変えられる。w,d＝横・奥行きのマス数、h＝最大の高さ
+   段の大きさ。セリフは CADQ_MISSION にある */
+const CADQ_STEPS=[
+ {w:2,d:2,h:2,say:'まずは小さい部品。三面図は、上・前・右から見た形だよ。3つを頭の中で組み立てて、正しい立体を選んで！'},
+ {w:3,d:2,h:3,say:'次はモーターの台座。段差がどこにあるか、正面図と右側面図の線をよく見比べて！'},
+ {w:3,d:3,h:3,say:'最後は歯車箱のふた。左右が反対の「鏡の形」にだまされないでね。立体を回して、三面図と見くらべて！'}];
+const CADQ_N=2;  /* 選択肢の数 */
+const CADQ=(()=>{const rnd=n=>Math.floor(Math.random()*n),C30=Math.cos(Math.PI/6);
+ function connected(hm){const d=hm.length,w=hm[0].length,seen=new Set();let st=null;for(let y=0;y<d;y++)for(let x=0;x<w;x++)if(hm[y][x]&&!st)st=[x,y];if(!st)return false;
+  const q=[st];seen.add(st+'');while(q.length){const[x,y]=q.pop();[[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,b])=>{const nx=x+a,ny=y+b;if(nx<0||ny<0||nx>=w||ny>=d||!hm[ny][nx]||seen.has(nx+','+ny))return;seen.add(nx+','+ny);q.push([nx,ny])})}
+  return seen.size===hm.flat().filter(v=>v).length}
+ function genShape(L){for(;;){const hm=[];for(let y=0;y<L.d;y++){hm.push([]);for(let x=0;x<L.w;x++)hm[y].push(rnd(L.h+1))}
+  const c=hm.flat(),n=c.filter(v=>v>0).length;if(n<Math.max(2,L.w*L.d-2)||!connected(hm)||Math.max(...c)<2)continue;return hm}}
+ function views(hm){const d=hm.length,w=hm[0].length,H=Math.max(...hm.flat()),front=[],top=[],side=[];
+  for(let z=0;z<H;z++){front.push([]);for(let x=0;x<w;x++){let v=-1;for(let y=0;y<d;y++)if(hm[y][x]>z){v=y;break}front[z].push(v)}}
+  for(let y=0;y<d;y++){top.push([]);for(let x=0;x<w;x++)top[y].push(hm[y][x]?H-hm[y][x]:-1)}
+  for(let z=0;z<H;z++){side.push([]);for(let y=0;y<d;y++){let v=-1;for(let x=w-1;x>=0;x--)if(hm[y][x]>z){v=w-1-x;break}side[z].push(v)}}
+  return{front,top,side,H}}
+ const vKey=hm=>{const v=views(hm);return JSON.stringify([v.front,v.top,v.side])};
+ function variants(hm,L){const out=[],cl=()=>hm.map(r=>[...r]);out.push(cl().map(r=>r.reverse()));out.push(cl().reverse());
+  for(let k=0;k<30;k++){const v=cl(),y=rnd(L.d),x=rnd(L.w);v[y][x]=Math.max(0,Math.min(L.h,v[y][x]+(Math.random()<.5?-1:1)));if(connected(v)&&v.flat().some(c=>c>1))out.push(v)}return out}
+ function isoPaint(x,hm,s,ox,oy){const w=hm[0].length,d=hm.length,P=(X,Y,Z)=>[(X+Y)*C30*s,(X-Y)*.5*s-Z*s],cubes=[];
+  for(let y=0;y<d;y++)for(let X=0;X<w;X++)for(let z=0;z<hm[y][X];z++)cubes.push([X,y,z]);cubes.sort((a,b)=>(a[0]-a[1]+a[2])-(b[0]-b[1]+b[2]));
+  const face=(ps,col)=>{x.beginPath();ps.forEach((p,i)=>{const q=[p[0]+ox,p[1]+oy];i?x.lineTo(...q):x.moveTo(...q)});x.closePath();x.fillStyle=col;x.fill();x.strokeStyle='#0b1024';x.lineWidth=1.4;x.stroke()};
+  const has=(X,Y,Z)=>X>=0&&Y>=0&&X<w&&Y<d&&Z>=0&&Z<hm[Y][X];
+  cubes.forEach(([X,Y,Z])=>{if(!has(X,Y-1,Z))face([P(X,Y,Z),P(X+1,Y,Z),P(X+1,Y,Z+1),P(X,Y,Z+1)],'#9fb4d6');
+   if(!has(X+1,Y,Z))face([P(X+1,Y,Z),P(X+1,Y+1,Z),P(X+1,Y+1,Z+1),P(X+1,Y,Z+1)],'#5a6e96');
+   if(!has(X,Y,Z+1))face([P(X,Y,Z+1),P(X+1,Y,Z+1),P(X+1,Y+1,Z+1),P(X,Y+1,Z+1)],'#e8eefc')});return P}
+ const sigCv=document.createElement('canvas');sigCv.width=sigCv.height=220;
+ function isoImg(hm){const x=sigCv.getContext('2d');x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,220,220);isoPaint(x,hm,14,70,150);return x.getImageData(0,0,220,220).data}
+ function sameLook(a,b){let n=0;for(let i=0;i<a.length;i+=4){if(Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2])+Math.abs(a[i+3]-b[i+3])>90){n++;if(n>40)return false}}return true}
+ function makeQ(L){for(let t=0;t<40;t++){const hm=genShape(L),keys=new Set([vKey(hm)]),imgs=[isoImg(hm)],opts=[hm];
+  for(const v of variants(hm,L).sort(()=>Math.random()-.5)){const k=vKey(v);if(keys.has(k))continue;const im=isoImg(v);if(imgs.some(o=>sameLook(o,im)))continue;keys.add(k);imgs.push(im);opts.push(v);if(opts.length===CADQ_N)break}
+  if(opts.length<CADQ_N)continue;const order=[...Array(CADQ_N).keys()].sort(()=>Math.random()-.5);return{hm,opts:order.map(i=>opts[i]),ans:order.indexOf(0)}}return null}
+ function drawViews(c,hm){const W=Math.min(560,c.parentNode.clientWidth),dpr=Math.min(2,devicePixelRatio||1),v=views(hm),w=hm[0].length,d=hm.length,H=v.H;
+  const cell=Math.floor(Math.min(W/(w+d+3.2),40)),gap=cell*1.1,ox=cell*.9,oy=cell*.9,HH=Math.round(oy*2+cell*(d+H)+gap+16);
+  c.style.height=HH+'px';c.width=W*dpr;c.height=HH*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.fillStyle='#f4efe0';x.fillRect(0,0,W,HH);
+  const topY=oy,frontY=oy+cell*d+gap,sideX=ox+cell*w+gap;
+  const grid=(g,X0,Y0,label)=>{const R=g.length,C=g[0].length,cx=(i,j)=>[X0+j*cell,Y0+(R-1-i)*cell],val=(i,j)=>(i<0||j<0||i>=R||j>=C)?-1:g[i][j];
+   x.fillStyle='#fff';for(let i=0;i<R;i++)for(let j=0;j<C;j++)if(g[i][j]>=0){const[a,b]=cx(i,j);x.fillRect(a,b,cell,cell)}
+   x.strokeStyle='#111';x.lineWidth=2.2;x.lineCap='square';
+   for(let i=0;i<R;i++)for(let j=0;j<C;j++){const[a,b]=cx(i,j),v0=val(i,j),vr=val(i,j+1),vu=val(i+1,j);
+    if(v0!==vr&&(v0>=0||vr>=0)){x.beginPath();x.moveTo(a+cell,b);x.lineTo(a+cell,b+cell);x.stroke()}
+    if(j===0&&v0>=0){x.beginPath();x.moveTo(a,b);x.lineTo(a,b+cell);x.stroke()}
+    if(v0!==vu&&(v0>=0||vu>=0)){x.beginPath();x.moveTo(a,b);x.lineTo(a+cell,b);x.stroke()}
+    if(i===0&&v0>=0){x.beginPath();x.moveTo(a,b+cell);x.lineTo(a+cell,b+cell);x.stroke()}}
+   x.fillStyle='#555';x.font='800 11px sans-serif';x.textAlign='left';x.fillText(label,X0,label==='平面図'?Y0-5:Y0+R*cell+13)};
+  grid(v.top,ox,topY,'平面図');grid(v.front,ox,frontY,'正面図');grid(v.side,sideX,frontY,'右側面図')}
+ /* 回せる立体：yaw＝横の回転、pitch＝見下ろす角度（度）。面ごとに奥から順に描く */
+ function drawRot(cv,hm,yaw,pitch){const W=240,Hh=200,dpr=Math.min(2,devicePixelRatio||1);if(cv.width!==W*dpr){cv.width=W*dpr;cv.height=Hh*dpr}
+  const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,W,Hh);
+  const w=hm[0].length,d=hm.length,H=Math.max(...hm.flat()),cx=w/2,cy=d/2,cz=H/2,t=yaw*Math.PI/180,f=pitch*Math.PI/180,ct=Math.cos(t),st=Math.sin(t),cf=Math.cos(f),sf=Math.sin(f);
+  const s=Math.min(44,165/Math.hypot(w,d,H));
+  const R=(X,Y,Z)=>{X-=cx;Y-=cy;Z-=cz;const x1=X*ct-Y*st,y1=X*st+Y*ct;return{sx:W/2+x1*s,sy:Hh/2+8-(Z*cf+y1*sf)*s,dz:-y1*cf+Z*sf}};
+  const has=(X,Y,Z)=>X>=0&&Y>=0&&X<w&&Y<d&&Z>=0&&Z<hm[Y][X];
+  /* 面：法線と4つの角。色は向きで決める（上が明るい） */
+  const F=[[[0,-1,0],[[0,0,0],[1,0,0],[1,0,1],[0,0,1]],'#9fb4d6'],[[0,1,0],[[1,1,0],[0,1,0],[0,1,1],[1,1,1]],'#7d92bb'],[[1,0,0],[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],'#5a6e96'],[[-1,0,0],[[0,1,0],[0,0,0],[0,0,1],[0,1,1]],'#6f84ad'],[[0,0,1],[[0,0,1],[1,0,1],[1,1,1],[0,1,1]],'#e8eefc'],[[0,0,-1],[[0,1,0],[1,1,0],[1,0,0],[0,0,0]],'#3c4a6a']];
+  const toCam=n=>{const nx=n[0]*ct-n[1]*st,ny=n[0]*st+n[1]*ct;return -ny*cf+n[2]*sf};
+  /* 立方体ごとに中心の奥行きで並べ、奥の立方体から順に、その見える面を描く（同じ大きさの立方体の格子なら、これで重なりが正しくなる） */
+  const cubes=[];for(let Y=0;Y<d;Y++)for(let X=0;X<w;X++)for(let Z=0;Z<hm[Y][X];Z++){const fs=[];F.forEach(([n,c,col])=>{if(has(X+n[0],Y+n[1],Z+n[2])||toCam(n)<=0.001)return;fs.push({ps:c.map(([a,b,e])=>R(X+a,Y+b,Z+e)),col})});if(fs.length)cubes.push({dz:R(X+.5,Y+.5,Z+.5).dz,fs})}
+  cubes.sort((a,b)=>a.dz-b.dz);const faces=[];cubes.forEach(c=>faces.push(...c.fs));
+  /* 床の正面の目印 */
+  const g=R(w/2,-.7,0);x.fillStyle='#e8c35a';x.font='800 11px sans-serif';x.textAlign='center';x.fillText('▲正面',g.sx,g.sy+10);
+  faces.forEach(o=>{x.beginPath();o.ps.forEach((p,i)=>i?x.lineTo(p.sx,p.sy):x.moveTo(p.sx,p.sy));x.closePath();x.fillStyle=o.col;x.fill();x.strokeStyle='#0b1024';x.lineWidth=1.3;x.stroke()})}
+ /* キャンバスをドラッグで回せるようにする */
+ function rotatable(cv,hm){const v={yaw:-35,pitch:30};let drag=null;const draw=()=>drawRot(cv,hm,v.yaw,v.pitch);
+  cv.addEventListener('pointerdown',e=>{e.preventDefault();drag=[e.clientX,e.clientY,v.yaw,v.pitch];try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+  cv.addEventListener('pointermove',e=>{if(!drag)return;v.yaw=drag[2]+(e.clientX-drag[0])*.8;v.pitch=clamp(drag[3]+(e.clientY-drag[1])*.5,-10,85);draw()});
+  const up=()=>{drag=null};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  draw();return{reset(){v.yaw=-35;v.pitch=30;draw()},draw}}
+ /* 1段ぶんを出す。正解なら true、「あとで」なら false で終わる */
+ function step(i,pr){return new Promise(res=>{const L=CADQ_STEPS[i];let Q=null,locked=false;
+  const who=(pr&&pr.who)||'fox',prac=pr&&pr.practice;
+  $('cqT').textContent=prac?'三面図の練習':'三面図の謎解き';$('cqStep').textContent=prac?pr.label:`${i+1} / ${CADQ_STEPS.length}`;$('cqBack').textContent=prac?'◀ やめる':'◀ あとで';
+  $('cqMsg').innerHTML=`<img src="${CHARS[who].img}" alt=""><span>${(pr&&pr.say)||L.say}</span>`;
+  $('cqBack').onclick=()=>{if(locked&&Q&&Q.done)return;res(false)};
+  const ask=()=>{Q=makeQ(L);locked=false;show('cadq');drawViews($('cqViews'),Q.hm);
+   $('cqCands').innerHTML=Q.opts.map((_,k)=>`<div class="cand"><b>${'アイウエ'[k]}</b><canvas></canvas><div class="cqrow"><button class="cqrs">↺</button><button class="cqpick">${'アイウエ'[k]}にする</button></div></div>`).join('');
+   $('cqCands').querySelectorAll('.cand').forEach((b,k)=>{const r=rotatable(b.querySelector('canvas'),Q.opts[k]);b.querySelector('.cqrs').onclick=r.reset;b.querySelector('.cqpick').onclick=()=>answer(k)});
+   $('cqFb').innerHTML='<span class="note">立体は指でドラッグすると回せる。三面図と同じ形を選ぼう</span>'};
+  const answer=k=>{if(locked)return;locked=true;const ok=k===Q.ans,bs=$('cqCands').querySelectorAll('.cand');$('cqCands').querySelectorAll('.cqpick').forEach(b=>b.disabled=true);bs[Q.ans].classList.add('ok');
+   if(ok){Q.done=true;tone(880,.12,'triangle',.1,1320);$('cqFb').innerHTML='<div class="okc">○ 正解！</div><button class="btn gold" id="cqNext">次へ</button>';$('cqNext').onclick=()=>res(true);return}
+   bs[k].classList.add('ng');buzz();const a=views(Q.opts[k]),b=views(Q.hm),eq=(p,q)=>JSON.stringify(p)===JSON.stringify(q);
+   const diff=!eq(a.top,b.top)?'平面図':!eq(a.front,b.front)?'正面図':'右側面図';
+   $('cqFb').innerHTML=`<div class="ngc">✗ 正解は「${'アイウエ'[Q.ans]}」</div><span class="note">「${'アイウエ'[k]}」は${diff}が合わない。もう一度、別の部品で挑戦！</span><button class="btn" id="cqRetry">もう一度</button>`;$('cqRetry').onclick=ask};
+  ask()})}
+ return{step,drawRot}})();
+/* ===== 第1章の仲間（ギアフォックス・ドド先輩・ホー博士）の加入ミッション：三面図を順番に3問 =====
+   CADQ_MISSION[キャラID] … intro＝最初の会話、say＝各段のセリフ（3つ）、done＝3問正解したときの一言、later＝「あとで」のときの一言
+   prac＝練習のときのセリフ [最初, 全問正解中, まちがいあり, 終わり(正解数n), 0問で終わり]
+   進み具合は G.flags.cadq[キャラID]（0〜3）に保存。途中でやめても、次はその段から */
+const CADQ_MISSION={
+ fox:{intro:[['fox','ギアフォックス','ちょっと待って！ この配電盤の機械、錆に食われて部品がバラバラなんだ。'],['fox','ギアフォックス','図面は三面図しか残ってない……。キミ、三面図、読める？\n部品の形を当ててくれたら、すぐ組み立てるよ！']],
+  say:['まずは小さい部品。三面図は、上・前・右から見た形だよ。3つを頭の中で組み立てて、正しい立体を選んで！','次はモーターの台座。段差がどこにあるか、正面図と右側面図の線をよく見比べて！','最後は歯車箱のふた。左右が反対の「鏡の形」にだまされないでね。立体を回して、三面図と見くらべて！'],
+  done:'動いた！ キミ、三面図を読むの、うまいじゃん！',later:'またあとで手伝ってね！',
+  prac:['練習モードだよ。何問でもどうぞ！ 立体は指で回せるからね。','いい調子！ どんどんいこう！','ゆっくりでいいよ。上・前・右を1つずつ見くらべてね。',n=>`おつかれ！ ${n}問正解。三面図、だいぶ読めるようになってきたね！`,'またいつでも声かけてね！']},
+ dodo:{intro:[[null,'','物かげで、もふもふした何かが寝息を立てている。そばには、錆びて欠けた金床（かなとこ）。'],['dodo','ドド先輩','……ん〜？ おや、こんな夜にどうしたの？\n錆に金床をかじられちゃってさ〜、打ち直す型の図面しか残ってないんだ。'],['dodo','ドド先輩','型の形、三面図から当てられる？\nそしたら一緒に打ち直そう〜。あせらなくていいからね〜。']],
+  say:['まずはヤットコの先っぽ〜。上・前・右の図を、ひとつずつ見ればだいじょうぶ〜。','次は金床の台座。高いところと低いところ、正面図の線でわかるよ〜。','最後は大きな型だよ〜。似た形にだまされないように、くるっと回して確かめてね〜。'],
+  done:'お〜、ぴったりの型だ〜。これで金床が打ち直せるよ〜。',later:'ふわぁ……また来てね〜。ここで寝て待ってるから〜。',
+  prac:['練習だね〜。ゆっくりでいいよ〜。立体は指で回せるからね〜。','すごいすごい〜。その調子〜。','だいじょうぶ〜。正面図から見てみよう〜。',n=>`${n}問も正解〜。えらいねぇ〜。ちょっと休憩しよっか〜。`,'またいつでもおいで〜。']},
+ owl:{intro:[['owl','ホー博士','ホッホッ。夜ふかしの若いのがおると思えば……\nおぬしたち、その図面をどこで？'],['owl','ホー博士','……ふむ、匠の魔法陣か。だが、魔法陣を扱うには図面を読む力がいる。'],['owl','ホー博士','わしの研究所の装置が錆で止まっておってな。部品は三面図で残っておる。\nこれを読み解けたら、おぬしたちに力を貸そう。']],
+  say:['まずは基本じゃ。三面図は、上から・前から・右から見た形。3つを重ねて考えるのじゃぞ。','段差のある部品じゃ。正面図と右側面図で、どこが高いかを読み取るのじゃ。','最後は難問じゃぞ。左右が反転した形にまどわされるな。立体を回して確かめるがよい。'],
+  done:'ホッホッ、見事じゃ！ 図面を読む目は、魔法陣を描く手の第一歩じゃよ。',later:'うむ、急がずともよい。また来るがよい。',
+  prac:['ホッホッ、練習か。感心じゃのう。立体は回して確かめてよいぞ。','うむ、その調子じゃ。','あわてるでない。上・前・右、順番に見るのじゃ。',n=>`${n}問正解か。うむ、よく励んだのう。`,'いつでも相手をしてやるぞい。']}};
+const CADQ_LV=['かんたん','ふつう','むずかしい'];
+/* 仲間になったあと、町でその仲間に話しかけると、いつでも三面図の練習ができる（進み具合や報酬には関係しない） */
+async function cadPractice(id,lv){const M=CADQ_MISSION[id],nm=CHARS[id].name;let ok=0,n=0;
+ for(;;){const r=await CADQ.step(lv,{practice:true,who:id,label:`${CADQ_LV[lv]}　正解 ${ok}`,say:n?(ok===n?M.prac[1]:M.prac[2]):M.prac[0]});if(!r)break;ok++;n++}
+ openTown();await talk([[id,nm,ok?M.prac[3](ok):M.prac[4]]])}
+function cadMenu(id){const c=CHARS[id];$('sheetT').innerHTML=`<img class="ic" src="${c.img}" alt="" style="width:30px;height:30px;object-fit:cover;object-position:50% 0;border-radius:8px"> ${c.name}`;
+ $('sheetB').innerHTML=`<div class="note" style="margin-bottom:4px">三面図の練習ができる。どれにする？</div>`+CADQ_LV.map((t,i)=>`<button class="btn" data-lv="${i}">三面図の練習：${t}</button>`).join('')+`<button class="btn ghost" id="cmTalk">話す</button>`;
+ $('sheetB').querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{closeSheet();interact(()=>cadPractice(id,+b.dataset.lv))});
+ $('cmTalk').onclick=()=>{closeSheet();const L=PARTY_TOWN_TALK[id];interact(()=>talk(L&&L.length?pick(L):[[id,c.name,'……']]))};
+ $('sheet').classList.add('on')}
+async function cadMission(id){const M=CADQ_MISSION[id],nm=CHARS[id].name;G.flags.cadq=G.flags.cadq||{};
+ if(id==='fox'&&G.flags.foxQ&&!G.flags.cadq.fox)G.flags.cadq.fox=G.flags.foxQ;  /* 前の版の進み具合を引きつぐ */
+ const q=()=>G.flags.cadq[id]||0;
+ await talk(q()?[[id,nm,`おかえり。続きからいこう。（${q()+1}問目）`]]:M.intro);
+ while(q()<CADQ_STEPS.length){const ok=await CADQ.step(q(),{who:id,say:M.say[q()]});if(!ok){openMap();await say(`${nm}「${M.later}」`,1200);return false}
+  G.flags.cadq[id]=q()+1;save();if(q()<CADQ_STEPS.length)tone(660,.12,'triangle',.08,990)}
+ openMap();return true}
+const FOE_IMG=['slime','dog','crow','golem','boss','bolt','arm','gear','lamp','crane','armor','pipe','ghost','golem2','rostol'];
+const FOE_IMG2=['rostol'];
+/* 敵・戦闘背景の画像を、ページを開いたあと空き時間に先読みしておく（戦闘開始時に敵がおくれて出ないように） */
+window.addEventListener('load',()=>{const go=()=>{FOE_IMG.forEach(k=>{img(`img/foe/${k}.webp`);if(FOE_IMG2.includes(k))img(`img/foe/${k}2.webp`)});['alley','factory','under'].forEach(a=>img(`img/bg_${a}.webp`))};window.requestIdleCallback?requestIdleCallback(go,{timeout:1500}):setTimeout(go,800)});
+const FACES={wolf:['smile','worry','serious']};
+/* 会話の顔のアップ：キャラごとに、元画像のどこを切り出すか [左x, 上y, 幅, 元画像の幅]（元画像のピクセル） */
+const PORTRAIT={wolf:[52,5,130,234],dodo:[0,-12,225,329],fox:[88,0,190,318],owl:[88,-4,205,350],
+ /* 町の人（img/ID.webp） */
+ gorilla:[45,-2,120,214],mouse:[40,20,240,327],robot:[60,0,125,247],tsukiyo:[60,20,200,343],onmyo:[45,-4,100,203],rocker:[45,-2,110,241]};
+function portrait(el,id){const p=PORTRAIT[id],W=96;if(!p){el.style.cssText='';return}const k=W/p[2];el.style.width=p[3]*k+'px';el.style.marginLeft=-p[0]*k+'px';el.style.marginTop=-p[1]*k+'px'}  /* img/face/キャラID_表情.webp。会話で 'wolf:smile' のように指定 */
+const EV_IMG=['rust_wolf','ending1'];  /* img/ev/ にあるイベント絵 */
+function foeArt(f){if(FOE_IMG.includes(f.k)){const two=f.awake&&FOE_IMG2.includes(f.k);return `<img class="fimg" src="img/foe/${f.k}${two?'2':''}.webp" alt="${f.name}" draggable="false">`}return foeSVG(f)}
+function foeSVG(f){const c=f.col,big=f.big||f.boss;return `<svg viewBox="-60 -60 120 120">${f.boss?'<text x="0" y="-38" text-anchor="middle" font-size="22">👑</text>':''}
+ ${f.wings?`<path d="M-20,0 Q-55,-25 -50,10 Q-35,0 -20,10Z M20,0 Q55,-25 50,10 Q35,0 20,10Z" fill="${c}" opacity=".85"/>`:''}
+ ${f.ears?`<path d="M-26,-22 L-18,-46 L-6,-26Z M26,-22 L18,-46 L6,-26Z" fill="${c}"/>`:''}
+ <ellipse cx="0" cy="8" rx="${big?44:34}" ry="${big?40:30}" fill="${c}" stroke="#2a1206" stroke-width="3"/>
+ ${f.boss||f.big?'<path d="M-30,-10 L-40,-30 M30,-10 L40,-30 M0,-28 L0,-46" stroke="#2a1206" stroke-width="5"/>':''}
+ <circle cx="-13" cy="0" r="6" fill="#ffdd88"/><circle cx="13" cy="0" r="6" fill="#ffdd88"/><circle cx="-12" cy="1" r="2.5" fill="#000"/><circle cx="14" cy="1" r="2.5" fill="#000"/>
+ <path d="M-10,18 Q0,24 10,18" stroke="#2a1206" stroke-width="3" fill="none"/></svg>`}
+function startBattle(list,node){$('battle').style.backgroundImage=`linear-gradient(rgba(11,16,36,.15),rgba(11,16,36,.35)),url(img/bg_${MAPS[G.area]?G.area:'alley'}.webp)`;
+ const lvAvg=G.party.reduce((a,m)=>a+m.lv,0)/G.party.length;
+ const foes=list.map((k,i)=>{const f=FOES[k],sc=f.boss?1:1+Math.max(0,lvAvg-3)*FOE_SCALE;return{k,...f,uid:'e'+i,name:f.n+(list.filter(x=>x===k).length>1?'ABC'[list.slice(0,i).filter(x=>x===k).length]:''),
+  hp:Math.round(f.hp*sc),max:Math.round(f.hp*sc),atk:f.atk*sc,def:f.def*sc,mag:f.mag*sc,st:{},charge:false,bp:0}});
+ /* オートの ON/OFF は設定（mmrpg1_opt）から。次の戦闘にも残る */
+ inBattle=true;BT={foes,node,turn:1,cmds:[],ci:0,busy:false,boss:list.some(k=>FOES[k].boss),st:{},autoOn:!!OPT.auto};
+ G.party.forEach(m=>BT.st[m.id]={});
+ BT.built=false;show('battle');$('log').innerHTML='';renderB();menuIdle();
+ const my=BT;(async()=>{await logL(foes.map(f=>f.name).join('、')+' が現れた！',550);if(BT===my)startTurn()})()}
+const alive=a=>a.filter(x=>x.hp>0);
+/* 戦闘画面：最初に1回だけ組み立て、あとは数値と見た目だけ書きかえる（画像を作り直さないので軽い） */
+function buildB(){
+ $('foes').innerHTML=BT.foes.map(f=>`<div class="foe in ${f.boss?'boss':''}" data-uid="${f.uid}">${foeArt(f)}<div class="fn"></div><div class="hb" style="width:${f.boss?150:80}px"><i style="background:#ff6a4a"></i></div><div class="st"></div></div>`).join('');
+ $('bparty').style.gridTemplateColumns=`repeat(${Math.min(2,G.party.length)},1fr)`;
+ /* 名前と状態は1行（はみ出したら…）。状態が増えても枠の高さは変わらない */
+ $('bparty').innerHTML=G.party.map((m,i)=>{const c=CHARS[m.id];return `<div class="pm" data-i="${i}"><img src="${c.img}" alt=""><div class="t"><div class="pnm"><span class="pnmT">${c.name} Lv${m.lv}</span><span class="pst" style="color:var(--gold)"></span></div>
+  <div style="display:flex;justify-content:space-between"><span class="php"></span><span class="pmp"></span></div><div class="hb"><i class="phb"></i></div><div class="hb sb"><i class="psb"></i></div></div></div>`}).join('');
+ BT.built=true}
+function renderB(){if(!BT.built)buildB();
+ BT.foes.forEach(f=>{const el=foeEl(f);if(!el)return;el.classList.toggle('dead',f.hp<=0);
+  const im=el.querySelector('.fimg');if(im){const want=foeArt(f).match(/src="([^"]+)"/);if(want&&im.getAttribute('src')!==want[1])im.setAttribute('src',want[1])}
+  const fn=el.querySelector('.fn');if(fn.textContent!==f.name)fn.textContent=f.name;
+  el.querySelector('.hb i').style.width=100*Math.max(0,f.hp)/f.max+'%';
+  const st=stTxt(f.st)+(f.charge?` ${IC('charge',16)}ため`:'');const se=el.querySelector('.st');if(se.dataset.v!==st){se.dataset.v=st;se.innerHTML=st}});
+ G.party.forEach((m,i)=>{const el=$('bparty').children[i];if(!el)return;
+  el.classList.toggle('ko',m.hp<=0);el.classList.toggle('act',BT.ci===i&&!!BT.choosing);
+  el.querySelector('.pst').textContent=stTxt(BT.st[m.id]);el.querySelector('.php').textContent=`HP ${Math.max(0,m.hp)}/${maxHp(m)}`;el.querySelector('.pmp').textContent=`MP ${m.mp}`;
+  el.querySelector('.phb').style.width=100*Math.max(0,m.hp)/maxHp(m)+'%';el.querySelector('.psb').style.width=m.sp+'%'})}
+function stTxt(st){if(!st)return'';const a=[];if(st.atk)a.push('攻↑');if(st.def)a.push('防↑');if(st.defdown)a.push('防↓');if(st.taunt)a.push('挑発');if(st.stun)a.push('しびれ');if(st.guard)a.push('防御');return a.join(' ')}
+/* 戦闘の速さ：ふつう=0.8倍、はやい=0.4倍の待ち時間（設定 mmrpg1_opt の fast） */
+const bSpd=()=>OPT.fast?.4:.8;
+async function logL(t,ms=650){const L=$('log'),d=document.createElement('div');d.textContent=t;L.appendChild(d);while(L.children.length>3)L.firstChild.remove();await wait(ms*bSpd())}
+function popOn(el,txt,cls=''){if(!el)return;const r=el.getBoundingClientRect(),p=document.createElement('div');p.className='pop '+cls;p.textContent=txt;p.style.left=(r.left+r.width/2-20+window.scrollX)+'px';p.style.top=(r.top+r.height*.25+window.scrollY)+'px';p.style.position='absolute';document.body.appendChild(p);setTimeout(()=>p.remove(),900)}
+const foeEl=f=>document.querySelector(`.foe[data-uid="${f.uid}"]`),memEl=m=>document.querySelector(`.pm[data-i="${G.party.indexOf(m)}"]`);
+/* ---- コマンド選択 ---- */
+/* しびれている仲間はコマンドを選ばない（行動のときに「しびれて動けない」と出る） */
+const canChoose=m=>m.hp>0&&!(BT.st[m.id]&&BT.st[m.id].stun);
+function startTurn(){BT.cmds=[];BT.ci=-1;nextActor()}
+function nextActor(){BT.ci++;while(BT.ci<G.party.length&&!canChoose(G.party[BT.ci])){const m=G.party[BT.ci];if(m.hp>0)BT.cmds.push({k:'none',who:m});BT.ci++}
+ if(BT.ci>=G.party.length){BT.choosing=false;renderB();execTurn();return}BT.choosing=true;if(BT.autoOn){autoAll();return}renderB();menuMain()}
+function prevActor(){let i=BT.ci-1;while(i>=0&&!canChoose(G.party[i]))i--;if(i<0)return;BT.ci=i;BT.cmds=BT.cmds.filter(c=>G.party.indexOf(c.who)<i);renderB();menuMain()}
+function cost(m,sk){let c=SKILLS[sk].mp||0;if(CHARS[m.id].pass.k==='mpcut')c=Math.max(1,c-1);return c}
+/* メニューは4列×2段。右下の2つ（オート・速さ）は行動中も押せる。どちらも設定に保存し、戦闘中に G はセーブしない */
+function syncTools(){const a=$('bAuto'),p=$('bSpd');if(a){a.classList.toggle('on',!!BT.autoOn);a.textContent=BT.autoOn?'オート中':'オート'}if(p){p.classList.toggle('on',!!OPT.fast);p.textContent=OPT.fast?'▶▶はやい':'▶ふつう'}}
+function bindTools(){$('bAuto').onclick=()=>{BT.autoOn=!BT.autoOn;OPT.auto=BT.autoOn;saveOpt();syncTools();if(BT.autoOn&&BT.choosing)autoAll()};$('bSpd').onclick=()=>{OPT.fast=!OPT.fast;G.flags.fast=OPT.fast;saveOpt();syncTools()};syncTools()}
+function cmdGrid(m,idle){const sp=m?Math.floor(m.sp):0,dis=idle?'disabled':'';
+ return `<div class="cgrid2">
+  <button class="cb" data-a="atk" ${dis}>たたかう</button><button class="cb" data-a="skill" ${dis}>わざ</button><button class="cb sp" data-a="sp" ${idle||!m||m.sp<SP_MAX?'disabled':''}>必殺<small>${sp}%</small></button><button class="cb" data-a="item" ${dis}>どうぐ</button>
+  <button class="cb" data-a="guard" ${dis}>ぼうぎょ</button><button class="cb" data-a="back" ${idle||BT.ci===firstChoosable()?'disabled':''}>◀もどる</button><button class="cb tool" id="bAuto">オート</button><button class="cb tool" id="bSpd">▶ふつう</button></div>`}
+/* コマンド欄に中身を入れる。over=true のとき（わざ・どうぐの一覧）は欄の下端から上へ重ねて出す */
+function setCmdHTML(h,over){const C=$('cmd');C.classList.toggle('over',!!over);C.innerHTML=`<div class="cmdBox">${h}</div>`}
+function clearTg(){document.querySelectorAll('.foe.tg,.pm.tg').forEach(e=>{e.classList.remove('tg');e.onclick=null})}
+function menuIdle(){$('cmd').classList.add('wait');const m=G.party.find(x=>x.hp>0);
+ setCmdHTML(`<div class="cmdT"><span>${BT.autoOn?'オートで戦闘中…':'行動中…'}</span><span class="note">ターン${BT.turn}</span></div>${cmdGrid(m,true)}`);bindTools()}
+function menuMain(){$('cmd').classList.remove('wait');clearTg();const m=G.party[BT.ci],c=CHARS[m.id];
+ setCmdHTML(`<div class="cmdT"><span>${c.name}はどうする？</span><span class="note">ターン${BT.turn}</span></div>${cmdGrid(m,false)}`);
+ $('cmd').querySelectorAll('.cb:not(.tool)').forEach(b=>b.onclick=()=>{const a=b.dataset.a;
+  if(a==='atk')pickTarget('one',t=>setCmd({k:'atk',t}));
+  else if(a==='skill')menuSkill();
+  else if(a==='sp'){if(c.sp.tg==='one')pickTarget('one',t=>setCmd({k:'sp',t}));else setCmd({k:'sp'})}  /* 敵1体を狙う必殺は、敵が2体以上なら選ぶ */
+  else if(a==='guard')setCmd({k:'guard'});
+  else if(a==='item')menuItem();
+  else if(a==='back')prevActor();
+  });bindTools()}
+const firstChoosable=()=>G.party.findIndex(m=>canChoose(m));
+function menuSkill(){const m=G.party[BT.ci];setCmdHTML(`<div class="cmdT"><span>わざ（MP ${m.mp}）</span></div>`+m.skills.map(sk=>{const s=SKILLS[sk],c=cost(m,sk);return `<button class="sk" data-sk="${sk}" ${m.mp<c?'disabled style="opacity:.4"':''}><span><b>${s.n}</b>　<small>${s.d}</small></span><small>MP${c}</small></button>`}).join('')+`<button class="cb" style="width:100%;margin-top:4px" id="bk">◀ もどる</button>`,true);
+ $('cmd').querySelectorAll('.sk').forEach(b=>b.onclick=()=>{const sk=b.dataset.sk,s=SKILLS[sk];if(m.mp<cost(m,sk))return;
+  if(s.tg==='one')pickTarget('one',t=>setCmd({k:'skill',sk,t}));else if(s.tg==='ally')pickTarget('ally',t=>setCmd({k:'skill',sk,t}));else if(s.tg==='ko'){if(!G.party.some(x=>x.hp<=0)){say('戦闘不能の仲間がいない',900);return}pickTarget('ko',t=>setCmd({k:'skill',sk,t}))}else setCmd({k:'skill',sk})});$('bk').onclick=menuMain}
+/* どうぐの数は「持っている数 − この番ですでに使う予定の数」で出す */
+function menuItem(){const left=k=>(G.items[k]||0)-BT.cmds.filter(c=>c.k==='item'&&c.it===k).length;
+ setCmdHTML(`<div class="cmdT"><span>どうぐ</span></div>`+Object.keys(ITEMS).map(k=>{const n=Math.max(0,left(k));return `<button class="sk itb" data-k="${k}" ${n>0?'':'disabled style="opacity:.4"'}>${IC(ITEM_IC[k],36)}<span class="itn"><b>${ITEMS[k].n}</b><small>${ITEMS[k].d}</small></span><span class="itc ${n?'':'z'}">×${n}</span></button>`}).join('')+`<button class="cb" style="width:100%;margin-top:4px" id="bk">◀ もどる</button>`,true);
+ $('cmd').querySelectorAll('.sk').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(left(k)<=0)return;pickTarget('ally',t=>setCmd({k:'item',it:k,t}))});$('bk').onclick=menuMain}
+function pickTarget(kind,cb){
+ if(kind==='one'){const al=alive(BT.foes);if(al.length===1){cb(al[0]);return}
+  setCmdHTML('<div class="cmdT"><span>どの敵をねらう？（敵をタップ）</span></div><button class="cb" style="width:100%" id="bk">◀ もどる</button>');$('bk').onclick=menuMain;
+  document.querySelectorAll('.foe').forEach(el=>{const f=BT.foes.find(x=>x.uid===el.dataset.uid);if(f.hp<=0)return;el.classList.add('tg');el.onclick=()=>{document.querySelectorAll('.foe').forEach(e=>{e.classList.remove('tg');e.onclick=null});cb(f)}})}
+ else{setCmdHTML(`<div class="cmdT"><span>${kind==='ko'?'だれを復活させる？':'だれに使う？'}（仲間をタップ）</span></div><button class="cb" style="width:100%" id="bk">◀ もどる</button>`);$('bk').onclick=menuMain;
+  document.querySelectorAll('.pm').forEach(el=>{const m=G.party[+el.dataset.i];if(kind==='ko'?m.hp>0:m.hp<=0)return;el.classList.add('tg');el.onclick=()=>{document.querySelectorAll('.pm').forEach(e=>{e.classList.remove('tg');e.onclick=null});cb(m)}})}}
+/* 決めた直後の150msは入力を止める（連打で次の仲間の行動まで決まらないように） */
+function setCmd(c){c.who=G.party[BT.ci];BT.cmds.push(c);lockInput(150);nextActor()}
+function aiFor(m){const J=JOBS[m.job],hurt=G.party.filter(x=>x.hp>0&&x.hp<maxHp(x)*.45).sort((a,b)=>a.hp/maxHp(a)-b.hp/maxHp(b))[0];
+ const heal=m.skills.find(sk=>SKILLS[sk].kind==='heal'&&SKILLS[sk].tg==='ally'&&m.mp>=cost(m,sk));if(hurt&&heal)return{k:'skill',sk:heal,t:hurt};
+ const al=alive(BT.foes),tg=al.sort((a,b)=>a.hp-b.hp)[0];
+ const atkSk=m.skills.filter(sk=>['phys','mag'].includes(SKILLS[sk].kind)&&m.mp>=cost(m,sk)+2).sort((a,b)=>(SKILLS[b].pw||0)*(SKILLS[b].tg==='all'&&al.length>1?2:1)-(SKILLS[a].pw||0)*(SKILLS[a].tg==='all'&&al.length>1?2:1))[0];
+ if(atkSk&&(J.uses==='mag'||Math.random()<.5))return{k:'skill',sk:atkSk,t:tg};return{k:'atk',t:tg}}
+function autoAll(){for(let i=BT.ci;i<G.party.length;i++){const m=G.party[i];if(m.hp<=0)continue;BT.cmds.push({...aiFor(m),who:m})}BT.ci=G.party.length;BT.choosing=false;renderB();execTurn()}
+/* ---- 実行 ---- */
+function sv(u,k){const isM=!!CHARS[u.id];let v=isM?stat(u,k):u[k];const st=isM?BT.st[u.id]:u.st;
+ if((k==='atk'||k==='mag')&&st.atk)v*=1+st.atk.v;if(k==='def'&&st.def)v*=1+st.def.v;if(k==='def'&&st.defdown)v*=1-st.defdown.v;
+ if(isM&&(k==='atk')&&CHARS[u.id].pass.k==='rage'&&u.hp<=maxHp(u)/2)v*=1.3;return v}
+function dmgCalc(a,d,s,critForce){const kind=s.kind,att=kind==='mag'?sv(a,'mag'):sv(a,'atk'),df=sv(d,'def');let v=att*(s.pw||1)-df*(kind==='mag'?.25:.5);v=Math.max(1,v)*rnd(.9,1.1);
+ const crit=critForce||Math.random()<.06;if(crit)v*=1.5;const isM=!!CHARS[d.id],st=isM?BT.st[d.id]:d.st;if(st.guard)v*=.5;if(isM&&CHARS[d.id].pass.k==='soft')v*=.85;return{v:Math.max(1,Math.round(v)),crit}}
+function addSt(u,fx,v,t){const isM=!!CHARS[u.id],st=isM?BT.st[u.id]:u.st;st[fx]={v,t}}
+function longT(m,t){return t+(m&&CHARS[m.id]&&CHARS[m.id].pass.k==='long'?1:0)}
+async function hit(a,d,s,critForce){const r=dmgCalc(a,d,s,critForce);d.hp-=r.v;const isM=!!CHARS[d.id];
+ if(isM){d.sp=Math.min(SP_MAX,d.sp+8);const el=memEl(d);if(el){el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit')}$('flash').classList.add('on');setTimeout(()=>$('flash').classList.remove('on'),110)}
+ else{const el=foeEl(d);if(el){el.classList.add('hit');setTimeout(()=>el.classList.remove('hit'),120)}}
+ if(CHARS[a.id])a.sp=Math.min(SP_MAX,a.sp+6);
+ tone(r.crit?880:220,.12,r.crit?'triangle':'sawtooth',.1,r.crit?1320:80);
+ renderB();popOn(isM?memEl(d):foeEl(d),r.v,r.crit?'c':'');await logL(`${nameOf(d)}に ${r.v} のダメージ${r.crit?'（会心！）':''}`,450);
+ if(d.hp<=0){d.hp=0;renderB();await logL(`${nameOf(d)}は${isM?'たおれた…':'たおれた！'}`,450)}}
+const nameOf=u=>CHARS[u.id]?CHARS[u.id].name:u.name;
+async function heal(m,v){const mx=maxHp(m);const before=m.hp;m.hp=Math.min(mx,m.hp+Math.round(v));renderB();const d=m.hp-before;
+ if(d<=0){await logL(`${CHARS[m.id].name}のHPは満タンだ`,400);return}
+ popOn(memEl(m),'+'+d,'h');tone(660,.15,'triangle',.08,990);await logL(`${CHARS[m.id].name}のHPが ${d} 回復`,450)}
+async function execTurn(){clearTg();menuIdle();const my=BT;  /* my：途中で別の戦闘に変わっていたら、この戦闘の処理はやめる */
+ BT.cmds.forEach(c=>{if(c.k==='guard')BT.st[c.who.id].guard={v:1,t:1}});
+ const acts=BT.cmds.map(c=>({...c,spd:sv(c.who,'spd')*rnd(.9,1.1)}));
+ alive(BT.foes).forEach(f=>acts.push({foe:f,spd:f.spd*rnd(.9,1.1)}));acts.sort((a,b)=>b.spd-a.spd);
+ for(const a of acts){if(BT!==my)return;if(!alive(BT.foes).length||!alive(G.party).length)break;
+  if(a.foe){if(a.foe.hp<=0)continue;await foeAct(a.foe)}else{if(a.who.hp<=0)continue;await memAct(a)}}
+ if(BT!==my)return;
+ /* ターン終わり */
+ const tick=st=>{for(const k in st){if(st[k]&&st[k].t!==undefined){st[k].t--;if(st[k].t<=0)delete st[k]}}};
+ G.party.forEach(m=>tick(BT.st[m.id]));BT.foes.forEach(f=>tick(f.st));renderB();
+ if(!alive(BT.foes).length)return winB();if(!alive(G.party).length)return loseB();
+ BT.turn++;startTurn()}
+async function memAct(c){const m=c.who,nm=CHARS[m.id].name,st=BT.st[m.id];
+ if(st.stun){delete st.stun;await logL(`${nm}はしびれて動けない！`);return}
+ if(c.k==='none'){await logL(`${nm}は体勢を立て直した`,350);return}  /* しびれていて選べなかったが、行動の前に治っていたとき */
+ if(c.k==='guard'){await logL(`${nm}は身を守っている`,400);return}
+ if(c.k==='item'){const it=ITEMS[c.it];if(G.items[c.it]<=0){await logL('どうぐがなかった…');return}const t=c.t&&c.t.hp>0?c.t:m;
+  /* 満タンなら使わない（数を減らさない） */
+  if((!it.hp||t.hp>=maxHp(t))&&(!it.mp||t.mp>=maxMp(t))){await logL(`${CHARS[t.id].name}は${it.hp?'HP':'MP'}が満タンなので、${it.n}を使わなかった`,500);return}
+  G.items[c.it]--;await logL(`${nm}は${it.n}を使った`,400);if(it.hp)await heal(t,it.hp);if(it.mp){t.mp=Math.min(maxMp(t),t.mp+it.mp);renderB();await logL(`${CHARS[t.id].name}のMPが回復`,400)}return}
+ if(c.k==='atk'){const t=c.t&&c.t.hp>0?c.t:alive(BT.foes)[0];await logL(`${nm}の攻撃！`,350);await hit(m,t,{kind:'phys',pw:1});return}
+ if(c.k==='sp'){await doSpecial(m,c.t);return}
+ const s=SKILLS[c.sk],mc=cost(m,c.sk);if(m.mp<mc){await logL(`${nm}はMPが足りない！`);return}m.mp-=mc;renderB();await logL(`${nm}の${s.n}！`,450);
+ if(s.kind==='phys'||s.kind==='mag'){const ts=s.tg==='all'?alive(BT.foes):[c.t&&c.t.hp>0?c.t:alive(BT.foes)[0]];
+  for(const t of ts){for(let h=0;h<(s.hits||1);h++){if(t.hp<=0)break;await hit(m,t,s,s.crit)}
+   if(t.hp>0&&s.fx==='defdown'){addSt(t,'defdown',s.v,longT(m,s.t));await logL(`${t.name}の防御が下がった`,350)}
+   if(t.hp>0&&s.fx==='stun'&&Math.random()<s.v){addSt(t,'stun',1,2);await logL(`${t.name}はしびれた！`,350)}}}
+ else if(s.kind==='heal'){if(s.fx==='revive'){const t=c.t&&c.t.hp<=0?c.t:G.party.find(x=>x.hp<=0);if(t){t.hp=Math.round(maxHp(t)/2);renderB();await logL(`${CHARS[t.id].name}が復活した！`)}else await logL('しかし何も起こらなかった')}
+  else{const ts=s.tg==='allies'?alive(G.party):[c.t&&c.t.hp>0?c.t:m];for(const t of ts){if(s.fx==='cure')delete BT.st[t.id].stun,delete BT.st[t.id].defdown;await heal(t,sv(m,'mag')*s.pw*rnd(.9,1.1))}}}
+ else if(s.kind==='buff'){const ts=s.tg==='allies'?alive(G.party):s.tg==='self'?[m]:[c.t&&c.t.hp>0?c.t:m];ts.forEach(t=>addSt(t,s.fx,s.v||1,longT(m,s.t)));renderB();
+  await logL(s.fx==='taunt'?`${nm}は敵を引きつけている！`:s.fx==='def'?'防御が上がった！':'攻撃と魔力が上がった！',450)}
+ else if(s.kind==='debuff'){const t=c.t&&c.t.hp>0?c.t:alive(BT.foes)[0];addSt(t,s.fx,s.v,longT(m,s.t));renderB();await logL(`${t.name}の防御が下がった！（弱点が見えた）`,450)}}
+async function foeAct(f){if(f.st.stun){delete f.st.stun;await logL(`${f.name}はしびれて動けない！`);return}
+ let sk;if(typeof f.ai==='string'){sk=(BOSS_AI[f.ai]||BOSS_AI.boss)(f)}
+ else{let r=Math.random();for(const[k,w]of f.ai){r-=w;if(r<=0){sk=k;break}}sk=sk||f.ai[0][0]}
+ const s=SKILLS[sk]||SKILLS.e_atk;
+ /* ため（予告）：攻撃しない。次の行動は BOSS_AI が f.charge の技を必ず出す */
+ if(s.kind==='charge'){if(!f.charge)f.charge='e_smash';renderB();await logL(`${f.name}${s.msg||'は力をためている…！（次のターンに大技）'}`,900);return}
+ /* 変身：攻撃しない。自分の防御ダウン・しびれを消す */
+ if(s.kind==='phase'){await logL(`${f.name}${s.msg||'の姿が変わった！'}`,1300);delete f.st.defdown;delete f.st.stun;f.col='#a0203a';f.awake=true;f.name=f.name.replace(/・覚醒$/,'')+'・覚醒';renderB();
+  const el=foeEl(f);if(el){el.classList.add('hit');setTimeout(()=>el.classList.remove('hit'),300)}buzz();
+  if(G.flags.selfRust){const h=G.party.find(m=>m.id===G.hero&&m.hp>0);if(h)await logL(`${CHARS[h.id].name}「${CHARS[h.id].lines[0]}」`,1300)}return}
+ /* 自分を強化 */
+ if(s.kind==='buff'&&s.tg==='self'){addSt(f,s.fx,s.v,s.t);renderB();await logL(`${f.name}の${s.n}！ ${f.name}${s.msg||'の力が上がった！'}`,650);return}
+ await logL(`${f.name}の${s.n}！`,400);
+ const al=alive(G.party);const taunter=al.find(m=>BT.st[m.id].taunt);
+ const ts=s.tg==='all'?al:[taunter||pick(al)];
+ for(const t of ts){if(t.hp<=0)continue;await hit(f,t,s);
+  if(t.hp>0&&s.fx==='defdown'){addSt(t,'defdown',s.v,s.t);renderB()}
+  if(t.hp>0&&s.fx==='stun'&&Math.random()<s.v){addSt(t,'stun',1,2);renderB();await logL(`${CHARS[t.id].name}はしびれた！`,400)}}}
+/* ---- 必殺技（魔法陣なぞり） ---- */
+async function doSpecial(m,tg){const c=CHARS[m.id];await logL(`${c.name}の必殺技！`,300);m.sp=0;
+ show('craft');$('craftT').textContent=`${c.name}「${c.sp.n}」`;$('craftSub').textContent='魔法陣をなぞれ！';
+ const r=await runDesign({type:c.sp.shape,tier:1,color:'#e8c35a',label:'必殺',seg:2.4,w:.15});  /* 必殺の線の太さは難易度を変えないため元のまま */const s=r.reach*r.acc;
+ show('battle');renderB();await say(`${c.sp.n}！<br>なぞり <span class="big">${Math.round(s*100)}%</span>`,1100);
+ /* 狙う敵：選んだ敵（たおれていたら、HPがいちばん多い敵） */
+ if(m.id==='wolf'){const t=tg&&tg.hp>0&&BT.foes.includes(tg)?tg:alive(BT.foes).sort((a,b)=>b.hp-a.hp)[0];if(t)await hit(m,t,{kind:'phys',pw:2.2+2.8*s},s>=.95)}
+ else if(m.id==='dodo'){alive(G.party).forEach(t=>addSt(t,'def',.4+.6*s,3));addSt(m,'taunt',1,3);await heal(m,maxHp(m)*(.2+.5*s));await logL('味方全員の防御が大きく上がった！',400)}
+ else if(m.id==='fox'){if(s>=.6)for(const t of G.party.filter(x=>x.hp<=0)){t.hp=1;await logL(`${CHARS[t.id].name}が復活した！`,350)}for(const t of alive(G.party))await heal(t,maxHp(t)*(.3+.5*s))}
+ else if(m.id==='owl'){for(const t of alive(BT.foes))await hit(m,t,{kind:'mag',pw:1+1.6*s})}}
+/* ---- 勝敗 ---- */
+async function winB(){inBattle=false;tone(523,.3,'triangle',.12);setTimeout(()=>tone(784,.4,'triangle',.12),150);
+ const exp=BT.foes.reduce((a,f)=>a+f.exp,0);let mat=0,itm='';BT.foes.forEach(f=>{if(Math.random()<f.mat)mat++});if(Math.random()<.3){G.items.oil++;itm='、オイル×1'}
+ G.mat+=mat;let unEq=0;const lines=[`経験値 ${exp}　${SCRAP()}鉄くず×${mat}${itm}`];
+ for(const m of G.party){if(m.lv>=LV_CAP){m.exp=0;continue}const g=m.hp>0?exp:Math.floor(exp/2);m.exp+=g;
+  while(m.lv<LV_CAP&&m.exp>=EXP_NEXT(m.lv)){m.exp-=EXP_NEXT(m.lv);const hpB=maxHp(m),mpB=maxMp(m);const got=levelUp(m);m.hp+=maxHp(m)-hpB;m.mp+=maxMp(m)-mpB;
+   lines.push(`${IC('levelup',20)} ${CHARS[m.id].name}は Lv${m.lv} になった！${m.lv>=LV_CAP?'（レベル最大）':''}`);got.forEach(sk=>{const eq=m.skills.includes(sk);if(!eq)unEq++;lines.push(`　→「${SKILLS[sk].n}」をおぼえた！<span class="nw">${eq?'（自動で装備した）':'（まだ装備していない）'}</span>`)})}
+  if(m.lv>=LV_CAP)m.exp=0}
+ if(unEq)lines.push(`\n${IC('newskill',20)} わざは4つまで。新しい技は自動では装備されません。\n　地図・町の「パーティ」で入れかえよう（NEW の印）。`);
+ G.party.forEach(m=>{if(m.hp<=0)m.hp=1});
+ /* 初めて勝った（章ボスは第1章クリア前なら何度でも「初めて」）。勝利の会話を読み終えるまで pendWin に残す */
+ const boss=BT.boss,node=BT.node,first=!!node&&(!G.cleared.includes(node.id)||(node.id===AREAS.under.boss&&!G.flags.ch1));clear(node);
+ if(boss&&first&&node)G.flags.pendWin=node.id;save();
+ $('resP').innerHTML=`<h2 style="margin:0 0 6px;color:var(--gold)">勝利！</h2><div class="note" style="font-size:15px;white-space:pre-wrap">${lines.join('\n')}</div>`;$('resBtns').innerHTML='';
+ addBtn('地図にもどる',()=>afterWin(boss,node,first),'gold');show('result')}
+/* ボスに初めて勝ったあと：勝利会話 → 次のエリアの解放（章ボスならエンディング）。終わったら pendWin を消す */
+let afterWinBusy=false;
+async function afterWin(boss,node,first){if(!(boss&&first&&node)){openMap();return}if(afterWinBusy)return;afterWinBusy=true;try{
+ await talk(BOSS_WIN[node.talk]||[]);
+ if(node.id===AREAS.under.boss){await talk(ENDING,'ev_ending1');G.flags.ch1=1;delete G.flags.pendWin;G.town={x:TOWN_START[0],y:TOWN_START[1]};G.where={s:'town'};G.party.forEach(m=>{m.hp=maxHp(m);m.mp=maxMp(m)});save();showEnding();return}
+ delete G.flags.pendWin;save();
+ const nx=AREA_ORDER.find(k=>AREAS[k].need===node.id);if(nx){sfx.win();await say(`${IC('unlock',30)} 「${AREAS[nx].n}」が解放された！<br><span style="font-size:14px">町の門から行ける（推奨Lv ${AREAS[nx].lv}）</span>`,1900)}
+ openMap()}finally{afterWinBusy=false}}
+function showEnding(){sfx.win();const h=CHARS[G.hero];
+ $('resP').innerHTML=`<div style="text-align:center"><img class="endImg" src="img/ev/ev_ending1.webp" alt=""><h2 style="margin:4px 0;color:var(--gold)">第1章 クリア！</h2><div style="font-weight:800">「夜の工房に灯る」</div>
+  <div style="display:flex;justify-content:center;gap:4px;margin:10px 0">${G.party.map(m=>`<img src="${CHARS[m.id].img}" style="width:64px;height:64px;object-fit:contain" alt="">`).join('')}</div>
+  <div class="note">${h.name}と仲間たち　${G.party.map(m=>CHARS[m.id].name+' Lv'+m.lv).join('・')}<br>クリア後も、町と各エリアで遊べます（レベル上げ・武器づくり・ボスの再戦）。<br>第2章「停電の街」へつづく</div></div>`;
+ $('resBtns').innerHTML='';addBtn('町にもどる',openTown,'gold');show('result')}
+async function loseB(){inBattle=false;G.party.forEach(m=>{m.hp=maxHp(m);m.mp=maxMp(m)});G.town={x:TOWN_START[0],y:TOWN_START[1]};G.where={s:'town'};save();
+ $('resP').innerHTML=`<h2 style="margin:0 0 6px">力尽きた……</h2><div class="note" style="font-size:15px;white-space:pre-wrap">気がつくと、町の古い工房の扉の前にいた。\n全員のHPとMPは回復している。\nレベルと経験値はそのまま。もう一度挑もう。</div>`;$('resBtns').innerHTML='';addBtn('町にもどる',openTown,'gold');show('result')}
+/* ===================== 起動 ===================== */
+try{G=migrate(G)}catch(e){console.warn('save migrate failed',e);G=null}
+/* 読めなかったセーブは、上書きされる前に mmrpg1_broken へ退避して知らせる */
+if(!G&&SAVE_RAW!=null){try{localStorage.setItem(BROKEN_KEY,SAVE_RAW)}catch(e){}loadNote='セーブを読めませんでした（元のデータは mmrpg1_broken に残しました）'}
+if(G&&OPT.fast===undefined&&G.flags.fast){OPT.fast=true;saveOpt()}  /* 前の版は速さを G.flags.fast に保存していた */
+if(G)G.flags.fast=!!OPT.fast;
+$('btnStart').textContent=G?'つづきから':'はじめる';$('btnReset').style.display=G?'':'none';
+$('tVer').textContent=`β版 ver ${VERSION}`;$('tNote').textContent=loadNote;
+/* テスト用の参照（テスト担当が G を書きかえて各エリア・ボスへ直接入れる） */
+window.__game={get G(){return G},set G(v){G=v},get BT(){return BT},save,migrate,enterNode,openTown,openMap,openDest,goArea,startBattle,newMember,curMap,stage,MAPS,AREAS,FOES,VERSION};
+</script>
+</body>
+</html>
