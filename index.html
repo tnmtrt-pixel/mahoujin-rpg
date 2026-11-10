@@ -1214,10 +1214,12 @@ function resizeTown(){if(!TW)return;const r=$('tWrap').getBoundingClientRect(),c
  const cv2=TW.cv2,d=Math.min(2,devicePixelRatio||1);cv2.style.width=r.width+'px';cv2.style.height=r.height+'px';cv2.width=Math.round(r.width*d);cv2.height=Math.round(r.height*d);
  TW.c2=cv2.getContext('2d');TW.c2.setTransform(d,0,0,d,0,0)}
 window.addEventListener('resize',()=>{if(TW&&onScr('town'))resizeTown()});
+/* 町を歩く速さ（1/60秒あたりに進むマス数）。0.16＝1秒に約10マス、0.11＝約6.6マス。小さいほどゆっくり */
+const WALK_SPEED=.11;
 /* 移動・アニメは経過時間で計算（120Hz の画面でも同じ速さ） */
 function townLoop(now){if(!TW||!G||!onScr('town')){townRaf=0;return}
  const dt=townLast?clamp((now-townLast)/16.667,0,3):1;townLast=now;TW.t+=.016*dt;
- if(TW.moving){const sp=.16*dt;const dx=TW.px-TW.fx,dy=TW.py-TW.fy;if(Math.abs(dx)+Math.abs(dy)<=sp){TW.fx=TW.px;TW.fy=TW.py;TW.moving=false;arrived()}else{TW.fx+=Math.sign(dx)*sp;TW.fy+=Math.sign(dy)*sp}}
+ if(TW.moving){const sp=WALK_SPEED*dt;const dx=TW.px-TW.fx,dy=TW.py-TW.fy;if(Math.abs(dx)+Math.abs(dy)<=sp){TW.fx=TW.px;TW.fy=TW.py;TW.moving=false;arrived()}else{TW.fx+=Math.sign(dx)*sp;TW.fy+=Math.sign(dy)*sp}}
  if(TW&&!TW.moving&&!TW.busy&&TW.dir)tryStep(TW.dir[0],TW.dir[1]);
  if(!TW||!onScr('town')){townRaf=0;return}
  drawTown();townRaf=requestAnimationFrame(townLoop)}
