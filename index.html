@@ -606,6 +606,77 @@ img.wt2{filter:drop-shadow(0 0 2px #ff7a2f)}img.wt3{filter:drop-shadow(0 0 2px #
  .rznx{padding:4px 10px;font-size:12px}
 }
 
+/* =====================================================================
+   統一デザイン（ホーム・編成・結果画面に合わせる）
+   ・地：黒に近い紺（--sk）、パネル：--sk2、線：--sl（白12%）
+   ・差し色はオレンジ（--so）1色。数字の強調は淡い金（--sg）
+   ・角は丸めない。大事なボタンだけ、右下を斜めに切る
+   ===================================================================== */
+:root{--bg:#0a0e1a;--panel:#121828;--line:#ffffff1f;--ink:#f2f4f8;--sub:#8790a6;--gold:#ffb07a;--sg:#ffd27a;--green:#5fe08a;--blue:#7fb2ff}
+body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
+/* パネル・カード */
+.panel,#sheet .shp,#talk .box,.fcard,.rcp,.zki,.itr,.cqmsg,.cqcands .cand{border-radius:0!important}
+.panel{background:var(--sk2);border:1px solid var(--sl)}
+.fcard{background:var(--sk2);border:1px solid var(--sl);border-top:2px solid var(--so);padding:14px;width:min(420px,92vw)}
+.fcard h3{margin:0;text-align:center;font-size:20px;font-weight:900;letter-spacing:.14em;color:var(--sw)}
+.fcard .note{text-align:center}
+/* ボタン：ふつう＝線、大事＝オレンジ（右下を斜めに） */
+.btn{border-radius:0;background:transparent;border:1px solid #ffffff40;color:var(--sw);font-weight:800;letter-spacing:.1em;box-shadow:none;text-shadow:none}
+.btn:active{background:#ffffff14}
+.btn.gold{background:var(--so);border-color:var(--so);color:#0a0e1a;clip-path:polygon(0 0,100% 0,100% 72%,calc(100% - 16px) 100%,0 100%)}
+.btn.gold:active{background:var(--so2)}
+.btn.ghost{border-color:var(--sl);color:var(--sm)}
+.btn:disabled{opacity:1;border-color:var(--sl);background:transparent;color:#5a6278;clip-path:none}
+#title .tbtns .btn.gold{font-size:20px;padding:16px;letter-spacing:.3em}
+#title .tbtns .btn.ghost{background:#0a0e1acc}
+/* 小さいボタン（戻る・ホームへ・閉じる） */
+.back,.thome,#townTop button,#sheet .shh button,.ppx{border-radius:0!important;background:#0a0e1acc!important;border:1px solid #ffffff40!important;color:var(--sw)!important;font-weight:700;letter-spacing:.08em;box-shadow:none}
+.thome{font-size:13px}
+/* タグ（小さな札） */
+.tag{border-radius:0;background:none;border:1px solid var(--sl);color:var(--sm);font-weight:700}
+#shop .tag[style*="5a3a8a"]{background:none!important;border-color:var(--so);color:var(--so)}
+#shop .tag[style*="background:#2a6a3a"],#shop .tag[style*="2a6a3a"]{background:none!important;border-color:var(--green);color:var(--green)}
+/* 下から出るシート（メニュー・持ちもの） */
+#sheet{background:#000b}
+#sheet .shp{background:var(--sk2);border:1px solid var(--sl);border-top:2px solid var(--so)}
+#sheet .shh{color:var(--sw);letter-spacing:.12em}
+.itr{background:transparent;border:none;border-bottom:1px solid var(--sl);padding:8px 2px;margin-top:0}
+.itr .itn b{font-size:15px}
+/* 会話・お知らせ */
+#talk .box{background:#0a0e1af2;border:1px solid var(--sl);border-top:2px solid var(--so)}
+#talk .tface{border-radius:0;background:var(--sk2)}
+#talk .who{color:var(--so);letter-spacing:.1em}
+#msgIn{border-radius:0!important;background:#0a0e1aee!important;border:1px solid var(--sl)!important;border-left:3px solid var(--so)!important;color:var(--sw)}
+/* レベルアップの候補 */
+.fpick{background:var(--sk);border:1px solid var(--sl);border-radius:0}
+.fpick:active{border-color:var(--so)}
+.fpick .lvt{color:var(--so);letter-spacing:.05em}
+/* フィールドの上の表示 */
+#fPauseB{border-radius:0;background:#0a0e1acc;border:1px solid #ffffff40}
+.fbar{border-radius:0;background:#000a;border-color:#ffffff26}
+.fbar i{background:linear-gradient(90deg,#ff7a2f,#ffb07a)}
+.fbar.hp i{background:linear-gradient(90deg,#3fbf6a,#8ef0a8)}
+/* 工房・図鑑のカード */
+.rcp{background:var(--sk2);border:none;border-left:2px solid var(--sl)}
+.zki{background:var(--sk2);border:1px solid transparent}
+/* 三面図 */
+.cqstep{color:var(--so)}
+.cqmsg{background:var(--sk2);border:1px solid var(--sl)}
+.cqmsg img{border-radius:0;background:var(--sk)}
+.cqcands .cand{background:var(--sk2);border:1px solid var(--sl)}
+.cqcands .cand b{color:var(--so)}
+.cqcands .cand.ok{border-color:var(--green);background:#15291e}
+.cqrow button{border-radius:0;background:transparent;border:1px solid #ffffff40}
+/* 武器づくり・設計の画面 */
+#craftT{color:var(--sw);letter-spacing:.1em}
+.big{color:var(--sg)}
+/* 画面の向きの案内 */
+#rotate{background:var(--sk)}#rotate .rph{border-color:var(--so);box-shadow:inset 0 -8px 0 -5px var(--so);border-radius:4px}
+.tag.tg-ok{border-color:var(--green);color:var(--green)}
+.tag.tg-tier{border-color:var(--so);color:var(--so)}
+.tag.tg-eq{background:var(--so);border-color:var(--so);color:#0a0e1a}
+.gab.ten,.gab.ok:not(:disabled),.lvup:not(:disabled){clip-path:polygon(0 0,100% 0,100% 72%,calc(100% - 16px) 100%,0 100%)}
+
 </style>
 </head>
 <body>
@@ -2381,13 +2452,13 @@ function renderShop(){const tabs=[['make',UIMG('u_weapon',20)+'つくる'],['too
   h+=known.map(id=>{const R=RECIPES[id],c=canMake(id),best=prodMul(R.tier,'B');
    const mats=Object.keys(R.mats).map(k=>`<span class="${(G.mats[k]||0)<R.mats[k]?'lack':''}">${MIC(k,18)}${MATS[k].n} ${G.mats[k]||0}/${R.mats[k]}</span>`).join('');
    const tools=R.tools.map(t=>`<span class="${G.tools.includes(t)?'':'lack'}">${MIC(t,18)}${TOOLS[t].n}${G.tools.includes(t)?'':'（なし）'}</span>`).join('');
-   return `<div class="rcp"><div class="rh">${RIC(id,34)}<div style="flex:1"><b>${R.n}</b>　<span class="tag">${R.kind==='armor'?'防具・'+SLOT_NAME[R.slot]:CHARS[R.who].name+'の武器'}</span><span class="tag" style="background:#5a3a8a">${KANJI_TIER[R.tier]}</span>
+   return `<div class="rcp"><div class="rh">${RIC(id,34)}<div style="flex:1"><b>${R.n}</b>　<span class="tag">${R.kind==='armor'?'防具・'+SLOT_NAME[R.slot]:CHARS[R.who].name+'の武器'}</span><span class="tag tg-tier">${KANJI_TIER[R.tier]}</span>
     <div class="note">${prodFx(R,best)}（Bランクのとき）<br>今：${curProd(R)}</div></div></div>
     <div class="rneed"><span class="nl">素材</span>${mats}</div><div class="rneed"><span class="nl">工具</span>${tools}</div>
     <button class="btn ${c.ok?'gold':''}" data-mk="${id}" ${c.ok?'':'disabled'} style="margin:6px 0 0">${c.ok?'加工する':c.noWho?CHARS[R.who].name+'がまだ仲間にいない':'足りないものがある'}</button></div>`}).join('');
   if(unk)h+=`<div class="note" style="text-align:center;margin-top:8px">${MIC('bp',18)} まだ図面がない製品：あと ${unk}<br>強敵や資材の箱から、図面が見つかる</div>`}
  if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。鉄くずで買えるものと、町の外でしか見つからないものがある。</div><div style="font-weight:800;margin:6px 0">${MIC('scrap',22)} 鉄くず ${G.mats.scrap}</div>`;
-  h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${has?'　<span class="tag" style="background:#2a7a4a">持っている</span>':''}<div class="note">${T.d}</div></div>
+  h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${has?'　<span class="tag tg-ok">持っている</span>':''}<div class="note">${T.d}</div></div>
    ${has?'':T.price?`<button class="btn" data-buy="${t}" ${G.mats.scrap<T.price?'disabled':''} style="width:auto;margin:0;padding:10px 14px;font-size:15px">${MIC('scrap',18)}${T.price}で買う</button>`:`<span class="note" style="max-width:110px">${T.where}で見つかる</span>`}</div></div>`}).join('')}
  if(shopTab==='mat'){h+=`<div class="note">素材は町の外で、錆の魔物を倒したり資材の箱をあけたりして集める。</div>`+MAT_ORDER.map(k=>`<div class="itr">${MIC(k,40)}<div class="itn"><b>${MATS[k].n}</b><small>${MATS[k].d}</small></div><span class="itc ${G.mats[k]?'':'z'}">×${G.mats[k]}</span></div>`).join('')}
  $('shopBody').innerHTML=h;
