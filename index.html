@@ -702,6 +702,24 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
 #title::before{background:url(img/title/title_bg3.webp) center top/cover no-repeat;filter:none;transform:none}
 #title::before{box-shadow:inset 0 -160px 120px -40px #0a0e1acc}
 #title .tlogo{width:min(94vw,560px);margin-top:1vh;filter:drop-shadow(0 4px 12px #000c)}
+/* ===== タイトルのボタン（鉄板の枠の画像） ===== */
+#title .tbtns{width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:12px}
+#title .trow{display:flex;gap:8px;width:84%;align-items:center}
+#title .tbb{border:0;padding:0;cursor:pointer;background:center/100% 100% no-repeat;font-weight:900;letter-spacing:.3em;clip-path:none;box-shadow:none;border-radius:0;-webkit-tap-highlight-color:transparent}
+#title .tbb.main{background-image:url(img/title/ui/b_main.webp);aspect-ratio:900/120;width:78%;color:#fff;font-size:clamp(17px,5vw,23px);text-shadow:0 2px 0 #000,0 0 12px #ff7a2f;padding-left:.3em}
+#title .tbb.main:active{background-image:url(img/title/ui/b_main_on.webp)}
+#title .tbb.sub{background-image:url(img/title/ui/b_sub.webp);aspect-ratio:900/109;flex:1;min-width:0;color:#d8dde8;font-size:clamp(14px,4vw,17px);text-shadow:0 2px 0 #000}
+#title .tbb.sub:active{background-image:url(img/title/ui/b_sub_on.webp);color:#fff}
+#title .tsq{flex:none;width:44px;height:44px;border:0;padding:0;background:url(img/title/ui/s_btn.webp) center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:0;box-shadow:none}
+#title .tsq:active{background-image:url(img/title/ui/s_btn_on.webp)}
+#title .tsq img{width:26px;height:26px;object-fit:contain}
+#title .tband{width:calc(100% + 32px);margin:0 -16px;aspect-ratio:1000/209;background:url(img/title/ui/band.webp) center bottom/100% 100% no-repeat;display:flex;align-items:flex-end;justify-content:center;padding-bottom:calc((100% + 32px) * .035)}
+#title .tband .tbb.main{margin-bottom:0}
+#title #btnReset{display:none!important}
+.optrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 2px;border-bottom:1px solid var(--sl)}.optrow span{font-weight:700}.optrow .btn{width:auto;min-width:96px;margin:0;padding:8px 14px}
+.news b{color:var(--so)}.news ul{margin:8px 0 12px;padding-left:1.2em;line-height:1.7;font-size:14px}
+#title{padding-bottom:calc(env(safe-area-inset-bottom) + 6px)!important}
+#title .trow{justify-content:flex-end}
 
 </style>
 </head>
@@ -713,8 +731,9 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
  <div class="tver" id="tVer"></div>
  <div class="tnote" id="tNote"></div>
  <div class="tbtns">
-  <button class="btn gold" id="btnStart" onclick="goStart()">はじめる</button>
-  <button class="btn ghost" id="btnReset" onclick="askReset()">セーブを消す</button>
+  <div class="trow"><button class="tbb sub" id="btnNew" onclick="askNew()">はじめから</button><button class="tsq" id="btnOpt" onclick="openOpt()" aria-label="設定"><img src="img/title/ui/i_set.webp" alt=""></button><button class="tsq" id="btnNews" onclick="openNews()" aria-label="お知らせ"><img src="img/title/ui/i_bell.webp" alt=""></button></div>
+  <div class="tband"><button class="tbb main" id="btnStart" onclick="goStart()">はじめる</button></div>
+  <button id="btnReset" hidden onclick="askReset()">セーブを消す</button>
  </div>
 </section>
 
@@ -1356,11 +1375,33 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('storage',e=>{if((e.key!==KEY&&e.key!==null)||saveBlocked||!G)return;saveBlocked=true;
  say('別のタブで、このゲームのセーブが変わりました<br><span style="font-size:14px">上書きしないよう、このタブではセーブを止めます。<br>このページを読みこみ直してください</span>',4000)});
 /* セーブを消す：ブラウザの confirm() は表示先によっては出ない（常に「いいえ」になる）ので、ゲーム内の確認パネルを使う */
+/* タイトル：はじめから（いまのセーブを消して最初から） */
+function askNew(){$('sheetT').textContent='はじめから';
+ $('sheetB').innerHTML=`<div style="text-align:center;line-height:1.7;margin:6px 0 10px">最初から遊びます。<br>いまのセーブは消えて、<b style="color:#ff6a6a">もとに戻せません。</b></div>
+  <button class="btn gold" id="nwYes">はじめから遊ぶ</button><button class="btn ghost" id="nwNo">やめる</button>`;
+ $('nwNo').onclick=closeSheet;$('nwYes').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}G=null;closeSheet();goStart()};
+ $('sheet').classList.add('on')}
+/* タイトル：設定（効果音・セーブを消す） */
+function openOpt(){$('sheetT').textContent='設定';
+ $('sheetB').innerHTML=`<div class="optrow"><span>効果音</span><button class="btn ${OPT.mute?'':'gold'}" id="opSnd">${OPT.mute?'オフ':'オン'}</button></div>
+  ${G?`<div class="optrow"><span>セーブを消す</span><button class="btn" id="opDel"><img src="img/title/ui/i_trash.webp" alt="" style="width:22px;height:22px;vertical-align:-5px"> 消す</button></div>`:''}
+  <div class="note" style="text-align:center;margin-top:8px">β版 ver ${VERSION}</div><button class="btn ghost" id="opX">閉じる</button>`;
+ $('opSnd').onclick=()=>{OPT.mute=!OPT.mute;saveOpt();if(!OPT.mute){audio();tone(880,.08,'triangle',.08)}openOpt()};
+ const d=$('opDel');if(d)d.onclick=()=>{closeSheet();askReset()};$('opX').onclick=closeSheet;
+ $('sheet').classList.add('on')}
+/* タイトル：お知らせ（この版で変わったこと） */
+function openNews(){$('sheetT').textContent='お知らせ';
+ $('sheetB').innerHTML=`<div class="news"><b>ver ${VERSION}　マイスターの塔2</b><ul>
+  <li>塔を連続で登るサバイバー形式になった。ボスのあとは続けて登るか帰るかを選べる</li>
+  <li>工房で素材・工具・図面から武器と防具をつくる</li>
+  <li>ガチャで仲間を集め、パーティ3人の能力で助け合う</li>
+  <li>前の版（コマンド版）のセーブは引きつがれない</li></ul></div><button class="btn ghost" id="nsX">閉じる</button>`;
+ $('nsX').onclick=closeSheet;$('sheet').classList.add('on')}
 function askReset(){$('sheetT').textContent='セーブを消す';
  $('sheetB').innerHTML=`<div style="text-align:center;line-height:1.7;margin:6px 0 10px">セーブを消します。<br><b style="color:var(--red)">もとに戻せません。</b>よろしいですか？</div>
   <button class="btn" style="background:linear-gradient(#a33,#611);border-color:#e66" id="rsYes">消す</button><button class="btn ghost" id="rsNo">やめる</button>`;
  $('rsNo').onclick=closeSheet;$('rsYes').onclick=()=>{try{localStorage.removeItem(KEY)}catch(e){}G=null;closeSheet();
-  $('btnStart').textContent='はじめる';$('btnReset').style.display='none';say('セーブを消しました',1000)};
+  $('btnStart').textContent='はじめる';$('btnReset').style.display='none';$('btnNew').style.display='none';say('セーブを消しました',1000)};
  $('sheet').classList.add('on')}
 const $=id=>document.getElementById(id);
 /* 横向きの案内が出ている間はゲームの時間を止める（戦闘の待ち時間・ミニゲームの制限時間） */
@@ -1392,7 +1433,7 @@ function talk(list,bg){if(!list||!list.length)return Promise.resolve();return ne
 /* ================= 音 ================= */
 let AC=null;
 function audio(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}}
-function tone(f,d,type='sine',v=.12,slide=0){if(!AC)return;try{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(slide,AC.currentTime+d);g.gain.value=v;g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g).connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}}
+function tone(f,d,type='sine',v=.12,slide=0){if(!AC||OPT.mute)return;try{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(slide,AC.currentTime+d);g.gain.value=v;g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.connect(g).connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}}
 let lastBuzz=0;
 function buzz(){const n=performance.now();if(n-lastBuzz<120)return;lastBuzz=n;tone(110,.09,'square',.07);$('flash').classList.add('on');setTimeout(()=>$('flash').classList.remove('on'),90)}
 const sfx={start:()=>tone(660,.15,'triangle',.1,990),hit:()=>tone(220,.25,'sawtooth',.12,60),perfect:()=>[784,988,1319].forEach((f,i)=>setTimeout(()=>tone(f,.25,'triangle',.12),i*90)),
@@ -2885,7 +2926,7 @@ try{G=migrate(G)}catch(e){console.warn('save migrate failed',e);G=null}
 if(!G&&SAVE_RAW!=null){try{localStorage.setItem(BROKEN_KEY,SAVE_RAW)}catch(e){}loadNote='セーブを読めませんでした（元のデータは mmrpg1_broken に残しました）'}
 if(G&&OPT.fast===undefined&&G.flags.fast){OPT.fast=true;saveOpt()}  /* 前の版は速さを G.flags.fast に保存していた */
 if(G)G.flags.fast=!!OPT.fast;
-$('btnStart').textContent=G?'つづきから':'はじめる';$('btnReset').style.display=G?'':'none';
+$('btnStart').textContent=G?'つづきから':'はじめる';$('btnReset').style.display='none';$('btnNew').style.display=G?'':'none';
 $('tVer').textContent=`β版 ver ${VERSION}`;$('tNote').textContent=loadNote;
 /* テスト用の参照（テスト担当が G を書きかえて各エリア・ボスへ直接入れる） */
 window.__game={get FD(){return FD},startField,fEnd,makeProduct,RECIPES,FAREA,FT,get G(){return G},set G(v){G=v},save,migrate,openTown,openHome,openDest,goArea,newMember,stage,AREAS,FOES,VERSION};
