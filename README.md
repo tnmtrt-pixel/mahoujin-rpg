@@ -4,7 +4,7 @@ iPhone の Safari 向けのブラウザRPG。マイスターの塔のキャラ�
 
 - 遊ぶ：https://tnmtrt-pixel.github.io/mahoujin-rpg/
 - バージョン：`index.html` の `const VERSION` を見る（タイトル画面にも表示）
-- セーブ：各端末のブラウザに保存される（localStorage `mmrpg2`。0.2 までの `mmrpg1` は読みこんで引きつぐ）
+- セーブ：各端末のブラウザに保存される（localStorage `mmrpg2`。0.2 までのセーブ `mmrpg1` は引きつがず、最初から始まる）
 
 ## 遊び方のしくみ（0.3）
 
