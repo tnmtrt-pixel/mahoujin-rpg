@@ -560,6 +560,52 @@ img.wt2{filter:drop-shadow(0 0 2px #ff7a2f)}img.wt3{filter:drop-shadow(0 0 2px #
 #tabs .tab.on .tic{opacity:1;filter:none}
 #tabs .tab span{font-size:11px;letter-spacing:.08em}
 
+/* ===== 各階のクリア画面 ===== */
+#result.fres #resP{background:none;border:0;padding:0;box-shadow:none}
+#result.fres{display:flex;flex-direction:column;justify-content:space-between;padding-top:calc(env(safe-area-inset-top) + 10px)}
+#result.fres #resBtns{display:flex;gap:10px}#result.fres #resBtns .btn{flex:1;margin:0}
+.rz{display:flex;flex-direction:column;gap:10px}
+.rzh{position:relative;text-align:center;padding:4px 0 8px;animation:rzIn .45s ease-out both}
+.rzh::after{content:'';position:absolute;left:8%;right:8%;bottom:0;height:2px;background:linear-gradient(90deg,transparent,var(--so),transparent)}
+.lose .rzh::after{background:linear-gradient(90deg,transparent,#7a8aa8,transparent)}
+.rzfl{font-size:58px;font-weight:900;line-height:1;letter-spacing:-.02em;color:transparent;-webkit-text-stroke:1.5px var(--so);font-family:system-ui}
+.rzfl small{font-size:26px;-webkit-text-stroke:1px var(--so)}
+.lose .rzfl,.lose .rzfl small{-webkit-text-stroke-color:#7a8aa8}
+.rzti{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:-4px}
+.rzti b{font-size:30px;font-weight:900;letter-spacing:.12em;color:var(--sw)}
+.win .rzti b{color:#ffd27a;text-shadow:0 0 14px #ff7a2f88}
+.rzsb{font-size:12px;color:var(--sm);margin-top:2px}
+.rzart{position:relative;height:clamp(110px,calc(100vh - 610px),230px);height:clamp(110px,calc(100dvh - 610px),230px);display:flex;justify-content:center;animation:rzIn .5s .1s ease-out both}
+.rzart::before{content:'';position:absolute;left:50%;top:50%;width:70%;aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(#ff7a2f55,transparent 65%);border-radius:50%}
+.lose .rzart::before{background:radial-gradient(#4a5a7a55,transparent 65%)}
+.rzart img{position:relative;height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px #000a)}
+.lose .rzart img{filter:grayscale(.6) brightness(.8) drop-shadow(0 6px 10px #000a)}
+.rzst{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.rzst div{background:var(--sk2);border:1px solid var(--sl);padding:6px 4px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.rzst span{font-size:10px;color:var(--sm);letter-spacing:.1em}.rzst b{font-size:20px;font-family:system-ui}
+.rzrh{font-size:11px;letter-spacing:.2em;color:var(--sm);margin-bottom:6px}
+.rzg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.rzt{position:relative;background:var(--sk2);border:1px solid var(--sl);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 2px 4px;min-height:62px;animation:rzPop .35s ease-out both}
+.rzt b{font-size:14px;font-family:system-ui;margin-top:1px}
+.rzt.gold{border-color:#ffb040;box-shadow:inset 0 0 12px #ff9a2a33}.rzt.gold b{color:#ffd27a}
+.rzt.wide{grid-column:span 2;flex-direction:row;gap:8px;justify-content:flex-start;padding:6px 8px;border-color:var(--so)}
+.rzt.wide b{font-size:12px;text-align:left;font-family:inherit}
+.rzt i{position:absolute;top:-7px;right:4px;font-style:normal;font-size:9px;font-weight:800;background:var(--so);color:#0a0e1a;padding:0 4px;letter-spacing:.05em}
+.rznx{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;border-left:2px solid var(--so);padding:6px 10px;background:linear-gradient(90deg,#ff7a2f1a,transparent)}
+.rznx b{font-size:15px;color:#ffd27a}.rznx em{font-style:normal;font-size:11px;color:var(--sm)}
+@keyframes rzIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@keyframes rzPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+#result.fres{background:radial-gradient(120% 60% at 50% 18%,#1a2236 0%,var(--sk) 70%)}
+#result.fres #resBtns{background:linear-gradient(transparent,var(--sk) 30%)}
+#result.fres #resBtns .btn{border-radius:0;box-shadow:none;font-size:16px;font-weight:800;letter-spacing:.1em;padding:14px 8px;background:transparent;border:1px solid var(--sl);color:var(--sw);text-shadow:none}
+#result.fres #resBtns .btn.gold{background:var(--so);border-color:var(--so);color:#0a0e1a;clip-path:polygon(0 0,100% 0,100% 70%,92% 100%,0 100%)}
+@media (max-height:760px){
+ .rz{gap:7px}.rzfl{font-size:42px}.rzfl small{font-size:20px}.rzti b{font-size:24px}.rzti .ic{width:32px!important;height:32px!important}
+ .rzst div{padding:3px 4px;flex-direction:row;justify-content:center;gap:5px}.rzst span{display:none}.rzst b{font-size:17px}
+ .rzt{min-height:50px;padding:4px 2px 3px}.rzt .ic{width:28px!important;height:28px!important}.rzt b{font-size:13px}
+ .rznx{padding:4px 10px;font-size:12px}
+}
+
 </style>
 </head>
 <body>
@@ -2287,18 +2333,33 @@ function fEnd(why){const D=FD;if(!D||D.ending)return;D.ending=true;D.run=false;c
  let coin=0;if(up){coin=fl>(G.floor|0)?(FLR.boss?COIN_FIRST_BOSS:COIN_FIRST):COIN_AGAIN;G.coin=(G.coin|0)+coin}
  if(up&&fl>(G.floor|0)){G.floor=fl;if(FLR.boss&&!G.cleared.includes(bossId)){G.cleared.push(bossId);G.flags.pendFieldWin=k}else if(fl<TOP_FLOOR)G.flags.pendFloorUp=fl}
  G.where={s:'town'};G.town={x:TOWN_START[0],y:TOWN_START[1]};save();
- const ttl={stairs:`${fl}階 突破！`,timeup:'時間切れ……階段が見つからなかった',limit:'錆が濃くなってきた。いったん町へ',retreat:'町へ帰ってきた',dead:'力つきた……'}[why];
- const mt=matText(got);
- $('resP').innerHTML=`<h2 style="margin:0 0 6px;color:${dead?'#ff8a7a':'var(--gold)'}">${ttl}</h2>
-  <div class="note">${fl}階 ${FLR.n}　${Math.floor(D.t/60)}分${Math.floor(D.t%60)}秒　倒した数 ${D.kills}　Lv${D.lv}</div>
-  <div class="panel" style="margin:8px 0"><b>持ち帰ったもの</b>${dead?'<div class="note" style="color:#ffb07a">力つきたので、素材は半分だけ持ち帰れた（図面と工具はそのまま）</div>':''}
-  <div style="margin-top:6px;line-height:2">${mt||'<span class="note">素材なし</span>'}</div>
-  ${D.lootBps.length?`<div style="margin-top:4px">${MIC('bp',20)} 図面：${D.lootBps.map(b=>'「'+RECIPES[b].n+'」').join('')}</div>`:''}
-  ${coin?`<div style="margin-top:4px">${coinIc(20)} コイン +${coin}</div>`:''}
-  ${D.lootTools.length?`<div style="margin-top:4px">${MIC(D.lootTools[0],20)} 工具：${D.lootTools.map(t=>'「'+TOOLS[t].n+'」').join('')}</div>`:''}</div>
-  <div class="note">工房で、素材＋工具＋図面をそろえると武器や防具をつくれる。</div>`;
- $('resBtns').innerHTML='';addBtn(G.flags.pendFieldWin?'つづける':'ホームへ',afterField,'gold');show('result');FD=null}
-async function afterField(){const k=G.flags.pendFieldWin;if(!k){const u=G.flags.pendFloorUp;if(u){delete G.flags.pendFloorUp;save();await say(`${IC('unlock',30)} ${u+1}階へ進めるようになった`,1100)}openHome();return}
+ const ttl={stairs:'突破！',timeup:'時間切れ',limit:'錆が濃くなった',retreat:'町へ帰った',dead:'力つきた'}[why];
+ const sub={stairs:FLR.boss?'ボスを倒して上への階段を登った':'上への階段を見つけた',timeup:'1分以内に階段が見つからなかった',limit:'いったん町へもどろう',retreat:'',dead:'素材は半分だけ持ち帰れた（図面と工具はそのまま）'}[why];
+ const emb={stairs:'n_floor',timeup:'n_time',limit:'n_time',retreat:'n_lamp',dead:'n_boss'}[why];
+ const tl=Math.floor(D.t),tt=`${Math.floor(tl/60)}:${String(tl%60).padStart(2,'0')}`;
+ let delay=0;const tile=(ic,n,cls='',tag='')=>`<div class="rzt ${cls}" style="animation-delay:${(delay+=70)}ms">${ic}<b>${n}</b>${tag?`<i>${tag}</i>`:''}</div>`;
+ const tiles=[...MAT_ORDER.filter(k=>got[k]).map(k=>tile(MIC(k,34),'×'+got[k])),
+  ...(coin?[tile(coinIc(34),'+'+coin,'gold')]:[]),
+  ...D.lootBps.map(b=>tile(RIC(b,34),RECIPES[b].n,'wide','図面 NEW')),
+  ...D.lootTools.map(t=>tile(MIC(t,34),TOOLS[t].n,'wide','工具 NEW'))].join('');
+ const nf=up&&fl<TOP_FLOOR&&!G.flags.pendFieldWin?FLOORS[fl+1]:null;
+ const nxt=nf?`<div class="rznx">${UIMG('n_unlock',26)}<span>次は <b>${fl+1}階</b>「${nf.n}」</span>${nf.boss?`<em>${UIMG('n_boss',16)}ボス</em>`:''}${nf.join&&!ownChar(nf.join)?`<em>${UIMG('n_join',16)}仲間の気配</em>`:''}</div>`
+  :!up?`<div class="rznx">${UIMG('n_time',26)}<span>もう一度 <b>${fl}階</b> に挑める</span></div>`:'';
+ $('result').classList.add('fres');
+ $('resP').innerHTML=`<div class="rz ${up?'win':'lose'}">
+  <div class="rzh"><div class="rzfl">${fl}<small>F</small></div><div class="rzti">${UIMG(emb,40)}<b>${ttl}</b></div><div class="rzsb">${FLR.n}${sub?'　'+sub:''}</div></div>
+  <div class="rzart"><img src="${CHARS[G.lead].img}" alt=""></div>
+  <div class="rzst"><div>${UIMG('n_time',22)}<span>時間</span><b>${tt}</b></div><div>${UIMG('r_kill',22)}<span>倒した数</span><b>${D.kills}</b></div><div>${UIMG('r_lv',22)}<span>レベル</span><b>${D.lv}</b></div></div>
+  <div class="rzrw"><div class="rzrh">持ち帰ったもの</div><div class="rzg">${tiles||'<span class="note">なし</span>'}</div></div>
+  ${nxt}</div>`;
+ $('resBtns').innerHTML='';
+ if(nf){addBtn(`${fl+1}階へ進む`,()=>resGo(fl+1),'gold');addBtn('ホームへ',afterField)}
+ else if(!up&&fl>=1){addBtn(`もう一度 ${fl}階へ`,()=>resGo(fl),'gold');addBtn('ホームへ',afterField)}
+ else addBtn(G.flags.pendFieldWin?'つづける':'ホームへ',afterField,'gold');
+ if(up)sfx.win&&sfx.win();show('result');FD=null}
+/* 結果画面から、そのまま次の階（またはもう一度）へ */
+function resGo(f){if(G.flags.pendFloorUp){delete G.flags.pendFloorUp;save()}$('result').classList.remove('fres');goFloor(f)}
+async function afterField(){$('result').classList.remove('fres');const k=G.flags.pendFieldWin;if(!k){const u=G.flags.pendFloorUp;if(u){delete G.flags.pendFloorUp;save();await say(`${IC('unlock',30)} ${u+1}階へ進めるようになった`,1100)}openHome();return}
  await talk(BOSS_WIN[k]||[]);
  if(k==='under'){await talk(ENDING,'ev_ending1');G.flags.ch1=1;delete G.flags.pendFieldWin;save();showEnding();return}
  delete G.flags.pendFieldWin;delete G.flags.pendFloorUp;save();
@@ -2348,6 +2409,7 @@ async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)
  Object.keys(R.mats).forEach(k=>G.mats[k]-=R.mats[k]);G.pendCraft={rid:id,rank,mul,ds:r.score,ls:R.lathe?ls:null,reach:r.reach,shape:r.shape||null,attr:R.kind==='weapon'?rollAttr(rank):null,grind:R.kind==='weapon'};save();showCraftResult(G.pendCraft)}finally{crafting=false}}
 function showCraftResult(pc){const R=RECIPES[pc.rid];if(!R){delete G.pendCraft;save();openShop();return}
  const who=R.kind==='weapon'?findOwn(R.who):null;if(R.kind==='weapon'&&!who){delete G.pendCraft;save();openShop();return}
+ $('result').classList.remove('fres');
  $('resP').innerHTML=`<div style="text-align:center">${RIC(pc.rid,72)}<div style="margin:2px 0">${RKIC(pc.rank,84)}</div><b>${R.n}</b>
   ${pc.shape?shapeImg(pc.shape,200):''}${pc.attr?`<div class="note" style="margin:4px 0">属性：${attrTxt(pc.attr)}</div>`:''}<div class="note">${pc.grind?'形の一致 '+pc.ds+'%':'設計 '+pc.ds}${pc.ls!=null?'・加工 '+pc.ls:''}　→　${prodFx(R,pc.mul)}${pc.reach<1&&pc.rank!=='SS'?'<br>（SS は、図面を最後までなぞったときだけ）':''}</div>
   <div class="note">今の装備：${curProd(R)}</div></div>`;
