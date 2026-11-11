@@ -701,7 +701,6 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
   <button class="ggo" onclick="openDest()"><b>出撃</b><small id="hGoT"></small></button>
   <button class="gb" onclick="goTab('shop')"><img src="img/ui/icon0.webp" alt=""><b>工房</b></button>
   <button class="gb" onclick="goTab('party')"><img src="img/ui/icon1.webp" alt=""><b>編成</b></button>
-  <button class="gb" onclick="goTab('town')"><img src="img/ui/icon2.webp" alt=""><b>町</b></button>
   <button class="gb" onclick="goTab('zukan')"><img src="img/ui/icon3.webp" alt=""><b>図鑑</b></button>
   <button class="gb gga" onclick="goTab('gacha')"><img src="img/ui/icon_gacha.webp" alt=""><b>ガチャ</b></button>
   <button class="gb" onclick="openMenu()"><img src="img/ui/icon5.webp" alt=""><b>メニュー</b></button>
@@ -776,7 +775,7 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
  </div>
  <div id="fWarn"></div>
  <div class="fov" id="fLevel"><div class="fcard"><h3>レベルアップ！</h3><div class="note">だれを強くする？</div><div id="fPicks"></div></div></div>
- <div class="fov" id="fPause"><div class="fcard"><h3>ひと休み</h3><button class="btn gold" onclick="fResume()">つづける</button><button class="btn" onclick="fRetreat()">町へ帰る（素材は全部持ち帰る）</button></div></div>
+ <div class="fov" id="fPause"><div class="fcard"><h3>ひと休み</h3><button class="btn gold" onclick="fResume()">つづける</button><button class="btn" onclick="fRetreat()">ホームへ帰る（素材は全部持ち帰る）</button></div></div>
 </section>
 
 <section id="result" class="scr">
@@ -1531,13 +1530,15 @@ function levelUp(m){m.lv++;return learnUpTo(m)}
 /* 町の座標が壊れていたら（範囲外・壁の中など）開始位置へ戻す */
 function fixTown(g){const t=g.town,ok=t&&Number.isInteger(t.x)&&Number.isInteger(t.y)&&t.y>=0&&t.y<TOWN.length&&t.x>=0&&t.x<TOWN[0].length&&!'#B~FPLST'.includes(tileAt(t.x,t.y));if(!ok)g.town={x:TOWN_START[0],y:TOWN_START[1]}}
 function goStart(){audio();if(G){fixTown(G);if(!G.opened)G.opened=[];resumeGame();return}
+ /* キャラ選択はなし：ウルフで始めて、すぐホーム（出撃メニュー）へ */
+ {const sel=HEROES[0];G={v:SAVE_V,hero:sel,party:[newMember(sel,1)],items:{oil:3,oil2:0,cool:1},mat:3,cleared:['base'],joined:[],town:{x:TOWN_START[0],y:TOWN_START[1]},opened:[],area:'alley',flags:{intro:0},restUsed:[],where:{s:'town'},mats:{scrap:3},tools:['file'],bps:[],arm:{},lead:sel};fixV2(G);save();playIntro();return}
  let sel=null;$('pickGrid').classList.toggle('one',HEROES.length===1);$('pickGrid').innerHTML=HEROES.map(id=>{const c=CHARS[id],J=JOBS[c.job];return `<div class="cc" data-id="${id}"><img src="${c.img}" alt=""><div class="nm">${c.name}</div><span class="tag">${JIC(Object.keys(JOBS).find(k=>JOBS[k]===J))} ${J.n}</span></div>`}).join('');
  $('pickGrid').querySelectorAll('.cc').forEach(el=>el.onclick=()=>{sel=el.dataset.id;$('pickGrid').querySelectorAll('.cc').forEach(x=>x.classList.toggle('sel',x===el));const c=CHARS[sel],J=JOBS[c.job];
   $('pickInfo').style.display='block';$('pickInfo').innerHTML=`<b>${c.name}</b>　${JIC(Object.keys(JOBS).find(k=>JOBS[k]===J))} ${J.n}（${J.role}）<div class="note">固有の能力：<b>${c.pass.n}</b>…${c.pass.d}<br>必殺技：<b>${c.sp.n}</b>…${c.sp.d}</div><div style="margin-top:4px">「${c.lines[0]}」</div>`;$('pickOk').disabled=false});
  if(HEROES.length===1)$('pickGrid').querySelector('.cc').click();
  $('pickOk').onclick=async()=>{if(G)return;G={v:SAVE_V,hero:sel,party:[newMember(sel,1)],items:{oil:3,oil2:0,cool:1},mat:3,cleared:['base'],joined:[],town:{x:TOWN_START[0],y:TOWN_START[1]},opened:[],area:'alley',flags:{intro:0},restUsed:[],where:{s:'town'},mats:{scrap:3},tools:['file'],bps:[],arm:{},lead:sel};fixV2(G);save();await playIntro()};show('pick')}
 /* はじまりの会話。読み終えてから intro=1 をセーブ（途中で読み込み直しても、もう一度出る） */
-async function playIntro(){openTown();if(TW)TW.busy=true;await talk(INTRO[G.hero]||[]);G.flags.intro=1;save();if(TW)TW.busy=false}
+async function playIntro(){openHome();await talk(INTRO[G.hero]||[]);G.flags.intro=1;save();openHome()}
 /* 「つづきから」：読み込み直しの前にいた安全な場面から再開する
    はじまりの会話の途中 → 会話から／勝利の会話の途中 → 地図＋勝利の会話から／武器の結果を選ぶ前 → 結果画面から／それ以外は町（同じ位置）か地図 */
 async function resumeGame(){
@@ -2404,8 +2405,8 @@ function fEnd(why){const D=FD;if(!D||D.ending)return;D.ending=true;D.run=false;c
  let coin=0;if(up){coin=fl>(G.floor|0)?(FLR.boss?COIN_FIRST_BOSS:COIN_FIRST):COIN_AGAIN;G.coin=(G.coin|0)+coin}
  if(up&&fl>(G.floor|0)){G.floor=fl;if(FLR.boss&&!G.cleared.includes(bossId)){G.cleared.push(bossId);G.flags.pendFieldWin=k}else if(fl<TOP_FLOOR)G.flags.pendFloorUp=fl}
  G.where={s:'town'};G.town={x:TOWN_START[0],y:TOWN_START[1]};save();
- const ttl={stairs:'突破！',timeup:'時間切れ',limit:'錆が濃くなった',retreat:'町へ帰った',dead:'力つきた'}[why];
- const sub={stairs:FLR.boss?'ボスを倒して上への階段を登った':'上への階段を見つけた',timeup:'1分以内に階段が見つからなかった',limit:'いったん町へもどろう',retreat:'',dead:'素材は半分だけ持ち帰れた（図面と工具はそのまま）'}[why];
+ const ttl={stairs:'突破！',timeup:'時間切れ',limit:'錆が濃くなった',retreat:'ホームへ帰った',dead:'力つきた'}[why];
+ const sub={stairs:FLR.boss?'ボスを倒して上への階段を登った':'上への階段を見つけた',timeup:'1分以内に階段が見つからなかった',limit:'いったんホームへもどろう',retreat:'',dead:'素材は半分だけ持ち帰れた（図面と工具はそのまま）'}[why];
  const emb={stairs:'n_floor',timeup:'n_time',limit:'n_time',retreat:'n_lamp',dead:'n_boss'}[why];
  const tl=Math.floor(D.t),tt=`${Math.floor(tl/60)}:${String(tl%60).padStart(2,'0')}`;
  let delay=0;const tile=(ic,n,cls='',tag='')=>`<div class="rzt ${cls}" style="animation-delay:${(delay+=70)}ms">${ic}<b>${n}</b>${tag?`<i>${tag}</i>`:''}</div>`;
@@ -2457,10 +2458,10 @@ function renderShop(){const tabs=[['make',UIMG('u_weapon',20)+'つくる'],['too
     <div class="rneed"><span class="nl">素材</span>${mats}</div><div class="rneed"><span class="nl">工具</span>${tools}</div>
     <button class="btn ${c.ok?'gold':''}" data-mk="${id}" ${c.ok?'':'disabled'} style="margin:6px 0 0">${c.ok?'加工する':c.noWho?CHARS[R.who].name+'がまだ仲間にいない':'足りないものがある'}</button></div>`}).join('');
   if(unk)h+=`<div class="note" style="text-align:center;margin-top:8px">${MIC('bp',18)} まだ図面がない製品：あと ${unk}<br>強敵や資材の箱から、図面が見つかる</div>`}
- if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。鉄くずで買えるものと、町の外でしか見つからないものがある。</div><div style="font-weight:800;margin:6px 0">${MIC('scrap',22)} 鉄くず ${G.mats.scrap}</div>`;
+ if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。鉄くずで買えるものと、塔の中でしか見つからないものがある。</div><div style="font-weight:800;margin:6px 0">${MIC('scrap',22)} 鉄くず ${G.mats.scrap}</div>`;
   h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${has?'　<span class="tag tg-ok">持っている</span>':''}<div class="note">${T.d}</div></div>
    ${has?'':T.price?`<button class="btn" data-buy="${t}" ${G.mats.scrap<T.price?'disabled':''} style="width:auto;margin:0;padding:10px 14px;font-size:15px">${MIC('scrap',18)}${T.price}で買う</button>`:`<span class="note" style="max-width:110px">${T.where}で見つかる</span>`}</div></div>`}).join('')}
- if(shopTab==='mat'){h+=`<div class="note">素材は町の外で、錆の魔物を倒したり資材の箱をあけたりして集める。</div>`+MAT_ORDER.map(k=>`<div class="itr">${MIC(k,40)}<div class="itn"><b>${MATS[k].n}</b><small>${MATS[k].d}</small></div><span class="itc ${G.mats[k]?'':'z'}">×${G.mats[k]}</span></div>`).join('')}
+ if(shopTab==='mat'){h+=`<div class="note">素材は塔の中で、錆の魔物を倒したり資材の箱をあけたりして集める。</div>`+MAT_ORDER.map(k=>`<div class="itr">${MIC(k,40)}<div class="itn"><b>${MATS[k].n}</b><small>${MATS[k].d}</small></div><span class="itc ${G.mats[k]?'':'z'}">×${G.mats[k]}</span></div>`).join('')}
  $('shopBody').innerHTML=h;
  $('shopBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{shopTab=b.dataset.t;renderShop()});
  $('shopBody').querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>makeProduct(b.dataset.mk));
@@ -2496,11 +2497,11 @@ function openItems(){const row=(ic,n,cnt,d)=>`<div class="itr">${ic}<div class="
   `<div class="note" style="margin-top:8px"><b>工具</b>　${G.tools.map(t=>MIC(t,20)+TOOLS[t].n).join('・')}</div>`+
   `<div class="note" style="margin-top:6px"><b>図面</b>　${G.bps.map(b=>'「'+RECIPES[b].n+'」').join('')}</div>`;
  $('sheet').classList.add('on')}
-function openHelp(){talk([[null,'説明','町では画面のどこでも、指を置いてずらした方向へ歩ける。人やキャラはタップかぶつかると話せる。工房の扉で武器・防具づくり、渦巻きの門から町の外へ。'],
- [null,'説明','町の外では、出撃キャラを指で動かす。攻撃は自動。はじめは出撃キャラの技だけ。'],
+function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイスターの塔を1階ずつ登る。各階は1分以内に上への階段を見つける。工房で武器・防具づくり、編成でパーティ、ガチャで仲間集め。'],
+ [null,'説明','塔の中では、出撃キャラを指で動かす。攻撃は自動。はじめは出撃キャラの技だけ。'],
  [null,'説明','レベルアップすると、技が3つ出る。持っている仲間の技（NEW）を覚えるか、覚えた技を強くするかを選ぶ。控えの仲間の技も出てくる。パーティ（3人）の仲間は、能力（パッシブ）で助けてくれる。'],
  [null,'説明','倒した錆や資材の箱から、素材と図面が手に入る。途中で帰っても全部持ち帰れるが、力つきると素材は半分になる。'],
- [null,'説明','工房では「素材＋工具＋図面」がそろうと加工できる。工具は工房で買うか、町の外で見つける。なぞりの出来ばえで強さが決まる。']])}
+ [null,'説明','工房では「素材＋工具＋図面」がそろうと加工できる。工具は工房で買うか、塔の中で見つける。なぞりの出来ばえで強さが決まる。']])}
 function signLines(){return [[null,'看板','↑ 古い工房（武器・防具づくり、工具）\n↓ 渦の門（マイスターの塔の入口。錆が出るので注意）'],[null,'看板',`塔の${G.floor|0}階まで突破。次は ${nextFloor()}階「${FLOORS[nextFloor()].n}」`]]}
 function openDest(){const top=nextFloor();
  show('dest');
