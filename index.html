@@ -981,6 +981,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .sgg span{display:flex;flex-direction:column}.sgg small{opacity:.75;font-size:12px}.sgg .btn{width:auto;margin:0;padding:6px 12px;font-size:14px}
 .sgc{width:100%;box-sizing:border-box;min-height:64px;font:12px monospace;background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px;word-break:break-all}
 #sgImp{margin:0}
+.frl{margin-left:6px;padding:0 6px;border-radius:8px;background:#7a2a12;color:#ffcf9a;font-size:12px;font-weight:700}
 
 </style>
 </head>
@@ -2418,6 +2419,9 @@ const BP_ELITE=.12,BP_CHEST=.08;
 const REC_POW={1:100,2:120,3:150,4:300,5:350,6:450,7:650,8:750,9:850,10:1100};
 const TOOL_GATE={tap:3,solder:3,drill:3,pliers:4,welder:4,lathe:4};
 const rustMul=()=>FD.st>FT.RUST?1+(FD.st-FT.RUST)/45:1;
+/* 長居の錆：錆が出てから25秒ごとに錆Lvが上がり、新しく出る敵のHPと攻撃が強くなる（低い階での放置稼ぎを止める） */
+const rustK=()=>Math.max(0,(FD.st-FT.RUST)/25),rustLv=()=>FD.st>=FT.RUST?Math.floor(rustK())+1:0;
+const rustHp=k=>1+.6*k+.25*k*k,rustDm=k=>1+.5*k+.2*k*k;
 const FCFG={HP:100,SPD:1.9,PICK:70,MAX_FOES:170};
 const AREA_JOIN={alley:'fox',factory:'dodo',under:'owl'};
 /* 塔の階（第1章＝1〜10階）。area：敵・地面・素材の種類（下層 alley／中層 factory／上層 under）
@@ -2550,8 +2554,8 @@ const fPow=id=>fPow0(id)*fPowX(id);
 /* 敵の波：1分の探索に合わせて、時間を2.5倍速で進める */
 const fSearchT=()=>FD.st;   /* この階を探索した時間（ボス戦の間は進まない） */
 function waveNow(){const mix=FAREA[FD.area].mix,t=fSearchT()*2.5;let w=mix[0];for(const v of mix)if(t>=v[0])w=v;return w}
-function fSpawn(kind,ang,dist){if(FD.foes.length>=FCFG.MAX_FOES&&!FFOE[kind].big)return null;const F=FFOE[kind],a=ang==null?Math.random()*TAU:ang,r=dist||Math.hypot(fW,fH)/2/fZ+60,fs=FSCALE(FD.floor),hm=F.boss?BOSS_HP[FD.floor]||1:(1+fSearchT()/60)*(1+.22*(FD.step||0))*fs.hp;
- const e={id:++FD.uid,k:kind,x:FD.x+Math.cos(a)*r,y:FD.y+Math.sin(a)*r,hp:F.hp*hm,max:F.hp*hm,r:F.r,spd:F.spd*(F.boss?1:.9+Math.random()*.2),hit:0,kb:[0,0],wob:Math.random()*TAU,oh:0,big:!!F.big,boss:!!F.boss,dm:F.boss?1+.08*((FD.floor||1)-1):fs.dmg};
+function fSpawn(kind,ang,dist){if(FD.foes.length>=FCFG.MAX_FOES&&!FFOE[kind].big)return null;const F=FFOE[kind],a=ang==null?Math.random()*TAU:ang,r=dist||Math.hypot(fW,fH)/2/fZ+60,fs=FSCALE(FD.floor),rk=F.boss?0:rustK(),hm=F.boss?BOSS_HP[FD.floor]||1:(1+fSearchT()/60)*(1+.22*(FD.step||0))*fs.hp*rustHp(rk);
+ const e={id:++FD.uid,k:kind,x:FD.x+Math.cos(a)*r,y:FD.y+Math.sin(a)*r,hp:F.hp*hm,max:F.hp*hm,r:F.r,spd:F.spd*(F.boss?1:.9+Math.random()*.2),hit:0,kb:[0,0],wob:Math.random()*TAU,oh:0,big:!!F.big,boss:!!F.boss,dm:F.boss?1+.08*((FD.floor||1)-1):fs.dmg*rustDm(rk)};
  FD.foes.push(e);return e}
 function nearestFoes(n,x=FD.x,y=FD.y,maxD=1e9){return FD.foes.map(f=>[f,(f.x-x)**2+(f.y-y)**2]).filter(a=>a[1]<maxD*maxD).sort((a,b)=>a[1]-b[1]).slice(0,n).map(a=>a[0])}
 function fDamage(e,d,kx,ky){if(e.hp<=0)return;e.hp-=d;e.hit=6;if(!e.boss)e.kb=[kx||0,ky||0];if(FD.pops.length<90)FD.pops.push({x:e.x,y:e.y-e.r,v:Math.round(d),t:0});
@@ -2675,7 +2679,7 @@ function fUpdate(f){const D=FD;D.t+=f/60;
  if(D.join&&!D.join.shown&&D.t>=FT.JOIN){const a=Math.random()*TAU;Object.assign(D.join,{shown:true,x:D.x+Math.cos(a)*230,y:D.y+Math.sin(a)*230});fBanner(`だれかの気配がする…（${CHARS[D.join.id].name}）`,180,'n_join')}
  if(FLOORS[D.floor].boss&&!D.boss&&!D.bossDone&&!D.bossCalled&&D.t>=FT.BOSS){fBossCome();return}
  if(D.stairs&&!D.stairShown&&D.t>=FT.HINT){D.stairShown=true;fBanner(D.stairs.open?'階段の気配がする！ 矢印の方へ':'階段に鍵がかかっている。強敵が鍵を持っているらしい',170,D.stairs.open?'n_floor':'n_join')}
- D.tt+=f/60;if(!D.boss){D.st+=f/60;if(D.st>=FT.RUST&&!D.rustMsg){D.rustMsg=1;fBanner('錆が濃くなってきた…… 敵がどんどん増える',170,'n_time')}}
+ D.tt+=f/60;if(!D.boss){D.st+=f/60;if(D.st>=FT.RUST&&!D.rustMsg){D.rustMsg=1;fBanner('錆が濃くなってきた…… 長居すると敵がどんどん強くなる',170,'n_time')}{const rl=rustLv();if(rl>=2&&rl>(D.rustLvMsg||1)){D.rustLvMsg=rl;fBanner(rl>=5?`錆Lv${rl}！ 敵がとても強い。早く階段へ`:`錆Lv${rl}　敵が強くなった`,150,'n_time')}}}
  // 攻撃
  fAttacks(f);
  for(const s of D.shots){s.x+=s.vx*f;s.y+=s.vy*f;s.life-=f;s.rot+=.35*f;
@@ -2750,7 +2754,7 @@ function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDP
  fDrawExtra(g,D);
  g.restore();
  // 上の帯
- const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+`<span class="ffl">${D.floor}F</span><span class="ftm">${D.boss?'ボス戦':Math.floor(lf/60)+':'+String(lf%60).padStart(2,'0')}</span>`+`<span class="fmats">${matIcons(D.floor,18)}</span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
+ const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+`<span class="ffl">${D.floor}F</span><span class="ftm">${D.boss?'ボス戦':Math.floor(lf/60)+':'+String(lf%60).padStart(2,'0')}</span>${rusty?`<span class="frl">錆Lv${rustLv()}</span>`:''}`+`<span class="fmats">${matIcons(D.floor,18)}</span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
  $('fHpI').style.width=Math.max(0,100*D.hp/D.maxhp)+'%';$('fXpI').style.width=100*D.xp/D.need+'%';$('fLv').textContent='Lv'+D.lv;
  if(D.boss){$('fBoss').style.display='block';$('fBossI').style.width=Math.max(0,100*D.boss.hp/D.boss.max)+'%';$('fBossN').textContent=FOES[D.boss.k]?FOES[D.boss.k].n:'ボス'}else $('fBoss').style.display='none';
  const wn=$('fWarn');if(D.warn>0){{const h=(D.warnIc?UIMG(D.warnIc,30)+' ':'')+D.warnTxt;if(wn._h!==h){wn.innerHTML=h;wn._h=h}}wn.style.opacity=Math.min(1,D.warn/30)}else wn.style.opacity=0}
@@ -4610,7 +4614,7 @@ function bkNag(){if(!G)return;const now=Date.now();if(now-(OPT.bkF||now)<7*86400
  $('ngF').onclick=()=>{closeSheet();saveFile()};$('ngX').onclick=closeSheet;$('sheet').classList.add('on')}
 {const _oh=openHome;openHome=function(){const r=_oh.apply(this,arguments);setTimeout(bkNag,700);return r}}
 
-const BUILD='11/13 07:04';
+const BUILD='11/13 07:46';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
