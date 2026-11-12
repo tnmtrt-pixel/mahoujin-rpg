@@ -898,6 +898,14 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 #sheet .shp{max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));display:flex;flex-direction:column}
 #sheet .shh{flex:none}#sheetB{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}
 #sheetB .itr{padding:6px 8px;margin-bottom:4px}
+/* 塔の中の一言 */
+#fSay{position:absolute;left:50%;top:96px;transform:translate(-50%,-8px);z-index:6;display:flex;align-items:center;gap:8px;max-width:88vw;padding:6px 12px 6px 6px;background:#0a0e1ae6;border-left:3px solid var(--so);opacity:0;pointer-events:none;transition:.25s}
+#fSay.on{opacity:1;transform:translate(-50%,0)}
+#fSay .fsi{width:40px;height:40px;flex:none;overflow:hidden;background:#1a2440}#fSay .fsi img{width:100%;height:160%;object-fit:cover;object-position:50% 0}
+#fSay .fst{display:flex;flex-direction:column;font-size:13px;line-height:1.35;color:var(--sw)}#fSay .fst b{font-size:11px;color:var(--so)}
+/* 進化・覚醒のカード */
+.fpick.evo{border:2px solid #ffc94a!important;background:linear-gradient(90deg,#ffc94a22,transparent 70%),var(--sk2)!important}
+.fpick.evo .lvt{background:#ffc94a;color:#1a0a00}.fpe{position:relative;width:52px;height:44px;flex:none}.fpe img{position:absolute;height:44px;width:auto}.fpe img+img{left:18px}
 
 </style>
 </head>
@@ -2451,7 +2459,7 @@ function startFloor(fl){audio();const FLR=FLOORS[fl],k=FLR.area,A=FAREA[k];
   boss:null,bossDone:false,ending:false};
  G.where={s:'field'};save();show('field');resizeField();fReleaseStick();renderFHud();$('fLevel').classList.remove('on');$('fPause').classList.remove('on');
  cancelAnimationFrame(fRaf);fLast=0;fRaf=requestAnimationFrame(fLoop);
- fBanner(`${fl}階　${FLR.n}　${FLR.boss?'ボスが待ちかまえている':'上への階段をさがせ'}`,180,FLR.boss?'n_boss':'n_floor');
+ fBanner(`${fl}階　${FLR.n}　${FLR.boss?'ボスが待ちかまえている':'強敵から鍵をうばえ'}`,180,FLR.boss?'n_boss':'n_floor');
  if(FLR.ev==='mirror'&&!G.flags.selfRust)fMirror()}
 const startField=k=>startFloor({alley:1,factory:4,under:7}[k]||1);
 async function fMirror(){FD.paused=true;fReleaseStick();try{await talk(SELF_RUST[G.hero]||[],EV_IMG.includes('rust_'+G.hero)?'ev_rust_'+G.hero:null);G.flags.selfRust=true;save();
@@ -2461,7 +2469,8 @@ const fSpd=()=>FCFG.SPD*(1+.1*FD.ps.spd)*(1+.08*armMul('feet'))*(1+Math.min(FD.a
 const fCd=()=>1-.08*FD.ps.cd;
 const fPick=()=>FCFG.PICK*(1+.6*FD.ps.mag)*(1+(FD.ab.pick||0));
 const fCut=()=>(1-Math.min(.45,.14*armMul('body')))*(1-(FD.ab.cut||0));
-const fPow=id=>{const g=id!==G.lead&&!G.party.some(m=>m.id===id)&&genFor(id);if(g){const L=findOwn(G.lead);return (g.attr&&g.attr.k==='fire'?1+g.attr.v:1)*g.mul*lvMul(L)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)}const m=findOwn(id);const at=m&&m.weapon&&m.weapon.attr;return (at&&at.k==='fire'?1+at.v:1)*(G.flags.selfRust&&id===G.hero?1.1:1)*starMul(m)*wMul(m)*lvMul(m)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)};
+const fPow0=id=>{const g=id!==G.lead&&!G.party.some(m=>m.id===id)&&genFor(id);if(g){const L=findOwn(G.lead);return (g.attr&&g.attr.k==='fire'?1+g.attr.v:1)*g.mul*lvMul(L)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)}const m=findOwn(id)||(FD.helperMs&&FD.helperMs[id])||null;const at=m&&m.weapon&&m.weapon.attr;return (at&&at.k==='fire'?1+at.v:1)*(G.flags.selfRust&&id===G.hero?1.1:1)*starMul(m)*wMul(m)*lvMul(m)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)};
+const fPow=id=>fPow0(id)*fPowX(id);
 /* 敵の波：1分の探索に合わせて、時間を2.5倍速で進める */
 const fSearchT=()=>FD.st;   /* この階を探索した時間（ボス戦の間は進まない） */
 function waveNow(){const mix=FAREA[FD.area].mix,t=fSearchT()*2.5;let w=mix[0];for(const v of mix)if(t>=v[0])w=v;return w}
@@ -2551,11 +2560,12 @@ function fOpenLevel(){FD.paused=true;fReleaseStick();FD.pendingLv--;tone(660,.12
  const opts=[];Object.keys(FD.atk).forEach(k=>{if((FD.atk[k]||0)<ATK_MAX)opts.push('a:'+k)});Object.keys(PASSIVE).forEach(k=>{if(FD.ps[k]<PASSIVE[k].max)opts.push('p:'+k)});
  /* 仲間の攻撃が少なくとも1つは入るようにする */
  let pk=opts.sort(()=>Math.random()-.5).slice(0,3);const atkOpts=opts.filter(o=>o[0]==='a');if(atkOpts.length&&!pk.some(o=>o[0]==='a'))pk[0]=pick(atkOpts);
+ {const ex=extraOpts();if(ex.length)pk=[ex[0],...pk.filter(x=>x!==ex[0])].slice(0,3)}
  if(!pk.length)pk=['heal'];
  $('fPicks').innerHTML=pk.map(o=>{if(o==='heal')return `<button class="fpick" data-k="heal">${MIC('oil',44)}<span><b>オイル補給</b><small>体力を50回復</small></span></button>`;
-  const [t,k]=o.split(':');if(t==='a'){const c=CHARS[k],A=ATK[k],L=FD.atk[k]||0,gr=k!==G.lead&&genRid(k);return `<button class="fpick" data-k="${o}">${gr?RIC(gr,44):`<span class="fpi"><img src="${c.img}" alt="">${TIC(A.type,26)}</span>`}<span><b>${gr?RECIPES[gr].n+'　'+A.type:c.name+'　'+A.n}</b><small>${A.d[L]}</small></span><span class="lvt">${L?'Lv'+L+'→'+(L+1):'NEW'}</span></button>`}
+  const [t,k]=o.split(':');if(t==='e'||t==='w')return evoCardHTML(t,k);if(t==='a'){const c=CHARS[k],A=ATK[k],L=FD.atk[k]||0,gr=k!==G.lead&&genRid(k);return `<button class="fpick" data-k="${o}">${gr?RIC(gr,44):`<span class="fpi"><img src="${c.img}" alt="">${TIC(A.type,26)}</span>`}<span><b>${gr?RECIPES[gr].n+'　'+A.type:c.name+'　'+A.n}</b><small>${A.d[L]}</small></span><span class="lvt">${L?'Lv'+L+'→'+(L+1):'NEW'}</span></button>`}
   const P=PASSIVE[k];return `<button class="fpick" data-k="${o}">${MIC(k,44)}<span><b>${P.n}</b><small>${P.d}</small></span><span class="lvt">${FD.ps[k]?'Lv'+FD.ps[k]+'→'+(FD.ps[k]+1):'NEW'}</span></button>`}).join('');
- $('fPicks').querySelectorAll('.fpick').forEach(b=>b.onclick=()=>{const o=b.dataset.k;if(o==='heal')FD.hp=Math.min(FD.maxhp,FD.hp+50);else{const [t,k]=o.split(':');if(t==='a')FD.atk[k]=(FD.atk[k]||0)+1;else{FD.ps[k]++;if(k==='hp'){FD.maxhp+=20;FD.hp=Math.min(FD.maxhp,FD.hp+20)}}}
+ $('fPicks').querySelectorAll('.fpick').forEach(b=>b.onclick=()=>{const o=b.dataset.k;if(o==='heal')FD.hp=Math.min(FD.maxhp,FD.hp+50);else{const [t,k]=o.split(':');if(t==='e'||t==='w')evoPick(t,k);else if(t==='a')FD.atk[k]=(FD.atk[k]||0)+1;else{FD.ps[k]++;if(k==='hp'){FD.maxhp+=20;FD.hp=Math.min(FD.maxhp,FD.hp+20)}}}
   $('fLevel').classList.remove('on');renderFHud();if(FD.pendingLv)fOpenLevel();else{FD.paused=false;fLast=0}});
  $('fLevel').classList.add('on')}
 
@@ -2740,7 +2750,7 @@ async function fAdvance(nf){const D=FD,F=FLOORS[nf],k=F.area,newArea=k!==D.area;
  D.hp=Math.min(D.maxhp,D.hp+Math.round(D.maxhp*.2));
  G.area=k;G.where={s:'field'};save();
  show('field');resizeField();renderFHud();
- fBanner(`${nf}階　${F.n}　${F.boss?'ボスが待ちかまえている':'上への階段をさがせ'}`,180,F.boss?'n_boss':'n_floor');
+ fBanner(`${nf}階　${F.n}　${F.boss?'ボスが待ちかまえている':'強敵から鍵をうばえ'}`,180,F.boss?'n_boss':'n_floor');
  if(F.ev==='mirror'&&!G.flags.selfRust){fMirror();return}
  D.paused=false;fLast=0;if(!fRaf)fRaf=requestAnimationFrame(fLoop)}
 
@@ -2846,6 +2856,8 @@ function openItems(){const row=(ic,n,cnt,d)=>`<div class="itr">${ic}<div class="
  $('sheetB').scrollTop=0;$('sheet').classList.add('on')}
 function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイスターの塔を登る。階段を見つけると、そのまま上の階へ。ボスを倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。工房で武器・防具づくり、編成でパーティ、ガチャで仲間集め。'],
  [null,'説明','塔の中では、出撃キャラを指で動かす。攻撃は自動。はじめは出撃キャラの技だけ。'],
+ [null,'説明','各層で、お助け仲間（下層：ギアフォックス、中層：ドド先輩、上層：ホー博士）に会える。その挑戦の間だけ一緒に戦ってくれる。パーティにいるときは技が強化される。'],
+ [null,'説明','2つの技をどちらも最大Lvにすると進化できる（例：連射＋追尾）。技が最大Lvで、その技の武器がSランク以上なら覚醒できる。どちらか一方だけ。磁石を拾うと、まわりの経験値を全部集める。'],
  [null,'説明','階段には鍵がかかっている。その階の強敵が鍵を持っているので、たおしてから階段へ。上の階ほど敵が強い。出撃画面の「推奨戦力」とチームの攻撃をくらべよう。'],
  [null,'説明','攻撃は装備した武器で決まる。はじめは出撃キャラの専用武器の技だけ。レベルアップすると、パーティの仲間の技と、装備した汎用武器（2つまで）の技が NEW で出てくる。パーティ（5人）の仲間は、能力（パッシブ）で助けてくれる。'],
  [null,'説明','倒した錆や資材の箱から、素材と図面が手に入る。途中で帰っても全部持ち帰れるが、力つきると素材は半分になる。'],
@@ -3874,6 +3886,66 @@ function runTap(o){return new Promise(res=>{
  window.__tap={turn,st:()=>({net,fwd,NEED,cyc,broke})};
  $('fgDone').style.display='';$('fgDone').onclick=()=>finish();raf=requestAnimationFrame(loop)})}
 Object.assign(MINI,{file:{f:runFile,t:'やすりがけ',n:'やすり'},drill:{f:runDrill,t:'ボール盤で穴あけ',n:'穴あけ'},tap:{f:runTap,t:'タップでねじ切り',n:'ねじ切り'}});
+
+/* ===================== お助け仲間・階ごとの一言・技の進化と覚醒・磁石 ===================== */
+
+/* ---------- 磁石：拾うと、画面のまわりの経験値を全部集める ---------- */
+UI_IC.magnet='p_mag';
+const MAGNET_RATE={normal:.004,elite:.35};
+{const _k=fKill;fKill=function(e){_k(e);if(!FD)return;const r=e.boss?1:e.big?MAGNET_RATE.elite:MAGNET_RATE.normal;if(Math.random()<r)FD.items.push({x:e.x+12,y:e.y-12,k:'magnet'})}}
+{const _g=fGot;fGot=function(it){if(it.k==='magnet'){FD.gems.forEach(g=>g.mag=1);fBanner('磁石！ まわりの経験値を全部集める',120,'p_mag');tone(660,.2,'triangle',.08,1320);return}return _g(it)}}
+
+/* ---------- お助け仲間：層ごとに1人。その挑戦の間だけ一緒に戦う。パーティにいれば強化 ---------- */
+const HELPER={alley:'fox',factory:'dodo',under:'owl'};
+const HELPER_AGAIN={fox:'また会ったね！ 今回も手伝うよ。直す役は任せて！',dodo:'お、また来たね〜。前に立つのは先輩にまかせて〜。',owl:'ホッホッ、また会うたな。今回もわしの計算を貸そう。'};
+function helperSetup(){if(!FD)return;FD.helped=FD.helped||{};const id=HELPER[FD.area];if(!id||FD.helped[FD.area]||FD.join)return;FD.join={id,shown:false,x:0,y:0,cool:0,helper:true}}
+{const _j=fJoin;fJoin=async function(){const J=FD&&FD.join;if(!J||!J.helper)return _j();FD.paused=true;fReleaseStick();const id=J.id,nm=CHARS[id].name;
+ try{const first=!G.flags['hp_'+id];await talk(first?(JOIN_TALK[id]||[]):[[id,nm,HELPER_AGAIN[id]]]);if(first){G.flags['hp_'+id]=1;save()}
+  FD.helped[FD.area]=true;FD.join=null;
+  if(G.party.some(m=>m.id===id)||FD.atk[id]!=null){FD.atk[id]=Math.min(ATK_MAX,(FD.atk[id]||0)+2);FD.hboost=FD.hboost||{};FD.hboost[id]=1.2;
+   await say(`${UIMG('n_join',40)} <span class="nw">${nm}が</span><span class="nw">力を貸してくれた！</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n} Lv+2・威力1.2倍（この挑戦の間）</span>`,1900)}
+  else{const L=findOwn(G.lead),m=newMember(id,1);m.lv=(L&&L.lv)||1;FD.helperMs=FD.helperMs||{};FD.helperMs[id]=m;FD.atk[id]=2;
+   await say(`${UIMG('n_join',40)} <span class="nw">お助け仲間！</span><br><span class="nw">${nm}が一緒に戦う</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n}（Lv2）が加わった。この挑戦の間だけ</span>`,2000)}}
+ finally{show('field');resizeField();renderFHud();FD.paused=false;fLast=0;if(!fRaf)fRaf=requestAnimationFrame(fLoop)}}}
+
+/* ---------- 階ごとの一言：入口・鍵を手に入れたとき・ボスの前（2回目から） ---------- */
+const FLOOR_LINES={1:['錆のにおいが濃い……。気をつけて行こう','まずは強敵をさがして、階段の鍵だ'],2:['街灯が消えてる。足もとに注意だ','この先、敵がふえてくるぞ'],3:['廃材の山……ボスの気配がする','ここを越えれば下層はおしまいだ'],
+ 4:['ここから工場か。機械のにおいがする','中層の敵は硬い。装備は大丈夫か？'],5:['制御室……まだ動いてる機械があるな','強敵が鍵を持ってる。さがそう'],6:['クレーンが動いてる……来るぞ','中層のボスだ。気を引きしめよう'],
+ 7:['図面の回廊……壁一面に図面がある','上層だ。ここからが本番だ'],8:['錆の巣……空気が重い','錆が濃い。長居は禁物だ'],9:['鏡の作業台……自分の姿が映ってる','あと少しで頂上だ'],10:['錆の炉……すべての錆はここから','行こう。この塔を終わらせる']};
+const KEY_LINES=['よし、鍵だ！ 上へ行こう','鍵を手に入れた！ 階段へ急ごう','これで階段が開くはず！'];
+const BOSS_LINES={alley:'あのボスだ……前より強くなってる。でも負けない！',factory:'あのクレーンだ。気を抜くなよ',under:'錆の炉の主……決着をつけよう'};
+function speaker(){const ps=G.party.filter(m=>m.id!==FD._lastSp),m=(ps.length?pick(ps):G.party[0]);FD._lastSp=m.id;return m.id}
+function fSay(id,text){const fl=$('field');if(!fl)return;let el=$('fSay');if(!el){el=document.createElement('div');el.id='fSay';fl.appendChild(el)}
+ el.innerHTML=`<span class="fsi"><img src="${CHARS[id].img}" alt=""></span><span class="fst"><b>${CHARS[id].name}</b>${text}</span>`;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');
+ clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),3400)}
+{const _b=fBossCome;fBossCome=async function(){const seen=G.flags['bt_'+AREAS[FD.area].boss];await _b();if(seen&&FD)fSay(G.lead,BOSS_LINES[FD.area]||'ボスだ！')}}
+
+/* ---------- 技の進化と覚醒 ---------- */
+/* 進化：2つの技がどちらも最大Lv → 合わさって進化（2つとも威力1.3倍＋合体の動き） */
+const EVO=[['wolf','onmyo','追尾牙刃','連射の弾が敵を追いかける'],['fox','owl','歯車結界','まわる輪が魔法陣を置いていく'],['dodo','rocker','轟音衝撃','たたいた所から音の波が広がる'],['gorilla','robot','雷電レーザー','貫くレーザーが次の敵へ飛び移る'],['tsukiyo','mouse','月光の雨','降る星が落ちるたびに少し回復']];
+/* 覚醒：技が最大Lv＋その技の武器がSランク以上 → 威力1.5倍。1つの技は進化か覚醒のどちらか */
+const evoOn=id=>!!(FD.evo&&EVO.some(p=>p.includes(id)&&FD.evo[p[0]]));
+function fPowX(id){let m=1;if(!FD)return m;if(FD.awk&&FD.awk[id])m*=1.5;if(evoOn(id))m*=1.3;if(FD.hboost&&FD.hboost[id])m*=FD.hboost[id];return m}
+function wRank(id){if(FD.helperMs&&FD.helperMs[id])return null;const g=id!==G.lead&&!G.party.some(m=>m.id===id)&&genFor(id);if(g)return g.rank;const m=findOwn(id);return m&&m.weapon&&m.weapon.rank}
+function extraOpts(){const o=[];FD.evo=FD.evo||{};FD.awk=FD.awk||{};const mx=id=>(FD.atk[id]||0)>=ATK_MAX;
+ EVO.forEach(p=>{if(!FD.evo[p[0]]&&mx(p[0])&&mx(p[1])&&!FD.awk[p[0]]&&!FD.awk[p[1]])o.push('e:'+p[0])});
+ Object.keys(FD.atk).forEach(id=>{if(mx(id)&&!FD.awk[id]&&!evoOn(id)&&['S','SS'].includes(wRank(id)))o.push('w:'+id)});return o}
+function evoCardHTML(t,k){if(t==='e'){const p=EVO.find(x=>x[0]===k);return `<button class="fpick evo" data-k="e:${k}"><span class="fpe"><img src="${CHARS[p[0]].img}" alt=""><img src="${CHARS[p[1]].img}" alt=""></span><span><b>進化！ ${p[2]}</b><small>${ATK[p[0]].type}＋${ATK[p[1]].type}：${p[3]}。2つとも威力1.3倍</small></span><span class="lvt">進化</span></button>`}
+ return `<button class="fpick evo awk" data-k="w:${k}"><span class="fpi"><img src="${CHARS[k].img}" alt="">${TIC(ATK[k].type,26)}</span><span><b>覚醒！ ${ATK[k].n}</b><small>武器のランク${wRank(k)}で覚醒。威力1.5倍</small></span><span class="lvt">覚醒</span></button>`}
+function evoPick(t,k){FD.evo=FD.evo||{};FD.awk=FD.awk||{};if(t==='e'){FD.evo[k]=true;const p=EVO.find(x=>x[0]===k);fBanner(`進化！「${p[2]}」`,170,'n_unlock')}else{FD.awk[k]=true;fBanner(`覚醒！「${ATK[k].n}」`,170,'n_unlock')}tone(880,.3,'triangle',.1,1760)}
+/* 合体の動き（進化したときだけ） */
+{const _fa=fAttacks;fAttacks=function(f){const c=FD.cd,b={...c};_fa(f);const E=FD.evo;if(!E)return;const fired=id=>c[id]!=null&&b[id]!=null&&c[id]>b[id];
+ if(E.wolf)FD.shots.forEach(s=>{const t=nearestFoes(1,s.x,s.y,260)[0];if(!t)return;const sp=Math.hypot(s.vx,s.vy)||7,ca=Math.atan2(s.vy,s.vx);let d=Math.atan2(t.y-s.y,t.x-s.x)-ca;d=Math.atan2(Math.sin(d),Math.cos(d));const na=ca+d*Math.min(1,.15*f);s.vx=Math.cos(na)*sp;s.vy=Math.sin(na)*sp});
+ if(E.fox&&FD.orb){FD._ez=(FD._ez||0)+f;if(FD._ez>=70){FD._ez=0;const dmg=2.6*fPow('owl');FD.orb.forEach(([x,y])=>FD.zones.push({x,y,r:40,t:0,life:90,dmg}))}}
+ if(E.dodo&&fired('dodo'))FD.waves.push({x:FD.x,y:FD.y,r:20,max:230,dmg:10*fPow('rocker'),kb:10,hit:new Set()});
+ if(E.gorilla&&fired('robot')){let from={x:FD.x,y:FD.y-14};const hit=new Set();for(let i=0;i<3;i++){const t=FD.foes.filter(e=>!hit.has(e.id)&&(e.x-from.x)**2+(e.y-from.y)**2<(i?170:300)**2).sort((a,z)=>((a.x-from.x)**2+(a.y-from.y)**2)-((z.x-from.x)**2+(z.y-from.y)**2))[0];if(!t)break;FD.fx.push({k:'bolt',x:from.x,y:from.y,x2:t.x,y2:t.y,t:0});fDamage(t,10*fPow('gorilla'),0,0);hit.add(t.id);from=t}}
+ if(E.tsukiyo&&fired('tsukiyo')){const a=2;FD.hp=Math.min(FD.maxhp,FD.hp+a);FD.pops.push({x:FD.x,y:FD.y-40,v:'+'+a,t:0,heal:1})}}}
+
+/* ---------- 毎フレームの見はり：階が変わったら、お助けの準備と入口の一言。鍵の一言 ---------- */
+{const _u=fUpdate;fUpdate=function(f){const D=FD;if(D&&!D.climbing){if(D._fl!==D.floor){D._fl=D.floor;D._said=false;D._key=false;helperSetup()}
+  if(!D._said&&D.t>1.2&&!D.paused){D._said=true;const L=FLOOR_LINES[D.floor];if(L)fSay(speaker(),pick(L))}
+  if(D.stairs&&D.stairs.open&&!D._key&&!FLOORS[D.floor].boss){D._key=true;fSay(speaker(),pick(KEY_LINES))}}
+ return _u(f)}}
 
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
