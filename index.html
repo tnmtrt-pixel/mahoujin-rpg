@@ -1109,7 +1109,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.0.0';
+const VERSION='1.1.0';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -4531,7 +4531,12 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver ${VERSION}　第1章「夜の工房に灯る」公開</b><ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.1.0　セーブの守り・引き継ぎ</b><ul>
+  <li>セーブの守り：ファイルに保存・引っ越しコード・端末の中の控え（3日分）・ひとつ前にもどす</li>
+  <li>マイスターの塔（サイコロ版）から、仲間とコイン（上限1,350）を1回だけ引き継げる</li>
+  <li>同じ階に長くいると「錆Lv」が上がり、敵がどんどん強くなる</li>
+  <li>ホームの上にコインの所持数を表示。帯のデザインを新しくした</li></ul>
+  <b>ver 1.0.0　第1章「夜の工房に灯る」公開</b><ul>
   <li>マイスターの塔 1〜20F。後編（11F〜）の試作の層・発電の層・空の層・頂上を追加</li>
   <li>4段目（肆）の装備と、新しい素材（チタン・蓄電池・カーボン繊維）</li>
   <li>ボスの宝箱：強化3つ＋コイン。ふつうの敵もコインを落とす</li>
@@ -4670,7 +4675,7 @@ function inhNag(){if(!G||G.flags.inh||OPT.inhAsked||!G.flags.intro)return;if($('
  const d=diceGift(diceLocal());if(!d||(!d.chars.length&&!d.coins))return;OPT.inhAsked=1;saveOpt();inhAsk(d,'この端末に「マイスターの塔」（サイコロ版）のデータがあります。')}
 {const _oh2=openHome;openHome=function(){const r=_oh2.apply(this,arguments);setTimeout(inhNag,500);return r}}
 
-const BUILD='11/13 08:39';
+const BUILD='11/13 08:40';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
