@@ -1095,7 +1095,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='0.3.0';
+const VERSION='1.0.0';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -1643,7 +1643,7 @@ function askNew(){$('sheetT').textContent='はじめから';
 function openOpt(){$('sheetT').textContent='設定';
  $('sheetB').innerHTML=`<div class="optrow"><span>効果音</span><button class="btn ${OPT.mute?'':'gold'}" id="opSnd">${OPT.mute?'オフ':'オン'}</button></div>
   ${G?`<div class="optrow"><span>セーブを消す</span><button class="btn" id="opDel"><img src="img/title/ui/i_trash.webp" alt="" style="width:22px;height:22px;vertical-align:-5px"> 消す</button></div>`:''}
-  <div class="note" style="text-align:center;margin-top:8px">β版 ver ${VERSION}</div><button class="btn ghost" id="opX">閉じる</button>`;
+  <div class="note" style="text-align:center;margin-top:8px">ver ${VERSION}</div><button class="btn ghost" id="opX">閉じる</button>`;
  $('opSnd').onclick=()=>{OPT.mute=!OPT.mute;saveOpt();if(!OPT.mute){audio();tone(880,.08,'triangle',.08)}openOpt()};
  const d=$('opDel');if(d)d.onclick=()=>{closeSheet();askReset()};$('opX').onclick=closeSheet;
  $('sheet').classList.add('on')}
@@ -4510,7 +4510,19 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
   <div class="gpf"><button class="btn" id="rfX">とじる</button></div>`;
  $('genPick').classList.add('on');$('rfX').onclick=()=>$('genPick').classList.remove('on')}
 
-const BUILD='11/13 01:57';
+/* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
+function openNews(){$('sheetT').textContent='お知らせ';
+ $('sheetB').innerHTML=`<div class="news"><b>ver ${VERSION}　第1章「夜の工房に灯る」公開</b><ul>
+  <li>マイスターの塔 1〜20F。後編（11F〜）の試作の層・発電の層・空の層・頂上を追加</li>
+  <li>4段目（肆）の装備と、新しい素材（チタン・蓄電池・カーボン繊維）</li>
+  <li>ボスの宝箱：強化3つ＋コイン。ふつうの敵もコインを落とす</li>
+  <li>ポーズ画面で、いまの技と能力を確認できる</li>
+  <li>世界地図。章が進むと霧が晴れる</li>
+  <li>チャット（仲間どうしの掛け合い）39本</li></ul>
+  <b>次の予定</b><ul><li>ver2.0.0　第2章「審判の塔」</li></ul></div><button class="btn ghost" id="nsX">閉じる</button>`;
+ $('nsX').onclick=closeSheet;$('sheet').classList.add('on')}
+
+const BUILD='11/13 02:04';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
@@ -4521,7 +4533,7 @@ if(!G&&SAVE_RAW!=null){try{localStorage.setItem(BROKEN_KEY,SAVE_RAW)}catch(e){}l
 if(G&&OPT.fast===undefined&&G.flags.fast){OPT.fast=true;saveOpt()}  /* 前の版は速さを G.flags.fast に保存していた */
 if(G)G.flags.fast=!!OPT.fast;
 $('btnStart').textContent=G?'つづきから':'はじめる';$('btnReset').style.display='none';$('btnNew').style.display=G?'':'none';
-$('tVer').textContent=`β版 ver ${VERSION}（${BUILD}）`;$('tNote').textContent=loadNote;
+$('tVer').textContent=`ver ${VERSION}　第1章（${BUILD}）`;$('tNote').textContent=loadNote;
 /* テスト用の参照（テスト担当が G を書きかえて各エリア・ボスへ直接入れる） */
 window.__game={get FD(){return FD},startField,fEnd,makeProduct,RECIPES,FAREA,FT,get G(){return G},set G(v){G=v},save,migrate,openTown,openHome,openDest,goArea,newMember,stage,AREAS,FOES,VERSION};
 </script>
