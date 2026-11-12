@@ -912,6 +912,10 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .prsign{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 0 2px}.prsign b{font-family:"Dela Gothic One",sans-serif;font-size:22px;letter-spacing:.06em}.fpick.evo .lvt .ic{vertical-align:-3px}
 .fpick.evo .lvt{white-space:nowrap;display:inline-flex;align-items:center;gap:2px}
 
+#fSay .fsi img,.fhelp img{height:100%;object-fit:contain;object-position:50% 50%}
+.hfc.fc img{top:4%;height:78%;width:auto;left:50%;transform:translateX(-50%)}
+.pface{object-fit:contain!important}
+
 </style>
 </head>
 <body>
@@ -2937,7 +2941,7 @@ function openHome(){if(TW)TW.busy=false;G.where={s:'town'};save();show('home');
 function fitHomeArt(){if(!onScr('home'))return;const hm=$('home').getBoundingClientRect(),nx=$('hBanner').getBoundingClientRect(),mn=document.querySelector('.gmenu').getBoundingClientRect();
  const top=nx.bottom-hm.top+8,bot=mn.top-hm.top-10,f=$('hArt').querySelector('.hform');if(f)Object.assign(f.style,{top:top+'px',height:Math.max(150,bot-top)+'px'})}
 function homeFormHTML(L,others){const card=(m,k,lead)=>{if(!m)return `<button class="hfc em" data-hf="slot:${k}"><span>＋</span><small>空き</small></button>`;const c=CHARS[m.id],A=ATK[m.id];
-  return `<button class="hfc ${lead?'ld':''}" data-hf="${m.id}"><img src="${c.img}" alt=""><span class="hft">${TIC(A.type,lead?24:18)}</span>${lead?'<span class="hfl">LEADER</span>':''}<span class="hfb"><b>${c.name}</b><small>Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i></small></span></button>`};
+  return `<button class="hfc ${lead?'ld':'fc'}" data-hf="${m.id}"><img src="${lead?c.img:FACE(m.id)}" alt=""><span class="hft">${TIC(A.type,lead?24:18)}</span>${lead?'<span class="hfl">LEADER</span>':''}<span class="hfb"><b>${c.name}</b><small>Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i></small></span></button>`};
  const rest=Array.from({length:PARTY_MAX-1},(_,i)=>card(others[i],i+1,false)).join('');
  return `<div class="hform"><div class="hfh"><span class="hfk">PARTY</span><span class="hfs"><i>攻撃</i><b>${teamPow()}</b><i>体力</i><b>${teamHp()}</b></span><button class="hfe" data-hf="${L.id}">編成 ›</button></div>${card(L,0,true)}${rest}</div>`}
 addEventListener('resize',()=>{if(onScr('home'))fitHomeArt()});
@@ -2965,7 +2969,7 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
    <div class="lvs"><span>攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)).toFixed(2)}</span><span>武器 ×${wMul(m)}</span></div>
    ${max?'<div class="note" style="text-align:center">レベル最大</div>':`<div class="lvc ${(G.coin|0)<cost.coin?'lack':''}">${coinIc(22)}<b>${G.coin|0}</b>/${cost.coin}</div>`}
    <button class="lvup" id="pUp" ${max||!canGrow(m)?'disabled':''}>レベルアップ</button></div></div>
- <div class="prow slots">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x&&x.id===m.id?'on':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img src="${CHARS[x.id].img}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
+ <div class="prow slots">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x&&x.id===m.id?'on':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img class="pface" src="${FACE(x.id)}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
  ${pickSlot==null?equipRowHTML():pickerHTML()}
  `;
  $('partyList').querySelectorAll('.phex.slot').forEach(b=>b.onclick=()=>{const k=+b.dataset.slot,x=G.party[k];pickSlot=k;pickSel=x?x.id:null;if(x)partySel=x.id;renderParty();$('party').scrollTop=0;window.scrollTo(0,0)});
@@ -2997,7 +3001,7 @@ function renderPartyPick(m,inP){const c=CHARS[m.id],A=ATK[m.id],ab=ABIL[m.id]||[
   <div class="pcl">${TIC(A.type,18)} ${A.n}（${A.type}）</div>
   <div class="pcl">${WPIC(m.id,18,w&&w.rid?RECIPES[w.rid].tier:0)} ${w&&w.rid?RECIPES[w.rid].n+' '+RKIC(rank,18):baseWeapon(m.id)}${w&&w.attr?'　'+attrTxt(w.attr):''}</div></div></div>
  <div class="pcab">${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
- <div class="prow slots sm">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img src="${CHARS[x.id].img}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
+ <div class="prow slots sm">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img class="pface" src="${FACE(x.id)}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
  ${pickerHTML()}`;
  bindPartyPick()}
 function bindPartyPick(){
@@ -3014,7 +3018,7 @@ function pickerHTML(){const k=pickSlot,x=G.party[k],y=pickSel?owned(pickSel):nul
  let act='';if(y&&(!x||x.id!==y.id)){const yIn=G.party.some(p=>p.id===y.id);act=yIn&&!x?`<span class="ppn">${CHARS[y.id].name}はもうパーティにいる</span>`:`<button class="lvup pin" id="ppIn">${CHARS[y.id].name}を${x?(yIn?'入れかえる':'この枠に入れる'):'この枠に入れる'}</button>`}
  else act=`<span class="ppn">${x?'入れかえるキャラを選ぶ':'入れるキャラを選ぶ'}</span>`;
  return `<div class="ppick" id="ppick"><div class="pph"><b>${label}</b>${act}<button class="ppx" id="ppClose">閉じる</button></div>
- <div class="ppg">${x&&k>0?'<button class="ppt off" id="ppOut">はずす</button>':''}${list.map(p=>{const inP=G.party.some(q=>q.id===p.id);return `<button class="ppt ${p.id===pickSel?'on':''}" data-id="${p.id}"><img src="${CHARS[p.id].img}" alt="">${inP?'<span class="ppc">✓</span>':''}<span class="plv">Lv${p.lv}</span><span class="pps">${'★'.repeat(p.star||1)}</span></button>`}).join('')}</div></div>`}
+ <div class="ppg">${x&&k>0?'<button class="ppt off" id="ppOut">はずす</button>':''}${list.map(p=>{const inP=G.party.some(q=>q.id===p.id);return `<button class="ppt ${p.id===pickSel?'on':''}" data-id="${p.id}"><img class="pface" src="${FACE(p.id)}" alt="">${inP?'<span class="ppc">✓</span>':''}<span class="plv">Lv${p.lv}</span><span class="pps">${'★'.repeat(p.star||1)}</span></button>`}).join('')}</div></div>`}
 function slotAssign(k,id){if(k==null||!id)return;const x=G.party[k];if(x&&x.id===id)return;const yi=G.party.findIndex(p=>p.id===id);
  if(yi>=0){if(!x)return;[G.party[k],G.party[yi]]=[G.party[yi],G.party[k]]}
  else{const bi=G.bench.findIndex(p=>p.id===id);if(bi<0)return;const y=G.bench.splice(bi,1)[0];if(x){G.party[k]=y;G.bench.push(x)}else G.party.push(y)}
@@ -3326,6 +3330,8 @@ function invStore(pc,who){const R=RECIPES[pc.rid];
  if(R.kind==='gen'){const old=G.gen&&G.gen[pc.rid];if(!old||RANK_ORDER.indexOf(pc.rank)>RANK_ORDER.indexOf(old.rank)){G.gen=G.gen||{};G.gen[pc.rid]={rank:pc.rank,mul:pc.mul,attr:pc.attr||null}}return}
  if(R.kind==='armor')invPut({rid:pc.rid,rank:pc.rank,mul:pc.mul},R.slot);else invW().push({who:who.id,w:weaponObj(R,pc,who)})}
 const RANK_ORDER=['D','C','B','A','S','SS'];
+/* 顔アイコン（ウルフは表情つきの絵） */
+const FACE=id=>id==='wolf'?'img/face/wolf_smile.webp':['fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker'].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
 /* 専用武器・防具の入れかえ */
 function openEqPick(kind,slot){const L=findOwn(G.lead);let rows='',head='';
  if(kind==='w'){head=`${CHARS[L.id].name}の専用武器`;const cur=L.weapon;
@@ -3922,7 +3928,7 @@ const KEY_LINES=['よし、鍵だ！ 上へ行こう','鍵を手に入れた！ 
 const BOSS_LINES={alley:'あのボスだ……前より強くなってる。でも負けない！',factory:'あのクレーンだ。気を抜くなよ',under:'錆の炉の主……決着をつけよう'};
 function speaker(){const ps=G.party.filter(m=>m.id!==FD._lastSp),m=(ps.length?pick(ps):G.party[0]);FD._lastSp=m.id;return m.id}
 function fSay(id,text){const fl=$('field');if(!fl)return;let el=$('fSay');if(!el){el=document.createElement('div');el.id='fSay';fl.appendChild(el)}
- el.innerHTML=`<span class="fsi"><img src="${CHARS[id].img}" alt=""></span><span class="fst"><b>${CHARS[id].name}</b>${text}</span>`;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');
+ el.innerHTML=`<span class="fsi"><img src="${FACE(id)}" alt=""></span><span class="fst"><b>${CHARS[id].name}</b>${text}</span>`;el.classList.remove('on');void el.offsetWidth;el.classList.add('on');
  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),3400)}
 {const _b=fBossCome;fBossCome=async function(){const seen=G.flags['bt_'+AREAS[FD.area].boss];await _b();if(seen&&FD)fSay(G.lead,BOSS_LINES[FD.area]||'ボスだ！')}}
 
@@ -3966,7 +3972,7 @@ function fDrawExtra(g,D){const t=D.t;
  if(D.evo&&D.evo.wolf){g.save();g.fillStyle='#ffd25a';for(const s of D.shots){g.globalAlpha=.5;g.beginPath();g.arc(s.x-s.vx*1.5,s.y-s.vy*1.5,4,0,TAU);g.fill();g.globalAlpha=.25;g.beginPath();g.arc(s.x-s.vx*3,s.y-s.vy*3,3,0,TAU);g.fill()}g.restore()}}
 /* お助け仲間が今いること：拾った物の列の前に顔 */
 {const _r=renderFHud;renderFHud=function(){_r();if(!FD)return;const ids=[...Object.keys(FD.helperMs||{}),...Object.keys(FD.hboost||{})];if(!ids.length)return;
- const h=ids.map(id=>`<span class="fhelp">${UIMG('u_help',18)}<img src="${CHARS[id].img}" alt="">${FD.hboost&&FD.hboost[id]?'強化':'お助け'}</span>`).join('');$('fLoot').insertAdjacentHTML('afterbegin',h)}}
+ const h=ids.map(id=>`<span class="fhelp">${UIMG('u_help',18)}<img src="${FACE(id)}" alt="">${FD.hboost&&FD.hboost[id]?'強化':'お助け'}</span>`).join('');$('fLoot').insertAdjacentHTML('afterbegin',h)}}
 
 /* はじめての加工の案内（本編で、その加工を初めてするときだけ） */
 const PROC_GUIDE={
