@@ -1693,9 +1693,9 @@ function makeProfile(tier){const N=160,k=CFG.LATHE_STEPS[tier],cuts=[0];
   if(s===taper){const nx=rs[s+1]??rs[s-1];const t=(x-cuts[s])/(cuts[s+1]-cuts[s]);tgt.push(rs[s]+(nx-rs[s])*t*.6)}else tgt.push(rs[s])}
  return{N,tgt,cuts,rs,taper}}
 function runLathe(o){return new Promise(res=>{
- cv.className='box';sizeCanvas(.8);
+ cv.className='box';sizeCanvas(1.15);
  const pr=makeProfile(o.tier),N=pr.N,T=CFG.LATHE_T[o.tier]*1000,LEAD=900;
- const W=S,H=SH,x0=W*.14,x1=W*.92,cy=H*.6,R0=H*.27,tol=o.tol||CFG.LATHE_TOL,[fOver,fUnder]=CFG.LATHE_FALL;
+ const W=S,H=SH,x0=W*.14,x1=W*.92,cy=H*.3,R0=H*.17,tol=o.tol||CFG.LATHE_TOL,[fOver,fUnder]=CFG.LATHE_FALL;
  const cur=new Array(N).fill(1);window.__dbg={kind:'lathe',x0,x1,cy,R0,tgt:pr.tgt,T,LEAD};
  /* 制限時間なし：刃物の先が指についてくる。左右で材料にそって動かし、上下で深さを決める。「仕上げる」で終わり */
  const c={started:false,t0:0,toolR:1.12,tx:x0-W*.06,drag:false,lastI:-1,done:false,parts:[],spin:0,cutAny:new Uint8Array(N)};
@@ -1703,10 +1703,20 @@ function runLathe(o){return new Promise(res=>{
  const cw0=(x1-x0)/N,idx=x=>Math.floor((x-x0)/cw0);
  function cutTo(nx,nr){const a=idx(c.tx),b=idx(nx),lo=Math.min(a,b),hi=Math.max(a,b);c.tx=nx;c.toolR=nr;
   for(let k=Math.max(0,lo);k<=Math.min(N-1,hi);k++){if(c.toolR<cur[k]){cur[k]=c.toolR;c.cutAny[k]=1;c.lastI=Math.max(c.lastI,k);if(Math.random()<.5){for(let q=0;q<2;q++)c.parts.push({x:x0+k*cw0,y:cy-c.toolR*R0,vx:Math.random()*4-1,vy:-Math.random()*4,l:20})}if(Math.random()<.15)sfx.cut()}}}
- handler={down(e){if(c.done)return;if(!c.started){c.started=true;c.t0=gnow();sfx.start();$('crDone').style.display=''}c.drag=true;const[x,y]=evP(e);c.tx=clamp(x,x0-W*.08,x1+W*.04);c.toolR=clamp((cy-y)/R0,.3,1.12)},
-  move(e){if(!c.drag||c.done)return;const[x,y]=evP(e);cutTo(clamp(x,x0-W*.08,x1+W*.04),clamp((cy-y)/R0,.3,1.12))},up(){c.drag=false}};
+ /* ハンドル（実物の旋盤と同じ）：左＝往復台（刃物を左右へ）、右＝横送り（刃物の深さ）。指で円をえがくように回す。2本指で両方同時に回せる */
+ const WY=H*.75,WR=Math.min(W*.17,H*.145),WX=[W*.27,W*.73],K0=(x1-x0)*.3/TAU,K1=.22/TAU;c.ang=[0,0];c.act=new Map();
+ const rawP=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+ const wheelAt=(x,y)=>y>H*.56?(x<W/2?0:1):-1;
+ function turn(w,d){c.ang[w]+=d;if(w===0)cutTo(clamp(c.tx+d*K0,x0-W*.08,x1+W*.04),c.toolR);else cutTo(c.tx,clamp(c.toolR-d*K1,.3,1.12))}
+ handler={down(e){if(c.done)return;const[x,y]=rawP(e),w=wheelAt(x,y);if(w<0)return;if(!c.started){c.started=true;c.t0=gnow();sfx.start();$('crDone').style.display=''}
+   c.act.set(e.pointerId,{w,a:Math.atan2(y-WY,x-WX[w])});c.drag=true},
+  move(e){const A=c.act.get(e.pointerId);if(!A||c.done)return;const[x,y]=rawP(e),a=Math.atan2(y-WY,x-WX[A.w]);let d=a-A.a;if(d>Math.PI)d-=TAU;if(d<-Math.PI)d+=TAU;A.a=a;
+   /* 中心の近くは角度がとびやすいので、少しだけ動かす */
+   const rr=Math.hypot(x-WX[A.w],y-WY);if(rr<WR*.25)d*=.3;turn(A.w,d)},
+  up(e){if(e)c.act.delete(e.pointerId);c.drag=c.act.size>0}};
+ window.__lathe={c,turn,cur,tgt:pr.tgt,x0,x1,N,R0};
  $('crDone').onclick=()=>finish();$('crDone').style.display='none';$('tbar').style.visibility='hidden';
- $('hudL').textContent=o.label||'';$('hudR').textContent='刃物の先を指で動かして削る';
+ $('hudL').textContent=o.label||'';$('hudR').textContent='下のハンドルを回して削る';
  const ptsOf=i=>{const e=cur[i]-pr.tgt[i],ae=Math.abs(e);return ae<=tol?1:clamp(1-(ae-tol)/(e<0?fOver:fUnder),0,1)};
  function score(upTo=N){let s=0;for(let i=0;i<upTo;i++)s+=ptsOf(i);return upTo?s/upTo:1}
  function finish(){if(c.done)return;c.done=true;handler=null;$('crDone').style.display='none';$('tbar').style.visibility='';draw();setTimeout(()=>res({score:Math.round(score()*100)}),400)}
@@ -1733,7 +1743,16 @@ function runLathe(o){return new Promise(res=>{
   cx.fillStyle='#6a7290';cx.fillRect(tx-9,ty-18-H*.25,18,H*.25);
   cx.strokeStyle='rgba(232,195,90,.35)';cx.beginPath();cx.moveTo(x0,ty);cx.lineTo(x1,ty);cx.stroke();
   for(const p of c.parts){p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.l--;cx.fillStyle=`rgba(255,${180+Math.random()*60|0},80,${p.l/20})`;cx.fillRect(p.x,p.y,3,3)}c.parts=c.parts.filter(p=>p.l>0);
-  if(!c.started){cx.fillStyle='rgba(255,255,255,.85)';cx.font=`800 ${Math.round(W*.04)}px sans-serif`;cx.fillText('刃物の先を指で動かして、金色の線まで削る',W/2,H*.12)}}
+  /* ハンドル */
+  [0,1].forEach(w=>{const X=WX[w],on=[...c.act.values()].some(A=>A.w===w);cx.save();cx.translate(X,WY);
+   cx.fillStyle='#141c34';cx.beginPath();cx.arc(0,0,WR*1.12,0,TAU);cx.fill();
+   cx.strokeStyle='#ffffff30';cx.lineWidth=1;for(let k=0;k<40;k++){const a=k/40*TAU,l=k%5?4:9;cx.beginPath();cx.moveTo(Math.cos(a)*WR*1.12,Math.sin(a)*WR*1.12);cx.lineTo(Math.cos(a)*(WR*1.12-l),Math.sin(a)*(WR*1.12-l));cx.stroke()}
+   cx.rotate(c.ang[w]);cx.strokeStyle=on?'#ff9a4a':'#9aa6c4';cx.lineWidth=WR*.13;cx.beginPath();cx.arc(0,0,WR*.82,0,TAU);cx.stroke();
+   cx.lineWidth=WR*.09;for(let k=0;k<3;k++){const a=k/3*TAU;cx.beginPath();cx.moveTo(0,0);cx.lineTo(Math.cos(a)*WR*.8,Math.sin(a)*WR*.8);cx.stroke()}
+   cx.fillStyle='#55618a';cx.beginPath();cx.arc(0,0,WR*.18,0,TAU);cx.fill();
+   cx.fillStyle=on?'#ff7a2f':'#c9a03a';cx.beginPath();cx.arc(WR*.82,0,WR*.17,0,TAU);cx.fill();cx.restore();
+   cx.fillStyle=on?'#ff9a4a':'#cfd6ea';cx.font=`800 ${Math.round(W*.034)}px sans-serif`;cx.textAlign='center';cx.fillText(w?'深さ（右回り＝深く）':'左右（右回り＝右へ）',X,WY+WR*1.36)});
+  if(!c.started){cx.fillStyle='rgba(255,255,255,.85)';cx.font=`800 ${Math.round(W*.038)}px sans-serif`;cx.textAlign='center';cx.fillText('下のハンドルを回して、金色の線まで削る',W/2,H*.05)}}
  cancelAnimationFrame(raf);
  (function loop(){if(c.done)return;
   if(c.started){if(c.drag)cutTo(c.tx,c.toolR);$('hudR').textContent=`加工 ${Math.round(score()*100)}点`}
@@ -2785,14 +2804,14 @@ async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)
  if(R.kind!=='weapon'&&MINI[procOf(R)]){const pr=procOf(R),M=MINI[pr];
   r=await M.f({tier:R.tier,shape:R.shape,title:`${M.t}　${R.n}`,assist:recLv(R),lim:limOf(R)});
   await say(`${M.n} <span class="big">${r.score}</span> 点${r.reach<1?`<br><span style="font-size:14px">最後までできなかった（${Math.round(r.reach*100)}%。SS はなし）</span>`:''}`,r.reach<1?1600:1100)}
- else if(R.kind==='gen'&&R.proc==='lathe'){show('craft');$('craftT').textContent=`旋盤　${R.n}`;$('craftSub').textContent='指で刃物を動かして、金色の線に合わせて削ろう';
+ else if(R.kind==='gen'&&R.proc==='lathe'){show('craft');$('craftT').textContent=`旋盤　${R.n}`;$('craftSub').textContent='ハンドルを回して刃物を動かす。左＝左右、右＝深さ';
   r=await runLathe({tier:R.tier,label:'旋盤・'+KANJI_TIER[R.tier]});r.reach=1;await say(`旋盤 <span class="big">${r.score}</span> 点`,1100)}
  else if(R.kind==='weapon'||(R.kind==='gen'&&R.proc==='grind')){r=await runGrind({who:R.who||R.impl,tier:R.tier,title:`① グラインダー　${R.n}`});r.reach=1;
   await say(`形の一致 <span class="big">${r.score}</span> %${r.score<CRAFT_RANK.C?'<br><span style="font-size:14px">もう少し点線に近づけよう</span>':''}`,1200)}
  else{show('craft');$('craftT').textContent=`① 設計　${R.n}`;$('craftSub').innerHTML='図面の線をなぞろう（はみ出したら減点）<br>最後までなぞりきると SS をねらえる';
   r=await runDesign({type:R.shape,tier:R.tier,color:'#e8c35a',label:'設計・'+KANJI_TIER[R.tier],full:true});
   await say(`設計 <span class="big">${r.score}</span> 点${r.reach<1?`<br><span style="font-size:14px">最後までなぞれなかった（到達 ${Math.round(r.reach*100)}%。SS はなし）</span>`:''}`,r.reach<1?1700:1200)}
- let ls=r.score;if(R.lathe&&R.kind!=='gen'){show('craft');$('craftT').textContent=`② 加工（旋盤）　${R.n}`;$('craftSub').textContent='上下にドラッグして、刃物の深さを金色の線に合わせよう';
+ let ls=r.score;if(R.lathe&&R.kind!=='gen'){show('craft');$('craftT').textContent=`② 加工（旋盤）　${R.n}`;$('craftSub').textContent='ハンドルを回して刃物を動かす。左＝左右、右＝深さ';
   const L=await runLathe({tier:R.tier,label:'加工・'+KANJI_TIER[R.tier]});ls=L.score;await say(`加工 <span class="big">${L.score}</span> 点`,1100)}
  const tb=toolBonus(R),q=Math.min(100,Math.floor((r.score+ls)/2)+tb);let rank=craftRank(q,r.reach),extra=[];
  if(hasLim('micro')&&Math.random()<.1&&rank!=='SS'&&rank!=='S'){rank=RANK_ORDER[RANK_ORDER.indexOf(rank)+1];extra.push(`${MIC('micro',18)}マイクロメータ：出来ばえが1段上がった！`)}
@@ -3299,7 +3318,7 @@ function openEqPick(kind,slot){const L=findOwn(G.lead);let rows='',head='';
  $('gpClose').onclick=()=>$('genPick').classList.remove('on');$('genPick').classList.add('on')}
 
 /* ===================== 加工の前に、その装備の特徴を見て、つくるか決める ===================== */
-const PROC_HOW={grind:'グラインダー：鉄を砥石に押し当てて、点線の形に削る',lathe:'旋盤：回る材料に刃物を当てて、金色の線どおりに削る',hit:'金床：輪が金色の円に重なった瞬間にたたく',weld:'溶接機：トーチでつなぎ目をなぞる',cut:'金切りばさみ：タップでひと切りずつ進み、ドラッグで向きを変えて線どおりに切る',wire:'配線：同じ色の端子を交差しないようにつなぎ、はんだ付けする',trace:'けがき：定規とコンパスで、図面の線を鉄板に写す（ノギスがあると点にすいつく）'};
+const PROC_HOW={grind:'グラインダー：鉄を砥石に押し当てて、点線の形に削る',lathe:'旋盤：2つのハンドル（左右・深さ）を回して刃物を動かし、金色の線どおりに削る',hit:'金床：輪が金色の円に重なった瞬間にたたく',weld:'溶接機：トーチでつなぎ目をなぞる',cut:'金切りばさみ：タップでひと切りずつ進み、ドラッグで向きを変えて線どおりに切る',wire:'配線：同じ色の端子を交差しないようにつなぎ、はんだ付けする',trace:'けがき：定規とコンパスで、図面の線を鉄板に写す（ノギスがあると点にすいつく）'};
 function recipeFx(R){const lo=prodMul(R.tier,'C'),b=prodMul(R.tier,'B'),hi=prodMul(R.tier,'SS');
  if(R.kind==='armor')return[['効果',`${ARMOR_FX[R.slot].d(b)}（B）`],['出来ばえで',`${ARMOR_FX[R.slot].d(lo)}（C）〜 ${ARMOR_FX[R.slot].d(hi)}（SS）`]];
  if(R.kind==='gen'){const A=ATK[R.impl],k=MAT_ATTR[genMain(R)],v=+(ATTR_BASE[k]*ATTR_RANK.B).toFixed(3);
