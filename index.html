@@ -782,6 +782,30 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 #forge .gh{text-align:center;padding:0 14px}#forge .gh b{display:block;font-size:20px;letter-spacing:.08em}#forge .gh small{font-size:12px;color:var(--sm)}
 #forge .gst{font-family:ui-monospace,Menlo,monospace;font-size:15px;color:var(--so);min-height:20px}
 #fgcv{touch-action:none;flex:none;background:#0d1322;border:1px solid var(--sl)}#forge .gab{width:min(560px,92vw);flex:none}
+/* 工房の一覧 */
+.wsbar{display:flex;flex-direction:column;gap:6px;margin:8px 0 4px}
+.wsch{display:flex;gap:4px;align-items:center}.wsch span{font-size:11px;color:var(--sm);margin-right:2px;letter-spacing:.1em}
+.wsch button{flex:1;padding:6px 0;background:none;border:1px solid var(--sl);color:var(--sm);font-size:13px;font-weight:700}
+.wsch button.on{border-color:var(--so);color:var(--so);background:#ff7a2f14}
+.wshint{font-size:11px;color:var(--sm);margin:4px 0 2px;line-height:1.4}
+.wsg{font-size:11px;font-weight:800;letter-spacing:.15em;color:var(--sm);margin:10px 0 3px;padding-left:2px;border-left:2px solid var(--so);padding-left:6px}
+.wsr{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:var(--sk2);border:none;border-left:2px solid var(--sl);color:var(--sw);padding:6px 8px;margin:0 0 3px;min-height:56px}
+.wsr.ok{border-left-color:var(--so);background:linear-gradient(90deg,#ff7a2f1c,transparent 70%),var(--sk2)}
+.wsr.dec{border-left-color:var(--bp);background:linear-gradient(90deg,#3d8bff1c,transparent 70%),var(--sk2)}
+.wsr:active{filter:brightness(1.3)}
+.wsi{flex:0 0 34px}.wsm{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.wsm b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wsm small{font-size:11px;color:var(--sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wsn{display:flex;flex-wrap:wrap;gap:2px 7px;font-size:11px;color:var(--sw)}.wsn i{font-style:normal;white-space:nowrap}.wsn i.lack{color:#ff7070;opacity:.85}.wsn em{width:1px;background:var(--sl);align-self:stretch}
+.wss{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.wss .go{font-size:12px;background:var(--so);color:#1a0a00;padding:3px 8px;letter-spacing:.1em}.wss .go.bp{background:var(--bp);color:#fff}
+#shop .bpgo{margin:6px 0 2px}
+
+.wsbar{flex-direction:row;align-items:center;gap:6px;margin:6px 0 2px}.wsbar .wsch{flex:1;gap:3px}.wsch button{padding:5px 0;font-size:12px}
+.wssort{flex:0 0 auto;background:none;border:1px solid var(--sl);color:var(--sm);font-size:12px;padding:5px 8px;white-space:nowrap}.wssort b{color:var(--so)}
+.wsg{margin:6px 0 2px}.wsr{min-height:44px;padding:4px 8px;gap:7px;margin-bottom:2px}.wsi{flex-basis:30px}
+.wst{display:flex;align-items:baseline;gap:6px;min-width:0}.wst b{font-size:14px;flex:0 1 auto}.wst small{flex:0 1 auto}
+.wss .go{font-size:11px;padding:2px 7px}
+#shop .bpgo{padding:6px 10px;font-size:13px}
 
 </style>
 </head>
@@ -2652,29 +2676,16 @@ function prodFx(R,mul){return R.kind==='gen'?`${ATK[R.impl].type}の攻撃　威
 function curProd(R){if(R.kind==='gen'){const g=G.gen&&G.gen[Object.keys(RECIPES).find(k=>RECIPES[k]===R)];return g?`${R.n}（${g.rank}）`:'まだない'}if(R.kind==='armor'){const p=G.arm[R.slot];return p?`${RECIPES[p.rid].n}（${p.rank}）`:'なし'}const m=findOwn(R.who);return m&&m.weapon&&m.weapon.rid?`${RECIPES[m.weapon.rid].n}（${m.weapon.rank}）`:baseWeapon(R.who)}
 function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make',UIMG('u_weapon',20)+'つくる'],['dec',MIC('bp',20)+'解読'+(nRaw?`<i class="bpn">${nRaw}</i>`:'')],['tool','工具'],['mat','素材']];
  let h=`<div class="stabs">${tabs.map(([k,n])=>`<button class="stab ${shopTab===k?'on':''}" data-t="${k}">${n}</button>`).join('')}</div>`;
- if(shopTab==='make'){const known=RECIPE_ORDER.filter(id=>G.bps.includes(id)),unk=RECIPE_ORDER.length-known.length;
-  h+=`<div class="note">素材＋工具＋図面がそろうと加工できる。出来ばえ（D〜SS）で強さが変わる。<b style="color:var(--gold)">SS は図面を最後までなぞりきったときだけ。</b></div>`;
-  if(nRaw)h+=`<button class="bpgo" data-t="dec">${MIC('bp',22)} 未解読の図面が ${nRaw}枚ある　→ 解読へ</button>`;
-  h+=known.map(id=>{const R=RECIPES[id],c=canMake(id),best=prodMul(R.tier,'B');
-   const mats=Object.keys(R.mats).map(k=>`<span class="${(G.mats[k]||0)<R.mats[k]?'lack':''}">${MIC(k,18)}${MATS[k].n} ${G.mats[k]||0}/${R.mats[k]}</span>`).join('');
-   const tools=R.tools.map(t=>`<span class="${G.tools.includes(t)?'':'lack'}">${MIC(t,18)}${TOOLS[t].n}${G.tools.includes(t)?'':'（なし）'}</span>`).join('');
-   return `<div class="rcp"><div class="rh">${RIC(id,34)}<div style="flex:1"><b>${R.n}</b>　<span class="tag">${recTag(R)}</span><span class="tag tg-tier">${KANJI_TIER[R.tier]}</span>
-    <div class="note">${prodFx(R,best)}（Bランクのとき）<br>今：${curProd(R)}</div></div></div>
-    <div class="rneed"><span class="nl">素材</span>${mats}</div><div class="rneed"><span class="nl">工具</span>${tools}</div>
-    <button class="btn ${c.ok?'gold':''}" data-mk="${id}" ${c.ok?'':'disabled'} style="margin:6px 0 0">${c.ok?'加工する':c.noWho?CHARS[R.who].name+'がまだ仲間にいない':'足りないものがある'}</button></div>`}).join('');
-  if(unk)h+=`<div class="note" style="text-align:center;margin-top:8px">${MIC('bp',18)} まだ図面がない製品：あと ${unk}<br>強敵や資材の箱から、図面が見つかる</div>`}
- /* 解読：拾った図面は三面図でかかれている。正しい立体を読み取ると、つくれるようになる */
- if(shopTab==='dec'){h+=`<div class="note">拾った図面は三面図でかかれている。上・前・右から見た形を組み立てて正しい立体を選ぶと、つくれるようになる。まちがえても何度でも挑戦できる。</div>`;
-  h+=nRaw?(G.bpRaw||[]).map(id=>{const R=RECIPES[id];return `<div class="rcp bpc"><div class="rh">${RIC(id,34)}<div style="flex:1"><b>${R.n}</b>　<span class="tag tg-bp">未解読</span>
-   <div class="note">${recTag(R)}　むずかしさ：${['かんたん','ふつう','むずかしい'].at(Math.min(2,R.tier-1))}</div></div></div>
-   <button class="btn bpb" data-dec="${id}">${MIC('bp',18)} 三面図を読む</button></div>`}).join(''):`<div class="note" style="text-align:center;margin-top:20px">${MIC('bp',28)}<br>未解読の図面はない。<br>強敵や資材の箱から図面が見つかる</div>`}
+ if(shopTab==='make'||shopTab==='dec')h+=wsListHTML(shopTab);
  if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。コインで買える。塔の資材の箱から見つかることもある（見つければ無料）。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
   h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${has?'　<span class="tag tg-ok">持っている</span>':''}<div class="note">${T.d}</div></div>
    ${has?'':T.price?`<div style="text-align:right"><button class="btn" data-buy="${t}" ${(G.coin|0)<T.price?'disabled':''} style="width:auto;margin:0;padding:10px 14px;font-size:15px">${coinIc(18)}${T.price}で買う</button>${T.where?`<div class="note" style="max-width:130px;margin-top:4px">${T.where}でも見つかる</div>`:''}</div>`:''}</div></div>`}).join('')}
  if(shopTab==='mat'){h+=`<div class="note">素材は塔の中で、錆の魔物を倒したり資材の箱をあけたりして集める。</div>`+MAT_ORDER.map(k=>`<div class="itr">${MIC(k,40)}<div class="itn"><b>${MATS[k].n}</b><small>${MATS[k].d}</small></div><span class="itc ${G.mats[k]?'':'z'}">×${G.mats[k]}</span></div>`).join('')}
  $('shopBody').innerHTML=h;
  $('shopBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{shopTab=b.dataset.t;renderShop()});
- $('shopBody').querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>makeProduct(b.dataset.mk));
+ $('shopBody').querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>wsTap(b.dataset.mk));
+ $('shopBody').querySelectorAll('[data-wsk]').forEach(b=>b.onclick=()=>{WS.kind=b.dataset.wsk;renderShop()});
+ $('shopBody').querySelectorAll('[data-wss]').forEach(b=>b.onclick=()=>{WS.sort=b.dataset.wss;renderShop()});
  $('shopBody').querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>decodeBp(b.dataset.dec));
  $('shopBody').querySelectorAll('.bpgo').forEach(b=>b.onclick=()=>{shopTab='dec';renderShop()});
  $('shopBody').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{const t=b.dataset.buy,T=TOOLS[t];if(G.tools.includes(t)||(G.coin|0)<T.price)return;G.coin-=T.price;G.tools.push(t);save();tone(880,.15,'triangle',.1,1320);renderShop();say(`${MIC(t,30)} ${T.n}を買った！`,1000)})}
@@ -3113,6 +3124,45 @@ function openGenPick(i){const own=Object.keys(G.gen||{}).filter(r=>RECIPES[r]);c
   `<div class="gpf">${cur?`<button class="btn ghost" data-gr="">はずす</button>`:''}<button class="btn" id="gpClose">とじる</button></div>`;
  $('gpBody').querySelectorAll('[data-gr]').forEach(b=>b.onclick=()=>{const r=b.dataset.gr||null;G.genEq[i]=r;if(r&&G.genEq[1-i]===r)G.genEq[1-i]=null;save();$('genPick').classList.remove('on');renderParty()});
  $('gpClose').onclick=()=>$('genPick').classList.remove('on');$('genPick').classList.add('on')}
+
+/* ===================== 工房の一覧：行をそのままタップ。種類・加工で並べかえ ===================== */
+const WS={kind:'all',sort:'kind'};
+const WS_KIND=[['all','すべて'],['weapon','専用'],['gen','汎用'],['armor','防具']];
+const WS_SORT=[['kind','種類'],['proc','加工'],['ok','つくれる']];
+const KIND_NAME={weapon:'専用武器',gen:'汎用武器',armor:'防具'};
+const PROC_ORDER=['grind','lathe','hit','cut','weld','wire','trace'];
+const PROC_LBL={grind:'削る',lathe:'旋盤',hit:'打つ',cut:'切る',weld:'つなぐ',wire:'配線',trace:'なぞる'};
+const PROC_TOOL={grind:'grinder',lathe:'lathe',hit:'anvil',cut:'snips',weld:'welder',wire:'solder',trace:'bp'};
+/* いまの加工のしかた（切る・配線はまだなぞり） */
+const procOf=R=>R.kind==='gen'?R.proc:R.kind==='weapon'?'grind':'trace';
+function wsListHTML(tab){const dec=tab==='dec';
+ let ids=dec?(G.bpRaw||[]).filter(id=>RECIPES[id]):RECIPE_ORDER.filter(id=>G.bps.includes(id));
+ if(WS.kind!=='all')ids=ids.filter(id=>RECIPES[id].kind===WS.kind);
+ const ok=id=>!dec&&canMake(id).ok;
+ const key={kind:id=>['weapon','gen','armor'].indexOf(RECIPES[id].kind),proc:id=>PROC_ORDER.indexOf(procOf(RECIPES[id])),ok:id=>ok(id)?0:1}[WS.sort];
+ ids.sort((a,b)=>key(a)-key(b)||RECIPES[a].tier-RECIPES[b].tier);
+ const grp=id=>WS.sort==='kind'?KIND_NAME[RECIPES[id].kind]:WS.sort==='proc'?PROC_LBL[procOf(RECIPES[id])]:ok(id)?'いま加工できる':'足りないものがある';
+ const nx=WS_SORT[(WS_SORT.findIndex(x=>x[0]===WS.sort)+1)%WS_SORT.length][0];
+ let h=`<div class="wsbar"><div class="wsch">${WS_KIND.map(([k,n])=>`<button class="${WS.kind===k?'on':''}" data-wsk="${k}">${n}</button>`).join('')}</div>
+  <button class="wssort" data-wss="${nx}">並び：<b>${WS_SORT.find(x=>x[0]===WS.sort)[1]}</b> ⇅</button></div>`;
+ if(!dec&&(G.bpRaw||[]).length)h+=`<button class="bpgo" data-t="dec">${MIC('bp',20)} 未解読の図面が ${G.bpRaw.length}枚　→ 解読へ</button>`;
+ if(dec)h+=`<div class="wshint">図面をタップすると三面図の解読が始まる。正しい立体を選ぶと、つくれるようになる</div>`;
+ 
+ let last=null;
+ h+=ids.map(id=>{const R=RECIPES[id],pr=procOf(R),g=grp(id),c=dec?null:canMake(id);let head='';if(g!==last){head=`<div class="wsg">${g}</div>`;last=g}
+  const mats=Object.keys(R.mats).map(k=>{const lack=(G.mats[k]||0)<R.mats[k];return `<i class="${!dec&&lack?'lack':''}">${MIC(k,16)}${dec?'':(G.mats[k]||0)+'/'}${R.mats[k]}</i>`}).join('');
+  const tools=R.tools.map(t=>`<i class="${!dec&&!G.tools.includes(t)?'lack':''}">${MIC(t,16)}</i>`).join('');
+  const cur=dec?null:R.kind==='gen'?(G.gen&&G.gen[id]):R.kind==='armor'?G.arm[R.slot]&&G.arm[R.slot].rid===id&&G.arm[R.slot]:(()=>{const m=findOwn(R.who);return m&&m.weapon&&m.weapon.rid===id&&m.weapon})();
+  return head+`<button class="wsr ${dec?'dec':c.ok?'ok':''}" ${dec?`data-dec="${id}"`:`data-mk="${id}"`}>
+   <span class="wsi">${RIC(id,30)}</span>
+   <span class="wsm"><span class="wst"><b>${R.n}</b><small>${R.kind==='gen'?ATK[R.impl].type:R.kind==='armor'?SLOT_NAME[R.slot]:CHARS[R.who].name}・${KANJI_TIER[R.tier]}・${PROC_LBL[pr]}</small></span><span class="wsn">${mats}<em></em>${tools}</span></span>
+   <span class="wss">${dec?'<b class="go bp">解読</b>':cur&&cur.rank?RKIC(cur.rank,24):''}${dec?'':c.ok?'<b class="go">加工</b>':''}</span></button>`}).join('');
+ if(!ids.length)h+=`<div class="note" style="text-align:center;margin:24px 0">${MIC('bp',28)}<br>${dec?'未解読の図面はない。強敵や資材の箱から図面が見つかる':'この種類の図面はまだない'}</div>`;
+ if(!dec){const unk=RECIPE_ORDER.length-G.bps.length-(G.bpRaw||[]).length;if(unk>0)h+=`<div class="wshint" style="text-align:center">まだ見つけていない図面：あと ${unk}</div>`}
+ return h}
+function wsTap(id){const c=canMake(id);if(c.ok){makeProduct(id);return}
+ const ls=[...c.lackM.map(k=>`${MIC(k,22)}${MATS[k].n} ${G.mats[k]||0}/${RECIPES[id].mats[k]}`),...c.lackT.map(t=>`${MIC(t,22)}${TOOLS[t].n}`)];
+ say(`<span style="font-size:15px">足りないもの</span><br>${ls.join('<br>')}${c.noWho?'<br>'+CHARS[RECIPES[id].who].name+'がまだ仲間にいない':''}`,1500)}
 
 /* ===================== 加工ミニゲーム：打つ（金床）・つなぐ（溶接機） ===================== */
 const HIT_N={1:5,2:7,3:9};          /* 打つ回数 */
