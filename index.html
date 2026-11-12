@@ -859,6 +859,9 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .drec{display:block;font-size:11px;margin:1px 0}.drec.ok{color:#9be39b}.drec.mid{color:#ffd060}.drec.ng{color:#ff8a8a}
 #shop .stab{white-space:nowrap;font-size:13px;letter-spacing:0;padding-left:0;padding-right:0;min-width:0}#shop .stab .ic{width:16px!important;height:16px!important;margin-right:1px}#shop .stabs{gap:0}
 
+.tlv{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11px;color:var(--sm)}.tlv b{color:var(--so)}.tlv i{flex:1;max-width:120px;height:5px;background:#ffffff18;display:block}.tlv u{display:block;height:100%;background:var(--so)}
+.txp{font-size:12px;line-height:1.6;margin:6px auto;padding:6px 10px;border:1px solid #ff7a2f55;background:#ff7a2f10;display:inline-block;text-align:left}.txp b{color:var(--so)}
+
 </style>
 </head>
 <body>
@@ -2740,8 +2743,8 @@ function curProd(R){if(R.kind==='gen'){const g=G.gen&&G.gen[Object.keys(RECIPES)
 function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make',UIMG('u_weapon',20)+'つくる'],['dec',MIC('bp',20)+'解読'+(nRaw?`<i class="bpn">${nRaw}</i>`:'')],['tool','工具'],['mat','素材'],['rec',UIMG('coin',18)+'換金所']];
  let h=`<div class="stabs">${tabs.map(([k,n])=>`<button class="stab ${shopTab===k?'on':''}" data-t="${k}">${n}</button>`).join('')}</div>`;
  if(shopTab==='make'||shopTab==='dec')h+=wsListHTML(shopTab);
- if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。コインで買える。塔の資材の箱から見つかることもある（見つければ無料）。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
-  h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${has?'　<span class="tag tg-ok">持っている</span>':''}<div class="note">${T.d}</div></div>
+ if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。使うほど<b>練度</b>が上がって、その工具を使う加工が楽になる（Lv1〜5）。コインで買えるほか、塔の資材の箱から見つかることもある。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
+  h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${has?'　<span class="tag tg-ok">持っている</span>':''}<div class="note">${T.d}</div>${has?tlvHTML(t):''}</div>
    ${has?'':(G.floor|0)<(TOOL_GATE[t]||0)?`<div class="note" style="text-align:right;max-width:130px">🔒 ${TOOL_GATE[t]}階に着くと店に並ぶ</div>`:T.price?`<div style="text-align:right"><button class="btn" data-buy="${t}" ${(G.coin|0)<T.price?'disabled':''} style="width:auto;margin:0;padding:10px 14px;font-size:15px">${coinIc(18)}${T.price}で買う</button>${T.where?`<div class="note" style="max-width:130px;margin-top:4px">${T.where}でも見つかる</div>`:''}</div>`:''}</div></div>`}).join('')}
  if(shopTab==='rec')h+=recycleHTML();
  if(shopTab==='mat'){h+=`<div class="note">素材は塔の中で、錆の魔物を倒したり資材の箱をあけたりして集める。</div>`+MAT_ORDER.map(k=>`<div class="itr">${MIC(k,40)}<div class="itn"><b>${MATS[k].n}</b><small>${MATS[k].d}</small></div><span class="itc ${G.mats[k]?'':'z'}">×${G.mats[k]}</span></div>`).join('')}
@@ -2758,7 +2761,7 @@ let crafting=false;
 async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)return;crafting=true;try{
  let r;
  if(R.kind!=='weapon'&&MINI[procOf(R)]){const pr=procOf(R),M=MINI[pr];
-  r=await M.f({tier:R.tier,shape:R.shape,title:`${M.t}　${R.n}`});
+  r=await M.f({tier:R.tier,shape:R.shape,title:`${M.t}　${R.n}`,assist:recLv(R)});
   await say(`${M.n} <span class="big">${r.score}</span> 点${r.reach<1?`<br><span style="font-size:14px">最後までできなかった（${Math.round(r.reach*100)}%。SS はなし）</span>`:''}`,r.reach<1?1600:1100)}
  else if(R.kind==='gen'&&R.proc==='lathe'){show('craft');$('craftT').textContent=`旋盤　${R.n}`;$('craftSub').textContent='指で刃物を動かして、金色の線に合わせて削ろう';
   r=await runLathe({tier:R.tier,label:'旋盤・'+KANJI_TIER[R.tier]});r.reach=1;await say(`旋盤 <span class="big">${r.score}</span> 点`,1100)}
@@ -2769,15 +2772,15 @@ async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)
   await say(`設計 <span class="big">${r.score}</span> 点${r.reach<1?`<br><span style="font-size:14px">最後までなぞれなかった（到達 ${Math.round(r.reach*100)}%。SS はなし）</span>`:''}`,r.reach<1?1700:1200)}
  let ls=r.score;if(R.lathe&&R.kind!=='gen'){show('craft');$('craftT').textContent=`② 加工（旋盤）　${R.n}`;$('craftSub').textContent='上下にドラッグして、刃物の深さを金色の線に合わせよう';
   const L=await runLathe({tier:R.tier,label:'加工・'+KANJI_TIER[R.tier]});ls=L.score;await say(`加工 <span class="big">${L.score}</span> 点`,1100)}
- const q=Math.floor((r.score+ls)/2),rank=craftRank(q,r.reach),mul=prodMul(R.tier,rank);
+ const tb=toolBonus(R),q=Math.min(100,Math.floor((r.score+ls)/2)+tb),rank=craftRank(q,r.reach),mul=prodMul(R.tier,rank);const txp=toolXpGain(R,q);
  /* 素材は結果が決まったここで引く。装備を選ぶ前に読み込み直しても、作った製品は G.pendCraft に残る */
- Object.keys(R.mats).forEach(k=>G.mats[k]-=R.mats[k]);G.pendCraft={rid:id,rank,mul,ds:r.score,ls:R.lathe?ls:null,reach:r.reach,shape:r.shape||null,attr:R.kind==='weapon'?rollAttr(rank):R.kind==='gen'?genAttr(R,rank):null,grind:R.kind==='weapon'||R.proc==='grind'};save();showCraftResult(G.pendCraft)}finally{crafting=false}}
+ Object.keys(R.mats).forEach(k=>G.mats[k]-=R.mats[k]);G.pendCraft={rid:id,rank,mul,ds:r.score,ls:R.lathe?ls:null,reach:r.reach,shape:r.shape||null,attr:R.kind==='weapon'?rollAttr(rank):R.kind==='gen'?genAttr(R,rank):null,grind:R.kind==='weapon'||R.proc==='grind',tb,txp};save();showCraftResult(G.pendCraft)}finally{crafting=false}}
 function showCraftResult(pc){const R=RECIPES[pc.rid];if(!R){delete G.pendCraft;save();openShop();return}
  const who=R.kind==='weapon'?findOwn(R.who):null;if(R.kind==='weapon'&&!who){delete G.pendCraft;save();openShop();return}
  $('result').classList.remove('fres');
  $('resP').innerHTML=`<div style="text-align:center">${RIC(pc.rid,72)}<div style="margin:2px 0">${RKIC(pc.rank,84)}</div><b>${R.n}</b>
   ${pc.shape?shapeImg(pc.shape,200):''}${pc.attr?`<div class="note" style="margin:4px 0">属性：${attrTxt(pc.attr)}</div>`:''}<div class="note">${pc.grind?'形の一致 '+pc.ds+'%':(MINI[R.proc]?MINI[R.proc].n+' ':R.proc==='lathe'?'旋盤 ':'設計 ')+pc.ds}${pc.ls!=null?'・加工 '+pc.ls:''}　→　${prodFx(R,pc.mul)}${pc.reach<1&&pc.rank!=='SS'?'<br>（SS は、加工を最後までやりきったときだけ）':''}</div>
-  <div class="note">今の装備：${curProd(R)}</div></div>`;
+  ${pc.tb?`<div class="note">工具の練度ボーナス +${pc.tb}点</div>`:''}${pc.txp?`<div class="txp">${pc.txp}</div>`:''}<div class="note">今の装備：${curProd(R)}</div></div>`;
  const done=eq=>{if(!G.pendCraft)return;if(!eq)invStore(pc,who);else{const p={rid:pc.rid,rank:pc.rank,mul:pc.mul};if(R.kind==='gen')genGet(pc);else if(R.kind==='armor'){invPut(G.arm[R.slot],R.slot);G.arm[R.slot]=p}else{const J=JOBS[who.job];invPutW(who);who.weapon={name:R.n+'（'+pc.rank+'）',k:J.uses,v:Math.round(pc.mul*5),bv:Math.round(pc.mul*5),plus:0,rank:pc.rank,tier:R.tier,rid:pc.rid,mul:pc.mul,shape:pc.shape||null,attr:pc.attr||null}}}
   delete G.pendCraft;save();openShop()};
  $('resBtns').innerHTML='';addBtn('装備する',()=>done(true),'gold');addBtn('しまっておく（あとで編成で装備できる）',()=>done(false),'ghost');show('result')}
@@ -3282,7 +3285,7 @@ function openRecipe(id){const R=RECIPES[id],c=canMake(id),pr=procOf(R);
  const tools=R.tools.map(t=>`<span class="${G.tools.includes(t)?'':'lack'}">${MIC(t,20)}${TOOLS[t].n}</span>`).join('');
  const cur=curProd(R);
  $('gpBody').innerHTML=`<div class="rdh">${RIC(id,52)}<div><b>${R.n}</b><small>${recTag(R)}・${KANJI_TIER[R.tier]}</small></div></div>
-  <div class="rdt">${recipeFx(R).map(([a,b])=>`<div><span>${a}</span><p>${b}</p></div>`).join('')}<div><span>加工</span><p>${MIC(PROC_TOOL[pr],18)}${PROC_HOW[pr]}</p></div><div><span>今</span><p>${cur}</p></div></div>
+  <div class="rdt">${recipeFx(R).map(([a,b])=>`<div><span>${a}</span><p>${b}</p></div>`).join('')}<div><span>加工</span><p>${MIC(PROC_TOOL[pr],18)}${PROC_HOW[pr]}</p></div><div><span>工具の練度</span><p>Lv${recLv(R)}　${toolBonus(R)?`点数 +${toolBonus(R)}`:`許す幅 +${Math.round((assistMul({assist:recLv(R)})-1)*100)}%`}（使うほど上がる）</p></div><div><span>今</span><p>${cur}</p></div></div>
   <div class="rdn"><span>素材</span>${mats}</div><div class="rdn"><span>工具</span>${tools}</div>
   ${c.ok?'':`<div class="note" style="color:#ff8080;margin-top:6px">${c.noWho?CHARS[R.who].name+'がまだ仲間にいない':'足りないものがある（赤い字）'}</div>`}
   <div class="gpf"><button class="btn ghost" id="gpClose">やめる</button><button class="btn gold" id="rdGo" ${c.ok?'':'disabled'}>つくる</button></div>`;
@@ -3307,7 +3310,7 @@ function renderZukan(){const t=ZK.tab,so=ZK.sort[t],S=ZK_SORTS[t],nx=S[(S.findIn
   const key={kind:id=>['weapon','gen','armor'].indexOf(RECIPES[id].kind),proc:id=>PROC_ORDER.indexOf(procOf(RECIPES[id])),floor:id=>fl[RECIPES[id].area]||RECIPES[id].tier}[so];ids.sort((a,b)=>key(a)-key(b)||RECIPES[a].tier-RECIPES[b].tier);
   h+=ids.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R)+'・'+PROC_LBL[procOf(R)]:LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}
  else if(t==='tool'){let ids=TOOL_ORDER.slice();if(ZK.own)ids=ids.filter(k=>G.tools.includes(k));const key={price:k=>TOOLS[k].price||0,have:k=>G.tools.includes(k)?0:1}[so];ids.sort((a,b)=>key(a)-key(b)||TOOL_ORDER.indexOf(a)-TOOL_ORDER.indexOf(b));
-  h+=ids.map(k=>{const has=G.tools.includes(k);return `<div class="zki ${has?'':'no'}">${MIC(k,40)}<b>${TOOLS[k].n}</b><small>${has?'持っている':TOOLS[k].price?`${UIMG('coin',12)}${TOOLS[k].price}`:TOOLS[k].where||''}</small></div>`}).join('')}
+  h+=ids.map(k=>{const has=G.tools.includes(k);return `<div class="zki ${has?'':'no'}">${MIC(k,40)}<b>${TOOLS[k].n}</b><small>${has?'練度 Lv'+tlv(k):TOOLS[k].price?`${UIMG('coin',12)}${TOOLS[k].price}`:TOOLS[k].where||''}</small></div>`}).join('')}
  else{let ids=MAT_ORDER.slice();if(ZK.own)ids=ids.filter(k=>G.mats[k]>0);const f1=k=>{const f=Object.keys(FLOOR_MATS).find(f=>floorMats(+f).includes(k));return f?+f:99};
   const key={floor:k=>f1(k),num:k=>-(G.mats[k]||0)}[so];ids.sort((a,b)=>key(a)-key(b)||MAT_ORDER.indexOf(a)-MAT_ORDER.indexOf(b));
   h+=ids.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]||0}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}
@@ -3355,6 +3358,21 @@ function recycleAsk(key){const [k,v]=[key.slice(0,1),key.slice(2)];let body='',g
  $('rcGo').onclick=()=>{const m=go();save();$('genPick').classList.remove('on');tone(880,.15,'triangle',.1,1320);renderShop();say(m,1000)};
  $('genPick').classList.add('on')}
 
+/* ===================== 工具の練度（使い込み）：使うほど上がり、その工具を使う加工が楽になる ===================== */
+/* G.tlx：{工具: 経験}。Lv1〜5。被った工具（工具ガチャ）でも大きく上がる */
+const TLV_XP=[0,30,80,160,300];
+const tlv=t=>{const x=(G.tlx||{})[t]||0;let l=1;TLV_XP.forEach((v,i)=>{if(x>=v)l=i+1});return l};
+/* そのレシピで使う工具のうち、いちばん練度の高いもの */
+const recLv=R=>Math.max(1,...R.tools.filter(t=>G.tools.includes(t)).map(tlv));
+/* グラインダー・旋盤など、ずれの幅を変えにくい加工は点数ボーナスで助ける（Lv5で+8点）。ほかは各ミニゲームで幅が広がる */
+const toolBonus=R=>{const pr=procOf(R);return ['grind','lathe'].includes(pr)||!MINI[pr]?(recLv(R)-1)*2:0};
+const assistMul=o=>1+.08*(((o&&o.assist)||1)-1);   /* Lv5で許す幅が+32% */
+function toolXpGain(R,q){G.tlx=G.tlx||{};const g=5+Math.round(q/10),msg=[];
+ R.tools.filter(t=>G.tools.includes(t)).forEach(t=>{const b=tlv(t);G.tlx[t]=(G.tlx[t]||0)+g;const a=tlv(t);msg.push(`${MIC(t,18)}${TOOLS[t].n} 練度+${g}${a>b?` <b>Lv${a}に上がった！</b>`:''}`)});
+ return msg.join('<br>')}
+function tlvHTML(t){const x=(G.tlx||{})[t]||0,l=tlv(t),nx=TLV_XP[l],pv=TLV_XP[l-1];
+ return `<div class="tlv"><span>練度 <b>Lv${l}</b></span><i><u style="width:${l>=5?100:Math.round((x-pv)/(nx-pv)*100)}%"></u></i><small>${l>=5?'最大':`${x}/${nx}`}</small></div>`}
+
 /* ===================== 加工ミニゲーム：打つ（金床）・つなぐ（溶接機） ===================== */
 const HIT_N={1:5,2:7,3:9};          /* 打つ回数 */
 const HIT_PERIOD={1:1.5,2:1.25,3:1.05}; /* 輪がちぢむ時間（秒）。時間切れはない。のがしたら輪がまたひろがる */
@@ -3367,7 +3385,7 @@ function forgeOpen(title,sub,ic){$('fgBar').style.display='none';$('fgBar').inne
 
 /* ---------- 打つ：真っ赤な鉄を金床の上でたたいて、金色の線までのばす ---------- */
 function runHit(o){return new Promise(res=>{
- const tier=o.tier||1,N=HIT_N[tier],P=HIT_PERIOD[tier];
+ const tier=o.tier||1,N=HIT_N[tier],P=HIT_PERIOD[tier],AM=assistMul(o);
  const {cv,g,W,H}=forgeOpen(o.title||'金床で打つ','輪が金色の円に重なった瞬間にタップ。ぴったりなほど、鉄が金色の線どおりにのびる','t_anvil');
  const ax0=W*.1,ax1=W*.9,ay=H*.62;        /* 鉄の中心線 */
  const tgtT=H*.045,startT=H*.11;           /* 目標の厚み（半分）と、はじめの厚み */
@@ -3376,7 +3394,7 @@ function runHit(o){return new Promise(res=>{
  let k=0,t=0,last=0,raf=0,done=false,scores=[],hammer=0,sparks=[],shake=0,msg='',msgT=0;
  const R0=26,RMAX=96;
  const ringR=()=>RMAX-(RMAX-R0*.2)*((t%P)/P);
- function strike(){if(done||k>=N)return;const r=ringR(),q=Math.max(0,1-Math.abs(r-R0)/(R0*.8));scores.push(q);
+ function strike(){if(done||k>=N)return;const r=ringR(),q=Math.max(0,1-Math.abs(r-R0)/(R0*.8*AM));scores.push(q);
   /* その場所の鉄をのばす：ぴったりなら目標の厚みに、ずれるほど厚いまま */
   const x=pts[k],span=(ax1-ax0)/N*.75;for(let i=0;i<=M;i++){const xi=ax0+(ax1-ax0)*i/M,d=Math.abs(xi-x)/span;if(d<1){const w=Math.cos(d*Math.PI/2),goal=tgtT+(startT-tgtT)*(1-q)*.85;th[i]=th[i]+(Math.min(th[i],goal)-th[i])*w}}
   hammer=1;shake=6;for(let i=0;i<14+q*16;i++){const a=-Math.PI*Math.random();sparks.push({x,y:ay-th[Math.round((x-ax0)/(ax1-ax0)*M)],vx:Math.cos(a)*(2+Math.random()*4),vy:Math.sin(a)*(2+Math.random()*5),l:1})}
@@ -3417,7 +3435,7 @@ function weldPath(shape,W,H){const y=H*.5,x0=W*.1,x1=W*.9,P=[];const n=80;
   else if(shape==='ma')yy=y+Math.sin(u*Math.PI*2)*H*.18;
   P.push([x,yy])}return P}
 function runWeld(o){return new Promise(res=>{
- const tier=o.tier||1,TOL=WELD_TOL[tier],[VMIN,VMAX]=WELD_V[tier];
+ const tier=o.tier||1,AM=assistMul(o),TOL=WELD_TOL[tier]*AM,VMIN=WELD_V[tier][0]/AM,VMAX=WELD_V[tier][1]*AM;
  const {cv,g,W,H}=forgeOpen(o.title||'溶接機でつなぐ','指でトーチを動かして、つなぎ目をなぞる。速すぎると細く、遅すぎると焼けすぎる','t_welder');
  const P=weldPath(o.shape||'ch',W,H),n=P.length-1,q=new Float32Array(n).fill(-1),heat=new Float32Array(n);
  let pid=null,tx=W*.5,ty=H*.85,lx=0,ly=0,lt=0,v=0,last=0,raf=0,done=false,spat=0,sparks=[],on=false;
@@ -3470,7 +3488,7 @@ function nearIdx(P,x,y,from,to){let bi=-1,bd=1e9;for(let i=from;i<=to;i++){const
 /* ---------- 切る：金切りばさみ。タップでひと切り進む。左右にドラッグで向きを変える ---------- */
 const CUT_STEP={1:16,2:14,3:12},CUT_TOL={1:13,2:10,3:8};
 function runCut(o){return new Promise(res=>{
- const tier=o.tier||1,STEP=CUT_STEP[tier],TOL=CUT_TOL[tier];
+ const tier=o.tier||1,STEP=CUT_STEP[tier],TOL=CUT_TOL[tier]*assistMul(o);
  const {cv,g,W,H}=forgeOpen(o.title||'金切りばさみで切る','タップでひと切り進む。左右にドラッグして、はさみの向きを変える。角では止まって向きを合わせよう','t_snips');
  const P=shapePath(o.shape||'ch',W,H),n=P.length-1;
  let x=P[0][0],y=P[0][1],ang=Math.atan2(P[3][1]-P[0][1],P[3][0]-P[0][0]),prog=0,cuts=[[x,y]],qs=[],done=false,raf=0,last=0,snap=0,pid=null,sx=0,moved=0,t0=0;
@@ -3512,10 +3530,10 @@ function runScribe(o){return new Promise(res=>{
  let tool='l',cur=null,pid=null,done=false;
  const bar=$('fgBar');bar.innerHTML=`<button data-tl="l" class="on">📏 定規</button><button data-tl="c">⭕ コンパス</button><button data-tl="u">↶ 1つ消す</button>`;bar.style.display='flex';
  bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{const t=b.dataset.tl;if(t==='u'){drawn.pop();draw();return}tool=t;bar.querySelectorAll('[data-tl]').forEach(x=>x.classList.toggle('on',x.dataset.tl===t))});
- const snapP=p=>{if(!snapOn)return p;let best=p,bd=12;pts.forEach(q=>{const d=Math.hypot(q[0]-p[0],q[1]-p[1]);if(d<bd){bd=d;best=q}});return best};
+ const AM=assistMul(o),snapP=p=>{if(!snapOn)return p;let best=p,bd=12*AM;pts.forEach(q=>{const d=Math.hypot(q[0]-p[0],q[1]-p[1]);if(d<bd){bd=d;best=q}});return best};
  function match(f){let best=0;drawn.forEach(d=>{if(d.t!==f.t)return;let q;
-  if(f.t==='l'){const e1=Math.hypot(d.a[0]-f.a[0],d.a[1]-f.a[1])+Math.hypot(d.b[0]-f.b[0],d.b[1]-f.b[1]),e2=Math.hypot(d.a[0]-f.b[0],d.a[1]-f.b[1])+Math.hypot(d.b[0]-f.a[0],d.b[1]-f.a[1]);q=1-Math.min(e1,e2)/40}
-  else q=1-(Math.hypot(d.c[0]-f.c[0],d.c[1]-f.c[1])+Math.abs(d.r-f.r)*1.2)/26;best=Math.max(best,q)});return Math.max(0,best)}
+  if(f.t==='l'){const e1=Math.hypot(d.a[0]-f.a[0],d.a[1]-f.a[1])+Math.hypot(d.b[0]-f.b[0],d.b[1]-f.b[1]),e2=Math.hypot(d.a[0]-f.b[0],d.a[1]-f.b[1])+Math.hypot(d.b[0]-f.a[0],d.b[1]-f.a[1]);q=1-Math.min(e1,e2)/(40*AM)}
+  else q=1-(Math.hypot(d.c[0]-f.c[0],d.c[1]-f.c[1])+Math.abs(d.r-f.r)*1.2)/(26*AM);best=Math.max(best,q)});return Math.max(0,best)}
  function result(){const qs=F.map(match),hit=qs.filter(q=>q>.3).length,extra=Math.max(0,drawn.length-F.length);return{score:Math.max(0,Math.round(qs.reduce((a,b)=>a+b,0)/F.length*100-extra*3)),reach:hit/F.length}}
  function finish(){if(done)return;done=true;cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;$('fgDone').onclick=null;bar.style.display='none';bar.innerHTML='';res(result())}
  function draw(){g.clearRect(0,0,W,H);g.fillStyle='#4a5670';g.fillRect(W*.05,H*.05,W*.9,H*.9);
@@ -3556,11 +3574,11 @@ function runWire(o){return new Promise(res=>{
   term.forEach((k,c)=>{const[x,y]=cc(c);g.fillStyle=WIRE_COL[k];g.beginPath();g.arc(x,y,S*.32,0,TAU);g.fill();g.fillStyle='#0d1322';g.beginPath();g.arc(x,y,S*.12,0,TAU);g.fill();
    if(phase==='solder'&&sold.length>k||phase==='done'){g.fillStyle='#d8dde6';g.beginPath();g.arc(x,y,S*.14,0,TAU);g.fill()}});
   if(phase==='solder'){const k=sk,[x,y]=cc(pairs[k][0]);g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(x,y,S*.45,0,TAU);g.stroke();
-   const bw=W*.7,bx=(W-bw)/2,by=H-22;g.fillStyle='#ffffff20';g.fillRect(bx,by,bw,10);g.fillStyle='#51cf6688';g.fillRect(bx+bw*.62,by,bw*.14,10);g.fillStyle='#fff';g.fillRect(bx+bw*gauge-2,by-5,4,20)}
+   const bw=W*.7,bx=(W-bw)/2,by=H-22;g.fillStyle='#ffffff20';g.fillRect(bx,by,bw,10);g.fillStyle='#51cf6688';{const zw=.14*assistMul(o);g.fillRect(bx+bw*(.69-zw/2),by,bw*zw,10)}g.fillStyle='#fff';g.fillRect(bx+bw*gauge-2,by-5,4,20)}
   $('fgInfo').textContent=phase==='wire'?`つないだ ${paths.filter((_,k)=>joined(k)).length} / ${K}`:phase==='solder'?`はんだ付け ${sold.length} / ${K}　緑のところでタップ`:'できた！'}
  function loop(ts){const dt=last?Math.min(.05,(ts-last)/1000):0;last=ts;if(phase==='solder'){gauge+=gdir*dt*(.8+.15*tier);if(gauge>1){gauge=1;gdir=-1}if(gauge<0){gauge=0;gdir=1}}draw();if(!done)raf=requestAnimationFrame(loop)}
  function toSolder(){if(paths.every((_,k)=>joined(k))){phase='solder';sk=0;gauge=0;tone(880,.15,'triangle',.08,1320)}}
- cv.onpointerdown=e=>{e.preventDefault();if(phase==='solder'){const q=Math.max(0,1-Math.abs(gauge-.69)/.2);sold.push(q);tone(q>.7?1200:500,.08,'square',.05,q>.7?900:300);sk++;if(sk>=K){phase='done';setTimeout(finish,500)}return}
+ cv.onpointerdown=e=>{e.preventDefault();if(phase==='solder'){const q=Math.max(0,1-Math.abs(gauge-.69)/(.2*assistMul(o)));sold.push(q);tone(q>.7?1200:500,.08,'square',.05,q>.7?900:300);sk++;if(sk>=K){phase='done';setTimeout(finish,500)}return}
   if(phase!=='wire')return;const c=cellAt(e);if(c<0)return;pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}
   if(term.has(c)){drag=term.get(c);paths[drag]=[c]}else{const k=owner(c);if(k<0)return;drag=k;paths[k]=paths[k].slice(0,paths[k].indexOf(c)+1)}draw()};
  cv.onpointermove=e=>{if(e.pointerId!==pid||drag<0)return;const c=cellAt(e);if(c<0)return;const p=paths[drag],lastC=p[p.length-1];if(c===lastC)return;
