@@ -2703,7 +2703,7 @@ function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDP
   const F=FFOE[e.k],s=fspr('img/foe/'+e.k+'.webp',Math.round(e.r*2.6)),sz=e.r*2.6,bob=F.fly?Math.sin(e.wob)*5:0;
   g.fillStyle='#0006';g.beginPath();g.ellipse(e.x,e.y+e.r*.8,e.r*.9,e.r*.3,0,0,TAU);g.fill();
   if(e.boss&&e.ai&&e.ai.st==='aim'){g.strokeStyle='#ff4a4a';g.globalAlpha=.4+.4*Math.sin(D.t*20);g.lineWidth=e.r;g.beginPath();g.moveTo(e.x,e.y);g.lineTo(e.x+Math.cos(e.ai.ang)*280,e.y+Math.sin(e.ai.ang)*280);g.stroke();g.globalAlpha=1}
-  if(s){g.save();g.translate(e.x,e.y+bob);if(D.x<e.x)g.scale(-1,1);g.drawImage(s,-sz/2,-sz*.6,sz,sz*s.height/s.width);g.restore()}else{g.fillStyle=FOES[e.k]?FOES[e.k].col:'#c07030';g.beginPath();g.arc(e.x,e.y,e.r,0,TAU);g.fill()}
+  if(s){g.save();g.translate(e.x,e.y+bob);if(D.x<e.x&&!F.noflip)g.scale(-1,1);g.drawImage(s,-sz/2,-sz*.6,sz,sz*s.height/s.width);g.restore()}else{g.fillStyle=FOES[e.k]?FOES[e.k].col:'#c07030';g.beginPath();g.arc(e.x,e.y,e.r,0,TAU);g.fill()}
   if(e.hit>0){g.fillStyle='rgba(255,255,255,.45)';g.beginPath();g.arc(e.x,e.y,e.r,0,TAU);g.fill()}
   if(e.big&&!e.boss){g.fillStyle='#0008';g.fillRect(e.x-30,e.y-e.r*1.5,60,6);g.fillStyle='#ff6a4a';g.fillRect(e.x-30,e.y-e.r*1.5,60*Math.max(0,e.hp/e.max),6)}}
  // 歯車・弾
@@ -4205,7 +4205,10 @@ function droneSpr(col,size){const S=Math.round(size*2),c=document.createElement(
  g.fillStyle='#d9dee6';g.strokeStyle='#5a6270';g.lineWidth=S*.02;g.beginPath();g.arc(m,m,S*.2,0,TAU);g.fill();g.stroke();
  const gr=g.createRadialGradient(m,m+S*.02,0,m,m+S*.02,S*.12);gr.addColorStop(0,'#fff');gr.addColorStop(.35,col);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.beginPath();g.arc(m,m+S*.02,S*.12,0,TAU);g.fill();
  g.fillStyle='#2a303a';g.font=`900 ${Math.round(S*.09)}px sans-serif`;g.textAlign='center';g.fillText('空',m,m-S*.1);return c}
-{const _f=fspr;fspr=function(src,size){const mm=/^img\/foe\/(\w+)\.webp$/.exec(src),F=mm&&FFOE[mm[1]];if(!F||!(F.base||F.drone||F.src))return _f(src,size);
+/* 専用の絵がある敵（色ぬりの仮の絵は使わない） */
+const FOE_IMG_OK=['mold','cog','anvil','spark','coil','lens','wing','golem3','arm2','golem4','drone1','drone2','drone3'];
+['drone1','drone2','drone3'].forEach(k=>FFOE[k].noflip=1);
+{const _f=fspr;fspr=function(src,size){const mm=/^img\/foe\/(\w+)\.webp$/.exec(src),F=mm&&FFOE[mm[1]];if(!F||!(F.base||F.drone||F.src)||FOE_IMG_OK.includes(mm[1]))return _f(src,size);
  if(F.src)return _f(F.src,size);const key=src+'@'+size;if(FSPR[key])return FSPR[key];
  if(F.drone)return FSPR[key]=droneSpr(F.drone,size);
  const b=_f('img/foe/'+F.base+'.webp',size);if(!b)return null;const c=document.createElement('canvas');c.width=b.width;c.height=b.height;const g=c.getContext('2d');
