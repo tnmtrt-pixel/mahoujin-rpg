@@ -894,6 +894,11 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 #practice .hd{padding-left:12px}
 .prgo{display:flex;align-items:center;gap:6px;width:100%;margin:6px 0 2px;padding:6px 10px;background:none;border:1px dashed #ff7a2f88;color:var(--so);font-size:13px;font-weight:800}
 
+/* シートが長いとき：画面に収めて中だけスクロール（とじるボタンが見えるように） */
+#sheet .shp{max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));display:flex;flex-direction:column}
+#sheet .shh{flex:none}#sheetB{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}
+#sheetB .itr{padding:6px 8px;margin-bottom:4px}
+
 </style>
 </head>
 <body>
@@ -998,7 +1003,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
  </div>
  <div id="fWarn"></div>
  <div class="fov" id="fLevel"><div class="fcard"><h3>レベルアップ！</h3><div class="note">だれを強くする？</div><div id="fPicks"></div></div></div>
- <div class="fov" id="fPause"><div class="fcard"><h3>ひと休み</h3><button class="btn gold" onclick="fResume()">つづける</button><button class="btn" onclick="fRetreat()">ホームへ帰る（素材は全部持ち帰る）</button></div></div>
+ <div class="fov" id="fPause"><div class="fcard"><h3>ひと休み</h3><button class="btn gold" onclick="fResume()">つづける</button><button class="btn" onclick="fRetreat()">ホームへ帰る<small class="bsm">素材は全部持ち帰る</small></button></div></div>
 </section>
 
 <section id="result" class="scr">
@@ -2835,8 +2840,9 @@ function openItems(){const row=(ic,n,cnt,d)=>`<div class="itr">${ic}<div class="
  $('sheetT').innerHTML=`${IC('bag',30)} 持ちもの`;
  $('sheetB').innerHTML=`<div class="note"><b>素材</b></div>`+MAT_ORDER.map(k=>row(MIC(k,40),MATS[k].n,G.mats[k],MATS[k].d)).join('')+
   `<div class="note" style="margin-top:8px"><b>工具</b>　${G.tools.map(t=>MIC(t,20)+TOOLS[t].n).join('・')}</div>`+
-  `<div class="note" style="margin-top:6px"><b>図面</b>　${G.bps.map(b=>'「'+RECIPES[b].n+'」').join('')}</div>`;
- $('sheet').classList.add('on')}
+  `<div class="note" style="margin-top:6px"><b>図面</b>　${G.bps.map(b=>'「'+RECIPES[b].n+'」').join('')}</div>`+
+  `<button class="btn" style="margin-top:10px" onclick="closeSheet()">とじる</button>`;
+ $('sheetB').scrollTop=0;$('sheet').classList.add('on')}
 function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイスターの塔を登る。階段を見つけると、そのまま上の階へ。ボスを倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。工房で武器・防具づくり、編成でパーティ、ガチャで仲間集め。'],
  [null,'説明','塔の中では、出撃キャラを指で動かす。攻撃は自動。はじめは出撃キャラの技だけ。'],
  [null,'説明','階段には鍵がかかっている。その階の強敵が鍵を持っているので、たおしてから階段へ。上の階ほど敵が強い。出撃画面の「推奨戦力」とチームの攻撃をくらべよう。'],
