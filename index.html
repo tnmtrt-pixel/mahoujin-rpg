@@ -922,6 +922,29 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .chr.nw{border-color:#ff7a2f88}.chr b{flex:1;font-size:14px}.chr i{font-style:normal;font-size:10px;font-weight:900;background:var(--so);color:#1a0a00;padding:1px 5px}
 .chf{display:flex}.chf img{width:30px;height:30px;object-fit:contain;background:#0f1626;border:1px solid var(--sl);margin-right:-6px}
 .hfs i{white-space:nowrap}.hfh{gap:6px}@media (max-width:400px){.hfk{font-size:13px;letter-spacing:.1em}.hfs b{font-size:14px;margin-right:2px}.hfh .hfe{padding:4px 7px;font-size:11px}}
+/* ポーズ：今の強化 */
+#fPause .fcard.pz{max-height:88vh;overflow-y:auto;text-align:left}
+#fPause .fcard.pz h3{text-align:center;margin:0 0 4px}
+.pzt{text-align:center;font-size:12px;color:var(--sub);margin-bottom:6px}
+.pzh{font-weight:800;font-size:13px;color:var(--gold);margin:8px 0 4px}
+.pzg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pzc{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;background:#0b1024;border:1px solid var(--line);border-radius:12px;padding:8px 4px 6px;min-height:84px;color:inherit}
+.pzc.no{opacity:.35;border-style:dashed}.pzc.sel{border-color:var(--gold);box-shadow:0 0 0 2px #e8c35a55}
+.pzc.evo{border-color:#7fd0ff}.pzc.awk{border-color:#ff9a3a}
+.pzc em{position:absolute;top:3px;right:4px;font-style:normal;font-size:10px;font-weight:800;background:#e8c35a;color:#1a1408;border-radius:6px;padding:0 4px}
+.pzc.evo em{background:#7fd0ff}.pzc.awk em{background:#ff9a3a}
+.pzi{position:relative;display:inline-block;width:48px;height:48px}.pzi img{width:48px;height:48px;object-fit:contain}.pzi .ic{position:absolute;right:-6px;bottom:-4px}
+.pzs{display:flex;gap:2px}.pzs i{width:10px;height:10px;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);background:#3a4158}.pzs i.on{background:#ffd23a}
+.pzn{grid-column:1/-1;font-size:12px;color:var(--sub)}
+.pzd{margin:10px 0 6px;background:#0b1024;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.55;color:var(--sub);min-height:44px}
+.pzd b{display:block;color:var(--txt,#fff);font-size:13px;margin-bottom:2px}.pzx{color:#9fd0ff}
+/* ボスの宝箱 */
+.chb{text-align:left}.chh{text-align:center;font-weight:900;font-size:20px;color:#9fe8ff;margin:2px 0 8px;letter-spacing:2px}
+.chr{display:flex;align-items:center;gap:10px;background:#0b1024;border:1px solid #2f6fb0;border-radius:12px;padding:6px 10px;margin-top:6px;opacity:0;animation:chIn .35s ease forwards}
+.chr span{display:flex;flex-direction:column}.chr small{color:var(--sub);font-size:12px}.chr.coin{border-color:var(--gold)}
+.chr img,.chr .pzi{flex:none}
+@keyframes chIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+#fChest .btn{margin-top:12px}
 
 </style>
 </head>
@@ -4376,6 +4399,49 @@ Object.entries(REMAP4).forEach(([k,ps])=>{const R=RECIPES[k];R.proc=ps[0];R.proc
 /* ===================== コイン：ふつうの敵もときどき落とす ===================== */
 const COIN_NORMAL={rate:.05,v:2};
 {const _k=fKill;fKill=function(e){_k(e);if(FD&&!e.big&&!e.small&&Math.random()<COIN_NORMAL.rate)FD.items.push({x:e.x+8,y:e.y-6,k:'coin',v:COIN_NORMAL.v})}}
+
+/* ===================== ポーズ画面：今の強化（技・能力・進化／覚醒・お助け）をタップで確認 ===================== */
+function atkCardIc(k,s){const c=CHARS[k],A=ATK[k],gr=k!==G.lead&&genRid(k);return gr?RIC(gr,s):`<span class="pzi"><img src="${c.img}" alt="">${TIC(A.type,Math.round(s*.5))}</span>`}
+function pzStars(n,max,cls){let h='';for(let i=0;i<max;i++)h+=`<i class="${i<n?'on':''} ${cls||''}"></i>`;return `<span class="pzs">${h}</span>`}
+function fPauseHTML(){const D=FD,ks=Object.keys(D.atk).filter(k=>D.atk[k]>0),ps=Object.keys(PASSIVE).filter(k=>D.ps[k]>0);
+ const cell=(ic,lv,max,tag,key,cls)=>`<button class="pzc ${cls||''}" data-pz="${key}">${ic}${tag?`<em>${tag}</em>`:''}${pzStars(lv,max,cls)}</button>`;
+ const atk=ks.map(k=>{const aw=D.awk&&D.awk[k],ev=evoOn(k);return cell(atkCardIc(k,48),D.atk[k],ATK_MAX,aw?'覚醒':ev?'進化':(D.helperMs&&D.helperMs[k]?'お助け':''),'a:'+k,aw?'awk':ev?'evo':'')}).join('');
+ const pas=ps.map(k=>cell(MIC(k,44),D.ps[k],PASSIVE[k].max,'','p:'+k)).join('');
+ const empty=n=>Array.from({length:Math.max(0,n)},()=>'<span class="pzc no"></span>').join('');
+ return `<h3>ひと休み</h3><div class="pzt">${D.floor}F ${FLOORS[D.floor].n}　Lv${D.lv}　体力 ${Math.ceil(D.hp)}/${D.maxhp}　${UIMG('coin',16)}${D.coin}</div>
+  <div class="pzh">技</div><div class="pzg">${atk}${empty(3-ks.length%3===3?0:3-ks.length%3)}</div>
+  <div class="pzh">能力</div><div class="pzg">${pas||'<span class="pzn">まだない</span>'}${pas?empty(3-ps.length%3===3?0:3-ps.length%3):''}</div>
+  <div class="pzd" id="pzD">アイコンをタップすると、くわしく見られる</div>
+  <button class="btn gold" onclick="fResume()">つづける</button><button class="btn" onclick="fRetreat()">ホームへ帰る<small class="bsm">素材は全部持ち帰る</small></button>`}
+function pzDesc(key){const D=FD,[t,k]=key.split(':');
+ if(t==='p'){const P=PASSIVE[k];return `<b>${P.n}　Lv${D.ps[k]}/${P.max}</b>${P.d}`}
+ const A=ATK[k],L=D.atk[k],gr=k!==G.lead&&genRid(k),nm=gr?RECIPES[gr].n:CHARS[k].name+'の'+A.n;
+ const got=A.d.slice(0,L).map((d,i)=>`Lv${i+1}：${d}`).join('<br>'),nx=L<ATK_MAX?`<br><span class="pzx">次（Lv${L+1}）：${A.d[L]}</span>`:'';
+ let ex='';if(D.awk&&D.awk[k])ex='<br><span class="pzx">覚醒：威力1.5倍</span>';else if(evoOn(k)){const p=EVO.find(x=>x.includes(k)&&D.evo[x[0]]);ex=`<br><span class="pzx">進化「${p[2]}」：威力1.3倍</span>`}
+ if(D.hboost&&D.hboost[k])ex+='<br><span class="pzx">お助け：威力1.2倍（この挑戦の間）</span>';
+ return `<b>${nm}　${A.type}　Lv${L}/${ATK_MAX}</b>${got}${nx}${ex}`}
+{const _p=fPause;fPause=function(){if(!FD||FD.paused)return;_p();const card=$('fPause').querySelector('.fcard');card.classList.add('pz');card.innerHTML=fPauseHTML();
+ card.querySelectorAll('[data-pz]').forEach(b=>b.onclick=()=>{card.querySelectorAll('.pzc.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');$('pzD').innerHTML=pzDesc(b.dataset.pz)})}}
+
+/* ===================== ボスの宝箱：強化3つ＋コイン ===================== */
+const BOSS_CHEST={coin:f=>40+f*6,n:3};
+{const _k=fKill;fKill=function(e){_k(e);if(FD&&e.boss)FD.chests.push({x:e.x+80,y:e.y+10,open:false,boss:true})}}
+function chestRewards(){const D=FD,out=[];D.evo=D.evo||{};D.awk=D.awk||{};
+ for(let i=0;i<BOSS_CHEST.n;i++){const ex=extraOpts(),o=[];Object.keys(D.atk).forEach(k=>{if(D.atk[k]>0&&D.atk[k]<ATK_MAX)o.push('a:'+k)});Object.keys(PASSIVE).forEach(k=>{if(D.ps[k]<PASSIVE[k].max)o.push('p:'+k)});
+  const pk=ex.length?ex[0]:o.length?pick(o):'heal';const [t,k]=pk.split(':');
+  if(pk==='heal'){D.hp=Math.min(D.maxhp,D.hp+80);out.push({ic:MIC('oil',52),n:'オイル補給',d:'体力を80回復'});continue}
+  if(t==='e'||t==='w'){evoPick(t,k);if(t==='e'){const p=EVO.find(x=>x[0]===k);out.push({ic:UIMG(EVO_IC[k],52),n:'進化！ '+p[2],d:'2つの技の威力1.3倍'})}else out.push({ic:UIMG('u_awk',52),n:'覚醒！ '+ATK[k].n,d:'威力1.5倍'});continue}
+  if(t==='a'){D.atk[k]++;const L=D.atk[k];out.push({ic:atkCardIc(k,52),n:(k!==G.lead&&genRid(k)?RECIPES[genRid(k)].n:CHARS[k].name+'　'+ATK[k].n),d:`Lv${L}：${ATK[k].d[L-1]}`});continue}
+  D.ps[k]++;if(k==='hp'){D.maxhp+=20;D.hp=Math.min(D.maxhp,D.hp+20)}out.push({ic:MIC(k,52),n:PASSIVE[k].n,d:`Lv${D.ps[k]}：${PASSIVE[k].d}`})}
+ return out}
+{const _o=fOpenChest;fOpenChest=function(c){if(!c.boss)return _o(c);c.open=true;const D=FD;D.paused=true;fReleaseStick();
+ const rw=chestRewards(),coin=BOSS_CHEST.coin(D.floor);G.coin=(G.coin|0)+coin;D.coin+=coin;save();renderFHud();tone(880,.25,'triangle',.1,1760);
+ let el=$('fChest');if(!el){el=document.createElement('div');el.className='fov';el.id='fChest';$('fPause').parentNode.appendChild(el)}
+ el.innerHTML=`<div class="fcard chb"><div class="chh">宝箱オープン</div>${rw.map((r,i)=>`<div class="chr" style="animation-delay:${i*120}ms">${r.ic}<span><b>${r.n}</b><small>${r.d}</small></span></div>`).join('')}
+  <div class="chr coin" style="animation-delay:${rw.length*120+80}ms">${UIMG('coin',48)}<span><b>コイン</b><small>×${coin}</small></span></div><button class="btn gold" id="chOk">OK</button></div>`;
+ el.classList.add('on');$('chOk').onclick=()=>{el.classList.remove('on');if(FD===D){D.paused=false;fLast=0}}}}
+{const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);for(const c of D.chests){if(!c.boss||c.open)continue;g.save();g.strokeStyle='#ffd23a';g.lineWidth=4;g.globalAlpha=.5+.5*Math.sin(D.t*5);g.beginPath();g.arc(c.x,c.y-6,40,0,TAU);g.stroke();
+ g.globalAlpha=1;g.fillStyle='#ffd23a';g.font='900 12px sans-serif';g.textAlign='center';g.fillText('ボスの宝箱',c.x,c.y-52);g.restore()}}}
 
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
