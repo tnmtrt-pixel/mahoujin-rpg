@@ -806,6 +806,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .wst{display:flex;align-items:baseline;gap:6px;min-width:0}.wst b{font-size:14px;flex:0 1 auto}.wst small{flex:0 1 auto}
 .wss .go{font-size:11px;padding:2px 7px}
 #shop .bpgo{padding:6px 10px;font-size:13px}
+#fTime .fmats{align-items:center}#fTime .fcn{font-size:13px;color:#ffd060;margin-left:1px;font-variant-numeric:tabular-nums;line-height:18px}
 
 </style>
 </head>
@@ -2539,7 +2540,7 @@ function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDP
  g.font='800 13px sans-serif';g.textAlign='center';for(const p of D.pops){g.globalAlpha=1-p.t/30;g.fillStyle=p.heal?'#7fffa0':'#fff';g.fillText(p.v,p.x,p.y-p.t*.8)}g.globalAlpha=1;
  g.restore();
  // 上の帯
- const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+(D.boss?`${D.floor}F　ボス戦`:`${D.floor}F　${Math.floor(lf/60)}:${String(lf%60).padStart(2,'0')}`)+`<span class="fmats">${matIcons(D.floor,18)}</span><span class="fcoin">${UIMG('coin',18)}<b>${D.coin|0}</b></span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
+ const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+(D.boss?`${D.floor}F　ボス戦`:`${D.floor}F　${Math.floor(lf/60)}:${String(lf%60).padStart(2,'0')}`)+`<span class="fmats">${matIcons(D.floor,18)}${UIMG('coin',18)}<b class="fcn">${D.coin|0}</b></span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
  $('fHpI').style.width=Math.max(0,100*D.hp/D.maxhp)+'%';$('fXpI').style.width=100*D.xp/D.need+'%';$('fLv').textContent='Lv'+D.lv;
  if(D.boss){$('fBoss').style.display='block';$('fBossI').style.width=Math.max(0,100*D.boss.hp/D.boss.max)+'%';$('fBossN').textContent=FOES[D.boss.k]?FOES[D.boss.k].n:'ボス'}else $('fBoss').style.display='none';
  const wn=$('fWarn');if(D.warn>0){{const h=(D.warnIc?UIMG(D.warnIc,30)+' ':'')+D.warnTxt;if(wn._h!==h){wn.innerHTML=h;wn._h=h}}wn.style.opacity=Math.min(1,D.warn/30)}else wn.style.opacity=0}
