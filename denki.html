@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>複線図の謎解き（マイスターの魔法陣）</title>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+1p:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1024;--panel:#141b38;--line:#2e3a6e;--ink:#f1ecd8;--sub:#9fa8cc;--gold:#e8c35a;--blue:#5aa8ff;--red:#ff5a5a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'M PLUS 1p',system-ui,sans-serif;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);background:radial-gradient(ellipse at 50% 20%,#1d2a5c 0%,#0b1024 70%)}
+button{font:inherit;color:inherit;border:none;cursor:pointer;touch-action:manipulation}
+.scr{display:none;max-width:620px;margin:0 auto;padding:10px;min-height:100%}
+.scr.on{display:block}
+h1{font-family:'Dela Gothic One';font-weight:400;color:var(--gold);font-size:26px;margin:6px 0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;margin:8px 0}
+.note{font-size:13px;color:var(--sub);line-height:1.7}
+.btn{display:block;width:100%;padding:13px;margin:8px 0;border-radius:14px;background:linear-gradient(#2c4a9a,#1c2f6a);border:1px solid #5a7ad0;font-weight:800;font-size:16px}
+.btn.gold{background:linear-gradient(#d8ae46,#946e1c);border-color:#f3d77a;color:#1b1400}
+.lv{display:flex;justify-content:space-between;align-items:center;text-align:left}
+.lv .st{color:var(--gold);font-size:18px;letter-spacing:2px}
+.hd{display:flex;align-items:center;gap:8px}
+.hd .t{flex:1;font-weight:800;font-size:16px}
+.back{background:transparent;border:1px solid var(--line);border-radius:10px;padding:6px 10px;color:var(--sub);font-size:13px}
+#sld{width:100%;display:block;border-radius:10px;background:#f4efe0}
+#wk{width:100%;display:block;border-radius:12px;background:#10162e;border:1px solid var(--line);touch-action:none}
+.tools{display:grid;grid-template-columns:repeat(3,1fr) 1.2fr 1.2fr;gap:6px;margin-top:6px}
+.tb{padding:10px 2px;border-radius:12px;border:2px solid var(--line);background:#141b38;font-weight:800;font-size:14px}
+.tb.c{display:flex;align-items:center;justify-content:center;gap:4px}
+.tb.c i{width:16px;height:16px;border-radius:50%;display:inline-block;border:2px solid #888}
+.tb.on{border-color:var(--gold);box-shadow:0 0 8px #e8c35a88}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+#msg{min-height:44px;font-size:14px;font-weight:700;line-height:1.6}
+.ok{color:#8fe08a}.ng{color:#ff9a9a}
+.ov{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;justify-content:center;z-index:10;padding:12px}
+.ov.on{display:flex}
+#talk .box{width:100%;max-width:600px;background:#141b38f5;border:2px solid var(--gold);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:flex-start;margin-bottom:6vh}
+#talk img{width:86px;height:86px;object-fit:contain;flex:none}
+#talk .who{font-weight:800;color:var(--gold);margin-bottom:4px}
+#talk .txt{font-size:15px;line-height:1.75;white-space:pre-wrap}
+#talk .nx{text-align:right;font-size:12px;color:var(--sub);margin-top:4px}
+</style>
+</head>
+<body>
+<section id="menu" class="scr on">
+ <h1>⚡ 複線図の謎解き</h1>
+ <div class="note">単線図（配線の設計図）を見て、実際の電線のつなぎ方＝複線図を完成させよう。正しくつなげば、街に灯りが戻る。</div>
+ <div id="lvList"></div>
+ <div class="panel note"><b>複線図の基本ルール</b><br>
+ ① 電源の<b>接地側（N）</b>は<b>白線</b>で、照明・コンセントへ直接つなぐ（スイッチを通さない）<br>
+ ② 電源の<b>非接地側（L）</b>は<b>黒線</b>で、スイッチとコンセントへ<br>
+ ③ スイッチと照明の間は「帰り線」でつなぐ（色の指定なし。VVF2心ならスイッチ側は白、照明側は黒になる）<br>
+ ④ 3路スイッチは、0番を電源側と照明側に、1番どうし・3番どうしをつなぐ<br>⑤ 器具からJBまではケーブル（VVF2心＝黒・白、3路はVVF3心＝黒・白・赤）。その心線の色しか使えない<br>⑥ 電線はすべて<b>ジョイントボックス（JB）</b>へ引き込み、JBの中で電線の端どうしを<b>差込形コネクタ</b>でつなぐ<br>※ 第二種電気工事士の考え方をもとに簡略化しています（接地線などは省略）。</div>
+</section>
+
+<section id="play" class="scr">
+ <div class="hd"><button class="back" onclick="openMenu()">◀ 一覧</button><span class="t" id="lvT"></span></div>
+ <div class="note" style="margin:4px 0 2px">単線図（設計図）</div>
+ <canvas id="sld"></canvas>
+ <div class="note" style="margin:6px 0 2px">複線図：①端子●→JBの中をタップで電線を引き込む　②JBの中で電線の端を2つ順にタップしてコネクタでつなぐ（コネクタをタップで外す）　電線をタップで削除／スイッチ本体をタップで入切</div>
+ <canvas id="wk"></canvas>
+ <div class="tools">
+  <button class="tb c on" data-c="#222"><i style="background:#222"></i>黒</button>
+  <button class="tb c" data-c="#f4f4f4"><i style="background:#f4f4f4"></i>白</button>
+  <button class="tb c" data-c="#e03a3a"><i style="background:#e03a3a"></i>赤</button>
+  <button class="tb" onclick="undo()">↶ 戻す</button>
+  <button class="tb" onclick="clearW()">全消去</button>
+ </div>
+ <div class="row2"><button class="btn" onclick="hint()" style="margin:0">💡 ヒント</button><button class="btn gold" onclick="check()" style="margin:0">⚡ 通電テスト</button></div>
+ <div class="panel" id="msg"></div>
+</section>
+
+<div class="ov" id="talk"><div class="box"><img id="tImg" src="img/gorilla.webp" alt=""><div style="flex:1"><div class="who" id="tWho"></div><div class="txt" id="tTxt"></div><div class="nx">タップで次へ ▶</div></div></div></div>
+
+<script>
+'use strict';
+/* =========== 問題データ（授業ではここに問題を足せる） ===========
+  機器の種類：src電源 lamp照明 sw片切スイッチ sw3 3路スイッチ out コンセント
+  x,y = 複線図での位置（0〜1）  sx,sy = 単線図での位置  ctl = その照明を操作するスイッチ
+*/
+const LEVELS=[
+ {t:'1. 街灯をつけよう',best:3,story:[['ボルトゴリラ','停電の原因は、錆にかじられた街灯の配線だ。ウホッ。'],['ボルトゴリラ','上の単線図は「1本の線で描いた設計図」。実際には電線が何本もいる。\nそれを描いたのが複線図だ。まずは照明1つ、スイッチ1つからいくぜ！']],
+  dev:[{id:'src',k:'src',x:.13,y:.2,sx:.1,sy:.5},{id:'L1',k:'lamp',lb:'イ',x:.75,y:.18,sx:.75,sy:.25,ctl:['S1']},{id:'S1',k:'sw',lb:'イ',x:.3,y:.8,sx:.45,sy:.8}]},
+ {t:'2. 工房の照明とコンセント',best:3,story:[['ボルトゴリラ','次は工房だ。照明に加えて、コンセントもある。'],['ボルトゴリラ','コンセントはスイッチと関係なく、いつでも使えないと困る。\nLとNの両方を、直接もってくるんだ。']],
+  dev:[{id:'src',k:'src',x:.13,y:.2,sx:.1,sy:.5},{id:'L1',k:'lamp',lb:'イ',x:.75,y:.18,sx:.75,sy:.25,ctl:['S1']},{id:'S1',k:'sw',lb:'イ',x:.28,y:.8,sx:.4,sy:.8},{id:'O1',k:'out',x:.78,y:.8,sx:.82,sy:.78}]},
+ {t:'3. 教室の照明2つ',best:4,story:[['ボルトゴリラ','教室には照明が2つ。イのスイッチでイの照明、ロのスイッチでロの照明だ。'],['ボルトゴリラ','記号（イ・ロ）を見て、どのスイッチがどの照明かを読み取るのがコツだぜ。']],
+  dev:[{id:'src',k:'src',x:.12,y:.45,sx:.08,sy:.5},{id:'L1',k:'lamp',lb:'イ',x:.45,y:.14,sx:.45,sy:.2,ctl:['S1']},{id:'L2',k:'lamp',lb:'ロ',x:.82,y:.14,sx:.82,sy:.2,ctl:['S2']},{id:'S1',k:'sw',lb:'イ',x:.25,y:.84,sx:.35,sy:.82},{id:'S2',k:'sw',lb:'ロ',x:.52,y:.84,sx:.55,sy:.82},{id:'O1',k:'out',x:.82,y:.82,sx:.85,sy:.8}]},
+ {t:'4. 階段の明かり（3路スイッチ）',best:5,story:[['ボルトゴリラ','最後は階段だ。1階でも2階でも、点けたり消したりできる明かり。'],['ボルトゴリラ','3路スイッチを2つ使う。端子は0・1・3。\n0番の片方は電源（L）へ、もう片方は照明へ。1番どうし、3番どうしをつなぐんだ！']],
+  dev:[{id:'src',k:'src',x:.12,y:.2,sx:.08,sy:.5},{id:'L1',k:'lamp',lb:'イ',x:.55,y:.14,sx:.5,sy:.2,ctl:['A','B']},{id:'A',k:'sw3',lb:'1階',x:.22,y:.8,sx:.25,sy:.8},{id:'B',k:'sw3',lb:'2階',x:.78,y:.8,sx:.78,sy:.8}]}
+];
+/* 端子の配置（機器の中心からのずれ）と名前 */
+const TERM={src:[['L',-.06,.09,'L'],['N',.06,.09,'N']],lamp:[['W',-.05,.08,'W'],['o',.05,.08,'']],sw:[['a',-.05,-.08,''],['b',.05,-.08,'']],
+ out:[['L',-.05,-.08,'L'],['W',.05,-.08,'W']],sw3:[['0',0,-.1,'0'],['1',-.06,-.08,'1'],['3',.06,-.08,'3']]};
+/* ケーブル：器具からJBまでの心線の色（VVF2心＝黒白、VVF3心＝黒白赤） */
+const CABLE={src:['#222','#f4f4f4'],lamp:['#222','#f4f4f4'],sw:['#222','#f4f4f4'],out:['#222','#f4f4f4'],sw3:['#222','#f4f4f4','#e03a3a']};
+const CNAME={'#222':'黒','#f4f4f4':'白','#e03a3a':'赤'};
+const ENDING=[['ボルトゴリラ','100万ボルトの勝利だ！ 街に灯りが戻ったぜ、ウホッ！'],['ボルトゴリラ','……よし、決めた。錆退治、俺も手伝う。電気のことなら任せとけ！']];
+
+/* =========== 状態 =========== */
+const $=id=>document.getElementById(id);
+let P=null,col='#222',sel=null,stars={};
+try{stars=JSON.parse(localStorage.getItem('denki1'))||{}}catch(e){}
+function saveS(){try{localStorage.setItem('denki1',JSON.stringify(stars))}catch(e){}}
+function openMenu(){$('play').classList.remove('on');$('menu').classList.add('on');
+ $('lvList').innerHTML=LEVELS.map((L,i)=>{const s=stars[i]||0,open=i===0||stars[i-1];return `<button class="btn lv" ${open?'':'disabled style="opacity:.4"'} onclick="start(${i})"><span>${L.t}</span><span class="st">${'★'.repeat(s)}${'☆'.repeat(3-s)}</span></button>`}).join('')}
+function talk(list){return new Promise(res=>{let i=0;$('talk').classList.add('on');const sh=()=>{$('tWho').textContent=list[i][0];$('tTxt').textContent=list[i][1]};sh();
+ $('talk').onclick=()=>{i++;if(i>=list.length){$('talk').classList.remove('on');$('talk').onclick=null;res()}else sh()}})}
+async function start(i){const L=LEVELS[i];P={i,L,wires:[],groups:[],state:{},lit:{},short:false};L.dev.forEach(d=>{if(d.k==='sw')P.state[d.id]=0;if(d.k==='sw3')P.state[d.id]=0});
+ $('menu').classList.remove('on');$('play').classList.add('on');$('lvT').textContent=L.t;$('msg').innerHTML='<span class="note">単線図を見て、必要な電線を引こう。</span>';sel=null;resize();
+ await talk(L.story)}
+document.querySelectorAll('.tb.c').forEach(b=>b.onclick=()=>{if(b.disabled)return;col=b.dataset.c;document.querySelectorAll('.tb.c').forEach(x=>x.classList.toggle('on',x===b))});
+function freeCores(termId){const did=termId.split('.')[0],d=P.L.dev.find(q=>q.id===did),used=P.wires.filter(w=>w.a.startsWith(did+'.')).map(w=>w.c);return CABLE[d.k].filter(c=>!used.includes(c))}
+function updateColors(){const fr=sel&&!sel.startsWith('j:')?freeCores(sel):null;document.querySelectorAll('.tb.c').forEach(b=>{const ok=!fr||fr.includes(b.dataset.c);b.disabled=!ok;b.style.opacity=ok?1:.25});
+ if(fr&&fr.length&&!fr.includes(col)){col=fr[0]}document.querySelectorAll('.tb.c').forEach(x=>x.classList.toggle('on',x.dataset.c===col))}
+
+/* =========== 描画 =========== */
+const sc=$('sld'),sx=sc.getContext('2d'),wc=$('wk'),wx=wc.getContext('2d');let SW=300,SH=120,WW=300,WH=300;
+function resize(){const w=Math.min(600,document.body.clientWidth-20),d=Math.min(2,devicePixelRatio||1);SW=w;SH=Math.round(w*.36);WW=w;WH=Math.round(Math.min(w*.95,innerHeight-SH-260));
+ [[sc,SW,SH,sx],[wc,WW,WH,wx]].forEach(([c,a,b,x])=>{c.style.height=b+'px';c.width=a*d;c.height=b*d;x.setTransform(d,0,0,d,0,0)});drawS();drawW()}
+window.addEventListener('resize',()=>{if(P)resize()});
+function drawS(){const x=sx;x.clearRect(0,0,SW,SH);x.fillStyle='#f4efe0';x.fillRect(0,0,SW,SH);const P2=d=>[d.sx*SW,d.sy*SH];
+ const jb=[SW*.42,SH*.5];x.strokeStyle='#222';x.lineWidth=2;
+ P.L.dev.forEach(d=>{const[a,b]=P2(d);x.beginPath();x.moveTo(jb[0],jb[1]);x.lineTo(a,b);x.stroke()});
+ if(P.L.dev.filter(d=>d.k==='sw3').length===2){}/* 3路は単線図ではJB経由の線で表す */
+ x.setLineDash([4,3]);x.beginPath();x.arc(jb[0],jb[1],10,0,Math.PI*2);x.fillStyle='#f4efe0';x.fill();x.stroke();x.setLineDash([]);
+ x.font='800 11px sans-serif';x.textAlign='center';x.fillStyle='#222';
+ P.L.dev.forEach(d=>{const[a,b]=P2(d);x.fillStyle='#f4efe0';x.strokeStyle='#222';x.lineWidth=2;
+  if(d.k==='src'){x.fillRect(a-16,b-11,32,22);x.strokeRect(a-16,b-11,32,22);x.fillStyle='#222';x.fillText('電源',a,b+4);x.fillText('1φ2W',a,b+24)}
+  else if(d.k==='lamp'){x.beginPath();x.arc(a,b,11,0,Math.PI*2);x.fill();x.stroke();x.beginPath();x.moveTo(a-8,b-8);x.lineTo(a+8,b+8);x.moveTo(a+8,b-8);x.lineTo(a-8,b+8);x.stroke();x.fillStyle='#222';x.fillText(d.lb,a+20,b-8)}
+  else if(d.k==='sw'||d.k==='sw3'){x.fillStyle='#222';x.beginPath();x.arc(a,b,6,0,Math.PI*2);x.fill();x.fillText((d.k==='sw3'?'3 ':'')+d.lb,a,b+20)}
+  else if(d.k==='out'){x.beginPath();x.arc(a,b,10,0,Math.PI*2);x.fill();x.stroke();x.beginPath();x.moveTo(a-4,b-5);x.lineTo(a-4,b+5);x.moveTo(a+4,b-5);x.lineTo(a+4,b+5);x.stroke();x.fillStyle='#222';x.fillText('コンセント',a,b+24)}});
+ x.fillStyle='#555';x.font='10px sans-serif';x.fillText('JB（ジョイントボックス）',jb[0],jb[1]-14)}
+function tpos(d,t){const T=TERM[d.k].find(q=>q[0]===t);return[(d.x+T[1])*WW,(d.y+T[2]/(WH/WW))*WH]}
+function allTerms(){const a=[];P.L.dev.forEach(d=>TERM[d.k].forEach(T=>a.push({d,t:T[0],lb:T[3],id:d.id+'.'+T[0],p:tpos(d,T[0])})));return a}
+const JB=()=>({x:WW*.5,y:WH*.47,r:Math.min(WW,WH)*.2});
+function endPos(){/* JBの縁に、電線の端を並べる（向きは端子の方向） */
+ const j=JB(),list=P.wires.map(w=>{const T=termById(w.a).p;return{w,ang:Math.atan2(T[1]-j.y,T[0]-j.x)}}).sort((p,q)=>p.ang-q.ang);
+ const gap=.32;for(let k=0;k<3;k++)for(let i=1;i<list.length;i++){if(list[i].ang-list[i-1].ang<gap)list[i].ang=list[i-1].ang+gap}
+ const pos={};list.forEach(o=>{pos[o.w.e]=[j.x+Math.cos(o.ang)*j.r*.86,j.y+Math.sin(o.ang)*j.r*.86]});return pos}
+function wirePath(w,ep){const A=termById(w.a).p,B=ep[w.e],j=JB();return[A,[(A[0]+B[0])/2*.7+j.x*.3,(A[1]+B[1])/2*.7+j.y*.3],B]}
+const termById=id=>allTerms().find(t=>t.id===id);
+function grpPos(g,ep){const j=JB();let x=0,y=0;g.forEach(e=>{x+=ep[e][0];y+=ep[e][1]});x/=g.length;y/=g.length;return[j.x+(x-j.x)*.38,j.y+(y-j.y)*.38]}
+function wireCol(c){return c==='#222'?'#111':c}
+function drawW(){const x=wx;x.clearRect(0,0,WW,WH);const j=JB(),ep=endPos();
+ /* JB */
+ x.fillStyle='rgba(40,52,96,.55)';x.strokeStyle='#9fb4d6';x.lineWidth=2;x.setLineDash([6,4]);x.beginPath();x.arc(j.x,j.y,j.r,0,Math.PI*2);x.fill();x.stroke();x.setLineDash([]);
+ x.fillStyle='rgba(159,180,214,.6)';x.font='800 11px sans-serif';x.textAlign='center';x.fillText('JB',j.x,j.y+j.r-8);
+ /* 電線（端子→JB） */
+ const stroke=(pts,c,curve)=>{x.lineCap='round';const go=()=>{x.beginPath();x.moveTo(...pts[0]);if(curve)x.quadraticCurveTo(...pts[1],...pts[2]);else x.lineTo(...pts[1]);x.stroke()};
+  if(c==='#f4f4f4'){x.strokeStyle='#555';x.lineWidth=7;go()}x.strokeStyle=wireCol(c);x.lineWidth=c==='#222'?5:4.5;if(c==='#222'){x.save();x.shadowColor='#8aa0ff';x.shadowBlur=3;go();x.restore()}else go()};
+ P.wires.forEach(w=>stroke(wirePath(w,ep),w.c,true));
+ /* コネクタ（JBの中の接続） */
+ P.groups.forEach(g=>{const c=grpPos(g,ep);g.forEach(e=>{const w=P.wires.find(q=>q.e===e);stroke([ep[e],c],w.c,false)});
+  x.fillStyle='#e8933a';x.strokeStyle='#fff';x.lineWidth=1.5;x.beginPath();x.roundRect?x.roundRect(c[0]-11,c[1]-8,22,16,4):x.rect(c[0]-11,c[1]-8,22,16);x.fill();x.stroke();x.fillStyle='#1b1400';x.font='800 10px sans-serif';x.fillText(g.length,c[0],c[1]+4)});
+ /* 電線の端 */
+ Object.entries(ep).forEach(([e,p])=>{const w=P.wires.find(q=>q.e===e);x.beginPath();x.arc(p[0],p[1],7,0,Math.PI*2);x.fillStyle=sel===e?'#e8c35a':wireCol(w.c);x.fill();x.strokeStyle=P.groups.some(g=>g.includes(e))?'#e8933a':'#fff';x.lineWidth=2;x.stroke()});
+ /* 機器 */
+ x.font='800 12px sans-serif';
+ P.L.dev.forEach(d=>{const a=d.x*WW,b=d.y*WH;x.lineWidth=2;const n=P.wires.filter(w=>w.a.startsWith(d.id+'.')).length;
+  if(d.k==='src'){x.fillStyle='#2a3460';x.strokeStyle='#9fb4d6';x.fillRect(a-30,b-18,60,30);x.strokeRect(a-30,b-18,60,30);x.fillStyle='#fff';x.fillText('電源',a,b+2)}
+  else if(d.k==='lamp'){const on=P.lit[d.id];if(on){const g=x.createRadialGradient(a,b,0,a,b,50);g.addColorStop(0,'rgba(255,230,140,.8)');g.addColorStop(1,'rgba(255,230,140,0)');x.fillStyle=g;x.beginPath();x.arc(a,b,50,0,Math.PI*2);x.fill()}
+   x.fillStyle=on?'#ffe9a0':'#2a3460';x.strokeStyle='#9fb4d6';x.beginPath();x.arc(a,b,17,0,Math.PI*2);x.fill();x.stroke();x.strokeStyle=on?'#a07a20':'#9fb4d6';x.beginPath();x.moveTo(a-11,b-11);x.lineTo(a+11,b+11);x.moveTo(a+11,b-11);x.lineTo(a-11,b+11);x.stroke();x.fillStyle='#e8c35a';x.fillText('照明 '+d.lb,a,b-23)}
+  else if(d.k==='sw'||d.k==='sw3'){const st=P.state[d.id];x.fillStyle='#2a3460';x.strokeStyle='#9fb4d6';x.fillRect(a-24,b-16,48,40);x.strokeRect(a-24,b-16,48,40);
+   x.fillStyle=d.k==='sw'?(st?'#8fe08a':'#555'):'#c9a06a';x.fillRect(a-8,b-6,16,22);x.fillStyle='#fff';x.font='800 10px sans-serif';x.fillText(d.k==='sw'?(st?'入':'切'):(st?'3側':'1側'),a,b+36);x.font='800 12px sans-serif';
+   x.fillStyle='#e8c35a';x.fillText((d.k==='sw3'?'3路 ':'スイッチ ')+d.lb,a,b+50)}
+  else if(d.k==='out'){x.fillStyle='#2a3460';x.strokeStyle='#9fb4d6';x.beginPath();x.arc(a,b,18,0,Math.PI*2);x.fill();x.stroke();x.fillStyle='#9fb4d6';x.fillRect(a-7,b-6,3,12);x.fillRect(a+4,b-7,3,14);x.fillStyle='#e8c35a';x.fillText(P.outOk?'コンセント ⚡':'コンセント',a,b+34)}
+  if(n){x.fillStyle='#9fb4d6';x.font='800 10px sans-serif';const lx=d.k==='src'?a:a+(d.x>.5?-38:38),ly=d.k==='src'?b-24:(d.k==='lamp'?b+4:b-24);x.fillText(`ケーブル${n}心`,lx,ly);x.font='800 12px sans-serif'}});
+ /* 端子 */
+ allTerms().forEach(T=>{const[a,b]=T.p;x.beginPath();x.arc(a,b,9,0,Math.PI*2);x.fillStyle=sel===T.id?'#e8c35a':'#d0d6ea';x.fill();x.strokeStyle='#0b1024';x.lineWidth=2;x.stroke();if(T.lb){x.fillStyle='#0b1024';x.font='800 9px sans-serif';x.fillText(T.lb,a,b+3)}});
+ if(P.short){x.fillStyle='rgba(255,60,60,.25)';x.fillRect(0,0,WW,WH);x.fillStyle='#ff6a6a';x.font='800 28px sans-serif';x.fillText('⚡ショート！',WW/2,WH/2)}}
+
+/* =========== 操作 =========== */
+function note(t){$('msg').innerHTML='<span class="note">'+t+'</span>'}
+wc.addEventListener('pointerdown',e=>{if(!P)return;e.preventDefault();const r=wc.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top,j=JB(),ep=endPos();
+ /* 0) 端子を選んだ状態でJBの中をタップ：電線を引き込む */
+ if(sel&&!sel.startsWith('j:')&&Math.hypot(px-j.x,py-j.y)<j.r){if(!freeCores(sel).includes(col))col=freeCores(sel)[0];P.wires.push({a:sel,e:'j:'+sel,c:col});setTimeout(updateColors,0);P.lastOp='w';sel=null;simulate();drawW();note('JBの中で、電線の端を2つ順にタップするとコネクタでつながる');return}
+ /* 1) 電線の端（JBの中） */
+ const E=Object.keys(ep).find(k=>Math.hypot(ep[k][0]-px,ep[k][1]-py)<14);
+ if(E){
+  if(!sel||!sel.startsWith('j:')){sel=E}else if(sel===E){sel=null}else{joinEnds(sel,E);sel=null;simulate()}drawW();return}
+ /* 2) コネクタ（タップで外す） */
+ const gi=P.groups.findIndex(g=>{const c=grpPos(g,ep);return Math.abs(c[0]-px)<14&&Math.abs(c[1]-py)<12});
+ if(gi>=0){P.groups.splice(gi,1);sel=null;simulate();drawW();note('コネクタを外した');return}
+ /* 3) 端子 */
+ const T=allTerms().find(t=>Math.hypot(t.p[0]-px,t.p[1]-py)<18);
+ if(T){if(P.wires.some(w=>w.a===T.id)){note('この端子にはもう電線がつながっている（電線をタップすると削除できる）');sel=null;drawW();return}sel=sel===T.id?null:T.id;updateColors();if(sel){const fr=freeCores(sel);if(!fr.length){note('このケーブルの心線は、もう全部使っている');sel=null;updateColors()}else note(`この器具のケーブルは${CABLE[P.L.dev.find(q=>q.id===sel.split('.')[0]).k].map(c=>CNAME[c]).join('・')}。色を選んで、JBの中をタップ`)}drawW();return}
+ /* 4) JBの中をタップ：選んだ端子から電線を引き込む */
+ if(Math.hypot(px-j.x,py-j.y)<j.r&&sel&&!sel.startsWith('j:')){P.wires.push({a:sel,e:'j:'+sel,c:col});sel=null;simulate();drawW();return}
+ /* 5) スイッチ */
+ const sw=P.L.dev.find(d=>(d.k==='sw'||d.k==='sw3')&&Math.abs(d.x*WW-px)<26&&py>d.y*WH-16&&py<d.y*WH+26);
+ if(sw){P.state[sw.id]^=1;simulate();drawW();return}
+ /* 6) 電線の削除 */
+ for(let i=P.wires.length-1;i>=0;i--){const[A,C,B]=wirePath(P.wires[i],ep);for(let t=0;t<=1;t+=.05){const qx=(1-t)*(1-t)*A[0]+2*(1-t)*t*C[0]+t*t*B[0],qy=(1-t)*(1-t)*A[1]+2*(1-t)*t*C[1]+t*t*B[1];if(Math.hypot(qx-px,qy-py)<10){removeWire(i);simulate();drawW();return}}}
+ sel=null;drawW()});
+function joinEnds(a,b){P.lastOp='g';const ga=P.groups.find(g=>g.includes(a)),gb=P.groups.find(g=>g.includes(b));
+ if(ga&&gb){if(ga!==gb){ga.push(...gb);P.groups.splice(P.groups.indexOf(gb),1)}}else if(ga)ga.push(b);else if(gb)gb.push(a);else P.groups.push([a,b])}
+function removeWire(i){const e=P.wires[i].e;P.wires.splice(i,1);P.groups.forEach(g=>{const k=g.indexOf(e);if(k>=0)g.splice(k,1)});P.groups=P.groups.filter(g=>g.length>1)}
+function undo(){if(P.groups.length&&(!P.wires.length||P.lastOp==='g')){P.groups.pop()}else if(P.wires.length)removeWire(P.wires.length-1);sel=null;simulate();drawW()}
+function clearW(){P.wires=[];P.groups=[];sel=null;simulate();drawW()}
+/* =========== 電気のシミュレーション =========== */
+function nets(state,raw){const par={};const f=a=>{if(!(a in par))par[a]=a;while(par[a]!==a){par[a]=par[par[a]];a=par[a]}return a};const u=(a,b)=>{par[f(a)]=f(b)};
+ P.wires.forEach(w=>u(w.a,w.e));P.groups.forEach(g=>g.forEach(e=>u(g[0],e)));
+ if(!raw)P.L.dev.forEach(d=>{if(d.k==='sw'&&state[d.id])u(d.id+'.a',d.id+'.b');if(d.k==='sw3')u(d.id+'.0',d.id+(state[d.id]?'.3':'.1'))});return f}
+function evalState(state){const f=nets(state),L=f('src.L'),N=f('src.N');const r={short:L===N,lit:{},rev:{},outOk:true};
+ P.L.dev.forEach(d=>{if(d.k==='lamp'){const w=f(d.id+'.W'),o=f(d.id+'.o');r.lit[d.id]=!r.short&&((w===N&&o===L)||(w===L&&o===N));r.rev[d.id]=w!==N}
+  if(d.k==='out'){if(!(f(d.id+'.L')===L&&f(d.id+'.W')===N))r.outOk=false}});return{...r,f}}
+function simulate(){const r=evalState(P.state);P.short=r.short;P.lit=r.lit;P.outOk=r.outOk&&!r.short;if(r.short)buzz()}
+function allStates(){const ids=P.L.dev.filter(d=>d.k==='sw'||d.k==='sw3').map(d=>d.id),out=[];for(let m=0;m<1<<ids.length;m++){const s={};ids.forEach((id,i)=>s[id]=(m>>i)&1);out.push(s)}return out}
+function check(){const errs=[],L=P.L,sts=allStates();let colorNg=false;
+ for(const s of sts){const r=evalState(s);if(r.short){errs.push('どこかでLとNが直接つながって、ショートしている');break}}
+ if(!errs.length){
+  for(const d of L.dev.filter(q=>q.k==='lamp')){
+   const res=sts.map(s=>({s,r:evalState(s)}));
+   if(res.some(x=>x.r.rev[d.id])){errs.push(`照明${d.lb}の W（受金）側が、白線で電源の N（接地側）に直接つながっていない`);continue}
+   if(d.ctl.length===1){const sw=d.ctl[0],okAll=res.every(x=>x.r.lit[d.id]===!!x.s[sw]);if(!okAll){const anyLit=res.some(x=>x.r.lit[d.id]);errs.push(anyLit?`照明${d.lb}が、スイッチ${d.lb}どおりに点いたり消えたりしない`:`照明${d.lb}がつかない（帰り線か、Lからスイッチへの線を確認）`)}}
+   else{/* 3路：どちらのスイッチを切り替えても、点灯状態が必ず変わる */
+    const lit=s=>evalState(s).lit[d.id];let ok=res.some(x=>x.r.lit[d.id]);
+    for(const s of sts)for(const id of d.ctl){const t={...s,[id]:s[id]^1};if(lit(s)===lit(t))ok=false}
+    if(!ok)errs.push(`照明${d.lb}を、1階と2階のどちらからでも切り替えられない（0番・1番・3番のつなぎ方を確認）`)}}
+  if(L.dev.some(d=>d.k==='out')&&sts.some(s=>!evalState(s).outOk))errs.push('コンセントに L と N の両方がきていない（スイッチを通してもいけない）');}
+ if(errs.length){$('msg').innerHTML='<span class="ng">✗ '+errs[0]+'</span>';buzz();return}
+ /* 色の決まり */
+ const fOn=nets({},true),fOff=fOn;const Nn=fOn('src.N'),Ln=fOn('src.L');
+ const cErr=[];P.wires.forEach(w=>{const isN=fOn(w.a)===Nn,isL=!isN&&fOff(w.a)===Ln;if(isN&&w.c!=='#f4f4f4')cErr.push('接地側（N）の線は白');else if(isL&&w.c!=='#222')cErr.push('電源から点滅器・コンセントまでの非接地側（L）は黒');});
+ const loose=P.wires.filter(w=>!P.groups.some(g=>g.includes(w.e))).length;let s=1;if(!cErr.length)s=2;if(s===2&&P.groups.length<=L.best&&!loose)s=3;
+ stars[P.i]=Math.max(stars[P.i]||0,s);saveS();
+ P.L.dev.forEach(d=>{if(d.k==='sw')P.state[d.id]=1});simulate();drawW();tone();
+ $('msg').innerHTML=`<span class="ok">✓ 通電成功！ 灯りがついた！</span>　<span style="color:var(--gold)">${'★'.repeat(s)}${'☆'.repeat(3-s)}</span><br><span class="note">${cErr.length?'★2の条件：'+[...new Set(cErr)][0]+'。':s<3?(loose?`★3の条件：どこにもつながっていない電線を外す（${loose}本）。`:`★3の条件：コネクタの数を最少に（${L.best}個）。`):`色の決まりも、コネクタの数（${L.best}個）も完ぺき！`}スイッチをタップして確かめてみよう。</span>`+
+  `<button class="btn gold" style="margin-top:8px" onclick="${P.i<LEVELS.length-1?`start(${P.i+1})`:'finale()'}">${P.i<LEVELS.length-1?'次の問題へ':'エンディング'}</button>`}
+async function finale(){await talk(ENDING);openMenu()}
+function hint(){const L=P.L,h=L.dev.some(d=>d.k==='sw3')?'JBの中のコネクタは5つ。①電源N（白）＋照明W　②電源L（黒）＋2階の0番（黒）　③④ 1番どうし・3番どうし（白と赤）　⑤1階の0番（黒）＋照明の黒（帰り線）。':
+ L.dev.some(d=>d.k==='sw'&&L.dev.filter(q=>q.k==='sw').length>1)?'コネクタは4つ。「N（白）の仲間：電源N・照明イW・照明ロW・コンセントW」「L（黒）の仲間：電源L・スイッチイ・スイッチロ・コンセントL」と、帰り線2つ（スイッチイの白＋照明イの黒、スイッチロの白＋照明ロの黒）。':
+ L.dev.some(d=>d.k==='out')?'コネクタは3つ。「電源N＋照明W＋コンセントW（白）」「電源L＋スイッチの黒＋コンセントL（黒）」「スイッチの白＋照明の黒（帰り線）」。':'すべての端子からJBへ電線を引き込み、JBの中で「電源N＋照明W（白）」「電源L（黒）＋スイッチの黒」「スイッチの白＋照明の黒（帰り線）」の3つをコネクタでつなごう。VVF2心なので、スイッチからは黒と白が1本ずつ出る。';
+ $('msg').innerHTML='<span class="note">💡 '+h+'</span>'}
+/* 音 */
+let AC=null;function ac(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume()}catch(e){}return AC}
+function beep(f,d,t='sine',v=.1){const a=ac();if(!a)return;try{const o=a.createOscillator(),g=a.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+d)}catch(e){}}
+function buzz(){beep(110,.25,'square',.08)}function tone(){[523,659,784].forEach((f,i)=>setTimeout(()=>beep(f,.25,'triangle'),i*110))}
+document.addEventListener('pointerdown',ac,{once:true});
+openMenu();
+</script>
+</body>
+</html>
