@@ -884,6 +884,15 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .gatype button{display:flex;align-items:center;justify-content:center;gap:4px}.gatype button .ic{filter:saturate(.6) brightness(.8)}.gatype button.on .ic{filter:none}.gapity .ic{vertical-align:-5px}
 .gaimg .gcb em{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}.gaimg .gcb em .ic{width:16px;height:16px}
 
+#practice{background:var(--sk);color:var(--sw);overflow:auto}#practice #prBody{padding:0 12px calc(16px + env(safe-area-inset-bottom))}
+.wsch.prt button{font-size:12px}
+.prg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
+.prc{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;background:var(--sk2);border:1px solid var(--sl);color:var(--sw);text-align:center}
+.prc b{font-size:15px}.prc small{font-size:10px;color:var(--sm);line-height:1.35;min-height:2.7em}.prc i{font-style:normal;font-size:11px;color:var(--so);display:flex;align-items:center;gap:3px}
+.prc:active{filter:brightness(1.3)}
+.prc{flex-direction:row;justify-content:flex-start;text-align:left;gap:8px;padding:8px}.prc small{display:none}.prc .prn{display:flex;flex-direction:column;gap:2px}
+#practice .hd{padding-left:12px}
+
 </style>
 </head>
 <body>
@@ -919,6 +928,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 <div id="gres" onclick="if(event.target===this)closeGacha()"><div class="grin"><div id="grCards"></div><button class="gab ok" onclick="closeGacha()"><b>OK</b></button></div></div>
 <section id="grind" class="scr"><div class="gh"><b id="gTitle"></b><small id="gSub"></small></div><div class="gst"><span id="gTime"></span><span id="gMatch"></span></div><canvas id="gcv"></canvas><div id="gWarn"></div><div class="grot"><button id="gRotL">⟲ 左に回す</button><button id="gRotR">右に回す ⟳</button></div><button class="gab ten" id="gDone"><b>仕上げる</b></button></section>
 <section id="forge" class="scr"><div class="gh"><b id="fgTitle"></b><small id="fgSub"></small></div><div class="gst"><span id="fgInfo"></span></div><canvas id="fgcv"></canvas><div id="fgBar" class="fgbar"></div><button class="gab ten" id="fgDone"><b>仕上げる</b></button></section>
+<section id="practice" class="scr"><div class="hd"><h2>加工ミニゲーム道場</h2></div><div id="prBody"></div></section>
 <section id="zukan" class="scr"><div class="hd"><h2>図鑑</h2></div><div id="zkBody"></div></section>
 <nav id="tabs">
  <button class="tab" data-s="shop" onclick="goTab('shop')"><img class="tic" src="img/ui/tab_shop.webp" alt=""><span>工房</span></button>
@@ -2991,7 +3001,7 @@ function _oldZukan(){show('zukan');
   return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R):LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}</div>
  <div class="zkh">工具 ${G.tools.length}/${TOOL_ORDER.length}</div><div class="zkg">${TOOL_ORDER.map(t=>{const has=G.tools.includes(t);return `<div class="zki ${has?'':'no'}">${MIC(t,40)}<b>${TOOLS[t].n}</b><small>${has?'持っている':TOOLS[t].price?'工房で買える':TOOLS[t].where}</small></div>`}).join('')}</div>
  <div class="zkh">素材</div><div class="zkg">${MAT_ORDER.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}</div>`}
-function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button>`;$('sheet').classList.add('on')}
+function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button>`;$('sheet').classList.add('on')}
 
 /* 鍛え直し：鉄くずを使って属性を付け直す */
 function reforge(id){const m=owned(id),w=m&&m.weapon;if(!w||!w.attr)return;if(G.mats.scrap<REFORGE_COST){say('鉄くずが足りない',900);return}
@@ -3501,6 +3511,28 @@ async function runProc(R,pr,st){let r;const tl=KANJI_TIER[R.tier];
  else{r=await runGrind({who:R.who||R.impl,tier:R.tier,title:`${st}グラインダー　${R.n}`});r.reach=1;
   await say(`形の一致 <span class="big">${r.score}</span> %`,1200)}
  return r}
+
+/* ===================== 加工ミニゲーム道場（練習）：ゲームを進めなくても、全部の加工を試せる。?practice で開く ===================== */
+const PRACTICE_LIST=['file','grind','lathe','hit','cut','weld','wire','trace','drill','tap'];
+const PRACTICE_SHAPE={cut:'ch',trace:'ch',weld:'de'};
+let prTier=1;
+const prBest=()=>{try{return JSON.parse(localStorage.getItem('mt2_practice')||'{}')}catch(_){return{}}};
+const prSave=b=>{try{localStorage.setItem('mt2_practice',JSON.stringify(b))}catch(_){}};
+function openPractice(){show('practice');const B=prBest();
+ $('prBody').innerHTML=`<div class="note" style="margin:4px 0 8px">塔で使う加工ミニゲームを、ここで自由に練習できる。練習の結果はゲームの進みには関係しない。</div>
+ <div class="wsch prt">${[1,2,3].map(t=>`<button class="${prTier===t?'on':''}" data-pt="${t}">${KANJI_TIER[t]}（${['やさしい','ふつう','むずかしい'][t-1]}）</button>`).join('')}</div>
+ <div class="prg">${PRACTICE_LIST.map(k=>{const b=B[k+prTier];return `<button class="prc" data-pk="${k}">${MIC(PROC_TOOL[k],40)}<span class="prn"><b>${PROC_LBL[k]}</b><i>${b!=null?`ベスト ${b}点 ${RKIC(craftRank(b,1),18)}`:'まだ'}</i></span></button>`}).join('')}</div>
+ <div class="gpf" style="margin-top:10px"><button class="btn ghost" id="prBack">${window.G?'ホームへ':'タイトルへ'}</button></div>`;
+ $('prBody').querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{prTier=+b.dataset.pt;openPractice()});
+ $('prBody').querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>runPractice(b.dataset.pk));
+ $('prBack').onclick=()=>window.G?openHome():show('title')}
+async function runPractice(k){const t=prTier,st='練習・';let r;
+ try{if(MINI[k]){const M=MINI[k];r=await M.f({tier:t,shape:PRACTICE_SHAPE[k]||'ch',title:`${st}${M.t}`,assist:1,lim:{}})}
+  else if(k==='lathe'){show('craft');$('craftT').textContent=`${st}旋盤`;$('craftSub').textContent='ハンドルを回して刃物を動かす。左＝左右、右＝深さ';r=await runLathe({tier:t,label:'旋盤・'+KANJI_TIER[t]});r.reach=1}
+  else{r=await runGrind({who:'wolf',tier:t,title:`${st}グラインダー`});r.reach=1}}catch(e){console.error(e);r={score:0,reach:0}}
+ const rank=craftRank(r.score,r.reach==null?1:r.reach),B=prBest(),key=k+t,best=B[key]==null||r.score>B[key];if(best){B[key]=r.score;prSave(B)}
+ await say(`${PROC_LBL[k]}（${KANJI_TIER[t]}）<br><span class="big">${r.score}</span> 点　${RKIC(rank,40)}${best?'<br><span style="font-size:14px;color:#ffd060">ベスト更新！</span>':''}`,1600);openPractice()}
+if(/practice/.test(location.search+location.hash))addEventListener('load',()=>setTimeout(openPractice,80));
 
 /* ===================== 加工ミニゲーム：打つ（金床）・つなぐ（溶接機） ===================== */
 const HIT_N={1:5,2:7,3:9};          /* 打つ回数 */
