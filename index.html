@@ -722,6 +722,25 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
 #title .trow{justify-content:flex-end}
 .rcp.raw{border-left-color:var(--so);background:linear-gradient(90deg,#ff7a2f14,transparent 60%),var(--sk2)}
 
+#grind .grot{display:flex;gap:10px;width:min(520px,92vw)}#grind .grot button{flex:1;padding:12px 6px;background:transparent;border:1px solid #ffffff40;color:var(--sw);font-weight:800;font-size:15px;letter-spacing:.05em}
+#grind .grot button:active{border-color:var(--so);color:var(--so)}
+#grind.on{gap:8px}
+
+/* 図面（解読）は設計図の青 */
+:root{--bp:#3d8bff;--bp2:#0f2a52}
+.stab .bpn{font-style:normal;font-size:11px;font-weight:800;background:var(--bp);color:#fff;padding:0 5px;margin-left:4px;vertical-align:2px}
+.stab[data-t="dec"].on{color:var(--bp);border-bottom-color:var(--bp)!important}
+.rcp.bpc{border-left:2px solid var(--bp);background:linear-gradient(#3d8bff14 1px,transparent 1px) 0 0/12px 12px,linear-gradient(90deg,#3d8bff14 1px,transparent 1px) 0 0/12px 12px,var(--bp2)}
+.tag.tg-bp{border-color:var(--bp);color:#8fbcff}
+.btn.bpb{background:var(--bp);border-color:var(--bp);color:#fff;margin:6px 0 0;clip-path:polygon(0 0,100% 0,100% 72%,calc(100% - 16px) 100%,0 100%)}
+.btn.bpb:active{background:#2a6fd6}
+.bpgo{display:block;width:100%;margin:8px 0 4px;padding:10px 12px;text-align:left;background:var(--bp2);border:1px solid var(--bp);color:#cfe2ff;font-weight:700;font-size:14px}
+#shop .stab[data-t="dec"].on{color:#8fbcff}#shop .stab[data-t="dec"].on::after{background:var(--bp)}
+#shop .stab{letter-spacing:.06em;font-size:14px}
+#shop .rcp.bpc{border-left:2px solid var(--bp);background:linear-gradient(#3d8bff14 1px,transparent 1px) 0 0/12px 12px,linear-gradient(90deg,#3d8bff14 1px,transparent 1px) 0 0/12px 12px,var(--bp2)}
+#shop .btn.bpb{background:var(--bp);border-color:var(--bp);color:#fff;margin:6px 0 0;clip-path:polygon(0 0,100% 0,100% 72%,calc(100% - 16px) 100%,0 100%)}
+#shop .btn.bpb:active{background:#2a6fd6}
+
 </style>
 </head>
 <body>
@@ -755,7 +774,7 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
 </section>
 <section id="gacha" class="scr"><div class="hd"><h2>ガチャ</h2></div><div id="gaBody"></div></section>
 <div id="gres" onclick="if(event.target===this)closeGacha()"><div class="grin"><div id="grCards"></div><button class="gab ok" onclick="closeGacha()"><b>OK</b></button></div></div>
-<section id="grind" class="scr"><div class="gh"><b id="gTitle"></b><small id="gSub"></small></div><div class="gst"><span id="gTime"></span><span id="gMatch"></span></div><canvas id="gcv"></canvas><div id="gWarn"></div><button class="gab ten" id="gDone"><b>仕上げる</b></button></section>
+<section id="grind" class="scr"><div class="gh"><b id="gTitle"></b><small id="gSub"></small></div><div class="gst"><span id="gTime"></span><span id="gMatch"></span></div><canvas id="gcv"></canvas><div id="gWarn"></div><div class="grot"><button id="gRotL">⟲ 左に回す</button><button id="gRotR">右に回す ⟳</button></div><button class="gab ten" id="gDone"><b>仕上げる</b></button></section>
 <section id="zukan" class="scr"><div class="hd"><h2>図鑑</h2></div><div id="zkBody"></div></section>
 <nav id="tabs">
  <button class="tab" data-s="shop" onclick="goTab('shop')"><img class="tic" src="img/ui/tab_shop.webp" alt=""><span>工房</span></button>
@@ -2564,14 +2583,11 @@ function canMake(id){const R=RECIPES[id];const lackM=Object.keys(R.mats).filter(
  const noWho=R.kind==='weapon'&&!ownChar(R.who);return{ok:!lackM.length&&!lackT.length&&!noWho,lackM,lackT,noWho}}
 function prodFx(R,mul){return R.kind==='armor'?ARMOR_FX[R.slot].d(mul):`${CHARS[R.who].name}の${ATK[R.who].n}の威力 ×${mul}`}
 function curProd(R){if(R.kind==='armor'){const p=G.arm[R.slot];return p?`${RECIPES[p.rid].n}（${p.rank}）`:'なし'}const m=findOwn(R.who);return m&&m.weapon&&m.weapon.rid?`${RECIPES[m.weapon.rid].n}（${m.weapon.rank}）`:baseWeapon(R.who)}
-function renderShop(){const tabs=[['make',UIMG('u_weapon',20)+'つくる'],['tool','工具'],['mat','素材']];
+function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make',UIMG('u_weapon',20)+'つくる'],['dec',MIC('bp',20)+'解読'+(nRaw?`<i class="bpn">${nRaw}</i>`:'')],['tool','工具'],['mat','素材']];
  let h=`<div class="stabs">${tabs.map(([k,n])=>`<button class="stab ${shopTab===k?'on':''}" data-t="${k}">${n}</button>`).join('')}</div>`;
  if(shopTab==='make'){const known=RECIPE_ORDER.filter(id=>G.bps.includes(id)),unk=RECIPE_ORDER.length-known.length;
   h+=`<div class="note">素材＋工具＋図面がそろうと加工できる。出来ばえ（D〜SS）で強さが変わる。<b style="color:var(--gold)">SS は図面を最後までなぞりきったときだけ。</b></div>`;
-  /* 拾った図面は三面図でかかれている。解読するとつくれるようになる */
-  h+=(G.bpRaw||[]).map(id=>{const R=RECIPES[id];return `<div class="rcp raw"><div class="rh">${RIC(id,34)}<div style="flex:1"><b>${R.n}</b>　<span class="tag tg-tier">未解読</span>
-   <div class="note">三面図の図面。正しい立体を読み取ると、つくれるようになる（${['かんたん','ふつう','むずかしい'].at(Math.min(2,R.tier-1))}）</div></div></div>
-   <button class="btn gold" data-dec="${id}" style="margin:6px 0 0">${MIC('bp',18)} 三面図で解読する</button></div>`}).join('');
+  if(nRaw)h+=`<button class="bpgo" data-t="dec">${MIC('bp',22)} 未解読の図面が ${nRaw}枚ある　→ 解読へ</button>`;
   h+=known.map(id=>{const R=RECIPES[id],c=canMake(id),best=prodMul(R.tier,'B');
    const mats=Object.keys(R.mats).map(k=>`<span class="${(G.mats[k]||0)<R.mats[k]?'lack':''}">${MIC(k,18)}${MATS[k].n} ${G.mats[k]||0}/${R.mats[k]}</span>`).join('');
    const tools=R.tools.map(t=>`<span class="${G.tools.includes(t)?'':'lack'}">${MIC(t,18)}${TOOLS[t].n}${G.tools.includes(t)?'':'（なし）'}</span>`).join('');
@@ -2580,6 +2596,11 @@ function renderShop(){const tabs=[['make',UIMG('u_weapon',20)+'つくる'],['too
     <div class="rneed"><span class="nl">素材</span>${mats}</div><div class="rneed"><span class="nl">工具</span>${tools}</div>
     <button class="btn ${c.ok?'gold':''}" data-mk="${id}" ${c.ok?'':'disabled'} style="margin:6px 0 0">${c.ok?'加工する':c.noWho?CHARS[R.who].name+'がまだ仲間にいない':'足りないものがある'}</button></div>`}).join('');
   if(unk)h+=`<div class="note" style="text-align:center;margin-top:8px">${MIC('bp',18)} まだ図面がない製品：あと ${unk}<br>強敵や資材の箱から、図面が見つかる</div>`}
+ /* 解読：拾った図面は三面図でかかれている。正しい立体を読み取ると、つくれるようになる */
+ if(shopTab==='dec'){h+=`<div class="note">拾った図面は三面図でかかれている。上・前・右から見た形を組み立てて正しい立体を選ぶと、つくれるようになる。まちがえても何度でも挑戦できる。</div>`;
+  h+=nRaw?(G.bpRaw||[]).map(id=>{const R=RECIPES[id];return `<div class="rcp bpc"><div class="rh">${RIC(id,34)}<div style="flex:1"><b>${R.n}</b>　<span class="tag tg-bp">未解読</span>
+   <div class="note">${R.kind==='armor'?'防具・'+SLOT_NAME[R.slot]:CHARS[R.who].name+'の武器'}　むずかしさ：${['かんたん','ふつう','むずかしい'].at(Math.min(2,R.tier-1))}</div></div></div>
+   <button class="btn bpb" data-dec="${id}">${MIC('bp',18)} 三面図を読む</button></div>`}).join(''):`<div class="note" style="text-align:center;margin-top:20px">${MIC('bp',28)}<br>未解読の図面はない。<br>強敵や資材の箱から図面が見つかる</div>`}
  if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。コインで買える。塔の資材の箱から見つかることもある（見つければ無料）。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
   h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${has?'　<span class="tag tg-ok">持っている</span>':''}<div class="note">${T.d}</div></div>
    ${has?'':T.price?`<div style="text-align:right"><button class="btn" data-buy="${t}" ${(G.coin|0)<T.price?'disabled':''} style="width:auto;margin:0;padding:10px 14px;font-size:15px">${coinIc(18)}${T.price}で買う</button>${T.where?`<div class="note" style="max-width:130px;margin-top:4px">${T.where}でも見つかる</div>`:''}</div>`:''}</div></div>`}).join('')}
@@ -2588,6 +2609,7 @@ function renderShop(){const tabs=[['make',UIMG('u_weapon',20)+'つくる'],['too
  $('shopBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{shopTab=b.dataset.t;renderShop()});
  $('shopBody').querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>makeProduct(b.dataset.mk));
  $('shopBody').querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>decodeBp(b.dataset.dec));
+ $('shopBody').querySelectorAll('.bpgo').forEach(b=>b.onclick=()=>{shopTab='dec';renderShop()});
  $('shopBody').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{const t=b.dataset.buy,T=TOOLS[t];if(G.tools.includes(t)||(G.coin|0)<T.price)return;G.coin-=T.price;G.tools.push(t);save();tone(880,.15,'triangle',.1,1320);renderShop();say(`${MIC(t,30)} ${T.n}を買った！`,1000)})}
 let crafting=false;
 async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)return;crafting=true;try{
@@ -2870,7 +2892,7 @@ const GRIND_SHAPE={
  rocker:[[.06,.30],[.36,.24],[.44,.42],[.94,.44],[.94,.56],[.44,.58],[.36,.78],[.06,.72],[.14,.50]]};
 const GW=120,GH=72;                    /* 削りの細かさ（マス目） */
 const GRIND_TIME={1:30,2:30,3:34};     /* 制限時間（秒）：段階ごと */
-const GRIND_WHEEL={1:7,2:6,3:5};       /* 砥石の半径（マス）。段階が上がるほど細かい作業 */
+const GRIND_WHEEL={1:15,2:13,3:11};    /* 固定した砥石の半径（マス）。段階が上がるほど小さく、細かい作業 */
 /* 属性：できあがりにランダムで1つ。v＝強さ（ランクで少し上がる） */
 const ATTRS={
  fire:{n:'炎',col:'#ff7a2f',d:v=>`この武器の攻撃+${Math.round(v*100)}%`},
@@ -2898,38 +2920,65 @@ function shapeCanvas(h,w=120,col='#c9d2e2'){const key=h+w+col;if(SHAPE_SPR[key])
 const shapeImg=(h,w)=>h?`<img class="wshape" src="${shapeCanvas(h,w||120).toDataURL()}" alt="">`:'';
 
 /* ---------- ミニゲーム本体 ---------- */
+/* グラインダー加工：砥石は画面の下に固定。鉄を指で動かして砥石に押し当てて削る。⟲⟳で鉄の向きを変える */
 function runGrind(o){return new Promise(res=>{
  const sec=$('grind'),cv=$('gcv'),g=cv.getContext('2d'),tier=o.tier||1,R=GRIND_WHEEL[tier],T=GRIND_TIME[tier];
  const tgt=targetMask(o.who),mat=new Uint8Array(GW*GH);
  const bx0=Math.round(GW*.04),bx1=Math.round(GW*.96),by0=Math.round(GH*.14),by1=Math.round(GH*.86);
  for(let y=by0;y<by1;y++)for(let x=bx0;x<bx1;x++)mat[y*GW+x]=1;
  let tgtN=0;for(const v of tgt)tgtN+=v;
- $('gTitle').innerHTML=UIMG('m_steel',26)+' '+(o.title||'グラインダー加工');$('gSub').textContent='指でこすって削り、点線の形に合わせよう。削りすぎると欠ける';
+ $('gTitle').innerHTML=UIMG('m_steel',26)+' '+(o.title||'グラインダー加工');$('gSub').textContent='鉄を指で動かし、下の砥石に押し当てて削る。⟲⟳で向きを変えて、点線の形に合わせよう';
  show('grind');
- let S=1,DPR=Math.min(2,devicePixelRatio||1),left=T,done=false,last=0,pid=null,px=0,py=0,sparks=[],grinding=0;
- const metal=document.createElement('canvas');
- function fit(){const w=Math.min(innerWidth-24,560);S=w/GW;cv.style.width=w+'px';cv.style.height=GH*S+'px';cv.width=Math.round(w*DPR);cv.height=Math.round(GH*S*DPR);
-  metal.width=cv.width;metal.height=cv.height;const m=metal.getContext('2d');m.setTransform(DPR*S,0,0,DPR*S,0,0);
-  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)if(mat[y*GW+x]){const n=(Math.sin(x*12.9+y*78.2)*43758.5)%1;m.fillStyle=`hsl(215,${8+n*6}%,${40+n*10}%)`;m.fillRect(x,y,1.05,1.05)}}
+ /* 作業台（ステージ）の大きさと砥石の位置（どちらも鉄のマス単位） */
+ const SW=GW*1.45,SH=GH*2.35,WX=SW/2,WY=SH-2;
+ const K=6,metal=document.createElement('canvas');metal.width=GW*K;metal.height=GH*K;
+ {const m=metal.getContext('2d');for(let y=0;y<GH;y++)for(let x=0;x<GW;x++)if(mat[y*GW+x]){const n=Math.abs(Math.sin(x*12.9+y*78.2)*43758.5)%1;m.fillStyle=`hsl(215,${8+n*6}%,${40+n*10}%)`;m.fillRect(x*K,y*K,K,K)}}
+ let S=1,DPR=Math.min(2,devicePixelRatio||1),left=T,done=false,last=0,pid=null,lx=0,ly=0,sparks=[],grinding=0,spin=0;
+ let cx=SW/2,cy=WY-R-GH/2-4,ang=0,angT=0;
+ function fit(){const w=Math.min(innerWidth-24,520,(innerHeight-260)*SW/SH);S=w/SW;cv.style.width=w+'px';cv.style.height=SH*S+'px';cv.width=Math.round(w*DPR);cv.height=Math.round(SH*S*DPR)}
  fit();
  function score(){let inter=0,uni=0;for(let i=0;i<mat.length;i++){const a=mat[i],b=tgt[i];if(a&&b)inter++;if(a||b)uni++}const iou=inter/uni;return{iou,q:Math.round(clamp((iou-.45)/.53,0,1)*100),broke:tgtN-inter}}
- function grindAt(cx,cy){let n=0;const m=metal.getContext('2d');m.save();m.globalCompositeOperation='destination-out';m.beginPath();m.arc(cx,cy,R,0,TAU);m.fill();m.restore();
-  for(let y=Math.max(0,Math.floor(cy-R));y<Math.min(GH,Math.ceil(cy+R));y++)for(let x=Math.max(0,Math.floor(cx-R));x<Math.min(GW,Math.ceil(cx+R));x++){if((x+.5-cx)**2+(y+.5-cy)**2<=R*R&&mat[y*GW+x]){mat[y*GW+x]=0;n++;if(sparks.length<160)sparks.push({x:x+.5,y:y+.5,vx:(Math.random()-.3)*3,vy:-Math.random()*2.5-.5,t:0,red:tgt[y*GW+x]})}}
-  if(n){grinding=6}}
+ /* 作業台の点 → 鉄のマス */
+ function toPiece(sx,sy){const dx=sx-cx,dy=sy-cy,c=Math.cos(ang),s=Math.sin(ang);return[dx*c+dy*s+GW/2,-dx*s+dy*c+GH/2]}
+ const reach=Math.hypot(GW,GH)/2;
+ function grindNow(){if(Math.abs(ang-angT)>.001)return;if(Math.hypot(cx-WX,cy-WY)>R+reach)return;
+  let n=0;const m=metal.getContext('2d');
+  for(let sy=WY-R;sy<=WY+R;sy+=.5)for(let sx=WX-R;sx<=WX+R;sx+=.5){if((sx-WX)**2+(sy-WY)**2>R*R)continue;
+   const[px,py]=toPiece(sx,sy),x=Math.floor(px),y=Math.floor(py);if(x<0||y<0||x>=GW||y>=GH)continue;const i=y*GW+x;
+   if(mat[i]){mat[i]=0;n++;m.clearRect(x*K,y*K,K,K);if(sparks.length<200&&Math.random()<.5)sparks.push({x:sx,y:sy,vx:1.5+Math.random()*2.5,vy:-(1+Math.random()*2),t:0,red:tgt[i]})}}
+  if(n)grinding=6;return n}
  const pos=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)/S,(e.clientY-r.top)/S]};
- cv.onpointerdown=e=>{if(done)return;e.preventDefault();pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}[px,py]=pos(e);grindAt(px,py)};
- cv.onpointermove=e=>{if(e.pointerId!==pid||done)return;const[x,y]=pos(e),d=Math.hypot(x-px,y-py),n=Math.max(1,Math.ceil(d/(R*.5)));for(let i=1;i<=n;i++)grindAt(px+(x-px)*i/n,py+(y-py)*i/n);px=x;py=y};
+ function moveBy(dx,dy){/* 砥石に当たっている間は、少し重く動く */
+  const touching=Math.hypot(cx-WX,cy-WY)<R+reach;const k=touching?.65:1,d=Math.hypot(dx,dy)*k,steps=Math.max(1,Math.ceil(d/(R*.25)));
+  for(let i=0;i<steps;i++){cx=clamp(cx+dx*k/steps,-GW*.2,SW+GW*.2);cy=clamp(cy+dy*k/steps,-GH*.4,WY);grindNow()}}
+ cv.onpointerdown=e=>{if(done)return;e.preventDefault();pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}[lx,ly]=pos(e)};
+ cv.onpointermove=e=>{if(e.pointerId!==pid||done)return;const[x,y]=pos(e);moveBy(x-lx,y-ly);lx=x;ly=y};
  cv.onpointerup=cv.onpointercancel=e=>{if(e.pointerId===pid)pid=null};
+ const rot=d=>{if(done)return;angT+=d*Math.PI/4;tone(500,.05,'triangle',.05,600)};
+ $('gRotL').onclick=()=>rot(-1);$('gRotR').onclick=()=>rot(1);
  $('gDone').onclick=()=>finish();
  function finish(){if(done)return;done=true;cancelAnimationFrame(raf);const s=score();sec.querySelector('#gDone').onclick=null;res({score:s.q,iou:s.iou,shape:packShape(mat)})}
  let raf=0;
  function frame(now){const dt=last?Math.min(.1,(now-last)/1000):0;last=now;if(!done&&!ROT_MQ.matches){left-=dt;if(left<=0){left=0;finish();return}}
+  /* 向きを変えるときは、なめらかに回す */
+  if(Math.abs(ang-angT)>.001){const st=dt*7;ang+=clamp(angT-ang,-st,st);if(Math.abs(ang-angT)<=.001)ang=angT}
+  grindNow();spin+=dt*30;
   g.setTransform(DPR,0,0,DPR,0,0);g.clearRect(0,0,cv.width,cv.height);
-  g.fillStyle='#0f1424';g.fillRect(0,0,GW*S,GH*S);g.strokeStyle='#ffffff10';g.lineWidth=1;for(let x=0;x<=GW;x+=6){g.beginPath();g.moveTo(x*S,0);g.lineTo(x*S,GH*S);g.stroke()}for(let y=0;y<=GH;y+=6){g.beginPath();g.moveTo(0,y*S);g.lineTo(GW*S,y*S);g.stroke()}
-  g.setTransform(1,0,0,1,0,0);g.drawImage(metal,0,0);g.setTransform(DPR,0,0,DPR,0,0);
+  g.fillStyle='#0f1424';g.fillRect(0,0,SW*S,SH*S);g.strokeStyle='#ffffff0d';g.lineWidth=1;for(let x=0;x<=SW;x+=8){g.beginPath();g.moveTo(x*S,0);g.lineTo(x*S,SH*S);g.stroke()}for(let y=0;y<=SH;y+=8){g.beginPath();g.moveTo(0,y*S);g.lineTo(SW*S,y*S);g.stroke()}
+  /* 鉄（と、合わせる点線の形） */
+  g.save();g.translate(cx*S,cy*S);g.rotate(ang);g.translate(-GW/2*S,-GH/2*S);
+  g.drawImage(metal,0,0,GW*S,GH*S);
   const P=GRIND_SHAPE[o.who]||GRIND_SHAPE.wolf;g.strokeStyle='#ffffffcc';g.setLineDash([6,4]);g.lineWidth=1.6;g.beginPath();P.forEach(([x,y],i)=>i?g.lineTo(x*GW*S,y*GH*S):g.moveTo(x*GW*S,y*GH*S));g.closePath();g.stroke();g.setLineDash([]);
-  for(const p of sparks){p.t+=dt*60;p.x+=p.vx*.4;p.y+=p.vy*.4;p.vy+=.12;g.fillStyle=p.red?'#ff4a4a':(p.t<6?'#fff3c0':'#ff9a3a');g.globalAlpha=Math.max(0,1-p.t/22);g.fillRect(p.x*S,p.y*S,2.2,2.2)}g.globalAlpha=1;sparks=sparks.filter(p=>p.t<22);
-  if(pid!==null){g.strokeStyle='#ffb07a';g.lineWidth=2;g.beginPath();g.arc(px*S,py*S,R*S,0,TAU);g.stroke()}
+  g.restore();
+  /* 固定の砥石 */
+  g.save();g.translate(WX*S,WY*S);
+  g.fillStyle='#3a3f4c';g.beginPath();g.arc(0,0,R*S+6,Math.PI,TAU);g.fill();
+  const gr=g.createRadialGradient(0,0,R*S*.2,0,0,R*S);gr.addColorStop(0,'#8a8f9c');gr.addColorStop(1,'#5a606c');g.fillStyle=gr;g.beginPath();g.arc(0,0,R*S,0,TAU);g.fill();
+  g.rotate(spin);g.strokeStyle='#ffffff22';g.lineWidth=2;for(let i=0;i<12;i++){g.rotate(TAU/12);g.beginPath();g.moveTo(R*S*.35,0);g.lineTo(R*S*.95,0);g.stroke()}
+  g.restore();
+  g.strokeStyle=grinding>0?'#ffb07a':'#ff7a2f88';g.lineWidth=2.5;g.beginPath();g.arc(WX*S,WY*S,R*S,Math.PI*1.1,Math.PI*1.9);g.stroke();
+  /* 火花 */
+  for(const p of sparks){p.t+=dt*60;p.x+=p.vx*.5;p.y+=p.vy*.5;p.vy+=.15;g.fillStyle=p.red?'#ff4a4a':(p.t<6?'#fff3c0':'#ff9a3a');g.globalAlpha=Math.max(0,1-p.t/24);g.fillRect(p.x*S,p.y*S,2.2,2.2)}g.globalAlpha=1;sparks=sparks.filter(p=>p.t<24);
   if(grinding>0){grinding--;if(grinding%2===0)tone(1800+Math.random()*900,.03,'sawtooth',.012)}
   const s=score();$('gTime').textContent=`残り ${Math.ceil(left)}秒`;$('gMatch').textContent=`形の一致 ${s.q}%`;$('gMatch').className=s.broke>tgtN*.03?'bad':'';
   $('gWarn').textContent=s.broke>tgtN*.03?'削りすぎ！ 形が欠けている':'';
