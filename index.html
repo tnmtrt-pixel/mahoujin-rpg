@@ -3015,7 +3015,6 @@ function canGrow(m){if(m.lv>=GROW_MAX)return false;return (G.coin|0)>=growCost(m
 function openParty(){show('party');pickSlot=null;pickSel=null;if(!partySel||!owned(partySel))partySel=G.lead;renderParty()}
 function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:partySel;const inP=G.party.some(x=>x.id===showId),m=owned(showId)||G.party[0],hasW=RECIPE_ORDER.some(r=>RECIPES[r].who===m.id),c=CHARS[m.id],A=ATK[m.id],ab=ABIL[m.id]||[],cost=growCost(m.lv),max=m.lv>=GROW_MAX;
  const w=m.weapon,rank=w&&w.rank?w.rank:'C';
- if(pickSlot!=null){renderPartyPick(m,inP);return}
  $('partyList').innerHTML=`
  <div class="pstat"><div class="pst pw"><span>攻撃</span><b>${teamPow()}</b></div><div class="pst ar"><span>体力</span><b>${teamHp()}</b></div></div>
  <div class="part"><img class="pimg" src="${c.img}" alt="">
@@ -3033,8 +3032,8 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
  <div class="prow slots">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x&&x.id===m.id?'on':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img class="pface" src="${FACE(x.id)}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
  ${pickSlot==null?equipRowHTML():pickerHTML()}
  `;
- $('partyList').querySelectorAll('.phex.slot').forEach(b=>b.onclick=()=>{const k=+b.dataset.slot,x=G.party[k];pickSlot=k;pickSel=x?x.id:null;if(x)partySel=x.id;renderParty();$('party').scrollTop=0;window.scrollTo(0,0)});
- $('partyList').querySelectorAll('.ppt[data-id]').forEach(b=>b.onclick=()=>{pickSel=b.dataset.id;renderParty()});
+ $('partyList').querySelectorAll('.phex.slot').forEach(b=>b.onclick=()=>{const k=+b.dataset.slot,x=G.party[k];if(pickSlot===k){pickSlot=null;pickSel=null;renderParty();return}pickSlot=k;pickSel=x?x.id:null;if(x)partySel=x.id;renderParty();const pp=$('ppick');if(pp)pp.scrollIntoView({block:'nearest',behavior:'smooth'})});
+ $('partyList').querySelectorAll('.ppt[data-id]').forEach(b=>b.onclick=()=>{const id=b.dataset.id,x=G.party[pickSlot];if(x&&x.id===id){partySel=id;renderParty();return}if(!x&&G.party.some(p=>p.id===id)){partySel=id;pickSel=id;renderParty();return}slotAssign(pickSlot,id)});
  const po=$('ppOut');if(po)po.onclick=()=>{const k=pickSlot,x=G.party[k];if(!x||k===0)return;G.bench.push(G.party.splice(k,1)[0]);pickSel=null;partySel=G.lead;save();tone(500,.08,'triangle',.06,300);renderParty()};
  const pi=$('ppIn');if(pi)pi.onclick=()=>slotAssign(pickSlot,pickSel);
  const pc=$('ppClose');if(pc)pc.onclick=()=>{pickSlot=null;pickSel=null;renderParty()};
@@ -3076,8 +3075,8 @@ function bindPartyPick(){
 function pickerHTML(){const k=pickSlot,x=G.party[k],y=pickSel?owned(pickSel):null;
  const list=ownedAll().slice().sort((a,b)=>(b.star||1)-(a.star||1)||b.lv-a.lv);
  const label=k===0?'リーダーの枠':`${k+1}番目の枠`;
- let act='';if(y&&(!x||x.id!==y.id)){const yIn=G.party.some(p=>p.id===y.id);act=yIn&&!x?`<span class="ppn">${CHARS[y.id].name}はもうパーティにいる</span>`:`<button class="lvup pin" id="ppIn">${CHARS[y.id].name}を${x?(yIn?'入れかえる':'この枠に入れる'):'この枠に入れる'}</button>`}
- else act=`<span class="ppn">${x?'入れかえるキャラを選ぶ':'入れるキャラを選ぶ'}</span>`;
+ let act='';if(false&&y&&(!x||x.id!==y.id)){const yIn=G.party.some(p=>p.id===y.id);act=yIn&&!x?`<span class="ppn">${CHARS[y.id].name}はもうパーティにいる</span>`:`<button class="lvup pin" id="ppIn">${CHARS[y.id].name}を${x?(yIn?'入れかえる':'この枠に入れる'):'この枠に入れる'}</button>`}
+ else act=`<span class="ppn">${x?'入れかえるキャラをタップ':'入れるキャラをタップ'}</span>`;
  return `<div class="ppick" id="ppick"><div class="pph"><b>${label}</b>${act}<button class="ppx" id="ppClose">閉じる</button></div>
  <div class="ppg">${x&&k>0?'<button class="ppt off" id="ppOut">はずす</button>':''}${list.map(p=>{const inP=G.party.some(q=>q.id===p.id);return `<button class="ppt ${p.id===pickSel?'on':''}" data-id="${p.id}"><img class="pface" src="${FACE(p.id)}" alt="">${inP?'<span class="ppc">✓</span>':''}<span class="plv">Lv${p.lv}</span><span class="pps">${'★'.repeat(p.star||1)}</span></button>`}).join('')}</div></div>`}
 function slotAssign(k,id){if(k==null||!id)return;const x=G.party[k];if(x&&x.id===id)return;const yi=G.party.findIndex(p=>p.id===id);
@@ -3092,7 +3091,7 @@ function _oldZukan(){show('zukan');
   return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R):LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}</div>
  <div class="zkh">工具 ${G.tools.length}/${TOOL_ORDER.length}</div><div class="zkg">${TOOL_ORDER.map(t=>{const has=G.tools.includes(t);return `<div class="zki ${has?'':'no'}">${MIC(t,40)}<b>${TOOLS[t].n}</b><small>${has?'持っている':TOOLS[t].price?'工房で買える':TOOLS[t].where}</small></div>`}).join('')}</div>
  <div class="zkh">素材</div><div class="zkg">${MAT_ORDER.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}</div>`}
-function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openChats()">チャット一覧</button><button class="btn ghost" onclick="closeSheet();openWorldMap()">世界地図</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button>`;$('sheet').classList.add('on')}
+function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openChats()">チャット一覧</button><button class="btn ghost" onclick="closeSheet();openWorldMap()">世界地図</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button><div class="note" style="text-align:center;margin-top:6px">更新日時：${typeof BUILD!=='undefined'?BUILD:'-'}</div>`;$('sheet').classList.add('on')}
 
 /* 鍛え直し：鉄くずを使って属性を付け直す */
 function reforge(id){const m=owned(id),w=m&&m.weapon;if(!w||!w.attr)return;if(G.mats.scrap<REFORGE_COST){say('鉄くずが足りない',900);return}
@@ -4511,6 +4510,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
   <div class="gpf"><button class="btn" id="rfX">とじる</button></div>`;
  $('genPick').classList.add('on');$('rfX').onclick=()=>$('genPick').classList.remove('on')}
 
+const BUILD='11/13 01:57';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
@@ -4521,7 +4521,7 @@ if(!G&&SAVE_RAW!=null){try{localStorage.setItem(BROKEN_KEY,SAVE_RAW)}catch(e){}l
 if(G&&OPT.fast===undefined&&G.flags.fast){OPT.fast=true;saveOpt()}  /* 前の版は速さを G.flags.fast に保存していた */
 if(G)G.flags.fast=!!OPT.fast;
 $('btnStart').textContent=G?'つづきから':'はじめる';$('btnReset').style.display='none';$('btnNew').style.display=G?'':'none';
-$('tVer').textContent=`β版 ver ${VERSION}`;$('tNote').textContent=loadNote;
+$('tVer').textContent=`β版 ver ${VERSION}（${BUILD}）`;$('tNote').textContent=loadNote;
 /* テスト用の参照（テスト担当が G を書きかえて各エリア・ボスへ直接入れる） */
 window.__game={get FD(){return FD},startField,fEnd,makeProduct,RECIPES,FAREA,FT,get G(){return G},set G(v){G=v},save,migrate,openTown,openHome,openDest,goArea,newMember,stage,AREAS,FOES,VERSION};
 </script>
