@@ -501,7 +501,7 @@ body.hasTabs .scr.on{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
 .flr:not(.next) .fs .ic{opacity:.75}
 
 /* 武器の段階：縁の光 */
-img.wt2{filter:drop-shadow(0 0 2px #ff7a2f)}img.wt3{filter:drop-shadow(0 0 2px #ff7a2f) drop-shadow(0 0 5px #ffb070)}
+img.wt2{filter:drop-shadow(0 0 2px #ff7a2f)}img.wt3{filter:drop-shadow(0 0 2px #ff7a2f) drop-shadow(0 0 5px #ffb070)}img.wt4{filter:drop-shadow(0 0 2px #7fd0ff) drop-shadow(0 0 6px #b07cff)}
 
 /* 編成：枠と一覧 */
 .prow.slots{gap:12px}.prow.slots .phex{width:84px;height:96px}
@@ -2349,8 +2349,8 @@ const FAREA={
 /* 制限時間はなし。同じ階に RUST 秒より長くいると「錆が濃くなり」、敵がどんどん増える */
 const FT={RUST:60,BOSS:30,JOIN:8,HINT:5,ELITE:[12,45],CHEST:[18,40]};
 /* 階ごとに敵が強くなる（体力・攻撃）。ボスは階ごとの倍率 */
-/* 11F〜（後編）は、装備の4段目ができるまで、上がり方をゆるくする */
-const FSCALE=f=>{const n=(f||1)<=10?(f||1)-1:9+((f||1)-10)*.2;return{hp:1+.3*n+.06*n*n,dmg:1+.15*n+.02*n*n}};
+/* 11F〜（後編）は、上がり方を少しゆるくする（装備の4段目で追いつける強さ） */
+const FSCALE=f=>{const n=(f||1)<=10?(f||1)-1:9+((f||1)-10)*.3;return{hp:1+.3*n+.06*n*n,dmg:1+.15*n+.02*n*n}};
 const BOSS_HP={3:1.3,6:2.6,10:3.5};
 /* 図面が出る確率：ボスは必ず1枚、強敵は BP_ELITE、資材の箱は BP_CHEST */
 const BP_ELITE=.12,BP_CHEST=.08;
@@ -2548,7 +2548,7 @@ function fKill(e){FD.kills++;const F=FFOE[e.k];FD.gems.push({x:e.x,y:e.y,v:F.xp,
   if(e.key&&FD.stairs&&!FD.stairs.open){FD.stairs.open=true;FD.stairShown=true;fBanner('階段の鍵を手に入れた！ 矢印の方へ',170,'f_key');tone(990,.2,'triangle',.1,1480)}
   if(e.boss||Math.random()<BP_ELITE){const bp=nextBp();if(bp)FD.items.push({x:e.x-16,y:e.y,k:'bp',id:bp})}
   /* 強敵・ボスはコインも落とす */
-  const cn=e.boss?3:1;for(let i=0;i<cn;i++)FD.items.push({x:e.x+Math.random()*44-22,y:e.y-14+Math.random()*20,k:'coin',v:COIN_DROP})}
+  const cn=e.boss?5:2;for(let i=0;i<cn;i++)FD.items.push({x:e.x+Math.random()*44-22,y:e.y-14+Math.random()*20,k:'coin',v:COIN_DROP})}
  if(e.boss){FD.bossDone=true;FD.boss=null;fBanner(`${FOES[e.k]?FOES[e.k].n:'ボス'}をたおした！`,200,'n_boss');sfx.win&&sfx.win();FD.stairs={x:e.x,y:e.y,open:true};FD.stairShown=true;
   /* ボスが倒れると、まわりの錆もくずれ落ちる */
   for(const o of FD.foes)if(o!==e&&o.hp>0){o.hp=0;FD.gems.push({x:o.x,y:o.y,v:1})}
@@ -3081,7 +3081,7 @@ const GACHA_POOL=['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo',
 const GACHA_COST=50,GACHA10_COST=450,STAR_MAX=5,PARTY_MAX=5;
 const STAR_RATE=[[3,.05],[2,.25],[1,.70]];
 /* コインの入り方（階の突破） */
-const COIN_FIRST=40,COIN_FIRST_BOSS=80,COIN_AGAIN=10,COIN_DROP=10;  /* COIN_DROP：強敵が落とすコイン1枚ぶん（ボスは3枚） */
+const COIN_FIRST=40,COIN_FIRST_BOSS=80,COIN_AGAIN=20,COIN_DROP=10;  /* COIN_DROP：強敵が落とすコイン1枚ぶん（ボスは3枚） */
 /* かけら：同じキャラが出ると、出た★に応じてもらえる。かけらで★を上げる */
 const SHARD_GAIN={1:1,2:3,3:10},STAR_COST={1:5,2:10,3:20,4:40};
 const starMul=m=>1;  /* ★は攻撃ではなく能力（パッシブ）に効く */
@@ -3493,7 +3493,7 @@ LIM_TOOLS.forEach(k=>{if(!TOOL_ORDER.includes(k))TOOL_ORDER.push(k)});
 let gaType='char';
 const TOOL_G={cost:30,cost11:300,lim:.03,pity:30},BP_G={cost:40,cost11:400,lim:.03,pity:30};
 const TOOL_POOL=()=>TOOL_ORDER.filter(t=>!TOOLS[t].limited&&t!=='file');
-const BP_POOL=()=>RECIPE_ORDER.filter(id=>{const R=RECIPES[id];return !R.limited&&(R.kind!=='weapon'||ownChar(R.who))});
+const BP_POOL=()=>RECIPE_ORDER.filter(id=>{const R=RECIPES[id];return !R.limited&&(R.kind!=='weapon'||ownChar(R.who))&&(R.tier<4||(G.floor|0)>=10)});
 const BP_LIM=()=>RECIPE_ORDER.filter(id=>RECIPES[id].limited);
 function gaHead(){return `<div class="gacoin">${coinIc(22)}<b>${G.coin}</b><small>コイン</small></div>
  <div class="gatype">${[['char','キャラ'],['tool','工具'],['bp','図面']].map(([k,n])=>`<button class="${gaType===k?'on':''}" data-gt="${k}">${UIMG('g_'+k,26)}${n}</button>`).join('')}</div>`}
@@ -4135,7 +4135,7 @@ Object.assign(AREAS,{
  top:  {n:'頂上',    need:null,lv:'',bossLv:0,tier:3,boss:'sorab', bg:'#0e1430'}});
 Object.assign(FLOOR_MATS,{11:['spring','brass'],12:['plate','brass'],13:['board','gear'],14:['oil','board'],15:['brass','spring'],16:['wire','board'],17:['board','brass'],18:['wire','spring'],19:['brass','board'],20:['board','core']});
 Object.assign(BOSS_HP,{13:3.4,16:3.8,19:4.2,20:4.6});
-Object.assign(REC_POW,{11:1200,12:1300,13:1400,14:1500,15:1600,16:1700,17:1800,18:1900,19:2000,20:2100});
+Object.assign(REC_POW,{11:1650,12:1700,13:1750,14:1800,15:1850,16:1900,17:1950,18:2000,19:2050,20:2200});
 
 /* ---------- 敵：base＝もとの絵、tint＝色。dash＝ときどき突進、shoot＝弾を撃つ、split＝倒すと2つに分かれる ---------- */
 Object.assign(FFOE,{
@@ -4334,6 +4334,48 @@ CHATS.push(
 const START_LV={11:7,14:11,17:14};
 {const _s=startFloor;startFloor=function(fl){_s(fl);const L=START_LV[fl];if(!L||!FD)return;const D=FD;D.lv=1+L;D.need=Math.round(3+D.lv*2.6+D.lv*D.lv*.16);D.pendingLv+=L;
  fBanner(`${fl}階から出撃：はじめから Lv${D.lv}（技を${L}回えらべる）`,200,'n_floor');if(!D.paused&&!$('fLevel').classList.contains('on'))fOpenLevel()}}
+
+/* ===================== 装備の4段目（肆）：後編の素材・図面 ===================== */
+Object.assign(MATS,{
+ titan: {n:'チタン',      d:'軽くて強い金属。試作の層に多い。4段目の装備に使う'},
+ cell:  {n:'蓄電池',      d:'電気をためる部品。発電の層に多い。4段目の装備に使う'},
+ carbon:{n:'カーボン繊維',d:'しなやかで丈夫な繊維。空の層に多い。4段目の装備に使う'}});
+MAT_ORDER.splice(MAT_ORDER.indexOf('core'),0,'titan','cell','carbon');
+Object.assign(MAT_ATTR,{titan:'steel',cell:'thunder',carbon:'wind'});
+Object.assign(SVG_IC,{
+ titan:'<polygon points="6,22 10,10 26,10 30,22" fill="#b9c4d0" stroke="#eef4fa" stroke-width="1.5"/><polygon points="6,22 30,22 26,27 2,27" fill="#7d8a98"/><path d="M12 14h12" stroke="#fff" stroke-width="1.5" opacity=".7"/>',
+ cell:'<rect x="8" y="7" width="16" height="22" rx="3" fill="#2f3a48" stroke="#9fd0ff" stroke-width="1.5"/><rect x="13" y="3" width="6" height="4" rx="1" fill="#9fd0ff"/><polygon points="17,10 11,19 16,19 14,26 21,16 16,16" fill="#ffe14a"/>',
+ carbon:'<rect x="5" y="5" width="22" height="22" rx="3" fill="#1d2026" stroke="#8a93a4" stroke-width="1.5"/>'+[0,1,2,3].map(i=>`<path d="M${7+i*5} 7v18" stroke="#3c434f" stroke-width="2.5"/><path d="M7 ${9+i*5}h18" stroke="#525b6a" stroke-width="1.6"/>`).join('')});
+Object.assign(FLOOR_MATS,{11:['titan','spring'],12:['titan','brass'],13:['titan','board'],14:['cell','oil'],15:['cell','brass'],16:['cell','wire'],17:['carbon','board'],18:['carbon','spring'],19:['carbon','titan'],20:['titan','cell']});
+TIER_MUL[4]=2.8;KANJI_TIER[4]='肆';
+/* 図面：試作の層／発電の層／空の層で見つかる。どの武器も2段階の加工 */
+Object.assign(RECIPES,{
+ bite3:   {n:'チタンの牙刃',   kind:'weapon',who:'wolf',   tier:4,mats:{titan:3,carbon:1,core:2},area:'proto',shape:'ma'},
+ spanner3:{n:'三連歯車の輪刃', kind:'weapon',who:'fox',    tier:4,mats:{titan:2,cell:1,spring:2,core:1},area:'proto',shape:'me'},
+ shield3: {n:'チタンの大盾',   kind:'weapon',who:'mouse',  tier:4,mats:{titan:3,plate:2,core:1},area:'proto',shape:'ch'},
+ laser3:  {n:'プラズマ砲',     kind:'weapon',who:'robot',  tier:4,mats:{cell:3,board:2,core:2},area:'proto',shape:'ch'},
+ thelm:   {n:'チタンのヘルメット',kind:'armor',slot:'head',tier:4,mats:{titan:3,carbon:1,core:2},area:'proto',shape:'ch'},
+ hammer3: {n:'鍛造の大籠手',   kind:'weapon',who:'dodo',   tier:4,mats:{titan:3,cell:1,core:2},area:'power',shape:'ch'},
+ pen2:    {n:'星図の杖',       kind:'weapon',who:'owl',    tier:4,mats:{cell:2,brass:2,core:2},area:'power',shape:'hikari'},
+ rod3:    {n:'雷神の槍',       kind:'weapon',who:'gorilla',tier:4,mats:{cell:3,wire:2,core:2},area:'power',shape:'de'},
+ guitar3: {n:'雷鳴のギター',   kind:'weapon',who:'rocker', tier:4,mats:{cell:2,carbon:2,core:2},area:'power',shape:'me'},
+ tboots:  {n:'空気ばね安全靴', kind:'armor',slot:'feet',tier:4,mats:{carbon:2,titan:2,cell:1,core:1},area:'power',shape:'de'},
+ g_star:  {n:'星降りの陣盤',   kind:'gen',impl:'owl',      tier:4,mats:{cell:2,titan:2,core:1},area:'power',shape:'hikari'},
+ bow3:    {n:'天体の弓',       kind:'weapon',who:'tsukiyo',tier:4,mats:{carbon:3,brass:2,core:2},area:'sky',shape:'ke'},
+ fuda3:   {n:'陰陽の式神札',   kind:'weapon',who:'onmyo',  tier:4,mats:{carbon:2,titan:1,board:2,core:1},area:'sky',shape:'yami'},
+ cvest:   {n:'カーボンの防護服',kind:'armor',slot:'body',tier:4,mats:{carbon:4,cell:1,core:1},area:'sky',shape:'de'},
+ g_ring:  {n:'天空のリング',   kind:'gen',impl:'fox',      tier:4,mats:{titan:3,carbon:1,core:1},area:'sky',shape:'me'}});
+const REMAP4={bite3:['lathe','file'],spanner3:['lathe','tap'],shield3:['hit','drill'],laser3:['wire','drill'],thelm:['hit','drill'],
+ hammer3:['hit','weld'],pen2:['trace','wire'],rod3:['weld','wire'],guitar3:['weld','wire'],tboots:['tap','trace'],g_star:['trace','lathe'],
+ bow3:['cut','lathe'],fuda3:['cut','grind'],cvest:['cut','weld'],g_ring:['lathe','drill']};
+Object.entries(REMAP4).forEach(([k,ps])=>{const R=RECIPES[k];R.proc=ps[0];R.procs=ps;R.tools=[...new Set(ps.flatMap(p=>PROC_MAIN[p]))];if(!RECIPE_ORDER.includes(k))RECIPE_ORDER.push(k)});
+/* ミニゲームの難しさは3段目と同じ（表が3段目までのため） */
+{const _p=runProc;runProc=function(R,pr,st){return _p(R.tier>3?Object.assign({},R,{tier:3}):R,pr,st)}}
+{const _r=runPractice;runPractice=function(k,t,back){return _r(k,t>3?3:t,back)}}
+
+/* ===================== コイン：ふつうの敵もときどき落とす ===================== */
+const COIN_NORMAL={rate:.05,v:2};
+{const _k=fKill;fKill=function(e){_k(e);if(FD&&!e.big&&!e.small&&Math.random()<COIN_NORMAL.rate)FD.items.push({x:e.x+8,y:e.y-6,k:'coin',v:COIN_NORMAL.v})}}
 
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
