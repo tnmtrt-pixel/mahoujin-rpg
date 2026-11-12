@@ -2349,7 +2349,8 @@ const FAREA={
 /* 制限時間はなし。同じ階に RUST 秒より長くいると「錆が濃くなり」、敵がどんどん増える */
 const FT={RUST:60,BOSS:30,JOIN:8,HINT:5,ELITE:[12,45],CHEST:[18,40]};
 /* 階ごとに敵が強くなる（体力・攻撃）。ボスは階ごとの倍率 */
-const FSCALE=f=>{const n=(f||1)-1;return{hp:1+.3*n+.06*n*n,dmg:1+.15*n+.02*n*n}};
+/* 11F〜（後編）は、装備の4段目ができるまで、上がり方をゆるくする */
+const FSCALE=f=>{const n=(f||1)<=10?(f||1)-1:9+((f||1)-10)*.2;return{hp:1+.3*n+.06*n*n,dmg:1+.15*n+.02*n*n}};
 const BOSS_HP={3:1.3,6:2.6,10:3.5};
 /* 図面が出る確率：ボスは必ず1枚、強敵は BP_ELITE、資材の箱は BP_CHEST */
 const BP_ELITE=.12,BP_CHEST=.08;
@@ -2373,7 +2374,7 @@ const FLOORS=[null,
  {n:'錆の巣',area:'under',step:1,stair:1700},
  {n:'鏡の作業台',area:'under',step:2,stair:900,ev:'mirror'},
  {n:'錆の炉',area:'under',step:3,boss:true}];
-const TOP_FLOOR=10;
+const TOP_FLOOR=20;
 const nextFloor=()=>Math.min(TOP_FLOOR,(G.floor|0)+1);
 const LAYER_NAME={alley:'下層',factory:'中層',under:'上層'};
 const bpArea=k=>RECIPE_ORDER.filter(id=>RECIPES[id].area===k);
@@ -2594,7 +2595,7 @@ async function fJoin(){const J=FD.join;FD.paused=true;fReleaseStick();const id=J
   await say(`${UIMG('n_join',40)} <span class="nw">${CHARS[id].name}が</span><span class="nw">仲間になった！</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n}が、レベルアップの候補に出るようになった${full?`<br>パーティが${PARTY_MAX}人なので控えに入った`:''}</span>`,full?2200:1700)}
  finally{show('field');resizeField();renderFHud();FD.paused=false;fLast=0;if(!fRaf)fRaf=requestAnimationFrame(fLoop)}}
 async function fBossCome(){const k=FD.area,tk='bt_'+AREAS[k].boss;FD.bossCalled=true;FD.paused=true;fReleaseStick();
- try{if(!G.flags[tk]){await talk(BOSS_TALK[k]||[]);G.flags[tk]=1;save()}}finally{FD.paused=false;fLast=0}
+ try{if(!G.flags[tk]){await talk(storyFit(BOSS_TALK[k]||[],null,['onmyo','sora','takumi']));G.flags[tk]=1;save()}}finally{FD.paused=false;fLast=0}
  const b=fSpawn(FAREA[k].boss,null,320);b.ai={st:'walk',t:0};FD.boss=b;fBanner(`${FOES[b.k]?FOES[b.k].n:'ボス'}が現れた！`,180,'n_boss')}
 /* ボスの動き：歩く → 予告（赤い線）→ 突進。手下を呼ぶ */
 function fBossAI(b,f){const a=b.ai;a.t+=f;
@@ -2741,8 +2742,9 @@ async function fStairs(){const D=FD;if(!D||D.climbing)return;D.climbing=true;D.p
  const fl=D.floor,FLR=FLOORS[fl],k=D.area;const first=commitFloor(fl);sfx.win&&sfx.win();
  try{
   if(FLR.boss){
-   if(first&&BOSS_WIN[k])await talk(BOSS_WIN[k]);
-   if(fl>=TOP_FLOOR){fEnd('ending');return}
+   if(first&&BOSS_WIN[k])await talk(storyFit(BOSS_WIN[k],null,['onmyo','sora','takumi']));
+   if(fl===10&&!G.flags.ch1){fEnd('ending');return}
+   if(fl>=TOP_FLOOR){fEnd('ending2');return}
    if(!await fChoice(fl)){fEnd('home');return}}
   if(fl>=TOP_FLOOR){fEnd('home');return}
   await fAdvance(fl+1)}
@@ -2773,13 +2775,14 @@ async function fAdvance(nf){const D=FD,F=FLOORS[nf],k=F.area,newArea=k!==D.area;
 
 /* ---------- 終わり：持ち帰り ---------- */
 /* why：home＝ボスのあとホームへ／retreat＝自分で帰った／dead＝力つきた／ending＝10階のボスを倒した */
-const startPoints=()=>[1,4,7].filter(s=>s===1||(G.floor|0)>=s-1);
+const startPoints=()=>[1,4,7,11,14,17].filter(s=>s===1||(G.floor|0)>=s-1);
 const bestStart=()=>{const p=startPoints();return p[p.length-1]};
 function fEnd(why){const D=FD;if(!D||D.ending)return;D.ending=true;D.run=false;cancelAnimationFrame(fRaf);fRaf=0;fReleaseStick();
  ['fNext','fLevel','fPause'].forEach(id=>{const e=$(id);if(e)e.classList.remove('on')});
  const dead=why==='dead',got={};MAT_ORDER.forEach(k=>{const n=D.loot[k]||0;got[k]=dead?Math.floor(n/2):n;G.mats[k]+=got[k]});
  D.lootTools.forEach(t=>{if(!G.tools.includes(t))G.tools.push(t)});D.lootBps.forEach(b=>{if(!G.bps.includes(b)&&!G.bpRaw.includes(b))G.bpRaw.push(b)});
  G.where={s:'town'};G.town={x:TOWN_START[0],y:TOWN_START[1]};save();
+ if(why==='ending2'){FD=null;(async()=>{await talk(storyFit(ENDING2,null,['owl','takumi']));G.flags.ch1b=1;save();showEnding()})();return}
  if(why==='ending'){FD=null;(async()=>{await talk(storyFit(ENDING,null,['gorilla']),'ev_ending1');G.flags.ch1=1;save();showEnding()})();return}
  const up=D.clearedTo>=D.startFl,fl=up&&why==='home'?D.clearedTo:D.floor,coin=D.coin,climbed=Math.max(0,D.clearedTo-D.startFl+1);
  const ttl={home:'突破！',retreat:'ホームへ帰った',dead:'力つきた'}[why];
@@ -2807,7 +2810,7 @@ function fEnd(why){const D=FD;if(!D||D.ending)return;D.ending=true;D.run=false;c
 function resGo(f){$('result').classList.remove('fres');goFloor(f)}
 async function afterField(){$('result').classList.remove('fres');
  /* 前の版のセーブに残った印（いまは階段の場で会話が流れる） */
- delete G.flags.pendFloorUp;const k=G.flags.pendFieldWin;if(k){delete G.flags.pendFieldWin;save();await talk(BOSS_WIN[k]||[])}
+ delete G.flags.pendFloorUp;const k=G.flags.pendFieldWin;if(k){delete G.flags.pendFieldWin;save();await talk(storyFit(BOSS_WIN[k]||[],null,['onmyo','sora','takumi']))}
  openHome()}
 
 /* ===================== 工房（素材＋工具＋図面 → 製品） ===================== */
@@ -2882,7 +2885,7 @@ function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイ�
 function signLines(){return [[null,'看板','↑ 古い工房（武器・防具づくり、工具）\n↓ 渦の門（マイスターの塔の入口。錆が出るので注意）'],[null,'看板',`塔の${G.floor|0}階まで突破。次は ${nextFloor()}階「${FLOORS[nextFloor()].n}」`]]}
 function openDest(){show('dest');const best=G.floor|0,pts=startPoints();
  $('destList').innerHTML=`<div class="note" style="margin-bottom:6px">階段には鍵がかかっている。強敵をたおすと鍵が手に入り、そのまま上の階へ進める。ボスの階を倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。</div>`+
-  [7,4,1].map(s=>{const F=FLOORS[s],open=pts.includes(s),bossF={1:3,4:6,7:TOP_FLOOR}[s],done=best>=bossF,reach=Math.min(best,bossF);
+  [17,14,11,7,4,1].map(s=>{const F=FLOORS[s],open=pts.includes(s),bossF={1:3,4:6,7:10,11:13,14:16,17:20}[s],done=best>=bossF,reach=Math.min(best,bossF);
    const st=!open?`${s-1}階のボスを倒すと開く`:done?`${UIMG('n_boss',16)}ボス撃破`:reach>=s?`${reach}Fまで到達`:'まだ入っていない';
    return `<button class="flr ${open&&s===bestStart()?'next':''} ${open?'':'lock'}" data-f="${s}" ${open?'':'disabled'}><span class="fn">${s}F</span><span class="ft"><b>${LAYER_NAME[F.area]}　${s}F〜${bossF}F</b><small>${st}</small><span class="drec ${teamPow()>=REC_POW[bossF]?'ok':teamPow()>=REC_POW[s]?'mid':'ng'}">推奨戦力 ${REC_POW[s]}〜${REC_POW[bossF]}　いま ${teamPow()}</span><span class="dmats">${Array.from({length:bossF-s+1},(_,i)=>s+i).map(f=>`<i>${f}F ${matIcons(f,15)}</i>`).join('')}</span></span><span class="fs">${open?UIMG(done?'n_floor':'n_unlock',26)+'出撃':UIMG('n_unlock',26)+'未'}</span></button>`}).join('')+
   `<div class="note" style="text-align:center;margin-top:8px">最高到達：${best}F　／　${TOP_FLOOR}F</div>`;
@@ -3917,10 +3920,10 @@ const MAGNET_RATE={normal:.004,elite:.35};
 /* ---------- お助け仲間：層ごとに1人。その挑戦の間だけ一緒に戦う。パーティにいれば強化 ---------- */
 const HELPER={alley:'fox',factory:'dodo',under:'owl'};
 const HELPER_AGAIN={fox:'また会ったね！ 今回も手伝うよ。直す役は任せて！',dodo:'お、また来たね〜。前に立つのは先輩にまかせて〜。',owl:'ホッホッ、また会うたな。今回もわしの計算を貸そう。'};
-function helperSetup(){if(!FD)return;FD.helped=FD.helped||{};const id=HELPER[FD.area];if(!id||FD.helped[FD.area]||FD.join)return;FD.join={id,shown:false,x:0,y:0,cool:0,helper:true}}
+function helperSetup(){if(!FD)return;FD.helped=FD.helped||{};const id=(typeof HELPER_FL!=='undefined'&&HELPER_FL[FD.floor])||HELPER[FD.area];if(!id||FD.helped[id]||FD.join)return;FD.join={id,shown:false,x:0,y:0,cool:0,helper:true}}
 {const _j=fJoin;fJoin=async function(){const J=FD&&FD.join;if(!J||!J.helper)return _j();FD.paused=true;fReleaseStick();const id=J.id,nm=CHARS[id].name;
  try{const first=!G.flags['hp_'+id];await talk(first?(JOIN_TALK[id]||[]):[[id,nm,HELPER_AGAIN[id]]]);if(first){G.flags['hp_'+id]=1;save()}
-  FD.helped[FD.area]=true;FD.join=null;
+  FD.helped[id]=true;FD.join=null;
   if(G.party.some(m=>m.id===id)||FD.atk[id]!=null){FD.atk[id]=Math.min(ATK_MAX,(FD.atk[id]||0)+2);FD.hboost=FD.hboost||{};FD.hboost[id]=1.2;
    await say(`${UIMG('u_help',44)} <span class="nw">${nm}が</span><span class="nw">力を貸してくれた！</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n} Lv+2・威力1.2倍（この挑戦の間）</span>`,1900)}
   else{const L=findOwn(G.lead),m=newMember(id,1);m.lv=(L&&L.lv)||1;FD.helperMs=FD.helperMs||{};FD.helperMs[id]=m;FD.atk[id]=2;
@@ -4002,7 +4005,7 @@ function procGuide(pr){return new Promise(res=>{const st=PROC_GUIDE[pr];if(!st){
 
 /* ---------- 世界観に合わせた台本の書きかえ（塔は昔から街に立つ／地下はない／10Fは前編の終わり） ---------- */
 /* 仲間のセリフは、そのキャラが今のパーティにいるときだけ出す。だれもいなければ fb を足す */
-function storyFit(L,fb,keep){const sp=l=>l[0]?String(l[0]).split(':')[0]:null,inP=id=>id===G.hero||(keep||[]).includes(id)||G.party.some(m=>m.id===id);
+function storyFit(L,fb,keep){const sp=l=>l[0]?String(l[0]).split(':')[0]:null,inP=id=>id===G.hero||(keep||[]).includes(id)||G.party.some(m=>m.id===id)||!!(typeof FD!=='undefined'&&FD&&FD.helperMs&&FD.helperMs[id]);
  const out=L.map(l=>!sp(l)||inP(sp(l))?l.slice(0,3):l[3]?[null,'',l[3]]:null).filter(Boolean);
  if(fb&&!out.some(l=>sp(l)&&sp(l)!==G.hero))out.splice(Math.max(1,out.length-3),0,...fb);
  return out}
@@ -4052,7 +4055,7 @@ ENDING.splice(0,ENDING.length,
  [null,'','第1章「夜の工房に灯る」前編　完'],
  [null,'','——次の夜。街じゅうの明かりが、いっせいに消えた。'],
  ['gorilla','ボルトゴリラ','ウホッ！？ 塔の上の層から、錆が電線に流れこんでやがる！\nおい、そこの職人たち、手を貸してくれ！'],
- [null,'','後編「停電の層」（11F〜20F）へつづく\n※次のアップデートで公開']);
+ [null,'','後編（11F〜20F）へつづく\n11Fから登れるようになった']);
 JOIN_TALK.owl[1]=['owl','ホー博士','……まちがいない、匠の魔法陣じゃ。\nあやつの線は、ひと目見ればわかる。'];
 
 /* ===================== チャット（テイルズのスキットのような、仲間どうしの短い掛け合い） =====================
@@ -4094,7 +4097,7 @@ return [
  {id:'c_live3',t:'アンプに火を',st:3,who:['gorilla','rocker'],L:[['rocker',RK,'おい、ゴリラ。停電でアンプが鳴らねぇんだが。'],['gorilla',GR,'ウホッ？ だったら俺の電気を流してやろうか。'],['rocker',RK,'……壊すなよ。'],['gorilla',GR,'力まかせじゃ電気は流れねぇ。……ちゃんと分かってるさ。'],[null,'','アンプから、塔じゅうに響くような音が鳴った。'],['wolf:smile',W,'（これ、戦いに使えたらすげぇな……）']]},
  {id:'c_end3',t:'鉄灯の名前',st:3,who:['owl','fox','dodo'],L:[['owl',OW,'「鉄灯」という街の名はな、あの塔の灯りから来ておる。初代マイスターが錆を道具にもどす陣を塔に刻み、その光が夜の工場街を照らしたのじゃ。'],['fox',FX,'じゃあ、灯りが消えてたのって、陣が止まってたってこと？'],['owl',OW,'うむ。そして十年前に灯りを消したのが……わしの古い知り合い、匠じゃ。'],['dodo',DD,'えっ、博士、匠さんと知り合いだったの〜？'],['owl',OW,'若いころ、同じ図面台で線を引いた仲じゃ。あやつは、だれよりも正確な線を引いた。……正確すぎるほどにのう。'],['wolf:serious',W,'だったら、上で会ったら聞いてやる。なんで灯りを消したのかってな。']]}
 ]})();
-const chatStage=()=>{const f=G.floor|0;return f>=10?3:f>=6?2:f>=3?1:0};
+const chatStage=()=>{const f=G.floor|0;return f>=20?7:f>=19?6:f>=16?5:f>=13?4:f>=10?3:f>=6?2:f>=3?1:0};
 const chatOpen=c=>c.st<=chatStage()&&c.who.every(id=>id==='wolf'||!!owned(id));
 const chatNew=()=>CHATS.filter(c=>chatOpen(c)&&!(G.chatRead||[]).includes(c.id));
 async function playChat(id){const c=CHATS.find(x=>x.id===id);if(!c)return;await talk(c.L);G.chatRead=G.chatRead||[];if(!G.chatRead.includes(id)){G.chatRead.push(id);save()}}
@@ -4107,6 +4110,230 @@ function openChats(){const all=CHATS.filter(chatOpen),rd=G.chatRead||[],lock=CHA
  $('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};
  $('gpBody').querySelectorAll('[data-ch]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await playChat(b.dataset.ch);openChats()});
  $('genPick').classList.add('on')}
+
+/* ===================== 後編：塔の11〜20F（試作の層・発電の層・空の層・頂上） =====================
+   階の名前はサイコロ版「マイスターの塔」と同じ。新しい敵は、今の敵の絵に色をつけたもの（あとで専用の絵に差しかえる）
+   ボスは監視ドローン「空」の一番機（青）・二番機（黄）・三番機（赤）と、20Fの匠空 */
+
+/* ---------- 階 ---------- */
+FLOORS.push(
+ {n:'試作室',area:'proto',step:0,stair:1300},
+ {n:'鍛造場',area:'proto',step:1,stair:1450},
+ {n:'制御室',area:'proto',step:2,boss:true},
+ {n:'研究所',area:'power',step:0,stair:1400},
+ {n:'精密測定室',area:'power',step:1,stair:1550},
+ {n:'発電所',area:'power',step:2,boss:true},
+ {n:'設計局',area:'sky',step:0,stair:1500},
+ {n:'嵐の展望台',area:'sky',step:1,stair:1650},
+ {n:'星見の回廊',area:'sky',step:2,boss:true},
+ {n:'天空の工房',area:'top',step:3,boss:true});
+Object.assign(LAYER_NAME,{proto:'試作の層',power:'発電の層',sky:'空の層',top:'頂上'});
+Object.assign(AREAS,{
+ proto:{n:'試作の層',need:null,lv:'',bossLv:0,tier:3,boss:'drone1',bg:'#10222a'},
+ power:{n:'発電の層',need:null,lv:'',bossLv:0,tier:3,boss:'drone2',bg:'#22200e'},
+ sky:  {n:'空の層',  need:null,lv:'',bossLv:0,tier:3,boss:'drone3',bg:'#1a1430'},
+ top:  {n:'頂上',    need:null,lv:'',bossLv:0,tier:3,boss:'sorab', bg:'#0e1430'}});
+Object.assign(FLOOR_MATS,{11:['spring','brass'],12:['plate','brass'],13:['board','gear'],14:['oil','board'],15:['brass','spring'],16:['wire','board'],17:['board','brass'],18:['wire','spring'],19:['brass','board'],20:['board','core']});
+Object.assign(BOSS_HP,{13:3.4,16:3.8,19:4.2,20:4.6});
+Object.assign(REC_POW,{11:1200,12:1300,13:1400,14:1500,15:1600,16:1700,17:1800,18:1900,19:2000,20:2100});
+
+/* ---------- 敵：base＝もとの絵、tint＝色。dash＝ときどき突進、shoot＝弾を撃つ、split＝倒すと2つに分かれる ---------- */
+Object.assign(FFOE,{
+ mold: {hp:30, spd:.85,dmg:12,xp:3,r:20,base:'slime',tint:'#2fd6c6',split:1},
+ cog:  {hp:34, spd:1.7,dmg:13,xp:3,r:17,base:'pipe', tint:'#ffcf4a'},
+ anvil:{hp:95, spd:.62,dmg:17,xp:6,r:26,base:'armor',tint:'#ff6a2a',dash:260},
+ spark:{hp:28, spd:1.3,dmg:11,xp:3,r:16,fly:1,base:'lamp',tint:'#fff04a',shoot:230},
+ coil: {hp:44, spd:1.0,dmg:13,xp:4,r:20,base:'gear', tint:'#6aff6a',dash:220},
+ lens: {hp:48, spd:1.1,dmg:14,xp:5,r:18,fly:1,base:'ghost',tint:'#5aa8ff',shoot:200},
+ wing: {hp:36, spd:1.8,dmg:13,xp:4,r:16,fly:1,base:'crow',tint:'#b07cff',dash:200},
+ golem3:{hp:850,spd:.58,dmg:26,xp:32,r:38,big:1,base:'golem2',tint:'#3fd0ff'},
+ arm2:  {hp:950,spd:.64,dmg:27,xp:34,r:36,big:1,base:'arm',   tint:'#ffe14a'},
+ golem4:{hp:1050,spd:.62,dmg:28,xp:36,r:38,big:1,base:'golem2',tint:'#b07cff'},
+ drone1:{hp:4200,spd:.9, dmg:36,xp:150,r:54,big:1,boss:1,fly:1,drone:'#4aa8ff',ring:150},
+ drone2:{hp:4800,spd:.95,dmg:40,xp:170,r:56,big:1,boss:1,fly:1,drone:'#ffd23a',ring:130},
+ drone3:{hp:5400,spd:1.0,dmg:44,xp:190,r:58,big:1,boss:1,fly:1,drone:'#ff4a4a',ring:115},
+ sorab: {hp:6400,spd:1.0,dmg:46,xp:240,r:60,big:1,boss:1,src:'img/sora.webp',ring:100,call:420}});
+Object.assign(FOES,{
+ mold:{n:'試作の錆',col:'#2fd6c6'},cog:{n:'歯車の錆',col:'#ffcf4a'},anvil:{n:'鍛造の錆',col:'#ff6a2a'},spark:{n:'火花の錆',col:'#fff04a'},
+ coil:{n:'コイルの錆',col:'#6aff6a'},lens:{n:'レンズの錆',col:'#5aa8ff'},wing:{n:'嵐の錆',col:'#b07cff'},
+ golem3:{n:'試作の巨錆',col:'#3fd0ff'},arm2:{n:'発電の巨腕',col:'#ffe14a'},golem4:{n:'嵐の巨錆',col:'#b07cff'},
+ drone1:{n:'監視ドローン 空・一番機',col:'#4aa8ff'},drone2:{n:'監視ドローン 空・二番機',col:'#ffd23a'},drone3:{n:'監視ドローン 空・三番機',col:'#ff4a4a'},sorab:{n:'匠空',col:'#3a6ad8'}});
+Object.assign(FAREA,{
+ proto:{mix:[[0,['mold'],1.4],[25,['mold','cog'],2.1],[70,['mold','cog','anvil'],2.9],[130,['anvil','mold','cog'],3.6],[200,['mold','cog','anvil'],4.5]],
+        elite:'golem3',boss:'drone1',drop:{scrap:.02,spring:.014,brass:.012,core:.004},chestTool:'drill',ground:['#16262a','60,170,170']},
+ power:{mix:[[0,['spark'],1.3],[25,['spark','coil'],2],[70,['spark','coil','lens'],2.8],[130,['coil','lens','spark'],3.5],[200,['spark','coil','lens'],4.4]],
+        elite:'arm2',boss:'drone2',drop:{scrap:.02,wire:.016,board:.012,core:.004},chestTool:'solder',ground:['#26240e','200,180,60']},
+ sky:  {mix:[[0,['wing'],1.4],[25,['wing','lens'],2.1],[70,['wing','lens','anvil'],2.9],[130,['anvil','wing','spark'],3.6],[200,['wing','lens','anvil'],4.5]],
+        elite:'golem4',boss:'drone3',drop:{scrap:.02,brass:.014,board:.014,core:.005},chestTool:'lathe',ground:['#1c1630','140,100,220']},
+ top:  {mix:[[0,['wing','lens'],1.6],[25,['wing','lens','spark'],2.4],[70,['anvil','wing','lens'],3.2],[130,['anvil','wing','spark'],4],[200,['wing','lens','anvil'],4.8]],
+        elite:'golem4',boss:'sorab',drop:{scrap:.02,board:.014,core:.006},chestTool:null,ground:['#101830','90,120,220']}});
+
+/* ---------- 床：下の層の床の絵に色をかさねる ---------- */
+const FLOOR_TINT={proto:['factory','rgba(40,170,180,.30)'],power:['under','rgba(230,200,40,.24)'],sky:['under','rgba(130,80,230,.32)'],top:['alley','rgba(30,50,160,.40)']};
+{const _g=groundFor;groundFor=function(k){const T=FLOOR_TINT[k];if(!T)return _g(k);if(fGround[k])return fGround[k];
+ const fi=img(FLOOR_IMG[T[0]]);if(fi&&fi.complete&&fi.naturalWidth){const c=document.createElement('canvas');c.width=c.height=360;const g=c.getContext('2d');g.drawImage(fi,0,0,360,360);g.fillStyle=T[1];g.fillRect(0,0,360,360);g.fillStyle='rgba(0,0,0,.18)';g.fillRect(0,0,360,360);return fGround[k]=fcv().getContext('2d').createPattern(c,'repeat')}
+ return groundTmp(k)}}
+
+/* ---------- 敵の絵：色つき・ドローン・匠空 ---------- */
+function droneSpr(col,size){const S=Math.round(size*2),c=document.createElement('canvas');c.width=c.height=S;const g=c.getContext('2d'),m=S/2,R=S*.36;
+ g.strokeStyle='#3a4250';g.lineWidth=S*.05;g.lineCap='round';
+ for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){g.beginPath();g.moveTo(m,m);g.lineTo(m+sx*R*.8,m+sy*R*.8);g.stroke()}
+ for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){const x=m+sx*R*.8,y=m+sy*R*.8;g.fillStyle='rgba(200,220,240,.25)';g.beginPath();g.ellipse(x,y,S*.16,S*.06,0,0,TAU);g.fill();g.fillStyle='#2a303a';g.beginPath();g.arc(x,y,S*.03,0,TAU);g.fill()}
+ g.fillStyle='#d9dee6';g.strokeStyle='#5a6270';g.lineWidth=S*.02;g.beginPath();g.arc(m,m,S*.2,0,TAU);g.fill();g.stroke();
+ const gr=g.createRadialGradient(m,m+S*.02,0,m,m+S*.02,S*.12);gr.addColorStop(0,'#fff');gr.addColorStop(.35,col);gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.beginPath();g.arc(m,m+S*.02,S*.12,0,TAU);g.fill();
+ g.fillStyle='#2a303a';g.font=`900 ${Math.round(S*.09)}px sans-serif`;g.textAlign='center';g.fillText('空',m,m-S*.1);return c}
+{const _f=fspr;fspr=function(src,size){const mm=/^img\/foe\/(\w+)\.webp$/.exec(src),F=mm&&FFOE[mm[1]];if(!F||!(F.base||F.drone||F.src))return _f(src,size);
+ if(F.src)return _f(F.src,size);const key=src+'@'+size;if(FSPR[key])return FSPR[key];
+ if(F.drone)return FSPR[key]=droneSpr(F.drone,size);
+ const b=_f('img/foe/'+F.base+'.webp',size);if(!b)return null;const c=document.createElement('canvas');c.width=b.width;c.height=b.height;const g=c.getContext('2d');
+ g.drawImage(b,0,0);g.globalCompositeOperation='source-atop';g.globalAlpha=.5;g.fillStyle=F.tint;g.fillRect(0,0,c.width,c.height);return FSPR[key]=c}}
+
+/* ---------- 新しい動き：突進・弾・分裂・ボスの弾の輪と手下 ---------- */
+const EB={SPD:3.1,MAX:70,DMG:.45};
+{const _u=fUpdate;fUpdate=function(f){_u(f);const D=FD;if(!D||!D.run||D.paused||D.climbing)return;
+ if(D._ebF!==D.floor){D._ebF=D.floor;D.ebul=[]}
+ for(const e of D.foes){const F=FFOE[e.k];if(!F)continue;
+  if(F.dash){if(e.dsh>0){e.x+=e.dv[0]*f;e.y+=e.dv[1]*f;e.dsh-=f}else{e.dt=(e.dt==null?Math.random()*F.dash:e.dt)+f;
+   if(e.dt>F.dash&&Math.hypot(D.x-e.x,D.y-e.y)<380){e.dt=0;const a=Math.atan2(D.y-e.y,D.x-e.x);e.dv=[Math.cos(a)*4.6,Math.sin(a)*4.6];e.dsh=28;e.hit=Math.max(e.hit,4)}}}
+  if(F.shoot){e.sht=(e.sht==null?Math.random()*F.shoot:e.sht)+f;if(e.sht>F.shoot){e.sht=0;const dx=D.x-e.x,dy=D.y-e.y,d=Math.hypot(dx,dy)||1;
+   if(d<420&&D.ebul.length<EB.MAX)D.ebul.push({x:e.x,y:e.y-8,vx:dx/d*EB.SPD,vy:dy/d*EB.SPD,life:160,dmg:F.dmg*EB.DMG*(e.dm||1),c:F.tint})}}}
+ for(const b of D.ebul){b.x+=b.vx*f;b.y+=b.vy*f;b.life-=f;if(D.inv<=0&&(b.x-D.x)**2+(b.y-D.y)**2<15*15){D.hp-=b.dmg*fCut();D.inv=30;b.life=0;tone(90,.1,'sawtooth',.05);D.shake=6;renderFHud()}}
+ D.ebul=D.ebul.filter(b=>b.life>0)}}
+{const _ai=fBossAI;fBossAI=function(b,f){const r=_ai(b,f),F=FFOE[b.k],D=FD;if(!F||!F.ring||!D)return r;
+ b.rg=(b.rg||0)+f;if(b.rg>F.ring){b.rg=0;const n=b.k==='sorab'?14:10,o=Math.random()*TAU;D.ebul=D.ebul||[];
+  for(let i=0;i<n;i++){const a=o+i/n*TAU;D.ebul.push({x:b.x,y:b.y,vx:Math.cos(a)*2.4,vy:Math.sin(a)*2.4,life:220,dmg:F.dmg*.5*(b.dm||1),c:F.drone||'#7fb0ff'})}tone(520,.08,'square',.03,260)}
+ if(F.call){b.cl=(b.cl||0)+f;if(b.cl>F.call){b.cl=0;for(let i=0;i<3;i++){const e=fSpawn('wing',0,1);if(e){e.x=b.x+Math.cos(i/3*TAU)*80;e.y=b.y+Math.sin(i/3*TAU)*80}}fBanner('匠空がドローンを呼んだ！',100,'n_boss')}}
+ return r}}
+{const _k=fKill;fKill=function(e){_k(e);const F=FFOE[e.k];if(!FD||!F||!F.split||e.small)return;
+ for(let i=0;i<2;i++){const s=fSpawn(e.k,0,1);if(!s)continue;s.x=e.x+(i?14:-14);s.y=e.y;s.r=Math.round(F.r*.65);s.max=s.hp=e.max*.3;s.small=true}}}
+{const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);if(!D.ebul||!D.ebul.length)return;
+ for(const b of D.ebul){g.fillStyle=b.c||'#ff6a4a';g.globalAlpha=.35;g.beginPath();g.arc(b.x,b.y,9,0,TAU);g.fill();g.globalAlpha=1;g.fillStyle='#fff';g.beginPath();g.arc(b.x,b.y,4,0,TAU);g.fill()}}}
+
+/* ---------- お助け仲間：階ごと（試作の層＝チュータ、発電の層＝ボルトゴリラ、17〜18F＝セブンティーン、19〜20F＝ツキヨ） ---------- */
+const HELPER_FL={11:'mouse',12:'mouse',13:'mouse',14:'gorilla',15:'gorilla',16:'gorilla',17:'rocker',18:'rocker',19:'tsukiyo',20:'tsukiyo'};
+Object.assign(JOIN_TALK,{
+ mouse:[['mouse','チュータ','チュー……メカロボが動かなくなっちゃった。'],
+  ['robot','メカロボ','ピ……ガ……システム……エラー……サビ……検出……'],
+  ['mouse','チュータ','ボク、ロボの頭の中の文字を読めるようになりたいんだ。\nいっしょに行ってもいい？ ロボを直す方法をさがしたいチュー！']],
+ gorilla:[['gorilla','ボルトゴリラ','ウホッ！ やっと来たか、職人たち！'],
+  ['gorilla','ボルトゴリラ','俺はボルトゴリラ。街の配線なら、だいたい俺がやった。\n……だから許せねぇんだよ、電線を食う錆どもが。'],
+  ['gorilla','ボルトゴリラ','この層の電気は、俺がつなぎなおす。\nフルパワーでいくぜ、ウホッ！']],
+ rocker:[['rocker','セブンティーン','よう。今夜の主役のお出ましか。'],
+  ['rocker','セブンティーン','嵐で、ギターの音がよく響きやがる。\n……錆の連中、いいリズムで攻めてくるじゃねぇか。'],
+  ['rocker','セブンティーン','一曲だけ付き合ってやる。\nアンコールは、ないぜ。']],
+ tsukiyo:[['tsukiyo','ツキヨ','……星が、きみたちが来るって告げてた。'],
+  ['tsukiyo','ツキヨ','錆の円の中心は、塔のてっぺん。そのさらに上の夜空。\n星の位置で、道を読んであげる。'],
+  ['tsukiyo','ツキヨ','夜明けに見た、星座にない光。\nあれの正体を、確かめに行こう。']]});
+Object.assign(HELPER_AGAIN,{mouse:'チュー！ また会えたね。ロボへの命令は、ボクにまかせて！',gorilla:'ウホッ、また来たか！ 力まかせじゃなく、きっちりつなぐぜ。',rocker:'よう。もう一曲、付き合ってやるよ。',tsukiyo:'星読みどおり。また会えたね。'});
+
+/* ---------- 層の紹介・階の一言 ---------- */
+Object.assign(AREA_INTRO,{
+ proto:[[null,'','11F。後編のはじまり、試作の層。\n作業台の上に、作りかけの機械がいくつも並んでいる。'],
+  [null,'','どれも途中で手を止めたまま、錆に包まれていた。\n奥の制御室から、低いモーター音が聞こえる。']],
+ power:[[null,'','14F。発電の層。天井を、何本もの太い電線が走っている。'],
+  [null,'','その電線に、錆がびっしりと取りついていた。\n錆が脈打つたびに、街の明かりがひとつ消えていく。']],
+ sky:[[null,'','17F。空の層。塔の外壁に沿って、通路が空へ続いている。'],
+  [null,'','窓の外で、雷雲が渦を巻いていた。\n設計局の机には、描きかけの図面が山のように積まれている。']],
+ top:[[null,'','20F。天井のない部屋。頭の上に、夜空が広がっている。'],
+  [null,'','壁はすべて棚で、何千本もの図面が収められていた。\n塔の歴代の主たちが描きためた、図面庫だ。'],
+  [null,'','床のまん中に、何も描かれていない円がある。']]});
+Object.assign(FLOOR_LINES,{
+ 11:['作りかけの機械ばかりだ……','止まった機械にも、錆がついてる'],12:['鍛造場か。熱がこもってるな','ハンマーの音……だれもいないのに'],
+ 13:['制御室。画面が全部、砂嵐だ','上から、プロペラの音がする'],14:['研究所……薬品と油のにおいだ','火花には気をつけよう'],
+ 15:['精密測定室。ここは寸法がすべてだ','0.01ミリのずれも、ここではごまかせない'],16:['発電所。ここが街の電気のもとか','錆が電気を食ってる。止めないと'],
+ 17:['設計局……描きかけの図面ばかりだ','途中で止めた図は、陰に転びやすい……か'],18:['嵐の展望台。風が強い！','雷が近い。足もとに気をつけろ'],
+ 19:['星見の回廊。空が近い','あと一階で、てっぺんだ'],20:['天空の工房……ここが頂上か','行こう。灯りを、取りもどす']});
+Object.assign(BOSS_LINES,{proto:'またあのドローンか。今度も止める',power:'電線を守る。気を抜くな',sky:'赤い一つ目……来るぞ',top:'もう一度、話をしよう'});
+
+/* ---------- ボスの会話（仲間のセリフは、その仲間がいるときだけ。4つ目は、いないときの地の文） ---------- */
+Object.assign(BOSS_TALK,{
+ proto:[[null,'','制御室の天井から、丸い機械が降りてきた。\n四つのプロペラ。まん中に、青く光る一つ目。'],
+  [null,'','胴体には、かすれた文字で「空」と書かれている。'],
+  ['wolf','ウルフ','朝焼けの空を横切った光……こいつだったのか。'],
+  [null,'監視ドローン 空・一番機','……錆ヲ、検出。……古イ機械ヲ、検出。型式、旧型。'],
+  [null,'監視ドローン 空・一番機','……完璧デナイモノハ、不要。消去シマス。']],
+ power:[[null,'','発電所の天井で、黄色い一つ目が光った。二機目の「空」だ。'],
+  [null,'監視ドローン 空・二番機','……古イ電線ヲ、検出。劣化率、基準外。消去。'],
+  [null,'','赤い光が、錆だけでなく、まだ使える電線まで焼き切っていく。'],
+  ['gorilla','ボルトゴリラ','おい、やめろ！ その線はまだ使える！','だれかの声がひびいた気がした。「その線は、まだ使える！」'],
+  [null,'監視ドローン 空・二番機','……完璧デナイモノハ、不要。……完璧デナイモノハ、不要。'],
+  ['wolf:serious','ウルフ','（9階の鏡の前で、俺が自分に言いかけた言葉と……同じだ）']],
+ sky:[[null,'','星見の回廊の窓の外を、赤い光が横切った。三機目の「空」だ。'],
+  ['tsukiyo','ツキヨ','星が隠れた……。この光、星座にない。','星が、ひとつずつ隠れていく。'],
+  [null,'監視ドローン 空・三番機','……錆ヲ、検出。……描キカケノ図面ヲ、検出。'],
+  [null,'監視ドローン 空・三番機','……途中デ止メタモノハ、不要。焼却ニヨリ、消去。']],
+ top:[[null,'','夜空から、何十もの光が降りてきた。すべて、監視ドローン「空」だった。'],
+  [null,'','そのまん中に、ひとりの職人が浮かんでいた。白い作業着に帽子。手には、ドローンの送信機。\n作業着の半分は、オレンジ色の錆におおわれている。'],
+  ['sora','匠空','空の上から見てたよ。きみの腕、試させて！'],
+  [null,'','明るい声だった。けれど、その目は笑っていなかった。'],
+  ['sora','匠空','ずれた線も、古い道具も、錆も。完璧でないものは、ぜんぶ消すんだ。\nそうしたら、錆は生まれないでしょ？'],
+  ['wolf:serious','ウルフ','……それじゃ、何も残らねぇだろうが！']]});
+Object.assign(BOSS_WIN,{
+ proto:[[null,'','ドローンの一つ目が光を失い、ゆっくりと床に降りた。'],
+  ['mouse','チュータ','中の文字、読めるチュー……！ ここ、書きかえられてる。','ドローンの小窓の中に、命令の文字が並んでいた。'],
+  ['mouse','チュータ','もとは「錆があったら、直す」。それを消して、上から「消す」って。\n……同じ人の字だチュー。','もとは「錆があったら、直す」。それを消して、上から「消す」。同じ人の字だ。'],
+  [null,'','そのとき、制御室の画面のひとつに、白と黒の影が映った。'],
+  ['onmyo','オンミョウ','……書きかえた跡か。あの人らしい、まっすぐな字だ。'],
+  [null,'','画面はすぐ砂嵐にもどった。\n試作の層 クリア！ 発電の層（14F〜）へ登れるようになった。']],
+ power:[[null,'','ドローンの一つ目が、黄色から青に変わった。'],
+  [null,'監視ドローン 空・二番機','……命令ヲ、確認。……「錆ヲ、消セ」。……発信元、匠……'],
+  ['gorilla','ボルトゴリラ','力まかせじゃ、電気は流れねぇ。……親方の口ぐせさ。\nこいつも、命令に力まかせに従ってただけかもしれねぇな。','このドローンは、十年前の命令に、ずっと従っていただけなのかもしれない。'],
+  [null,'','焼き切れた電線を、図面どおりにつなぎなおす。\n天井のランプが、ひとつずつ灯っていった。'],
+  [null,'','発電の層 クリア！ 空の層（17F〜）へ登れるようになった。']],
+ sky:[[null,'','三機目のドローンが落ちると、回廊に白と黒の影が立っていた。\n今度は、消えなかった。'],
+  ['onmyo','オンミョウ','……陰と陽、どちらに転ぶか。見届けておった。'],
+  [null,'','オンミョウは、懐から一枚の紙を取り出した。\nぎざぎざの切り口。匠の魔法陣の、左半分だった。'],
+  ['onmyo','オンミョウ','我は、匠の弟子だった。\n十年前、師匠と二人で、この塔の再生の陣を描きなおしていた。'],
+  ['onmyo','オンミョウ','師匠の線は、一本も狂わなかった。我の線は、いつも少しずつずれた。\n……それがこわくなって、我は筆を置いて去った。'],
+  ['onmyo','オンミョウ','一人になった師匠は完成を急ぎ、錆を「直す」陣を「消す」陣に書きかえた。\n陣は暴走し、図面は左右に裂けた。'],
+  ['wolf:serious','ウルフ','……右半分は、ロストールが持ってた。'],
+  ['onmyo','オンミョウ','そなたの線は、ずれても磨き続ける線だ。我にはなかったものだ。\n……今度は、最後まで描く。連れていけ。'],
+  [null,'','空の層 クリア！ 頂上・天空の工房（20F）へ登れるようになった。']],
+ top:[[null,'','匠空の作業着から、錆がはじけ飛んだ。\nドローンの一つ目が、赤から青へ、ひとつずつ変わっていく。'],
+  [null,'','床の円の上で、二枚の図面を合わせた。左右は、ぴたりと合った。\nけれどまん中に、一本だけ線が足りない。'],
+  ['takumi','匠','……描けないよ。この手じゃ、もう完璧な線は引けない。'],
+  ['wolf','ウルフ','図面のここ、公差だろ。ここまでならずれていいっていう幅だ。\n初代マイスターの図面にも、ちゃんと書いてある。'],
+  ['takumi','匠','……ゼロにしたんだ。書きかえたとき、その数字を、ぜんぶゼロに。\nずれを許さない陣にしたら、錆も、道具も、人も……全部、はじかれた。'],
+  ['wolf:smile','ウルフ','俺の線は、たぶんちょっとずれる。でも、公差の中には入れてみせる。\n……毎晩、磨いてきたからな。'],
+  [null,'','ウルフとオンミョウが、左右から一本の線を引いた。\nまん中で、少しだけずれて出会う。'],
+  [null,'','魔法陣が光った。その光は匠の錆を消さず、ゆっくりと元の色にもどしていった。\n本当の「再生の陣」が、十年ぶりに完成した。']]});
+
+/* ---------- 20Fのエンディング（第1章 完） ---------- */
+const ENDING2=[
+ [null,'','塔のてっぺんに、灯りがともった。\n鉄灯の街の、すべての街灯が、いっせいについた。'],
+ ['takumi','匠','……まいった。きみたちこそ、本物のマイスターだよ。'],
+ ['takumi','匠','でも、ぼくは許されたわけじゃない。\n十年、街を暗くした。古い道具をたくさん消した。弟子を、一人にした。'],
+ ['takumi','匠','だから、審判を受けようと思う。'],
+ [null,'','匠が魔法陣に手をおくと、一筋の光が、はるか西の空を指した。\nその先に、白と黒に塗り分けられた塔の影が見えた。'],
+ ['owl','ホー博士','審判の塔じゃ。白黒の高原に、大昔から立つ塔。\n正しさを量る「天秤の陣」が刻まれておる。','白黒の高原に、大昔から立つ塔。正しさを量る「天秤の陣」が刻まれているという。'],
+ ['wolf:smile','ウルフ','俺たちも行くよ。あんたがどう変わったか、一番近くで見てたのは俺たちだ。\n証人がいなきゃ、裁判にならねぇだろ。'],
+ [null,'','塔の入口の石に刻まれた言葉が、街の灯りに照らされていた。\n「夜に磨く、未来を創る力」'],
+ [null,'','第1章「夜の工房に灯る」　完\n第2章「審判の塔」へつづく']];
+function showEnding(){sfx.win&&sfx.win();const full=!!G.flags.ch1b;
+ $('resP').innerHTML=`<div style="text-align:center"><img class="endImg" src="img/ev/ev_ending1.webp" alt=""><h2 style="margin:4px 0;color:var(--gold)">${full?'第1章 クリア！':'第1章 前編クリア！'}</h2><div style="font-weight:800">「夜の工房に灯る」</div>
+  <div style="display:flex;justify-content:center;gap:4px;margin:10px 0;flex-wrap:wrap">${G.party.map(m=>`<img src="${CHARS[m.id].img}" style="width:56px;height:56px;object-fit:contain" alt="">`).join('')}</div>
+  <div class="note">${full?'塔の灯りが、十年ぶりにともった。<br>クリア後も、塔に登って素材集め・装備づくりができる。<br>第2章「審判の塔」へつづく':'塔の中ほどに、灯りがひとつともった。<br>11Fから後編へ。塔の頂上・20Fをめざそう。'}</div></div>`;
+ $('resBtns').innerHTML='';addBtn('ホームへ',openHome,'gold');show('result')}
+
+/* ---------- チャット（後編）：13F・16F・19F・20Fクリアで出る ---------- */
+{const W='ウルフ',DD='ドド先輩',OW='ホー博士',GR='ボルトゴリラ',MO='チュータ',RB='メカロボ',TK='ツキヨ',OM='オンミョウ',RK='セブンティーン';
+CHATS.push(
+ {id:'c_robo4',t:'再起動',st:4,who:['mouse','robot'],L:[['mouse',MO,'ロボの頭の中の文字、ひと晩かけて読んだんだ。'],['mouse',MO,'もしこうなら、こうする。正しい順番で並んだ命令は、ちゃんと描いた図面と同じなんだね。'],['mouse',MO,'錆が、一字だけ食べちゃってた。そこを書きなおしたら……'],['robot',RB,'ピ……再起動……完了。……再起動ニ、必要ナモノ……ぷろぐらむ……ト……トモダチ……'],['mouse',MO,'……うん。やったチュー！']]},
+ {id:'c_onmyo4',t:'まっすぐな字',st:4,who:['onmyo'],L:[['onmyo',OM,'……書きかえた跡を、見たか。'],['wolf',W,'やっぱり、画面に映ったのはお前だったのか。'],['onmyo',OM,'あの人の字は、昔から一本も震えなかった。'],['onmyo',OM,'震えない字は、美しい。……だが、ときに冷たい。']]},
+ {id:'c_owl4',t:'十年前の命令',st:4,who:['owl'],L:[['owl',OW,'ドローンの命令が書きかえられたのは、十年前。灯りが消えたのと同じころじゃ。'],['owl',OW,'あやつは、完璧な線を引く男じゃった。……完璧すぎるほどにのう。'],['wolf',W,'博士……匠のこと、もっと知ってるんじゃねぇのか。'],['owl',OW,'……上へ行けば、わかる。']]},
+ {id:'c_gorilla4',t:'まず図を描け',st:5,who:['gorilla'],L:[['gorilla',GR,'俺は昔、配線を力まかせにつないで、工場をひとつ停電させたことがある。'],['gorilla',GR,'そのとき親方に言われたんだ。まず図を描け、ってな。'],['wolf',W,'図を描いてから、つなぐ……。'],['gorilla',GR,'正しく描いた複線図は、光るんだぜ。魔法陣と同じさ、ウホッ。']]},
+ {id:'c_rocker4',t:'火事の夜',st:5,who:['rocker'],L:[['rocker',RK,'研究所の油のにおい……思い出すぜ。'],['rocker',RK,'昔、港の倉庫街で火事があった。俺はそのとき、ギターしか持ってなかった。'],['rocker',RK,'油の火に水はだめだ。泡で、ふたをする。……あの夜のあとで、全部覚えた。'],['wolf',W,'……だから、そんなに詳しいのか。']]},
+ {id:'c_robo5',t:'命令して、撃つ',st:5,who:['mouse','robot'],L:[['mouse',MO,'ロボ、ボクが命令を書くから、撃って！'],['robot',RB,'……了解。狙イト、たいみんぐハ、ちゅーたニ、オマカセシマス。'],['mouse',MO,'右に三つ、左に二つ、上に一つ。ドローンの動き、いつも同じ順番だったチュー！'],[null,'','チュータが書いた命令で、ロボのレーザーがまっすぐ伸びた。']]},
+ {id:'c_onmyo5',t:'筆を置いた日',st:6,who:['onmyo'],L:[['onmyo',OM,'……我の線は、いつも少しずつずれた。'],['onmyo',OM,'ずれが陣を壊すのではないか。そう思ったら、筆が持てなくなった。'],['wolf',W,'俺もだよ。試験で手がふるえて、0.05ミリ削りすぎた。'],['onmyo',OM,'……それでも、そなたは旋盤の前にもどった。'],['wolf:smile',W,'もどるしかなかったんだよ。ほかに、やり方を知らねぇからな。']]},
+ {id:'c_tsukiyo4',t:'星図の陣',st:6,who:['tsukiyo','owl'],L:[['owl',OW,'ツキヨ殿、星の位置と、わしの錆の地図。もう一度重ねてみてくれんか。'],['tsukiyo',TK,'……円の中心は、塔のてっぺん。その、さらに上。'],['owl',OW,'ホッホッ。星と計算、組み合わせれば、陣の中心が読める。'],['tsukiyo',TK,'星読みどおり。……ううん、星読み以上かな。']]},
+ {id:'c_live4',t:'嵐のステージ',st:6,who:['rocker','gorilla'],L:[['rocker',RK,'嵐の中で弾くのは、悪くねぇな。'],['gorilla',GR,'俺の電気も、もう力まかせじゃねぇぞ。'],['rocker',RK,'……知ってる。さっきの音、ちゃんと鳴ってた。'],[null,'','雷鳴とギターの音が、嵐の展望台に響いた。']]},
+ {id:'c_owl5',t:'ゼロにした数字',st:7,who:['owl'],L:[['owl',OW,'あやつが公差をゼロにした、と聞いて……ようやくわかったわい。'],['owl',OW,'若いころ、あやつはよく言っておった。「ずれは、ぼくの負けだ」と。'],['wolf',W,'ずれは負けじゃねぇよ。公差の中なら、それは合格だ。'],['owl',OW,'ホッホッ。……そうじゃな。それをあやつに教えたのは、おぬしじゃ。']]},
+ {id:'c_wolf3',t:'合格ライン',st:7,who:['wolf'],L:[['wolf',W,'……試験、あさってなんだよな。'],['wolf',W,'不思議と、手がふるえる気がしねぇ。'],[null,'','ウルフは、20階で引いた一本の線を思い出していた。少しずれて、それでも公差の中で出会った線を。'],['wolf:smile',W,'よっしゃ。合格ライン、ぶっちぎってやる！']]})}
+
+/* ---------- 後編の層から出撃するときは、最初からレベルが上がった状態（下の階を登ってきた分） ---------- */
+const START_LV={11:7,14:11,17:14};
+{const _s=startFloor;startFloor=function(fl){_s(fl);const L=START_LV[fl];if(!L||!FD)return;const D=FD;D.lv=1+L;D.need=Math.round(3+D.lv*2.6+D.lv*D.lv*.16);D.pendingLv+=L;
+ fBanner(`${fl}階から出撃：はじめから Lv${D.lv}（技を${L}回えらべる）`,200,'n_floor');if(!D.paused&&!$('fLevel').classList.contains('on'))fOpenLevel()}}
 
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
