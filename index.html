@@ -816,6 +816,13 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 #fTime .ffl{display:inline-block;min-width:2.1em;text-align:left}#fTime .ftm{display:inline-block;width:3.3em;text-align:left;font-variant-numeric:tabular-nums}#fTime{flex:0 0 auto}
 .fgbar{display:none;gap:6px;width:min(560px,92vw)}.fgbar button{flex:1;padding:10px 4px;background:none;border:1px solid #ffffff40;color:var(--sw);font-weight:800;font-size:14px}.fgbar button.on{border-color:var(--so);color:var(--so)}
 
+/* ホーム：パーティはアイコンで */
+#hLead{display:flex;flex-direction:column;gap:3px}#hLead .hpi{display:flex;gap:4px}
+.hic{width:38px;height:38px;padding:0;border:1px solid var(--sl);background:#0f1626;overflow:hidden;position:relative;color:var(--sm);font-size:16px}
+.hic img{width:100%;height:160%;object-fit:cover;object-position:50% 0}.hic.ld{border:2px solid var(--so)}.hic.em{border-style:dashed}
+/* 編成：装備の列を小さい画面で詰める */
+@media (max-width:380px){.peq{gap:4px}.eqs{width:40px;height:40px;flex-basis:40px}.peq .pel{margin-left:0}}
+
 </style>
 </head>
 <body>
@@ -1493,7 +1500,7 @@ function openNews(){$('sheetT').textContent='お知らせ';
  $('sheetB').innerHTML=`<div class="news"><b>ver ${VERSION}　マイスターの塔2</b><ul>
   <li>塔を連続で登るサバイバー形式になった。ボスのあとは続けて登るか帰るかを選べる</li>
   <li>工房で素材・工具・図面から武器と防具をつくる</li>
-  <li>ガチャで仲間を集め、パーティ3人の能力で助け合う</li>
+  <li>ガチャで仲間を集め、パーティ5人の能力で助け合う</li>
   <li>前の版（コマンド版）のセーブは引きつがれない</li></ul></div><button class="btn ghost" id="nsX">閉じる</button>`;
  $('nsX').onclick=closeSheet;$('sheet').classList.add('on')}
 function askReset(){$('sheetT').textContent='セーブを消す';
@@ -2736,7 +2743,7 @@ function openItems(){const row=(ic,n,cnt,d)=>`<div class="itr">${ic}<div class="
  $('sheet').classList.add('on')}
 function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイスターの塔を登る。階段を見つけると、そのまま上の階へ。ボスを倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。工房で武器・防具づくり、編成でパーティ、ガチャで仲間集め。'],
  [null,'説明','塔の中では、出撃キャラを指で動かす。攻撃は自動。はじめは出撃キャラの技だけ。'],
- [null,'説明','攻撃は装備した武器で決まる。はじめは出撃キャラの専用武器の技だけ。レベルアップすると、パーティの仲間の技と、装備した汎用武器（2つまで）の技が NEW で出てくる。パーティ（3人）の仲間は、能力（パッシブ）で助けてくれる。'],
+ [null,'説明','攻撃は装備した武器で決まる。はじめは出撃キャラの専用武器の技だけ。レベルアップすると、パーティの仲間の技と、装備した汎用武器（2つまで）の技が NEW で出てくる。パーティ（5人）の仲間は、能力（パッシブ）で助けてくれる。'],
  [null,'説明','倒した錆や資材の箱から、素材と図面が手に入る。途中で帰っても全部持ち帰れるが、力つきると素材は半分になる。'],
  [null,'説明','工房では「素材＋工具＋図面」がそろうと加工できる。工具は工房で買うか、塔の中で見つける。なぞりの出来ばえで強さが決まる。']])}
 function signLines(){return [[null,'看板','↑ 古い工房（武器・防具づくり、工具）\n↓ 渦の門（マイスターの塔の入口。錆が出るので注意）'],[null,'看板',`塔の${G.floor|0}階まで突破。次は ${nextFloor()}階「${FLOORS[nextFloor()].n}」`]]}
@@ -2798,9 +2805,10 @@ function openHome(){if(TW)TW.busy=false;G.where={s:'town'};save();show('home');
  $('hName').textContent='第1章　夜の工房に灯る';$('hRank').textContent=`${G.floor|0}F / ${TOP_FLOOR}F`;$('hRankI').style.width=100*(G.floor|0)/TOP_FLOOR+'%';
  $('hRes').innerHTML=resHTML();
  const others=G.party.filter(m=>m.id!==L.id);
- $('hArt').innerHTML=others.map((m,i)=>`<img class="hsub p${i}" data-id="${m.id}" src="${CHARS[m.id].img}" alt="${CHARS[m.id].name}">`).join('')+`<img class="hmain" data-id="${L.id}" src="${CHARS[L.id].img}" alt="${CHARS[L.id].name}">`;
+ $('hArt').innerHTML=`<img class="hmain" data-id="${L.id}" src="${CHARS[L.id].img}" alt="${CHARS[L.id].name}">`;
  $('hArt').querySelectorAll('img').forEach(im=>im.onclick=()=>{partySel=im.dataset.id;openParty()});
- $('hLead').innerHTML=`<small>出撃キャラ</small>${CHARS[L.id].name}`;
+ $('hLead').innerHTML=`<small>パーティ</small><span class="hpi">${[L,...others].map(m=>`<button class="hic ${m.id===L.id?'ld':''}" data-id="${m.id}"><img src="${CHARS[m.id].img}" alt="${CHARS[m.id].name}"></button>`).join('')}${Array.from({length:Math.max(0,PARTY_MAX-G.party.length)},()=>'<button class="hic em" data-id="">＋</button>').join('')}</span>`;
+ $('hLead').querySelectorAll('.hic').forEach(b=>b.onclick=()=>{partySel=b.dataset.id||null;openParty()});
  const g=nextGoal();$('hBanner').innerHTML=`<span class="nx">NEXT</span><span class="nm">${g.m}</span><span class="na">→</span>`;$('hBanner').onclick=()=>g.go==='go'?openDest():goTab(g.go);
  const f=bestStart();$('hGoT').textContent=`塔の${f}階から　${LAYER_NAME[FLOORS[f].area]}`;
  const h=$('home');h.classList.remove('enter');void h.offsetWidth;h.classList.add('enter');requestAnimationFrame(fitHomeArt)}
@@ -2936,7 +2944,7 @@ Object.assign(ABIL,{
  rocker: ab4(['lvSpd',.05],['teamAtk',.05],['xp',.08],['teamAtk',.1])});
 /* ウルフは最初からいる。ほかの仲間はすべてガチャで手に入れる */
 const GACHA_POOL=['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker'];
-const GACHA_COST=50,GACHA10_COST=450,STAR_MAX=5,PARTY_MAX=3;
+const GACHA_COST=50,GACHA10_COST=450,STAR_MAX=5,PARTY_MAX=5;
 const STAR_RATE=[[3,.05],[2,.25],[1,.70]];
 /* コインの入り方（階の突破） */
 const COIN_FIRST=40,COIN_FIRST_BOSS=80,COIN_AGAIN=10,COIN_DROP=10;  /* COIN_DROP：強敵が落とすコイン1枚ぶん（ボスは3枚） */
