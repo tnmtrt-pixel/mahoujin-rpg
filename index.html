@@ -856,6 +856,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .zkc img{position:absolute;left:50%;top:5%;height:115%;transform:translateX(-50%);max-width:none}
 .zkc.no img{filter:brightness(0) opacity(.45)}.zkc.no .hfb b{color:var(--sm)}
 .zkno{position:absolute;right:4px;top:3px;z-index:2;font-size:9px;color:var(--sm);font-family:ui-monospace,Menlo,monospace}
+.drec{display:block;font-size:11px;margin:1px 0}.drec.ok{color:#9be39b}.drec.mid{color:#ffd060}.drec.ng{color:#ff8a8a}
 
 </style>
 </head>
@@ -2160,17 +2161,17 @@ const floorMats=f=>[...(FLOOR_MATS[f]||['scrap']),...(FLOORS[f]&&FLOORS[f].boss?
 /* 工具：price＝工房で買うときのコイン（0＝最初から持っている）。where＝塔の中で見つかる場所（見つければ無料） */
 const TOOLS={
  file:  {n:'やすり',     d:'金属の角やバリを取る。基本の工具',price:0},
- snips: {n:'金切りばさみ',d:'薄い鉄板や銅線を切る',price:60},
- anvil: {n:'金床',       d:'熱した鉄を打つ台',price:100},
- pliers:{n:'電工ペンチ', d:'銅線を切る・曲げる・はさむ',price:150,where:'塔の中層（4〜6階）の資材の箱'},
- welder:{n:'溶接機',     d:'鉄と鉄をつなぐ',price:250,where:'塔の上層（7〜10階）の資材の箱'},
- caliper:{n:'ノギス',    d:'長さを正確に測る',price:40},
- vise:  {n:'万力',       d:'材料をしっかり固定する',price:60},
- grinder:{n:'グラインダー',d:'回る砥石で削って形を整える',price:80},
- tap:   {n:'タップハンドル',d:'穴にねじを切る',price:100},
- solder:{n:'はんだごて', d:'電子部品をつなぐ',price:120},
- drill: {n:'ボール盤',   d:'材料に穴をあける',price:150},
- lathe: {n:'旋盤',       d:'材料を回して丸く削る',price:300}};
+ snips: {n:'金切りばさみ',d:'薄い鉄板や銅線を切る',price:90},
+ anvil: {n:'金床',       d:'熱した鉄を打つ台',price:150},
+ pliers:{n:'電工ペンチ', d:'銅線を切る・曲げる・はさむ',price:240,where:'塔の中層（4〜6階）の資材の箱'},
+ welder:{n:'溶接機',     d:'鉄と鉄をつなぐ',price:400,where:'塔の上層（7〜10階）の資材の箱'},
+ caliper:{n:'ノギス',    d:'長さを正確に測る',price:60},
+ vise:  {n:'万力',       d:'材料をしっかり固定する',price:90},
+ grinder:{n:'グラインダー',d:'回る砥石で削って形を整える',price:120},
+ tap:   {n:'タップハンドル',d:'穴にねじを切る',price:160},
+ solder:{n:'はんだごて', d:'電子部品をつなぐ',price:180},
+ drill: {n:'ボール盤',   d:'材料に穴をあける',price:240},
+ lathe: {n:'旋盤',       d:'材料を回して丸く削る',price:450}};
 const TOOL_ORDER=['file','caliper','snips','vise','grinder','anvil','tap','solder','pliers','drill','welder','lathe'];
 /* 製品（レシピ）。kind:'weapon'（who のキャラの攻撃が強くなる）／'armor'（slot：head・body・feet。全員に効く）
    tier：1〜3（段階が上がるほど強い。なぞりと加工もむずかしくなる） shape：なぞる形 lathe：旋盤の加工もある
@@ -2260,7 +2261,16 @@ const FAREA={
 /* 時間（秒）：RUN＝ボスが出ないときに帰る時間、BOSS＝ボスが来る、JOIN＝仲間の気配、ELITE＝強敵、CHEST＝資材の箱、LIMIT＝ボス戦の終わり */
 /* SEARCH：1つの階で階段をさがせる時間（秒）。ボスとの戦いの間は止まる */
 /* 制限時間はなし。同じ階に RUST 秒より長くいると「錆が濃くなり」、敵がどんどん増える */
-const FT={RUST:60,BOSS:30,JOIN:8,HINT:5,ELITE:[25,45],CHEST:[12,35]};
+const FT={RUST:60,BOSS:30,JOIN:8,HINT:5,ELITE:[12,45],CHEST:[18,40]};
+/* 階ごとに敵が強くなる（体力・攻撃）。ボスは階ごとの倍率 */
+const FSCALE=f=>{const n=(f||1)-1;return{hp:1+.3*n+.06*n*n,dmg:1+.15*n+.02*n*n}};
+const BOSS_HP={3:1.3,6:2.6,10:3.5};
+/* 図面が出る確率：ボスは必ず1枚、強敵は BP_ELITE、資材の箱は BP_CHEST */
+const BP_ELITE=.12,BP_CHEST=.08;
+/* 工具が店に並ぶ階（その階に着いたら買える） */
+/* 推奨戦力（チームの攻撃）。自動プレイで確かめた目安 */
+const REC_POW={1:100,2:120,3:150,4:300,5:350,6:450,7:650,8:750,9:850,10:1100};
+const TOOL_GATE={tap:3,solder:3,drill:3,pliers:4,welder:4,lathe:6};
 const rustMul=()=>FD.st>FT.RUST?1+(FD.st-FT.RUST)/45:1;
 const FCFG={HP:100,SPD:1.9,PICK:70,MAX_FOES:170};
 const AREA_JOIN={alley:'fox',factory:'dodo',under:'owl'};
@@ -2373,7 +2383,7 @@ function startFloor(fl){audio();const FLR=FLOORS[fl],k=FLR.area,A=FAREA[k];
  const hpMax=teamHp();
  const comp=FLR.join,needJoin=comp&&comp!==G.hero&&!ownChar(comp);
  const sa=Math.random()*TAU,sd=FLR.stair||0;
- FD={ab,revived:false,st:0,tt:0,startFl:fl,clearedTo:fl-1,coin:0,area:k,floor:fl,step:FLR.step,run:true,stairs:FLR.boss?null:{x:Math.cos(sa)*sd,y:Math.sin(sa)*sd,open:!needJoin},paused:false,t:0,lv:1,xp:0,need:4,hp:hpMax,maxhp:hpMax,x:0,y:0,face:'down',walk:0,inv:0,shake:0,warn:0,warnTxt:'',
+ FD={ab,revived:false,st:0,tt:0,startFl:fl,clearedTo:fl-1,coin:0,area:k,floor:fl,step:FLR.step,run:true,stairs:FLR.boss?null:{x:Math.cos(sa)*sd,y:Math.sin(sa)*sd,open:false},paused:false,t:0,lv:1,xp:0,need:4,hp:hpMax,maxhp:hpMax,x:0,y:0,face:'down',walk:0,inv:0,shake:0,warn:0,warnTxt:'',
   atk,ps:{spd:0,mag:0,hp:0,cd:0},foes:[],shots:[],gems:[],items:[],pops:[],fx:[],zones:[],chests:[],uid:0,acc:0,elite:0,chestN:0,pendingLv:0,
   cd:{wolf:0,fox:0,dodo:0,owl:0},stars:[],seeks:[],waves:[],orbA:0,kills:0,loot:{},lootTools:[],lootBps:[],join:needJoin?{id:comp,shown:false,x:0,y:0,cool:0}:null,
   boss:null,bossDone:false,ending:false};
@@ -2393,8 +2403,8 @@ const fPow=id=>{const g=id!==G.lead&&!G.party.some(m=>m.id===id)&&genFor(id);if(
 /* 敵の波：1分の探索に合わせて、時間を2.5倍速で進める */
 const fSearchT=()=>FD.st;   /* この階を探索した時間（ボス戦の間は進まない） */
 function waveNow(){const mix=FAREA[FD.area].mix,t=fSearchT()*2.5;let w=mix[0];for(const v of mix)if(t>=v[0])w=v;return w}
-function fSpawn(kind,ang,dist){if(FD.foes.length>=FCFG.MAX_FOES&&!FFOE[kind].big)return null;const F=FFOE[kind],a=ang==null?Math.random()*TAU:ang,r=dist||Math.hypot(fW,fH)/2/fZ+60,hm=F.boss?1:(1+fSearchT()/60)*(1+.22*(FD.step||0));
- const e={id:++FD.uid,k:kind,x:FD.x+Math.cos(a)*r,y:FD.y+Math.sin(a)*r,hp:F.hp*hm,max:F.hp*hm,r:F.r,spd:F.spd*(F.boss?1:.9+Math.random()*.2),hit:0,kb:[0,0],wob:Math.random()*TAU,oh:0,big:!!F.big,boss:!!F.boss};
+function fSpawn(kind,ang,dist){if(FD.foes.length>=FCFG.MAX_FOES&&!FFOE[kind].big)return null;const F=FFOE[kind],a=ang==null?Math.random()*TAU:ang,r=dist||Math.hypot(fW,fH)/2/fZ+60,fs=FSCALE(FD.floor),hm=F.boss?BOSS_HP[FD.floor]||1:(1+fSearchT()/60)*(1+.22*(FD.step||0))*fs.hp;
+ const e={id:++FD.uid,k:kind,x:FD.x+Math.cos(a)*r,y:FD.y+Math.sin(a)*r,hp:F.hp*hm,max:F.hp*hm,r:F.r,spd:F.spd*(F.boss?1:.9+Math.random()*.2),hit:0,kb:[0,0],wob:Math.random()*TAU,oh:0,big:!!F.big,boss:!!F.boss,dm:F.boss?1+.08*((FD.floor||1)-1):fs.dmg};
  FD.foes.push(e);return e}
 function nearestFoes(n,x=FD.x,y=FD.y,maxD=1e9){return FD.foes.map(f=>[f,(f.x-x)**2+(f.y-y)**2]).filter(a=>a[1]<maxD*maxD).sort((a,b)=>a[1]-b[1]).slice(0,n).map(a=>a[0])}
 function fDamage(e,d,kx,ky){if(e.hp<=0)return;e.hp-=d;e.hit=6;if(!e.boss)e.kb=[kx||0,ky||0];if(FD.pops.length<90)FD.pops.push({x:e.x,y:e.y-e.r,v:Math.round(d),t:0});
@@ -2447,7 +2457,8 @@ function fKill(e){FD.kills++;const F=FFOE[e.k];FD.gems.push({x:e.x,y:e.y,v:F.xp,
  if(e.big){for(let i=0;i<6;i++)FD.gems.push({x:e.x+Math.random()*60-30,y:e.y+Math.random()*60-30,v:3});
   const n=e.boss?4:2,fm=FLOOR_MATS[FD.floor]||['scrap'];for(let i=0;i<n;i++)FD.items.push({x:e.x+Math.random()*50-25,y:e.y+Math.random()*50-25,k:fm.at(i%fm.length)});
   FD.items.push({x:e.x,y:e.y+10,k:'core'});if(e.boss)FD.items.push({x:e.x+20,y:e.y,k:'core'});
-  const bp=nextBp();if(bp)FD.items.push({x:e.x-16,y:e.y,k:'bp',id:bp});
+  if(e.key&&FD.stairs&&!FD.stairs.open){FD.stairs.open=true;FD.stairShown=true;fBanner('階段の鍵を手に入れた！ 矢印の方へ',170,'n_floor');tone(990,.2,'triangle',.1,1480)}
+  if(e.boss||Math.random()<BP_ELITE){const bp=nextBp();if(bp)FD.items.push({x:e.x-16,y:e.y,k:'bp',id:bp})}
   /* 強敵・ボスはコインも落とす */
   const cn=e.boss?3:1;for(let i=0;i<cn;i++)FD.items.push({x:e.x+Math.random()*44-22,y:e.y-14+Math.random()*20,k:'coin',v:COIN_DROP})}
  if(e.boss){FD.bossDone=true;FD.boss=null;fBanner(`${FOES[e.k]?FOES[e.k].n:'ボス'}をたおした！`,200,'n_boss');sfx.win&&sfx.win();FD.stairs={x:e.x,y:e.y,open:true};FD.stairShown=true;
@@ -2468,7 +2479,7 @@ function fOpenChest(c){c.open=true;const A=FAREA[FD.area],got=[];
  const add=(k,n)=>{for(let i=0;i<n;i++)FD.items.push({x:c.x+Math.random()*40-20,y:c.y+Math.random()*40-20,k})};
  {const fm=FLOOR_MATS[FD.floor]||['scrap'];add(fm.at(0),2+Math.floor(Math.random()*3));add(fm.at(-1),1+Math.floor(Math.random()*2))}
  const tl=A.chestTool;if(tl&&!G.tools.includes(tl)&&!FD.lootTools.includes(tl)&&!FD.items.some(i=>i.k==='tool'))FD.items.push({x:c.x,y:c.y-24,k:'tool',id:tl});
- else if(Math.random()<.35){const bp=nextBp();if(bp)FD.items.push({x:c.x,y:c.y-24,k:'bp',id:bp})}
+ else if(Math.random()<BP_CHEST){const bp=nextBp();if(bp)FD.items.push({x:c.x,y:c.y-24,k:'bp',id:bp})}
  tone(880,.2,'triangle',.1,1320);fBanner('資材の箱をあけた！',90)}
 
 /* ---------- レベルアップ（だれを強化するか選ぶ） ---------- */
@@ -2510,11 +2521,12 @@ function fUpdate(f){const D=FD;D.t+=f/60;
  if(ml>.05){D.x+=mx*fSpd()*f;D.y+=my*fSpd()*f;D.walk+=f;D.face=Math.abs(mx)>Math.abs(my)?(mx<0?'left':'right'):(my<0?'up':'down')}
  // 出現
  const w=waveNow(),rate=w[2]*(D.boss?.6:1)*(1+.12*(D.step||0))*rustMul();D.acc+=rate*f/60;while(D.acc>=1){D.acc--;fSpawn(pick(w[1]))}
- if(D.elite<FT.ELITE.length&&D.t>=FT.ELITE[D.elite]){D.elite++;fSpawn(FAREA[D.area].elite);fBanner('強敵が来た！ 図面を持っているかも',150,'n_boss')}
+ if(D.elite<FT.ELITE.length&&D.t>=FT.ELITE[D.elite]){const key=!!(D.stairs&&!D.stairs.open);D.elite++;const e=fSpawn(FAREA[D.area].elite);if(e&&key)e.key=true;fBanner(key?'強敵が来た！ 階段の鍵を持っている':'強敵が来た！',150,'n_boss')}
+ if(D.stairs&&!D.stairs.open&&D.elite>=FT.ELITE.length&&!D.foes.some(e=>e.key)&&D.t>(D.keyT||0)){D.keyT=D.t+20;const e=fSpawn(FAREA[D.area].elite);if(e){e.key=true;fBanner('鍵を持った強敵がまた来た！',150,'n_boss')}}
  if(D.chestN<FT.CHEST.length&&D.t>=FT.CHEST[D.chestN]){D.chestN++;const a=Math.random()*TAU;D.chests.push({x:D.x+Math.cos(a)*260,y:D.y+Math.sin(a)*260,open:false});fBanner('近くに資材の箱がある！',120)}
  if(D.join&&!D.join.shown&&D.t>=FT.JOIN){const a=Math.random()*TAU;Object.assign(D.join,{shown:true,x:D.x+Math.cos(a)*230,y:D.y+Math.sin(a)*230});fBanner(`だれかの気配がする…（${CHARS[D.join.id].name}）`,180,'n_join')}
  if(FLOORS[D.floor].boss&&!D.boss&&!D.bossDone&&!D.bossCalled&&D.t>=FT.BOSS){fBossCome();return}
- if(D.stairs&&!D.stairShown&&D.t>=FT.HINT){D.stairShown=true;fBanner(D.stairs.open?'階段の気配がする！ 矢印の方へ':'階段は見つけた。でも仲間の気配が気になる……',170,D.stairs.open?'n_floor':'n_join')}
+ if(D.stairs&&!D.stairShown&&D.t>=FT.HINT){D.stairShown=true;fBanner(D.stairs.open?'階段の気配がする！ 矢印の方へ':'階段に鍵がかかっている。強敵が鍵を持っているらしい',170,D.stairs.open?'n_floor':'n_join')}
  D.tt+=f/60;if(!D.boss){D.st+=f/60;if(D.st>=FT.RUST&&!D.rustMsg){D.rustMsg=1;fBanner('錆が濃くなってきた…… 敵がどんどん増える',170,'n_time')}}
  // 攻撃
  fAttacks(f);
@@ -2527,7 +2539,7 @@ function fUpdate(f){const D=FD;D.t+=f/60;
   const dx=D.x-e.x,dy=D.y-e.y,d=Math.hypot(dx,dy)||1,slow=D.zones.some(z=>(e.x-z.x)**2+(e.y-z.y)**2<z.r*z.r)?(FD.ab.slow?.35:.55):1;
   if(mode==='walk'){e.x+=(dx/d*e.spd*slow+e.kb[0])*f;e.y+=(dy/d*e.spd*slow+e.kb[1])*f}
   e.kb[0]*=.8;e.kb[1]*=.8;e.hit=Math.max(0,e.hit-f);e.oh=Math.max(0,e.oh-f);e.wob+=.1*f;
-  if(d<e.r+14&&D.inv<=0){D.hp-=FFOE[e.k].dmg*fCut();D.inv=30;tone(90,.12,'sawtooth',.06);D.shake=8;renderFHud()}}
+  if(d<e.r+14&&D.inv<=0){D.hp-=FFOE[e.k].dmg*(e.dm||1)*fCut();D.inv=30;tone(90,.12,'sawtooth',.06);D.shake=8;renderFHud()}}
  const fs=D.foes;for(let i=0;i<fs.length;i++){const a=fs[i];for(let j=i+1;j<Math.min(fs.length,i+12);j++){const b=fs[j],dx=b.x-a.x,dy=b.y-a.y,d2=dx*dx+dy*dy,m=a.r+b.r-6;if(d2<m*m&&d2>.01){const dd=Math.sqrt(d2),p=(m-dd)/2/dd,wa=a.boss?0:b.boss?2:1,wb=b.boss?0:a.boss?2:1;a.x-=dx*p*wa;a.y-=dy*p*wa;b.x+=dx*p*wb;b.y+=dy*p*wb}}}
  for(const e of D.foes)if(e.hp<=0)fKill(e);
  D.foes=D.foes.filter(e=>e.hp>0&&(e.boss||Math.hypot(e.x-D.x,e.y-D.y)<1600));
@@ -2538,7 +2550,7 @@ function fUpdate(f){const D=FD;D.t+=f/60;
  for(const it of D.items){const dx=D.x-it.x,dy=D.y-it.y,d=Math.hypot(dx,dy);if(d<R*.8||it.mag){it.mag=1;const v=Math.min(d,8*f);it.x+=dx/(d||1)*v;it.y+=dy/(d||1)*v}if(d<18){it.got=1;fGot(it)}}
  D.items=D.items.filter(i=>!i.got);
  for(const c of D.chests)if(!c.open&&(c.x-D.x)**2+(c.y-D.y)**2<40*40)fOpenChest(c);
- if(D.stairs){const sd=(D.stairs.x-D.x)**2+(D.stairs.y-D.y)**2;if(sd<46*46){if(D.stairs.open){fStairs();return}else if(!D.lockMsg){D.lockMsg=150;fBanner('仲間の気配のところへ行ってから登ろう',150,'n_unlock')}}if(D.lockMsg)D.lockMsg=Math.max(0,D.lockMsg-f)}
+ if(D.stairs){const sd=(D.stairs.x-D.x)**2+(D.stairs.y-D.y)**2;if(sd<46*46){if(D.stairs.open){fStairs();return}else if(!D.lockMsg){D.lockMsg=150;fBanner('鍵がかかっている。強敵をたおして鍵を手に入れよう',150,'n_unlock')}}if(D.lockMsg)D.lockMsg=Math.max(0,D.lockMsg-f)}
  if(D.join&&D.join.shown){D.join.cool=Math.max(0,D.join.cool-f);if(!D.join.cool&&(D.join.x-D.x)**2+(D.join.y-D.y)**2<44*44){fJoin();return}}
  D.pops.forEach(p=>p.t+=f);D.pops=D.pops.filter(p=>p.t<30);D.fx.forEach(p=>p.t+=f);D.fx=D.fx.filter(p=>p.t<16);
  D.shake=Math.max(0,D.shake-f);D.warn=Math.max(0,D.warn-f);
@@ -2656,11 +2668,11 @@ function fChoice(fl){return new Promise(res=>{let el=$('fNext');if(!el){el=docum
  $('fnGo').onclick=()=>{el.classList.remove('on');res(true)};$('fnHome').onclick=()=>{el.classList.remove('on');res(false)}})}
 /* 次の階へ：レベル・技・体力・素材はそのまま。階のものだけ入れかえる */
 async function fAdvance(nf){const D=FD,F=FLOORS[nf],k=F.area,newArea=k!==D.area;
- await say(`${UIMG('n_floor',40)} <b style="font-size:26px">${nf}F</b>　${F.n}<br><span style="font-size:13px">${LAYER_NAME[k]}${F.boss?'・'+UIMG('n_boss',16)+'ボスの階':''}</span><br><span style="font-size:13px">出る素材 ${matIcons(nf,22)}</span>`,1100);
+ await say(`${UIMG('n_floor',40)} <b style="font-size:26px">${nf}F</b>　${F.n}<br><span style="font-size:13px">${LAYER_NAME[k]}${F.boss?'・'+UIMG('n_boss',16)+'ボスの階':''}</span><br><span style="font-size:13px">出る素材 ${matIcons(nf,22)}</span><br><span style="font-size:13px;color:${teamPow()>=REC_POW[nf]?'#9be39b':'#ff8a8a'}">推奨戦力 ${REC_POW[nf]}（いま ${teamPow()}）</span>`,1100);
  if(FD!==D)return;
  if(newArea&&!G.flags['ai_'+k]){await talk(AREA_INTRO[k]);G.flags['ai_'+k]=1;save()}
  const comp=F.join,needJoin=comp&&comp!==G.hero&&!ownChar(comp),sa=Math.random()*TAU,sd=F.stair||0;
- Object.assign(D,{floor:nf,area:k,step:F.step,stairs:F.boss?null:{x:Math.cos(sa)*sd,y:Math.sin(sa)*sd,open:!needJoin},
+ Object.assign(D,{floor:nf,area:k,step:F.step,stairs:F.boss?null:{x:Math.cos(sa)*sd,y:Math.sin(sa)*sd,open:false},
   t:0,st:0,x:0,y:0,foes:[],shots:[],gems:[],items:[],pops:[],fx:[],zones:[],chests:[],stars:[],seeks:[],waves:[],acc:0,elite:0,chestN:0,
   join:needJoin?{id:comp,shown:false,x:0,y:0,cool:0}:null,boss:null,bossDone:false,bossCalled:false,stairShown:false,lockMsg:0,rustMsg:0,inv:90,climbing:false});
  D.hp=Math.min(D.maxhp,D.hp+Math.round(D.maxhp*.2));
@@ -2729,7 +2741,7 @@ function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make',UIMG('u_weap
  if(shopTab==='make'||shopTab==='dec')h+=wsListHTML(shopTab);
  if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。コインで買える。塔の資材の箱から見つかることもある（見つければ無料）。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
   h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${has?'　<span class="tag tg-ok">持っている</span>':''}<div class="note">${T.d}</div></div>
-   ${has?'':T.price?`<div style="text-align:right"><button class="btn" data-buy="${t}" ${(G.coin|0)<T.price?'disabled':''} style="width:auto;margin:0;padding:10px 14px;font-size:15px">${coinIc(18)}${T.price}で買う</button>${T.where?`<div class="note" style="max-width:130px;margin-top:4px">${T.where}でも見つかる</div>`:''}</div>`:''}</div></div>`}).join('')}
+   ${has?'':(G.floor|0)<(TOOL_GATE[t]||0)?`<div class="note" style="text-align:right;max-width:130px">🔒 ${TOOL_GATE[t]}階に着くと店に並ぶ</div>`:T.price?`<div style="text-align:right"><button class="btn" data-buy="${t}" ${(G.coin|0)<T.price?'disabled':''} style="width:auto;margin:0;padding:10px 14px;font-size:15px">${coinIc(18)}${T.price}で買う</button>${T.where?`<div class="note" style="max-width:130px;margin-top:4px">${T.where}でも見つかる</div>`:''}</div>`:''}</div></div>`}).join('')}
  if(shopTab==='mat'){h+=`<div class="note">素材は塔の中で、錆の魔物を倒したり資材の箱をあけたりして集める。</div>`+MAT_ORDER.map(k=>`<div class="itr">${MIC(k,40)}<div class="itn"><b>${MATS[k].n}</b><small>${MATS[k].d}</small></div><span class="itc ${G.mats[k]?'':'z'}">×${G.mats[k]}</span></div>`).join('')}
  $('shopBody').innerHTML=h;
  $('shopBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{shopTab=b.dataset.t;renderShop()});
@@ -2738,7 +2750,7 @@ function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make',UIMG('u_weap
  $('shopBody').querySelectorAll('[data-wss]').forEach(b=>b.onclick=()=>{WS.sort=b.dataset.wss;renderShop()});
  $('shopBody').querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>decodeBp(b.dataset.dec));
  $('shopBody').querySelectorAll('.bpgo').forEach(b=>b.onclick=()=>{shopTab='dec';renderShop()});
- $('shopBody').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{const t=b.dataset.buy,T=TOOLS[t];if(G.tools.includes(t)||(G.coin|0)<T.price)return;G.coin-=T.price;G.tools.push(t);save();tone(880,.15,'triangle',.1,1320);renderShop();say(`${MIC(t,30)} ${T.n}を買った！`,1000)})}
+ $('shopBody').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{const t=b.dataset.buy,T=TOOLS[t];if(G.tools.includes(t)||(G.coin|0)<T.price||(G.floor|0)<(TOOL_GATE[t]||0))return;G.coin-=T.price;G.tools.push(t);save();tone(880,.15,'triangle',.1,1320);renderShop();say(`${MIC(t,30)} ${T.n}を買った！`,1000)})}
 let crafting=false;
 async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)return;crafting=true;try{
  let r;
@@ -2777,15 +2789,16 @@ function openItems(){const row=(ic,n,cnt,d)=>`<div class="itr">${ic}<div class="
  $('sheet').classList.add('on')}
 function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイスターの塔を登る。階段を見つけると、そのまま上の階へ。ボスを倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。工房で武器・防具づくり、編成でパーティ、ガチャで仲間集め。'],
  [null,'説明','塔の中では、出撃キャラを指で動かす。攻撃は自動。はじめは出撃キャラの技だけ。'],
+ [null,'説明','階段には鍵がかかっている。その階の強敵が鍵を持っているので、たおしてから階段へ。上の階ほど敵が強い。出撃画面の「推奨戦力」とチームの攻撃をくらべよう。'],
  [null,'説明','攻撃は装備した武器で決まる。はじめは出撃キャラの専用武器の技だけ。レベルアップすると、パーティの仲間の技と、装備した汎用武器（2つまで）の技が NEW で出てくる。パーティ（5人）の仲間は、能力（パッシブ）で助けてくれる。'],
  [null,'説明','倒した錆や資材の箱から、素材と図面が手に入る。途中で帰っても全部持ち帰れるが、力つきると素材は半分になる。'],
  [null,'説明','工房では「素材＋工具＋図面」がそろうと加工できる。工具は工房で買うか、塔の中で見つける。なぞりの出来ばえで強さが決まる。']])}
 function signLines(){return [[null,'看板','↑ 古い工房（武器・防具づくり、工具）\n↓ 渦の門（マイスターの塔の入口。錆が出るので注意）'],[null,'看板',`塔の${G.floor|0}階まで突破。次は ${nextFloor()}階「${FLOORS[nextFloor()].n}」`]]}
 function openDest(){show('dest');const best=G.floor|0,pts=startPoints();
- $('destList').innerHTML=`<div class="note" style="margin-bottom:6px">階段を見つけると、そのまま上の階へ進む。ボスの階を倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。</div>`+
+ $('destList').innerHTML=`<div class="note" style="margin-bottom:6px">階段には鍵がかかっている。強敵をたおすと鍵が手に入り、そのまま上の階へ進める。ボスの階を倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。</div>`+
   [7,4,1].map(s=>{const F=FLOORS[s],open=pts.includes(s),bossF={1:3,4:6,7:TOP_FLOOR}[s],done=best>=bossF,reach=Math.min(best,bossF);
    const st=!open?`${s-1}階のボスを倒すと開く`:done?`${UIMG('n_boss',16)}ボス撃破`:reach>=s?`${reach}Fまで到達`:'まだ入っていない';
-   return `<button class="flr ${open&&s===bestStart()?'next':''} ${open?'':'lock'}" data-f="${s}" ${open?'':'disabled'}><span class="fn">${s}F</span><span class="ft"><b>${LAYER_NAME[F.area]}　${s}F〜${bossF}F</b><small>${st}</small><span class="dmats">${Array.from({length:bossF-s+1},(_,i)=>s+i).map(f=>`<i>${f}F ${matIcons(f,15)}</i>`).join('')}</span></span><span class="fs">${open?UIMG(done?'n_floor':'n_unlock',26)+'出撃':UIMG('n_unlock',26)+'未'}</span></button>`}).join('')+
+   return `<button class="flr ${open&&s===bestStart()?'next':''} ${open?'':'lock'}" data-f="${s}" ${open?'':'disabled'}><span class="fn">${s}F</span><span class="ft"><b>${LAYER_NAME[F.area]}　${s}F〜${bossF}F</b><small>${st}</small><span class="drec ${teamPow()>=REC_POW[bossF]?'ok':teamPow()>=REC_POW[s]?'mid':'ng'}">推奨戦力 ${REC_POW[s]}〜${REC_POW[bossF]}　いま ${teamPow()}</span><span class="dmats">${Array.from({length:bossF-s+1},(_,i)=>s+i).map(f=>`<i>${f}F ${matIcons(f,15)}</i>`).join('')}</span></span><span class="fs">${open?UIMG(done?'n_floor':'n_unlock',26)+'出撃':UIMG('n_unlock',26)+'未'}</span></button>`}).join('')+
   `<div class="note" style="text-align:center;margin-top:8px">最高到達：${best}F　／　${TOP_FLOOR}F</div>`;
  $('destList').querySelectorAll('[data-f]:not([disabled])').forEach(b=>b.onclick=()=>goFloor(+b.dataset.f))}
 async function goFloor(f){audio();if(TW)TW.busy=true;const F=FLOORS[f],k=F.area;G.area=k;save();await say(`${IC('gate',28)} 塔の${f}階へ……`,700);
