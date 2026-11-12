@@ -982,6 +982,11 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .sgc{width:100%;box-sizing:border-box;min-height:64px;font:12px monospace;background:rgba(0,0,0,.35);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px;word-break:break-all}
 #sgImp{margin:0}
 .frl{margin-left:6px;padding:0 6px;border-radius:8px;background:#7a2a12;color:#ffcf9a;font-size:12px;font-weight:700}
+/* ホーム上部のコイン（素材3枠の絵の上にかぶせる） */
+.gcoin{position:absolute;left:43.2%;right:1%;top:10%;bottom:10%;display:flex;align-items:center;gap:6px;padding:0 10px;background:linear-gradient(90deg,#141a24,#1b2230);border:1px solid rgba(255,140,60,.55);border-radius:4px;box-shadow:inset 0 0 6px rgba(0,0,0,.6)}
+.gcoin img,.gcoin .ic{width:20px!important;height:20px!important;flex:none}
+.gcoin small{font-size:11px;color:#c9b79a;letter-spacing:.05em}
+.gcoin b{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-weight:600;font-size:15px;color:#ffd76a}
 
 </style>
 </head>
@@ -2937,7 +2942,7 @@ function openItems(){const row=(ic,n,cnt,d)=>`<div class="itr">${ic}<div class="
   `<div class="note" style="margin-top:6px"><b>図面</b>　${G.bps.map(b=>'「'+RECIPES[b].n+'」').join('')}</div>`+
   `<button class="btn" style="margin-top:10px" onclick="closeSheet()">とじる</button>`;
  $('sheetB').scrollTop=0;$('sheet').classList.add('on')}
-function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイスターの塔を登る。階段を見つけると、そのまま上の階へ。ボスを倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。工房で武器・防具づくり、編成でパーティ、ガチャで仲間集め。'],
+function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイスターの塔を登る。階段を見つけると、そのまま上の階へ。ボスを倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。さらに25秒ごとに「錆Lv」が上がり、敵のHPと攻撃がどんどん強くなる（低い階での長居は危険）。工房で武器・防具づくり、編成でパーティ、ガチャで仲間集め。'],
  [null,'説明','塔の中では、出撃キャラを指で動かす。攻撃は自動。はじめは出撃キャラの技だけ。'],
  [null,'説明','各層で、お助け仲間（下層：ギアフォックス、中層：ドド先輩、上層：ホー博士、試作の層：チュータ、発電の層：ボルトゴリラ、空の層：セブンティーン→ツキヨ）に会える。その挑戦の間だけ一緒に戦ってくれる。パーティにいるときは技が強化される。'],
  [null,'説明','2つの技をどちらも最大Lvにすると進化できる（例：連射＋追尾）。技が最大Lvで、その技の武器がSランク以上なら覚醒できる。どちらか一方だけ。磁石を拾うと、まわりの経験値を全部集める。'],
@@ -2947,7 +2952,7 @@ function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイ�
  [null,'説明','工房では「素材＋工具＋図面」がそろうと加工できる。工具は工房で買うか、塔の中で見つける。なぞりの出来ばえで強さが決まる。']])}
 function signLines(){return [[null,'看板','↑ 古い工房（武器・防具づくり、工具）\n↓ 渦の門（マイスターの塔の入口。錆が出るので注意）'],[null,'看板',`塔の${G.floor|0}階まで突破。次は ${nextFloor()}階「${FLOORS[nextFloor()].n}」`]]}
 function openDest(){show('dest');const best=G.floor|0,pts=startPoints();
- $('destList').innerHTML=`<div class="note" style="margin-bottom:6px">階段には鍵がかかっている。強敵をたおすと鍵が手に入り、そのまま上の階へ進める。ボスの階を倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。</div>`+
+ $('destList').innerHTML=`<div class="note" style="margin-bottom:6px">階段には鍵がかかっている。強敵をたおすと鍵が手に入り、そのまま上の階へ進める。ボスの階を倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。さらに25秒ごとに「錆Lv」が上がり、敵のHPと攻撃がどんどん強くなる（低い階での長居は危険）。</div>`+
   [17,14,11,7,4,1].map(s=>{const F=FLOORS[s],open=pts.includes(s),bossF={1:3,4:6,7:10,11:13,14:16,17:20}[s],done=best>=bossF,reach=Math.min(best,bossF);
    const st=!open?`${s-1}階のボスを倒すと開く`:done?`${UIMG('n_boss',16)}ボス撃破`:reach>=s?`${reach}Fまで到達`:'まだ入っていない';
    return `<button class="flr ${open&&s===bestStart()?'next':''} ${open?'':'lock'}" data-f="${s}" ${open?'':'disabled'}><span class="fn">${s}F</span><span class="ft"><b>${LAYER_NAME[F.area]}　${s}F〜${bossF}F</b><small>${st}</small><span class="drec ${teamPow()>=REC_POW[bossF]?'ok':teamPow()>=REC_POW[s]?'mid':'ng'}">推奨戦力 ${REC_POW[s]}〜${REC_POW[bossF]}　いま ${teamPow()}</span><span class="dmats">${Array.from({length:bossF-s+1},(_,i)=>s+i).map(f=>`<i>${f}F ${matIcons(f,15)}</i>`).join('')}</span></span><span class="fs">${open?UIMG(done?'n_floor':'n_unlock',26)+'出撃':UIMG('n_unlock',26)+'未'}</span></button>`}).join('')+
@@ -2998,7 +3003,8 @@ function nextGoal(){const k=AREA_ORDER.find(a=>areaOpen(a)&&!areaDone(a));
  if((G.floor|0)<TOP_FLOOR){const f=nextFloor();return{t:'次の目標',m:`塔の${f}階「${FLOORS[f].n}」を突破する`,ic:IC('node_boss',40),go:'go'}}
  return{t:'第1章クリア',m:'第2章「審判の塔」は次のアップデートで公開。素材を集めて、最強の装備を作ろう',ic:IC('clear',40),go:'shop'}}
 function isEquipped(id){const R=RECIPES[id];if(R.kind==='armor')return G.arm[R.slot]&&G.arm[R.slot].rid===id;const m=G.party.find(x=>x.id===R.who);return m&&m.weapon&&m.weapon.rid===id}
-function resHTML(){return ['scrap','gear','core'].map((k,i)=>`<span class="gslot s${i}">${MIC(k,20)}<b>${G.mats[k]}</b></span>`).join('')}
+/* ホーム上部：コインの所持数（素材の数は出さない） */
+function resHTML(){return `<span class="gcoin">${UIMG('coin',20)}<small>コイン</small><b>${(G.coin|0).toLocaleString()}</b></span>`}
 function openHome(){if(TW)TW.busy=false;G.where={s:'town'};save();show('home');
  const L=G.party.find(m=>m.id===G.lead)||G.party[0],done=AREA_ORDER.filter(areaDone).length;
  $('hName').textContent='第1章　夜の工房に灯る';$('hRank').textContent=`${G.floor|0}F / ${TOP_FLOOR}F`;$('hRankI').style.width=100*(G.floor|0)/TOP_FLOOR+'%';
@@ -4614,7 +4620,7 @@ function bkNag(){if(!G)return;const now=Date.now();if(now-(OPT.bkF||now)<7*86400
  $('ngF').onclick=()=>{closeSheet();saveFile()};$('ngX').onclick=closeSheet;$('sheet').classList.add('on')}
 {const _oh=openHome;openHome=function(){const r=_oh.apply(this,arguments);setTimeout(bkNag,700);return r}}
 
-const BUILD='11/13 07:46';
+const BUILD='11/13 08:33';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
