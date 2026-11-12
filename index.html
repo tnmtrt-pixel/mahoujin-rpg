@@ -842,6 +842,20 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .hfc.em{display:flex;flex-direction:column;align-items:center;justify-content:center;border-style:dashed;background:#0c122288;color:var(--sm)}.hfc.em span{font-size:22px}.hfc.em small{font-size:10px}
 .hfc:active{filter:brightness(1.25)}
 #hLead:empty{display:none}
+/* ガチャ：バナーだけ */
+.gavol{display:flex;gap:4px;margin:6px 0}.gavol button{flex:1;padding:7px 0;background:none;border:1px solid var(--sl);color:var(--sm);font-weight:800;font-family:'Dela Gothic One',sans-serif;letter-spacing:.08em}
+.gavol button.on{border-color:var(--so);color:var(--so);background:#ff7a2f14}.gavol button.soon{opacity:.55}
+.gaban.soon{aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(135deg,#121a2c 0 14px,#0e1524 14px 28px);border:1px dashed var(--sl)}
+.gasoon{text-align:center}.gasoon b{display:block;font-family:'Dela Gothic One',sans-serif;font-size:34px;color:#ffffff30;letter-spacing:.1em}.gasoon span{color:var(--sm);font-size:14px;letter-spacing:.3em}
+.galink{display:flex;gap:6px;margin:8px 0}.galink button{flex:1;background:none;border:1px solid #ffffff30;color:var(--sw);font-size:12px;padding:7px 0}
+/* 図鑑：タブ */
+.zktab{display:flex;gap:3px;margin:4px 0 2px}.zktab button{flex:1;background:none;border:none;border-bottom:2px solid var(--sl);color:var(--sm);font-weight:800;font-size:14px;padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.zktab button small{font-size:10px;font-weight:600;opacity:.8}.zktab button.on{color:var(--so);border-bottom-color:var(--so)}
+.zkown.on{border-color:var(--so);color:var(--so)}
+.zkc{position:relative;overflow:hidden;aspect-ratio:3/4;padding:0;border:1px solid #ffffff26;background:linear-gradient(160deg,#22304f,#0c1222 70%);color:var(--sw);clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%)}
+.zkc img{position:absolute;left:50%;top:5%;height:115%;transform:translateX(-50%);max-width:none}
+.zkc.no img{filter:brightness(0) opacity(.45)}.zkc.no .hfb b{color:var(--sm)}
+.zkno{position:absolute;right:4px;top:3px;z-index:2;font-size:9px;color:var(--sm);font-family:ui-monospace,Menlo,monospace}
 
 </style>
 </head>
@@ -2920,7 +2934,7 @@ function slotAssign(k,id){if(k==null||!id)return;const x=G.party[k];if(x&&x.id==
  if(k===0)say(`${CHARS[id].name}がリーダー（出撃キャラ）になった`,900)}
 
 /* ---------- 図鑑（図面・工具・素材） ---------- */
-function openZukan(){show('zukan');
+function _oldZukan(){show('zukan');
  $('zkBody').innerHTML=`<div class="zkh">図面 ${G.bps.length}/${RECIPE_ORDER.length}</div><div class="zkg">${RECIPE_ORDER.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);
   return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R):LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}</div>
  <div class="zkh">工具 ${G.tools.length}/${TOOL_ORDER.length}</div><div class="zkg">${TOOL_ORDER.map(t=>{const has=G.tools.includes(t);return `<div class="zki ${has?'':'no'}">${MIC(t,40)}<b>${TOOLS[t].n}</b><small>${has?'持っている':TOOLS[t].price?'工房で買える':TOOLS[t].where}</small></div>`}).join('')}</div>
@@ -2983,12 +2997,18 @@ function pullOnce(){const id=pick(GACHA_POOL),star=rollStar(),m=owned(id);
 function doGacha(n){const cost=n>1?GACHA10_COST:GACHA_COST;if(G.coin<cost){say('コインが足りない<br><span style="font-size:14px">塔の階を突破するとコインがもらえる</span>',1300);return}
  G.coin-=cost;const res=[];for(let i=0;i<n;i++)res.push(pullOnce());save();showGachaResult(res);renderGacha()}
 function openGacha(){show('gacha');renderGacha()}
-function renderGacha(){
+/* バナーは今後ふえる（vol.2、vol.3…）。soon:true はまだ引けない */
+const GACHA_BANNERS=[{id:'v1',vol:1,n:'塔のなかまガチャ',img:'img/gacha-v1.webp',pool:GACHA_POOL},{id:'v2',vol:2,n:'近日登場',soon:true},{id:'v3',vol:3,n:'近日登場',soon:true}];
+let gaBan=0;
+function renderGacha(){const B=GACHA_BANNERS[gaBan];
  $('gaBody').innerHTML=`<div class="gacoin">${coinIc(22)}<b>${G.coin}</b><small>コイン</small></div>
- <div class="gaban"><img src="img/gacha-v1.webp" alt=""><span>塔のなかまガチャ</span></div>
- <div class="gapool">${GACHA_POOL.map(id=>{const m=owned(id);return `<div class="gpc ${m?'':'no'}"><img src="${CHARS[id].img}" alt=""><b>${CHARS[id].name}</b><small>${m?starTxt(m.star||1):'まだいない'}</small></div>`}).join('')}</div>
- <div class="garate">出る★：★3 ${STAR_RATE[0][1]*100}%　★2 ${STAR_RATE[1][1]*100}%　★1 ${STAR_RATE[2][1]*100}%<br>同じキャラが出ると<b>かけら</b>（★1＝1、★2＝3、★3＝10）。かけらで★を上げると、パーティに入れたときの能力が開く（★5で覚醒）。<br>コインは塔の階を突破するともらえる（はじめて突破：${COIN_FIRST}、ボスの階：${COIN_FIRST_BOSS}、2回目から：${COIN_AGAIN}）。</div>
- <div class="gabtns"><button class="gab" onclick="doGacha(1)" ${G.coin<GACHA_COST?'disabled':''}><b>1回</b><small>${coinIc(16)} ${GACHA_COST}</small></button><button class="gab ten" onclick="doGacha(11)" ${G.coin<GACHA10_COST?'disabled':''}><b>11回</b><small>${coinIc(16)} ${GACHA10_COST}</small></button></div>`}
+ <div class="gavol">${GACHA_BANNERS.map((b,i)=>`<button class="${i===gaBan?'on':''} ${b.soon?'soon':''}" data-gb="${i}">vol.${b.vol}</button>`).join('')}</div>
+ <div class="gaban ${B.soon?'soon':''}">${B.soon?`<div class="gasoon"><b>vol.${B.vol}</b><span>近日登場</span></div>`:`<img src="${B.img}" alt=""><span>${B.n}　vol.${B.vol}</span>`}</div>
+ <div class="galink"><button data-ga="rate">提供割合</button><button data-ga="list">出るキャラ（図鑑）</button></div>
+ <div class="gabtns"><button class="gab" onclick="doGacha(1)" ${B.soon||G.coin<GACHA_COST?'disabled':''}><b>1回</b><small>${coinIc(16)} ${GACHA_COST}</small></button><button class="gab ten" onclick="doGacha(11)" ${B.soon||G.coin<GACHA10_COST?'disabled':''}><b>11回</b><small>${coinIc(16)} ${GACHA10_COST}</small></button></div>`;
+ $('gaBody').querySelectorAll('[data-gb]').forEach(b=>b.onclick=()=>{gaBan=+b.dataset.gb;renderGacha()});
+ $('gaBody').querySelector('[data-ga=list]').onclick=()=>{ZK.tab='char';goTab('zukan')};
+ $('gaBody').querySelector('[data-ga=rate]').onclick=()=>{$('gpBody').innerHTML=`<div class="gph">提供割合　vol.${B.vol}</div><div class="rdt"><div><span>★3</span><p>${STAR_RATE[0][1]*100}%</p></div><div><span>★2</span><p>${STAR_RATE[1][1]*100}%</p></div><div><span>★1</span><p>${STAR_RATE[2][1]*100}%</p></div><div><span>出るキャラ</span><p>${(B.pool||[]).map(id=>CHARS[id].name).join('・')}（どれも同じ確率）</p></div><div><span>かけら</span><p>同じキャラが出ると、かけら（★1＝1、★2＝3、★3＝10）。かけらで★を上げると能力が開く（★5で覚醒）</p></div><div><span>11回</span><p>10回分の値段（${GACHA10_COST}コイン）で11回引ける</p></div></div><div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;$('gpClose').onclick=()=>$('genPick').classList.remove('on');$('genPick').classList.add('on')}}
 function coinIc(s){return UIMG('coin',s)}
 function _oldCoinIc(s){return `<svg class="ic" viewBox="0 0 32 32" style="width:${s}px;height:${s}px;vertical-align:middle"><circle cx="16" cy="16" r="13" fill="#ff9a3a" stroke="#ffd7a8" stroke-width="2"/><circle cx="16" cy="16" r="8" fill="none" stroke="#7a3a00" stroke-width="2"/><path d="M16 9v14M12 12h8" stroke="#7a3a00" stroke-width="2"/></svg>`}
 function showGachaResult(res){const best=Math.max(...res.map(r=>r.star));
@@ -3252,6 +3272,39 @@ function openRecipe(id){const R=RECIPES[id],c=canMake(id),pr=procOf(R);
   <div class="gpf"><button class="btn ghost" id="gpClose">やめる</button><button class="btn gold" id="rdGo" ${c.ok?'':'disabled'}>つくる</button></div>`;
  $('gpClose').onclick=()=>$('genPick').classList.remove('on');
  $('rdGo').onclick=()=>{if(!canMake(id).ok)return;$('genPick').classList.remove('on');makeProduct(id)};
+ $('genPick').classList.add('on')}
+
+/* ===================== 図鑑：タブ（キャラ・図面・工具・素材）と並べかえ ===================== */
+const ZK={tab:'char',sort:{char:'no',bp:'kind',tool:'price',mat:'floor'},own:false};
+const ZK_TABS=[['char','キャラ'],['bp','図面'],['tool','工具'],['mat','素材']];
+const ZK_SORTS={char:[['no','番号'],['star','★'],['lv','Lv'],['type','技']],bp:[['kind','種類'],['proc','加工'],['floor','階']],tool:[['price','値段'],['have','持っている']],mat:[['floor','階'],['num','数']]};
+const CHAR_ALL=()=>[...new Set([...GACHA_POOL,...Object.keys(CHARS).filter(k=>ATK[k])])];
+function openZukan(){show('zukan');renderZukan()}
+function renderZukan(){const t=ZK.tab,so=ZK.sort[t],S=ZK_SORTS[t],nx=S[(S.findIndex(x=>x[0]===so)+1)%S.length][0];
+ const cnt={char:[CHAR_ALL().filter(owned).length,CHAR_ALL().length],bp:[G.bps.length,RECIPE_ORDER.length],tool:[G.tools.length,TOOL_ORDER.length],mat:[MAT_ORDER.filter(k=>G.mats[k]>0).length,MAT_ORDER.length]};
+ let h=`<div class="zktab">${ZK_TABS.map(([k,n])=>`<button class="${k===t?'on':''}" data-zt="${k}">${n}<small>${cnt[k][0]}/${cnt[k][1]}</small></button>`).join('')}</div>
+ <div class="wsbar"><button class="wssort zkown ${ZK.own?'on':''}" data-zo="1">${ZK.own?'持っているだけ':'すべて'}</button><span style="flex:1"></span><button class="wssort" data-zs="${nx}">並び：<b>${S.find(x=>x[0]===so)[1]}</b> ⇅</button></div><div class="zkg">`;
+ if(t==='char'){let ids=CHAR_ALL();if(ZK.own)ids=ids.filter(owned);const no=id=>CHAR_ALL().indexOf(id);
+  const key={no:id=>no(id),star:id=>-((owned(id)||{}).star||0),lv:id=>-((owned(id)||{}).lv||0),type:id=>ATK[id].type.charCodeAt(0)}[so];ids.sort((a,b)=>key(a)-key(b)||no(a)-no(b));
+  h+=ids.map(id=>{const m=owned(id),c=CHARS[id];return `<button class="zkc ${m?'':'no'}" data-zc="${id}"><img src="${c.img}" alt=""><span class="hft">${TIC(ATK[id].type,18)}</span><span class="zkno">No.${String(no(id)+1).padStart(2,'0')}</span><span class="hfb"><b>${c.name}</b><small>${m?`Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i>`:'まだいない'}</small></span></button>`}).join('')}
+ else if(t==='bp'){let ids=RECIPE_ORDER.slice();if(ZK.own)ids=ids.filter(id=>G.bps.includes(id));const fl={alley:1,factory:2,under:3};
+  const key={kind:id=>['weapon','gen','armor'].indexOf(RECIPES[id].kind),proc:id=>PROC_ORDER.indexOf(procOf(RECIPES[id])),floor:id=>fl[RECIPES[id].area]||RECIPES[id].tier}[so];ids.sort((a,b)=>key(a)-key(b)||RECIPES[a].tier-RECIPES[b].tier);
+  h+=ids.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R)+'・'+PROC_LBL[procOf(R)]:LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}
+ else if(t==='tool'){let ids=TOOL_ORDER.slice();if(ZK.own)ids=ids.filter(k=>G.tools.includes(k));const key={price:k=>TOOLS[k].price||0,have:k=>G.tools.includes(k)?0:1}[so];ids.sort((a,b)=>key(a)-key(b)||TOOL_ORDER.indexOf(a)-TOOL_ORDER.indexOf(b));
+  h+=ids.map(k=>{const has=G.tools.includes(k);return `<div class="zki ${has?'':'no'}">${MIC(k,40)}<b>${TOOLS[k].n}</b><small>${has?'持っている':TOOLS[k].price?`${UIMG('coin',12)}${TOOLS[k].price}`:TOOLS[k].where||''}</small></div>`}).join('')}
+ else{let ids=MAT_ORDER.slice();if(ZK.own)ids=ids.filter(k=>G.mats[k]>0);const f1=k=>{const f=Object.keys(FLOOR_MATS).find(f=>floorMats(+f).includes(k));return f?+f:99};
+  const key={floor:k=>f1(k),num:k=>-(G.mats[k]||0)}[so];ids.sort((a,b)=>key(a)-key(b)||MAT_ORDER.indexOf(a)-MAT_ORDER.indexOf(b));
+  h+=ids.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]||0}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}
+ h+='</div>';$('zkBody').innerHTML=h;
+ $('zkBody').querySelectorAll('[data-zt]').forEach(b=>b.onclick=()=>{ZK.tab=b.dataset.zt;renderZukan()});
+ $('zkBody').querySelector('[data-zs]').onclick=e=>{ZK.sort[t]=e.currentTarget.dataset.zs;renderZukan()};
+ $('zkBody').querySelector('[data-zo]').onclick=()=>{ZK.own=!ZK.own;renderZukan()};
+ $('zkBody').querySelectorAll('[data-zc]').forEach(b=>b.onclick=()=>zkChar(b.dataset.zc))}
+function zkChar(id){const c=CHARS[id],m=owned(id),A=ATK[id],ab=ABIL[id]||[],ban=GACHA_BANNERS.find(b=>b.pool&&b.pool.includes(id));
+ $('gpBody').innerHTML=`<div class="rdh"><img src="${c.img}" alt="" style="height:84px"><div><b>${c.name}</b><small>${m?`Lv${m.lv}　${'★'.repeat(m.star||1)}　かけら ${m.shard||0}`:'まだいない'}</small></div></div>
+  <div class="rdt"><div><span>技</span><p>${TIC(A.type,18)}${A.n}（${A.type}）<br>${A.d[0]}</p></div>${ab.map((x,i)=>`<div><span>${ABIL_RANK[i][0]}・★${ABIL_RANK[i][1]}</span><p>${x.d}</p></div>`).join('')}<div><span>入手</span><p>${ban?`ガチャ vol.${ban.vol}`:id===G.lead||id==='wolf'?'はじめからいる':'—'}</p></div></div>
+  <div class="gpf">${m?`<button class="btn ghost" id="zkGo">編成で見る</button>`:''}<button class="btn" id="gpClose">とじる</button></div>`;
+ $('gpClose').onclick=()=>$('genPick').classList.remove('on');{const g=$('zkGo');if(g)g.onclick=()=>{$('genPick').classList.remove('on');partySel=id;openParty()}}
  $('genPick').classList.add('on')}
 
 /* ===================== 加工ミニゲーム：打つ（金床）・つなぐ（溶接機） ===================== */
