@@ -909,6 +909,8 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .fhelp{display:inline-flex;align-items:center;gap:3px;margin-right:6px;padding:1px 6px 1px 1px;background:#ffc94a22;border:1px solid #ffc94a88;color:#ffd25a;font-size:11px;font-weight:800}
 .fhelp img{width:20px;height:20px;object-fit:cover;object-position:50% 0}
 .pgd{margin:6px 0 8px;padding-left:22px;font-size:15px;line-height:1.7}.pgd li{margin-bottom:4px}
+.prsign{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 0 2px}.prsign b{font-family:"Dela Gothic One",sans-serif;font-size:22px;letter-spacing:.06em}.fpick.evo .lvt .ic{vertical-align:-3px}
+.fpick.evo .lvt{white-space:nowrap;display:inline-flex;align-items:center;gap:2px}
 
 </style>
 </head>
@@ -945,7 +947,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 <div id="gres" onclick="if(event.target===this)closeGacha()"><div class="grin"><div id="grCards"></div><button class="gab ok" onclick="closeGacha()"><b>OK</b></button></div></div>
 <section id="grind" class="scr"><div class="gh"><b id="gTitle"></b><small id="gSub"></small></div><div class="gst"><span id="gTime"></span><span id="gMatch"></span></div><canvas id="gcv"></canvas><div id="gWarn"></div><div class="grot"><button id="gRotL">⟲ 左に回す</button><button id="gRotR">右に回す ⟳</button></div><button class="gab ten" id="gDone"><b>仕上げる</b></button></section>
 <section id="forge" class="scr"><div class="gh"><b id="fgTitle"></b><small id="fgSub"></small></div><div class="gst"><span id="fgInfo"></span></div><canvas id="fgcv"></canvas><div id="fgBar" class="fgbar"></div><button class="gab ten" id="fgDone"><b>仕上げる</b></button></section>
-<section id="practice" class="scr"><div class="hd"><h2>加工ミニゲーム道場</h2></div><div id="prBody"></div></section>
+<section id="practice" class="scr"><div id="prBody"></div></section>
 <section id="zukan" class="scr"><div class="hd"><h2>図鑑</h2></div><div id="zkBody"></div></section>
 <nav id="tabs">
  <button class="tab" data-s="shop" onclick="goTab('shop')"><img class="tic" src="img/ui/tab_shop.webp" alt=""><span>工房</span></button>
@@ -3294,7 +3296,7 @@ function wsListHTML(tab){const dec=tab==='dec';
  const nx=WS_SORT[(WS_SORT.findIndex(x=>x[0]===WS.sort)+1)%WS_SORT.length][0];
  let h=`<div class="wsbar"><div class="wsch">${WS_KIND.map(([k,n])=>`<button class="${WS.kind===k?'on':''}" data-wsk="${k}">${n}</button>`).join('')}</div>
   <button class="wssort" data-wss="${nx}">並び：<b>${WS_SORT.find(x=>x[0]===WS.sort)[1]}</b> ⇅</button></div>`;
- if(!dec)h+=`<button class="prgo" onclick="openPractice()">${MIC('file',18)} 加工ミニゲーム道場で練習する　→</button>`;
+ if(!dec)h+=`<button class="prgo" onclick="openPractice()">${UIMG('u_dojo',22)} 加工ミニゲーム道場で練習する　→</button>`;
  if(!dec&&(G.bpRaw||[]).length)h+=`<button class="bpgo" data-t="dec">${MIC('bp',20)} 未解読の図面が ${G.bpRaw.length}枚　→ 解読へ</button>`;
  if(dec)h+=`<div class="wshint">図面をタップすると三面図の解読が始まる。正しい立体を選ぶと、つくれるようになる</div>`;
  
@@ -3545,7 +3547,7 @@ let prTier=1;
 const prBest=()=>{try{return JSON.parse(localStorage.getItem('mt2_practice')||'{}')}catch(_){return{}}};
 const prSave=b=>{try{localStorage.setItem('mt2_practice',JSON.stringify(b))}catch(_){}};
 function openPractice(){show('practice');const B=prBest();
- $('prBody').innerHTML=`<div class="note" style="margin:4px 0 8px">塔で使う加工ミニゲームを、ここで自由に練習できる。練習の結果はゲームの進みには関係しない。</div>
+ $('prBody').innerHTML=`<div class="prsign">${UIMG('u_dojo',64)}<b>加工ミニゲーム道場</b></div><div class="note" style="margin:4px 0 8px">塔で使う加工ミニゲームを、ここで自由に練習できる。練習の結果はゲームの進みには関係しない。</div>
  <div class="wsch prt">${[1,2,3].map(t=>`<button class="${prTier===t?'on':''}" data-pt="${t}">${KANJI_TIER[t]}（${['やさしい','ふつう','むずかしい'][t-1]}）</button>`).join('')}</div>
  <div class="prg">${PRACTICE_LIST.map(k=>{const b=B[k+prTier];return `<button class="prc" data-pk="${k}">${MIC(PROC_TOOL[k],40)}<span class="prn"><b>${PROC_LBL[k]}</b><i>${b!=null?`ベスト ${b}点 ${RKIC(craftRank(b,1),18)}`:'まだ'}</i></span></button>`}).join('')}</div>
  <div class="gpf" style="margin-top:10px"><button class="btn ghost" id="prBack">${(typeof G!=='undefined'&&G)?'工房へ':'タイトルへ'}</button></div>`;
@@ -3894,10 +3896,10 @@ Object.assign(MINI,{file:{f:runFile,t:'やすりがけ',n:'やすり'},drill:{f:
 /* ===================== お助け仲間・階ごとの一言・技の進化と覚醒・磁石 ===================== */
 
 /* ---------- 磁石：拾うと、画面のまわりの経験値を全部集める ---------- */
-UI_IC.magnet='p_mag';
+UI_IC.magnet='i_magnet';
 const MAGNET_RATE={normal:.004,elite:.35};
 {const _k=fKill;fKill=function(e){_k(e);if(!FD)return;const r=e.boss?1:e.big?MAGNET_RATE.elite:MAGNET_RATE.normal;if(Math.random()<r)FD.items.push({x:e.x+12,y:e.y-12,k:'magnet'})}}
-{const _g=fGot;fGot=function(it){if(it.k==='magnet'){FD.gems.forEach(g=>g.mag=1);fBanner('磁石！ まわりの経験値を全部集める',120,'p_mag');tone(660,.2,'triangle',.08,1320);return}return _g(it)}}
+{const _g=fGot;fGot=function(it){if(it.k==='magnet'){FD.gems.forEach(g=>g.mag=1);fBanner('磁石！ まわりの経験値を全部集める',120,'i_magnet');tone(660,.2,'triangle',.08,1320);return}return _g(it)}}
 
 /* ---------- お助け仲間：層ごとに1人。その挑戦の間だけ一緒に戦う。パーティにいれば強化 ---------- */
 const HELPER={alley:'fox',factory:'dodo',under:'owl'};
@@ -3907,9 +3909,9 @@ function helperSetup(){if(!FD)return;FD.helped=FD.helped||{};const id=HELPER[FD.
  try{const first=!G.flags['hp_'+id];await talk(first?(JOIN_TALK[id]||[]):[[id,nm,HELPER_AGAIN[id]]]);if(first){G.flags['hp_'+id]=1;save()}
   FD.helped[FD.area]=true;FD.join=null;
   if(G.party.some(m=>m.id===id)||FD.atk[id]!=null){FD.atk[id]=Math.min(ATK_MAX,(FD.atk[id]||0)+2);FD.hboost=FD.hboost||{};FD.hboost[id]=1.2;
-   await say(`${UIMG('n_join',40)} <span class="nw">${nm}が</span><span class="nw">力を貸してくれた！</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n} Lv+2・威力1.2倍（この挑戦の間）</span>`,1900)}
+   await say(`${UIMG('u_help',44)} <span class="nw">${nm}が</span><span class="nw">力を貸してくれた！</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n} Lv+2・威力1.2倍（この挑戦の間）</span>`,1900)}
   else{const L=findOwn(G.lead),m=newMember(id,1);m.lv=(L&&L.lv)||1;FD.helperMs=FD.helperMs||{};FD.helperMs[id]=m;FD.atk[id]=2;
-   await say(`${UIMG('n_join',40)} <span class="nw">お助け仲間！</span><br><span class="nw">${nm}が一緒に戦う</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n}（Lv2）が加わった。この挑戦の間だけ</span>`,2000)}}
+   await say(`${UIMG('u_help',44)} <span class="nw">お助け仲間！</span><br><span class="nw">${nm}が一緒に戦う</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n}（Lv2）が加わった。この挑戦の間だけ</span>`,2000)}}
  finally{show('field');resizeField();renderFHud();FD.paused=false;fLast=0;if(!fRaf)fRaf=requestAnimationFrame(fLoop)}}}
 
 /* ---------- 階ごとの一言：入口・鍵を手に入れたとき・ボスの前（2回目から） ---------- */
@@ -3934,9 +3936,9 @@ function wRank(id){if(FD.helperMs&&FD.helperMs[id])return null;const g=id!==G.le
 function extraOpts(){const o=[];FD.evo=FD.evo||{};FD.awk=FD.awk||{};const mx=id=>(FD.atk[id]||0)>=ATK_MAX;
  EVO.forEach(p=>{if(!FD.evo[p[0]]&&mx(p[0])&&mx(p[1])&&!FD.awk[p[0]]&&!FD.awk[p[1]])o.push('e:'+p[0])});
  Object.keys(FD.atk).forEach(id=>{if(mx(id)&&!FD.awk[id]&&!evoOn(id)&&['S','SS'].includes(wRank(id)))o.push('w:'+id)});return o}
-function evoCardHTML(t,k){if(t==='e'){const p=EVO.find(x=>x[0]===k);return `<button class="fpick evo" data-k="e:${k}"><span class="fpe"><img src="${CHARS[p[0]].img}" alt=""><img src="${CHARS[p[1]].img}" alt=""></span><span><b>進化！ ${p[2]}</b><small>${ATK[p[0]].type}＋${ATK[p[1]].type}：${p[3]}。2つとも威力1.3倍</small></span><span class="lvt">進化</span></button>`}
- return `<button class="fpick evo awk" data-k="w:${k}"><span class="fpi"><img src="${CHARS[k].img}" alt="">${TIC(ATK[k].type,26)}</span><span><b>覚醒！ ${ATK[k].n}</b><small>武器のランク${wRank(k)}で覚醒。威力1.5倍</small></span><span class="lvt">覚醒</span></button>`}
-function evoPick(t,k){FD.evo=FD.evo||{};FD.awk=FD.awk||{};if(t==='e'){FD.evo[k]=true;const p=EVO.find(x=>x[0]===k);fBanner(`進化！「${p[2]}」`,170,'n_unlock')}else{FD.awk[k]=true;fBanner(`覚醒！「${ATK[k].n}」`,170,'n_unlock')}tone(880,.3,'triangle',.1,1760)}
+function evoCardHTML(t,k){if(t==='e'){const p=EVO.find(x=>x[0]===k);return `<button class="fpick evo" data-k="e:${k}">${UIMG('ev_'+k,48)}<span><b>進化！ ${p[2]}</b><small>${ATK[p[0]].type}＋${ATK[p[1]].type}：${p[3]}。2つとも威力1.3倍</small></span><span class="lvt">${UIMG('u_evo',18)}進化</span></button>`}
+ return `<button class="fpick evo awk" data-k="w:${k}"><span class="fpi"><img src="${CHARS[k].img}" alt="">${TIC(ATK[k].type,26)}</span><span><b>覚醒！ ${ATK[k].n}</b><small>武器のランク${wRank(k)}で覚醒。威力1.5倍</small></span><span class="lvt">${UIMG('u_awk',18)}覚醒</span></button>`}
+function evoPick(t,k){FD.evo=FD.evo||{};FD.awk=FD.awk||{};if(t==='e'){FD.evo[k]=true;const p=EVO.find(x=>x[0]===k);fBanner(`進化！「${p[2]}」`,170,'ev_'+k)}else{FD.awk[k]=true;fBanner(`覚醒！「${ATK[k].n}」`,170,'u_awk')}tone(880,.3,'triangle',.1,1760)}
 /* 合体の動き（進化したときだけ） */
 {const _fa=fAttacks;fAttacks=function(f){const c=FD.cd,b={...c};_fa(f);const E=FD.evo;if(!E)return;const fired=id=>c[id]!=null&&b[id]!=null&&c[id]>b[id];
  if(E.wolf)FD.shots.forEach(s=>{const t=nearestFoes(1,s.x,s.y,260)[0];if(!t)return;const sp=Math.hypot(s.vx,s.vy)||7,ca=Math.atan2(s.vy,s.vx);let d=Math.atan2(t.y-s.y,t.x-s.x)-ca;d=Math.atan2(Math.sin(d),Math.cos(d));const na=ca+d*Math.min(1,.15*f);s.vx=Math.cos(na)*sp;s.vy=Math.sin(na)*sp});
@@ -3964,7 +3966,7 @@ function fDrawExtra(g,D){const t=D.t;
  if(D.evo&&D.evo.wolf){g.save();g.fillStyle='#ffd25a';for(const s of D.shots){g.globalAlpha=.5;g.beginPath();g.arc(s.x-s.vx*1.5,s.y-s.vy*1.5,4,0,TAU);g.fill();g.globalAlpha=.25;g.beginPath();g.arc(s.x-s.vx*3,s.y-s.vy*3,3,0,TAU);g.fill()}g.restore()}}
 /* お助け仲間が今いること：拾った物の列の前に顔 */
 {const _r=renderFHud;renderFHud=function(){_r();if(!FD)return;const ids=[...Object.keys(FD.helperMs||{}),...Object.keys(FD.hboost||{})];if(!ids.length)return;
- const h=ids.map(id=>`<span class="fhelp"><img src="${CHARS[id].img}" alt="">${FD.hboost&&FD.hboost[id]?'強化':'お助け'}</span>`).join('');$('fLoot').insertAdjacentHTML('afterbegin',h)}}
+ const h=ids.map(id=>`<span class="fhelp">${UIMG('u_help',18)}<img src="${CHARS[id].img}" alt="">${FD.hboost&&FD.hboost[id]?'強化':'お助け'}</span>`).join('');$('fLoot').insertAdjacentHTML('afterbegin',h)}}
 
 /* はじめての加工の案内（本編で、その加工を初めてするときだけ） */
 const PROC_GUIDE={
@@ -3980,7 +3982,7 @@ const PROC_GUIDE={
  tap:['ハンドルを、指で円をえがくように回す','右に半回転すすめたら、左に1/4もどす','もどさずに回し続けると、タップが折れる']};
 function procGuide(pr){return new Promise(res=>{const st=PROC_GUIDE[pr];if(!st){res();return}
  $('gpBody').innerHTML=`<div class="rdh">${MIC(PROC_TOOL[pr],52)}<div><b>はじめての${PROC_LBL[pr]}</b><small>やり方</small></div></div><ol class="pgd">${st.map(x=>`<li>${x}</li>`).join('')}</ol>
-  <div class="note">道場（工房の「加工ミニゲーム道場」）で、いつでも練習できる</div><div class="gpf"><button class="btn gold" id="pgOk">わかった！ はじめる</button></div>`;
+  <div class="note">${UIMG('u_dojo',18)} 道場（工房の「加工ミニゲーム道場」）で、いつでも練習できる</div><div class="gpf"><button class="btn gold" id="pgOk">わかった！ はじめる</button></div>`;
  $('genPick').classList.add('on');$('pgOk').onclick=()=>{$('genPick').classList.remove('on');res()}})}
 {const _p=runProc;runProc=async function(R,pr,st){if(typeof G!=='undefined'&&G&&!G.flags['guide_'+pr]){await procGuide(pr);G.flags['guide_'+pr]=1;save()}return _p(R,pr,st)}}
 
