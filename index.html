@@ -2478,7 +2478,7 @@ function startFloor(fl){audio();const FLR=FLOORS[fl],k=FLR.area,A=FAREA[k];
  fBanner(`${fl}階　${FLR.n}　${FLR.boss?'ボスが待ちかまえている':'強敵から鍵をうばえ'}`,180,FLR.boss?'n_boss':'n_floor');
  if(FLR.ev==='mirror'&&!G.flags.selfRust)fMirror()}
 const startField=k=>startFloor({alley:1,factory:4,under:7}[k]||1);
-async function fMirror(){FD.paused=true;fReleaseStick();try{await talk(SELF_RUST[G.hero]||[],EV_IMG.includes('rust_'+G.hero)?'ev_rust_'+G.hero:null);G.flags.selfRust=true;save();
+async function fMirror(){FD.paused=true;fReleaseStick();try{await talk(storyFit(SELF_RUST[G.hero]||[],SELF_RUST_FB),EV_IMG.includes('rust_'+G.hero)?'ev_rust_'+G.hero:null);G.flags.selfRust=true;save();
  await say(`${IC('shine',30)} 心の錆が消えた！<br><span style="font-size:14px">この先、ウルフの攻撃が少し強くなる</span>`,1600)}finally{if(FD){FD.paused=false;fLast=0;show('field');resizeField();if(!fRaf)fRaf=requestAnimationFrame(fLoop)}}}
 function fBanner(t,frames,ic){if(!FD)return;FD.warnTxt=t;FD.warnIc=ic||'';FD.warn=frames||120}
 const fSpd=()=>FCFG.SPD*(1+.1*FD.ps.spd)*(1+.08*armMul('feet'))*(1+Math.min(FD.ab.lvSpd||0,.01*(FD.lv-1)))*(1+(FD.ab.wspd||0));
@@ -2780,7 +2780,7 @@ function fEnd(why){const D=FD;if(!D||D.ending)return;D.ending=true;D.run=false;c
  const dead=why==='dead',got={};MAT_ORDER.forEach(k=>{const n=D.loot[k]||0;got[k]=dead?Math.floor(n/2):n;G.mats[k]+=got[k]});
  D.lootTools.forEach(t=>{if(!G.tools.includes(t))G.tools.push(t)});D.lootBps.forEach(b=>{if(!G.bps.includes(b)&&!G.bpRaw.includes(b))G.bpRaw.push(b)});
  G.where={s:'town'};G.town={x:TOWN_START[0],y:TOWN_START[1]};save();
- if(why==='ending'){FD=null;(async()=>{await talk(ENDING,'ev_ending1');G.flags.ch1=1;save();showEnding()})();return}
+ if(why==='ending'){FD=null;(async()=>{await talk(storyFit(ENDING,null,['gorilla']),'ev_ending1');G.flags.ch1=1;save();showEnding()})();return}
  const up=D.clearedTo>=D.startFl,fl=up&&why==='home'?D.clearedTo:D.floor,coin=D.coin,climbed=Math.max(0,D.clearedTo-D.startFl+1);
  const ttl={home:'突破！',retreat:'ホームへ帰った',dead:'力つきた'}[why];
  const sub=`${D.startFl}F から ${climbed?climbed+'階 登った':'出発'}`+(dead?'<br>素材は半分だけ持ち帰れた（図面と工具はそのまま）':'');
@@ -2930,7 +2930,7 @@ function nextGoal(){const k=AREA_ORDER.find(a=>areaOpen(a)&&!areaDone(a));
  if(mk)return{t:'工房',m:`「${RECIPES[mk].n}」を作れる！`,ic:RIC(mk,40),go:'shop'};
  const up=G.party.find(m=>m.lv<GROW_MAX&&canGrow(m));if(up)return{t:'編成',m:`${CHARS[up.id].name}をレベルアップできる`,ic:`<img src="${CHARS[up.id].img}" style="width:40px;height:40px;object-fit:contain">`,go:'party'};
  if((G.floor|0)<TOP_FLOOR){const f=nextFloor();return{t:'次の目標',m:`塔の${f}階「${FLOORS[f].n}」を突破する`,ic:IC('node_boss',40),go:'go'}}
- return{t:'第1章クリア',m:'素材を集めて、最強の装備を作ろう',ic:IC('clear',40),go:'shop'}}
+ return{t:'第1章 前編クリア',m:'後編（11F〜）は次のアップデートで公開。素材を集めて、最強の装備を作ろう',ic:IC('clear',40),go:'shop'}}
 function isEquipped(id){const R=RECIPES[id];if(R.kind==='armor')return G.arm[R.slot]&&G.arm[R.slot].rid===id;const m=G.party.find(x=>x.id===R.who);return m&&m.weapon&&m.weapon.rid===id}
 function resHTML(){return ['scrap','gear','core'].map((k,i)=>`<span class="gslot s${i}">${MIC(k,20)}<b>${G.mats[k]}</b></span>`).join('')}
 function openHome(){if(TW)TW.busy=false;G.where={s:'town'};save();show('home');
@@ -3930,7 +3930,7 @@ function helperSetup(){if(!FD)return;FD.helped=FD.helped||{};const id=HELPER[FD.
 /* ---------- 階ごとの一言：入口・鍵を手に入れたとき・ボスの前（2回目から） ---------- */
 const FLOOR_LINES={1:['錆のにおいが濃い……。気をつけて行こう','まずは強敵をさがして、階段の鍵だ'],2:['街灯が消えてる。足もとに注意だ','この先、敵がふえてくるぞ'],3:['廃材の山……ボスの気配がする','ここを越えれば下層はおしまいだ'],
  4:['ここから工場か。機械のにおいがする','中層の敵は硬い。装備は大丈夫か？'],5:['制御室……まだ動いてる機械があるな','強敵が鍵を持ってる。さがそう'],6:['クレーンが動いてる……来るぞ','中層のボスだ。気を引きしめよう'],
- 7:['図面の回廊……壁一面に図面がある','上層だ。ここからが本番だ'],8:['錆の巣……空気が重い','錆が濃い。長居は禁物だ'],9:['鏡の作業台……自分の姿が映ってる','あと少しで頂上だ'],10:['錆の炉……すべての錆はここから','行こう。この塔を終わらせる']};
+ 7:['図面の回廊……壁一面に図面がある','上層だ。ここからが本番だ'],8:['錆の巣……空気が重い','錆が濃い。長居は禁物だ'],9:['鏡の作業台……自分の姿が映ってる','あと少しで頂上だ'],10:['錆の炉……すべての錆はここから','行こう。この塔の灯りを取りもどす']};
 const KEY_LINES=['よし、鍵だ！ 上へ行こう','鍵を手に入れた！ 階段へ急ごう','これで階段が開くはず！'];
 const BOSS_LINES={alley:'あのボスだ……前より強くなってる。でも負けない！',factory:'あのクレーンだ。気を抜くなよ',under:'錆の炉の主……決着をつけよう'};
 function speaker(){const ps=G.party.filter(m=>m.id!==FD._lastSp),m=(ps.length?pick(ps):G.party[0]);FD._lastSp=m.id;return m.id}
@@ -4000,6 +4000,61 @@ function procGuide(pr){return new Promise(res=>{const st=PROC_GUIDE[pr];if(!st){
  $('genPick').classList.add('on');$('pgOk').onclick=()=>{$('genPick').classList.remove('on');res()}})}
 {const _p=runProc;runProc=async function(R,pr,st){if(typeof G!=='undefined'&&G&&!G.flags['guide_'+pr]){await procGuide(pr);G.flags['guide_'+pr]=1;save()}return _p(R,pr,st)}}
 
+/* ---------- 世界観に合わせた台本の書きかえ（塔は昔から街に立つ／地下はない／10Fは前編の終わり） ---------- */
+/* 仲間のセリフは、そのキャラが今のパーティにいるときだけ出す。だれもいなければ fb を足す */
+function storyFit(L,fb,keep){const sp=l=>l[0]?String(l[0]).split(':')[0]:null,inP=id=>id===G.hero||(keep||[]).includes(id)||G.party.some(m=>m.id===id);
+ const out=L.map(l=>!sp(l)||inP(sp(l))?l.slice(0,3):l[3]?[null,'',l[3]]:null).filter(Boolean);
+ if(fb&&!out.some(l=>sp(l)&&sp(l)!==G.hero))out.splice(Math.max(1,out.length-3),0,...fb);
+ return out}
+INTRO.wolf=[
+ [null,'','夜の工業の街「鉄灯（てっとう）」。\n街のまん中に、灯りの消えた古い塔が立っている。'],
+ [null,'','昔、塔のてっぺんにはいつも灯りがともり、それが街の名前になった。\n十年前にその灯りが消えてから、塔の扉は閉ざされたままだ。'],
+ ['wolf','ウルフ','……また停電かよ。国家資格の試験まで、あと一週間だってのに。'],
+ ['wolf','ウルフ','工房の旋盤で、もう一回だけ練習を——\nん？ 塔の扉が、開いてる……？ 中から、オレンジ色のドロドロが出てきた！'],
+ [null,'','金属を食らう夜の魔物「錆（サビ）」。\nそのとき、工房の棚から一枚の古い図面が光を放った。'],
+ [null,'','この世界では、正確に描かれた図面が、そのまま魔法陣になる。\n図面のふちには、塔の入口と同じ言葉が刻まれていた。「夜に磨く、未来を創る力」'],
+ ['wolf:serious','ウルフ','塔を建てた初代マイスターの言葉……だったか。\nよくわかんねぇけど、使えるもんは使う！ 国家資格の前に、まずはお前だ！']
+];
+AREA_INTRO.alley=[
+ [null,'','塔の下層。中は、錆にのまれた街の路地のようになっていた。'],
+ [null,'','塔は昔、街じゅうの錆を受け止めて、元の道具にもどしていたという。\n灯りが消えた今、受け止めきれなかった錆が、路地の形のまま積み上がっている。']
+];
+AREA_INTRO.factory=[
+ [null,'','塔の中層。止まったままのベルトコンベアに、\n錆びた部品がずらりと並んでいる。ここで、錆を道具にもどしていたらしい。'],
+ [null,'','「まだ使える」と誰かが書いた札が、床に落ちていた。\n奥で、何か巨大なものがきしむ音がする。']
+];
+AREA_INTRO.under=[
+ [null,'','塔の上層。階段の先に、壁一面に図面が貼られた回廊が続いていた。'],
+ [null,'','どれも、途中で描くのをやめたように、半分しかない。'],
+ [null,'','さらに上から熱い風。止まったはずの炉が、赤く光っている。']
+];
+MIDBOSS_WIN.splice(0,MIDBOSS_WIN.length,
+ [null,'','サビガルドは崩れ落ち、その胸から、\n光る図面のかけらがこぼれた。'],
+ [null,'','かけらには、塔の中層の見取り図が描かれている。\n——錆を道具にもどしていた、古い工場の層だ。'],
+ [null,'','下層 クリア！\n塔の中層（4F〜）へ登れるようになった。']);
+FACTORY_BOSS_WIN.splice(0,FACTORY_BOSS_WIN.length,
+ [null,'','ギギガントのアームが止まり、ゆっくりと床に下りた。'],
+ [null,'錆クレーン ギギガント','ギ……マタ……ダレカ……ウゴカシテ……クレル……カ……'],
+ [null,'','錆が落ちたクレーンの運転席に、小さな札が残っていた。\n「点検済　匠」——匠の字だ。'],
+ [null,'','天井のハッチが開き、上へ続く階段が現れた。\n中層 クリア！ 塔の上層（7F〜）へ登れるようになった。']);
+SELF_RUST.wolf[0]=[null,'','鏡の作業台の前で、ウルフの足が止まった。\n鏡に映った腕に、うっすらとオレンジ色の錆が浮かんでいる。'];
+['dodo','fox','owl'].forEach(k=>{const l=SELF_RUST[k]&&SELF_RUST[k][0];if(l)l[2]=l[2].replace('炉の前で','鏡の作業台の前で')});
+const SELF_RUST_FB=[[null,'','そのとき、ポケットの図面がかすかに光った。\nふちの言葉が目に入る。「夜に磨く、未来を創る力」'],
+ [null,'','結果は一日で決まる。でも腕は、毎晩少しずつ磨かれてきた。\nそれは、もう誰にも消せない。']];
+ENDING.splice(0,ENDING.length,
+ [null,'','炉の炎が消えると、塔の窓の外で、東の空がうっすらと明るくなっていた。'],
+ [null,'','見上げると、塔の中ほどに、小さな灯りがひとつともっている。\n十年ぶりの、鉄灯の塔の灯りだった。'],
+ ['owl','ホー博士','錆は、捨てられた道具とあきらめた夢から生まれる……。\nそして、匠の図面を求めておった。','「錆は、捨てられた道具とあきらめた夢から生まれる」\n——ロストールの言葉が、耳に残っている。'],
+ ['fox','ギアフォックス','図面で錆を消したいのか、それとも\n図面で「もう一度動きたい」のか……どっちなんだろ。'],
+ ['dodo','ドド先輩','ま、今日のところは、みんな無事でよかったよ〜。\n……ふわぁ。帰って寝よっか。'],
+ ['wolf:smile','ウルフ','おう。けど、休んだらまた磨くぞ。\n塔は、まだ上に続いてるんだからな。'],
+ [null,'','そのとき、朝焼けの空を、小さな光がすっと横切った。\n鳥にしては、まっすぐすぎる。'],
+ [null,'','第1章「夜の工房に灯る」前編　完'],
+ [null,'','——次の夜。街じゅうの明かりが、いっせいに消えた。'],
+ ['gorilla','ボルトゴリラ','ウホッ！？ 塔の上の層から、錆が電線に流れこんでやがる！\nおい、そこの職人たち、手を貸してくれ！'],
+ [null,'','後編「停電の層」（11F〜20F）へつづく\n※次のアップデートで公開']);
+JOIN_TALK.owl[1]=['owl','ホー博士','……まちがいない、匠の魔法陣じゃ。\nあやつの線は、ひと目見ればわかる。'];
+
 /* ===================== チャット（テイルズのスキットのような、仲間どうしの短い掛け合い） =====================
    st：どこまで登ったら出るか（0＝はじめから、1＝3Fクリア、2＝6Fクリア、3＝10Fクリア）
    who：出るのに必要な仲間（持っていること。ウルフはいつもいる）
@@ -4037,7 +4092,7 @@ return [
  {id:'c_onmyo3',t:'半分の図面',st:3,who:['onmyo'],L:[['onmyo',OM,'……面白い。'],['onmyo',OM,'その半分の図面。残りは、星の図面庫か、あるいは空か。'],['onmyo',OM,'……いずれ、また会うだろう。']]},
  {id:'c_rocker3',t:'今夜の主役',st:3,who:['rocker'],L:[['rocker',RK,'……やるじゃねぇか。今夜の主役は、お前らだ。'],['rocker',RK,'けどな、ステージはまだ続く。'],['rocker',RK,'倉庫のほうで火が出たら……そのときは、俺も弾く。']]},
  {id:'c_live3',t:'アンプに火を',st:3,who:['gorilla','rocker'],L:[['rocker',RK,'おい、ゴリラ。停電でアンプが鳴らねぇんだが。'],['gorilla',GR,'ウホッ？ だったら俺の電気を流してやろうか。'],['rocker',RK,'……壊すなよ。'],['gorilla',GR,'力まかせじゃ電気は流れねぇ。……ちゃんと分かってるさ。'],[null,'','アンプから、塔じゅうに響くような音が鳴った。'],['wolf:smile',W,'（これ、戦いに使えたらすげぇな……）']]},
- {id:'c_end3',t:'夜は、まだまだ',st:3,who:['owl','fox','dodo'],L:[['owl',OW,'錆は、捨てられた道具とあきらめた夢から生まれる……。そして、匠の図面を求めておった。'],['fox',FX,'図面で錆を消したいのか、それとも図面で「もう一度動きたい」のか……どっちなんだろ。'],['dodo',DD,'ま、今日のところは、みんな無事でよかったよ〜。'],['wolf:smile',W,'おう。けど、休んだらまた磨くぞ。夜は、まだまだ続くんだからな。']]}
+ {id:'c_end3',t:'鉄灯の名前',st:3,who:['owl','fox','dodo'],L:[['owl',OW,'「鉄灯」という街の名はな、あの塔の灯りから来ておる。初代マイスターが錆を道具にもどす陣を塔に刻み、その光が夜の工場街を照らしたのじゃ。'],['fox',FX,'じゃあ、灯りが消えてたのって、陣が止まってたってこと？'],['owl',OW,'うむ。そして十年前に灯りを消したのが……わしの古い知り合い、匠じゃ。'],['dodo',DD,'えっ、博士、匠さんと知り合いだったの〜？'],['owl',OW,'若いころ、同じ図面台で線を引いた仲じゃ。あやつは、だれよりも正確な線を引いた。……正確すぎるほどにのう。'],['wolf:serious',W,'だったら、上で会ったら聞いてやる。なんで灯りを消したのかってな。']]}
 ]})();
 const chatStage=()=>{const f=G.floor|0;return f>=10?3:f>=6?2:f>=3?1:0};
 const chatOpen=c=>c.st<=chatStage()&&c.who.every(id=>id==='wolf'||!!owned(id));
