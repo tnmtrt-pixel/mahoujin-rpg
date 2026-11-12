@@ -814,6 +814,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .rdn{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12px;margin-top:6px}.rdn>span:first-child{flex:0 0 64px;font-size:11px;color:var(--sm);letter-spacing:.1em}.rdn .lack{color:#ff7070}
 .gpf .btn.gold{background:var(--so);border-color:var(--so);color:#1a0a00}.gpf .btn:disabled{opacity:.4}
 #fTime .ffl{display:inline-block;min-width:2.1em;text-align:left}#fTime .ftm{display:inline-block;width:3.3em;text-align:left;font-variant-numeric:tabular-nums}#fTime{flex:0 0 auto}
+.fgbar{display:none;gap:6px;width:min(560px,92vw)}.fgbar button{flex:1;padding:10px 4px;background:none;border:1px solid #ffffff40;color:var(--sw);font-weight:800;font-size:14px}.fgbar button.on{border-color:var(--so);color:var(--so)}
 
 </style>
 </head>
@@ -849,7 +850,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 <section id="gacha" class="scr"><div class="hd"><h2>ガチャ</h2></div><div id="gaBody"></div></section>
 <div id="gres" onclick="if(event.target===this)closeGacha()"><div class="grin"><div id="grCards"></div><button class="gab ok" onclick="closeGacha()"><b>OK</b></button></div></div>
 <section id="grind" class="scr"><div class="gh"><b id="gTitle"></b><small id="gSub"></small></div><div class="gst"><span id="gTime"></span><span id="gMatch"></span></div><canvas id="gcv"></canvas><div id="gWarn"></div><div class="grot"><button id="gRotL">⟲ 左に回す</button><button id="gRotR">右に回す ⟳</button></div><button class="gab ten" id="gDone"><b>仕上げる</b></button></section>
-<section id="forge" class="scr"><div class="gh"><b id="fgTitle"></b><small id="fgSub"></small></div><div class="gst"><span id="fgInfo"></span></div><canvas id="fgcv"></canvas><button class="gab ten" id="fgDone"><b>仕上げる</b></button></section>
+<section id="forge" class="scr"><div class="gh"><b id="fgTitle"></b><small id="fgSub"></small></div><div class="gst"><span id="fgInfo"></span></div><canvas id="fgcv"></canvas><div id="fgBar" class="fgbar"></div><button class="gab ten" id="fgDone"><b>仕上げる</b></button></section>
 <section id="zukan" class="scr"><div class="hd"><h2>図鑑</h2></div><div id="zkBody"></div></section>
 <nav id="tabs">
  <button class="tab" data-s="shop" onclick="goTab('shop')"><img class="tic" src="img/ui/tab_shop.webp" alt=""><span>工房</span></button>
@@ -2700,9 +2701,9 @@ function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make',UIMG('u_weap
 let crafting=false;
 async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)return;crafting=true;try{
  let r;
- if(R.kind==='gen'&&(R.proc==='hit'||R.proc==='weld')){const hit=R.proc==='hit';
-  r=await (hit?runHit:runWeld)({tier:R.tier,shape:R.shape,title:`${hit?'金床で打つ':'溶接機でつなぐ'}　${R.n}`});
-  await say(`${hit?'打ち':'溶接'} <span class="big">${r.score}</span> 点${r.reach<1?`<br><span style="font-size:14px">最後までできなかった（${Math.round(r.reach*100)}%。SS はなし）</span>`:''}`,r.reach<1?1600:1100)}
+ if(R.kind!=='weapon'&&MINI[procOf(R)]){const pr=procOf(R),M=MINI[pr];
+  r=await M.f({tier:R.tier,shape:R.shape,title:`${M.t}　${R.n}`});
+  await say(`${M.n} <span class="big">${r.score}</span> 点${r.reach<1?`<br><span style="font-size:14px">最後までできなかった（${Math.round(r.reach*100)}%。SS はなし）</span>`:''}`,r.reach<1?1600:1100)}
  else if(R.kind==='gen'&&R.proc==='lathe'){show('craft');$('craftT').textContent=`旋盤　${R.n}`;$('craftSub').textContent='指で刃物を動かして、金色の線に合わせて削ろう';
   r=await runLathe({tier:R.tier,label:'旋盤・'+KANJI_TIER[R.tier]});r.reach=1;await say(`旋盤 <span class="big">${r.score}</span> 点`,1100)}
  else if(R.kind==='weapon'||(R.kind==='gen'&&R.proc==='grind')){r=await runGrind({who:R.who||R.impl,tier:R.tier,title:`① グラインダー　${R.n}`});r.reach=1;
@@ -2719,7 +2720,7 @@ function showCraftResult(pc){const R=RECIPES[pc.rid];if(!R){delete G.pendCraft;s
  const who=R.kind==='weapon'?findOwn(R.who):null;if(R.kind==='weapon'&&!who){delete G.pendCraft;save();openShop();return}
  $('result').classList.remove('fres');
  $('resP').innerHTML=`<div style="text-align:center">${RIC(pc.rid,72)}<div style="margin:2px 0">${RKIC(pc.rank,84)}</div><b>${R.n}</b>
-  ${pc.shape?shapeImg(pc.shape,200):''}${pc.attr?`<div class="note" style="margin:4px 0">属性：${attrTxt(pc.attr)}</div>`:''}<div class="note">${pc.grind?'形の一致 '+pc.ds+'%':({hit:'打ち ',weld:'溶接 ',lathe:'旋盤 '}[R.proc]||'設計 ')+pc.ds}${pc.ls!=null?'・加工 '+pc.ls:''}　→　${prodFx(R,pc.mul)}${pc.reach<1&&pc.rank!=='SS'?'<br>（SS は、図面を最後までなぞったときだけ）':''}</div>
+  ${pc.shape?shapeImg(pc.shape,200):''}${pc.attr?`<div class="note" style="margin:4px 0">属性：${attrTxt(pc.attr)}</div>`:''}<div class="note">${pc.grind?'形の一致 '+pc.ds+'%':(MINI[R.proc]?MINI[R.proc].n+' ':R.proc==='lathe'?'旋盤 ':'設計 ')+pc.ds}${pc.ls!=null?'・加工 '+pc.ls:''}　→　${prodFx(R,pc.mul)}${pc.reach<1&&pc.rank!=='SS'?'<br>（SS は、加工を最後までやりきったときだけ）':''}</div>
   <div class="note">今の装備：${curProd(R)}</div></div>`;
  const done=eq=>{if(!G.pendCraft)return;if(!eq)invStore(pc,who);else{const p={rid:pc.rid,rank:pc.rank,mul:pc.mul};if(R.kind==='gen')genGet(pc);else if(R.kind==='armor'){invPut(G.arm[R.slot],R.slot);G.arm[R.slot]=p}else{const J=JOBS[who.job];invPutW(who);who.weapon={name:R.n+'（'+pc.rank+'）',k:J.uses,v:Math.round(pc.mul*5),bv:Math.round(pc.mul*5),plus:0,rank:pc.rank,tier:R.tier,rid:pc.rid,mul:pc.mul,shape:pc.shape||null,attr:pc.attr||null}}}
   delete G.pendCraft;save();openShop()};
@@ -3142,10 +3143,12 @@ const WS_KIND=[['all','すべて'],['weapon','専用'],['gen','汎用'],['armor'
 const WS_SORT=[['kind','種類'],['proc','加工'],['ok','つくれる']];
 const KIND_NAME={weapon:'専用武器',gen:'汎用武器',armor:'防具'};
 const PROC_ORDER=['grind','lathe','hit','cut','weld','wire','trace'];
-const PROC_LBL={grind:'削る',lathe:'旋盤',hit:'打つ',cut:'切る',weld:'つなぐ',wire:'配線',trace:'なぞる'};
-const PROC_TOOL={grind:'grinder',lathe:'lathe',hit:'anvil',cut:'snips',weld:'welder',wire:'solder',trace:'bp'};
+const PROC_LBL={grind:'削る',lathe:'旋盤',hit:'打つ',cut:'切る',weld:'つなぐ',wire:'配線',trace:'けがき'};
+const PROC_TOOL={grind:'grinder',lathe:'lathe',hit:'anvil',cut:'snips',weld:'welder',wire:'pliers',trace:'caliper'};
 /* いまの加工のしかた（切る・配線はまだなぞり） */
-const procOf=R=>R.kind==='gen'?R.proc:R.kind==='weapon'?'grind':'trace';
+const procOf=R=>R.proc||(R.kind==='weapon'?'grind':'trace');
+/* 防具は部位で加工を分ける：ヘルメット＝打つ、エプロン・コート＝切る、ベスト＝つなぐ、靴＝けがき */
+Object.entries({helm:['hit',['anvil']],apron:['cut',['snips']],boots:['trace',['file']],mask:['hit',['anvil']],vest:['weld',['welder','vise']],gboots:['trace',['caliper','tap']],chelm:['hit',['anvil','welder']],coat:['cut',['snips','pliers']],jboots:['trace',['caliper','welder']]}).forEach(([k,[p,t]])=>{if(RECIPES[k]){RECIPES[k].proc=p;RECIPES[k].tools=t}});
 function wsListHTML(tab){const dec=tab==='dec';
  let ids=dec?(G.bpRaw||[]).filter(id=>RECIPES[id]):RECIPE_ORDER.filter(id=>G.bps.includes(id));
  if(WS.kind!=='all')ids=ids.filter(id=>RECIPES[id].kind===WS.kind);
@@ -3206,7 +3209,7 @@ function openEqPick(kind,slot){const L=findOwn(G.lead);let rows='',head='';
  $('gpClose').onclick=()=>$('genPick').classList.remove('on');$('genPick').classList.add('on')}
 
 /* ===================== 加工の前に、その装備の特徴を見て、つくるか決める ===================== */
-const PROC_HOW={grind:'グラインダー：鉄を砥石に押し当てて、点線の形に削る',lathe:'旋盤：回る材料に刃物を当てて、金色の線どおりに削る',hit:'金床：輪が金色の円に重なった瞬間にたたく',weld:'溶接機：トーチでつなぎ目をなぞる',cut:'切る：図面の線をなぞって切り出す（いまは図面なぞり）',wire:'配線：図面の線をなぞる（いまは図面なぞり）',trace:'図面の線をなぞって形をつくる'};
+const PROC_HOW={grind:'グラインダー：鉄を砥石に押し当てて、点線の形に削る',lathe:'旋盤：回る材料に刃物を当てて、金色の線どおりに削る',hit:'金床：輪が金色の円に重なった瞬間にたたく',weld:'溶接機：トーチでつなぎ目をなぞる',cut:'金切りばさみ：タップでひと切りずつ進み、ドラッグで向きを変えて線どおりに切る',wire:'配線：同じ色の端子を交差しないようにつなぎ、はんだ付けする',trace:'けがき：定規とコンパスで、図面の線を鉄板に写す（ノギスがあると点にすいつく）'};
 function recipeFx(R){const lo=prodMul(R.tier,'C'),b=prodMul(R.tier,'B'),hi=prodMul(R.tier,'SS');
  if(R.kind==='armor')return[['効果',`${ARMOR_FX[R.slot].d(b)}（B）`],['出来ばえで',`${ARMOR_FX[R.slot].d(lo)}（C）〜 ${ARMOR_FX[R.slot].d(hi)}（SS）`]];
  if(R.kind==='gen'){const A=ATK[R.impl],k=MAT_ATTR[genMain(R)],v=+(ATTR_BASE[k]*ATTR_RANK.B).toFixed(3);
@@ -3231,7 +3234,7 @@ const HIT_PERIOD={1:1.5,2:1.25,3:1.05}; /* 輪がちぢむ時間（秒）。時�
 const WELD_TOL={1:16,2:13,3:10};      /* 溶接線からどれだけずれてもよいか（画面の点） */
 const WELD_V={1:[60,240],2:[70,210],3:[80,190]}; /* ちょうどよいトーチの速さ（点/秒） */
 
-function forgeOpen(title,sub,ic){$('fgTitle').innerHTML=UIMG(ic,26)+' '+title;$('fgSub').textContent=sub;$('fgInfo').textContent='';show('forge');
+function forgeOpen(title,sub,ic){$('fgBar').style.display='none';$('fgBar').innerHTML='';$('fgTitle').innerHTML=UIMG(ic,26)+' '+title;$('fgSub').textContent=sub;$('fgInfo').textContent='';show('forge');
  const cv=$('fgcv'),W=Math.min(560,innerWidth*.92),H=Math.min(W*1.15,innerHeight-250),DPR=Math.min(2,devicePixelRatio||1);
  cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';const g=cv.getContext('2d');g.setTransform(DPR,0,0,DPR,0,0);return{cv,g,W,H}}
 
@@ -3326,6 +3329,121 @@ function runWeld(o){return new Promise(res=>{
  cv.onpointermove=e=>{if(e.pointerId!==pid||done)return;const[x,y]=pos(e),now=performance.now();tx=x;ty=y-OFF;const dt=Math.max(.001,(now-lt)/1000);const iv=Math.hypot(tx-lx,ty-ly)/dt;v=v*.8+iv*.2;lx=tx;ly=ty;lt=now};
  cv.onpointerup=cv.onpointercancel=e=>{if(e.pointerId===pid){pid=null;on=false}};
  $('fgDone').style.display='';$('fgDone').onclick=()=>finish();raf=requestAnimationFrame(loop)})}
+
+/* ---------- 共通：図形の道すじ（キャンバスの点） ---------- */
+function shapePath(shape,W,H,closed){const cx=W/2,cy=H/2,P=[];
+ if(shape==='ch'){const w=W*.32,h=H*.3,s=W*.12;[[cx-w,cy+h],[cx-w,cy-h],[cx-w+s,cy-h-s*.6],[cx+w-s,cy-h-s*.6],[cx+w,cy-h],[cx+w,cy+h]].forEach(p=>P.push(p))}
+ else if(shape==='de'){const n=5,w=W*.36;for(let i=0;i<=n*2;i++){const u=i/(n*2);P.push([cx-w+2*w*u,cy+(i%2?-1:1)*H*.12+H*.05])}}
+ else if(shape==='me'){for(let i=0;i<=24;i++){const a=Math.PI*(1+i/24),r=W*.34;P.push([cx+Math.cos(a)*r,cy+H*.15+Math.sin(a)*r*.9])}}
+ else{for(let i=0;i<=40;i++){const a=i/40*TAU*.9+Math.PI*.55,r=W*(.1+.25*i/40);P.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r])}}
+ /* 細かい点に分ける */
+ const Q=[P[0]];for(let i=1;i<P.length;i++){const[a,b]=P[i-1],[c,d]=P[i],L=Math.hypot(c-a,d-b),k=Math.max(1,Math.round(L/6));for(let j=1;j<=k;j++)Q.push([a+(c-a)*j/k,b+(d-b)*j/k])}return Q}
+function nearIdx(P,x,y,from,to){let bi=-1,bd=1e9;for(let i=from;i<=to;i++){const d=Math.hypot(P[i][0]-x,P[i][1]-y);if(d<bd){bd=d;bi=i}}return[bi,bd]}
+
+/* ---------- 切る：金切りばさみ。タップでひと切り進む。左右にドラッグで向きを変える ---------- */
+const CUT_STEP={1:16,2:14,3:12},CUT_TOL={1:13,2:10,3:8};
+function runCut(o){return new Promise(res=>{
+ const tier=o.tier||1,STEP=CUT_STEP[tier],TOL=CUT_TOL[tier];
+ const {cv,g,W,H}=forgeOpen(o.title||'金切りばさみで切る','タップでひと切り進む。左右にドラッグして、はさみの向きを変える。角では止まって向きを合わせよう','t_snips');
+ const P=shapePath(o.shape||'ch',W,H),n=P.length-1;
+ let x=P[0][0],y=P[0][1],ang=Math.atan2(P[3][1]-P[0][1],P[3][0]-P[0][0]),prog=0,cuts=[[x,y]],qs=[],done=false,raf=0,last=0,snap=0,pid=null,sx=0,moved=0,t0=0;
+ function finish(){if(done)return;done=true;cancelAnimationFrame(raf);cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;$('fgDone').onclick=null;
+  const reach=Math.min(1,prog/n),q=qs.length?qs.reduce((a,b)=>a+b,0)/qs.length:0;res({score:Math.round(q*100*Math.min(1,reach+.02)),reach:reach>=.97?1:reach})}
+ function snip(){if(done)return;const nx=x+Math.cos(ang)*STEP,ny=y+Math.sin(ang)*STEP;const[i,d]=nearIdx(P,nx,ny,Math.max(0,prog-4),Math.min(n,prog+14));
+  x=nx;y=ny;cuts.push([x,y]);const q=Math.max(0,1-(Math.max(0,d-2)/TOL)**2);qs.push(q);if(d<TOL*1.6&&i>prog)prog=i;snap=1;
+  tone(q>.7?900:500,.04,'square',.05,q>.7?600:300);$('fgInfo').textContent=`切った ${Math.round(Math.min(1,prog/n)*100)}%　${q>.8?'ぴったり':q>.4?'少しずれた':'ずれた！'}`;
+  if(prog>=n-1)setTimeout(finish,400)}
+ function draw(){g.clearRect(0,0,W,H);
+  g.fillStyle='#55627e';g.fillRect(W*.06,H*.08,W*.88,H*.84);g.strokeStyle='#7d8aa6';g.strokeRect(W*.06,H*.08,W*.88,H*.84);
+  g.setLineDash([6,6]);g.strokeStyle='#e8c35a';g.lineWidth=2;g.beginPath();P.forEach(([a,b],i)=>i?g.lineTo(a,b):g.moveTo(a,b));g.stroke();g.setLineDash([]);
+  g.strokeStyle='#0d1322';g.lineWidth=3;g.beginPath();cuts.forEach(([a,b],i)=>i?g.lineTo(a,b):g.moveTo(a,b));g.stroke();
+  /* 次に切る向き */
+  g.strokeStyle='#ffffff90';g.setLineDash([3,4]);g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(ang)*STEP*2.2,y+Math.sin(ang)*STEP*2.2);g.stroke();g.setLineDash([]);
+  /* はさみ */
+  g.save();g.translate(x,y);g.rotate(ang);const op=.35*(1-snap);g.fillStyle='#c9d2e4';
+  [op,-op].forEach(a=>{g.save();g.rotate(a);g.beginPath();g.moveTo(0,0);g.lineTo(-30,a>0?-4:4);g.lineTo(-30,0);g.closePath();g.fill();g.restore()});
+  g.fillStyle='#e05a3a';g.beginPath();g.ellipse(-40,-7,8,5,0,0,TAU);g.ellipse(-40,7,8,5,0,0,TAU);g.fill();g.restore()}
+ function loop(ts){const dt=last?Math.min(.05,(ts-last)/1000):0;last=ts;snap=Math.max(0,snap-dt*6);draw();if(!done)raf=requestAnimationFrame(loop)}
+ const px=e=>e.clientX-cv.getBoundingClientRect().left;
+ cv.onpointerdown=e=>{e.preventDefault();pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}sx=px(e);moved=0;t0=performance.now()};
+ window.__cut={P,st:()=>({x,y,ang,prog,n}),aim:a=>{ang=a},snip};
+ cv.onpointermove=e=>{if(e.pointerId!==pid)return;const nx=px(e),dx=nx-sx;moved+=Math.abs(dx);ang+=dx*.012;sx=nx};
+ cv.onpointerup=cv.onpointercancel=e=>{if(e.pointerId!==pid)return;pid=null;if(moved<8&&performance.now()-t0<400)snip()};
+ $('fgDone').style.display='';$('fgDone').onclick=()=>finish();$('fgInfo').textContent='切った 0%';raf=requestAnimationFrame(loop)})}
+
+/* ---------- けがき：定規で直線、コンパスで円。図面の線を鉄板に写す ---------- */
+function scribeFig(shape,W,H,tier){const cx=W/2,cy=H/2,F=[];const L=(a,b,c,d)=>F.push({t:'l',a:[a,b],b:[c,d]}),C=(x,y,r)=>F.push({t:'c',c:[x,y],r});
+ const w=W*.3,h=H*.24;
+ if(shape==='de'){L(cx-w,cy+h,cx+w,cy+h);L(cx+w,cy+h,cx,cy-h);L(cx,cy-h,cx-w,cy+h);C(cx,cy+h*.3,W*.08)}
+ else if(shape==='me'){C(cx,cy,W*.3);L(cx-W*.3,cy,cx+W*.3,cy);C(cx,cy,W*.1)}
+ else{L(cx-w,cy-h,cx+w,cy-h);L(cx+w,cy-h,cx+w,cy+h);L(cx+w,cy+h,cx-w,cy+h);L(cx-w,cy+h,cx-w,cy-h);C(cx,cy,W*.09)}
+ if(tier>=2)C(cx-w*.6,cy-h*.55,W*.05);if(tier>=3)L(cx-w*.6,cy+h*.6,cx+w*.6,cy+h*.6);return F}
+function runScribe(o){return new Promise(res=>{
+ const tier=o.tier||1,snapOn=!!(window.G&&G.tools&&G.tools.includes('caliper'));
+ const {cv,g,W,H}=forgeOpen(o.title||'けがき','図面の線を鉄板に写す。定規：始めから終わりまでドラッグ。コンパス：円の中心を押して、外へドラッグ','t_caliper');
+ const F=scribeFig(o.shape||'ch',W,H,tier),drawn=[],pts=[];F.forEach(f=>{if(f.t==='l'){pts.push(f.a,f.b)}else pts.push(f.c)});
+ let tool='l',cur=null,pid=null,done=false;
+ const bar=$('fgBar');bar.innerHTML=`<button data-tl="l" class="on">📏 定規</button><button data-tl="c">⭕ コンパス</button><button data-tl="u">↶ 1つ消す</button>`;bar.style.display='flex';
+ bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{const t=b.dataset.tl;if(t==='u'){drawn.pop();draw();return}tool=t;bar.querySelectorAll('[data-tl]').forEach(x=>x.classList.toggle('on',x.dataset.tl===t))});
+ const snapP=p=>{if(!snapOn)return p;let best=p,bd=12;pts.forEach(q=>{const d=Math.hypot(q[0]-p[0],q[1]-p[1]);if(d<bd){bd=d;best=q}});return best};
+ function match(f){let best=0;drawn.forEach(d=>{if(d.t!==f.t)return;let q;
+  if(f.t==='l'){const e1=Math.hypot(d.a[0]-f.a[0],d.a[1]-f.a[1])+Math.hypot(d.b[0]-f.b[0],d.b[1]-f.b[1]),e2=Math.hypot(d.a[0]-f.b[0],d.a[1]-f.b[1])+Math.hypot(d.b[0]-f.a[0],d.b[1]-f.a[1]);q=1-Math.min(e1,e2)/40}
+  else q=1-(Math.hypot(d.c[0]-f.c[0],d.c[1]-f.c[1])+Math.abs(d.r-f.r)*1.2)/26;best=Math.max(best,q)});return Math.max(0,best)}
+ function result(){const qs=F.map(match),hit=qs.filter(q=>q>.3).length,extra=Math.max(0,drawn.length-F.length);return{score:Math.max(0,Math.round(qs.reduce((a,b)=>a+b,0)/F.length*100-extra*3)),reach:hit/F.length}}
+ function finish(){if(done)return;done=true;cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;$('fgDone').onclick=null;bar.style.display='none';bar.innerHTML='';res(result())}
+ function draw(){g.clearRect(0,0,W,H);g.fillStyle='#4a5670';g.fillRect(W*.05,H*.05,W*.9,H*.9);
+  g.setLineDash([5,6]);g.strokeStyle='#e8c35a99';g.lineWidth=2;F.forEach(f=>{g.beginPath();f.t==='l'?(g.moveTo(...f.a),g.lineTo(...f.b)):g.arc(f.c[0],f.c[1],f.r,0,TAU);g.stroke()});g.setLineDash([]);
+  g.fillStyle='#e8c35a';F.forEach(f=>{if(f.t==='c'){g.fillRect(f.c[0]-4,f.c[1]-.5,8,1);g.fillRect(f.c[0]-.5,f.c[1]-4,1,8)}});
+  g.strokeStyle='#f2f6ff';g.lineWidth=1.6;[...drawn,...(cur?[cur]:[])].forEach(d=>{g.beginPath();d.t==='l'?(g.moveTo(...d.a),g.lineTo(...d.b)):g.arc(d.c[0],d.c[1],d.r,0,TAU);g.stroke()});
+  if(cur){g.fillStyle='#fff';const p=cur.t==='l'?cur.b:[cur.c[0]+cur.r,cur.c[1]];g.beginPath();g.arc(p[0],p[1],4,0,TAU);g.fill()}
+  const r=result();$('fgInfo').textContent=`写した線 ${Math.round(r.reach*F.length)} / ${F.length}${snapOn?'　（ノギス：点にすいつく）':''}`}
+ const pos=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+ cv.onpointerdown=e=>{e.preventDefault();pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}const p=snapP(pos(e));cur=tool==='l'?{t:'l',a:p,b:p}:{t:'c',c:p,r:0};draw()};
+ cv.onpointermove=e=>{if(e.pointerId!==pid||!cur)return;const p=pos(e);if(cur.t==='l')cur.b=snapP(p);else cur.r=Math.hypot(p[0]-cur.c[0],p[1]-cur.c[1]);draw()};
+ cv.onpointerup=cv.onpointercancel=e=>{if(e.pointerId!==pid)return;pid=null;if(cur&&(cur.t==='l'?Math.hypot(cur.b[0]-cur.a[0],cur.b[1]-cur.a[1])>12:cur.r>8)){drawn.push(cur);tone(760,.05,'triangle',.05,900)}cur=null;draw()};
+ $('fgDone').style.display='';$('fgDone').onclick=()=>finish();draw()})}
+
+/* ---------- 配線：同じ色の端子を線でつなぐ（線は交差できない）。最後にはんだ付け ---------- */
+const WIRE_N={1:5,2:6,3:7},WIRE_K={1:3,2:4,3:5};
+const WIRE_COL=['#ff5a5a','#4da3ff','#ffd43b','#51cf66','#cc5de8'];
+function wirePuzzle(N,K){for(let tries=0;tries<300;tries++){const used=new Array(N*N).fill(-1),pairs=[],sol=[];let ok=true;
+  for(let k=0;k<K&&ok;k++){let st=-1;for(let t=0;t<50;t++){const c=Math.random()*N*N|0;if(used[c]<0){st=c;break}}if(st<0){ok=false;break}
+   const path=[st];used[st]=k;const want=3+(Math.random()*(N))|0;
+   while(path.length<want){const c=path[path.length-1],x=c%N,y=c/N|0,nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[x+dx,y+dy]).filter(([a,b])=>a>=0&&b>=0&&a<N&&b<N&&used[b*N+a]<0);if(!nb.length)break;const[a,b]=nb[Math.random()*nb.length|0];used[b*N+a]=k;path.push(b*N+a)}
+   if(path.length<3){ok=false;break}pairs.push([path[0],path[path.length-1]]);sol.push(path)}
+  if(ok){window.__wire={sol,N};return pairs}}return null}
+function runWire(o){return new Promise(res=>{
+ const tier=o.tier||1,N=WIRE_N[tier],K=WIRE_K[tier],pairs=wirePuzzle(N,K);
+ const {cv,g,W,H}=forgeOpen(o.title||'配線','同じ色の端子を指でつなぐ。線は交差できない。全部つないだら、はんだ付け','t_pliers');
+ const S=Math.min(W,H)/(N+.4),ox=(W-S*N)/2,oy=(H-S*N)/2,term=new Map();pairs.forEach(([a,b],k)=>{term.set(a,k);term.set(b,k)});
+ const paths=pairs.map(()=>[]);let drag=-1,pid=null,phase='wire',done=false,raf=0,last=0,sold=[],gauge=0,gdir=1,sk=0;
+ const cellAt=e=>{const r=cv.getBoundingClientRect(),x=Math.floor((e.clientX-r.left-ox)/S),y=Math.floor((e.clientY-r.top-oy)/S);return x>=0&&y>=0&&x<N&&y<N?y*N+x:-1};
+ const owner=c=>paths.findIndex(p=>p.includes(c));
+ const joined=k=>{const p=paths[k];return p.length>1&&term.get(p[0])===k&&term.get(p[p.length-1])===k&&p[0]!==p[p.length-1]&&pairs[k].includes(p[0])&&pairs[k].includes(p[p.length-1])};
+ function finish(){if(done)return;done=true;cancelAnimationFrame(raf);cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;$('fgDone').onclick=null;
+  const con=paths.filter((_,k)=>joined(k)).length/K,sq=sold.length?sold.reduce((a,b)=>a+b,0)/K:0;res({score:Math.round(con*50+sq*50),reach:con>=1&&sold.length>=K?1:con*.9})}
+ function draw(){g.clearRect(0,0,W,H);g.fillStyle='#16203a';g.fillRect(ox,oy,S*N,S*N);g.strokeStyle='#ffffff14';g.lineWidth=1;
+  for(let i=0;i<=N;i++){g.beginPath();g.moveTo(ox+i*S,oy);g.lineTo(ox+i*S,oy+N*S);g.stroke();g.beginPath();g.moveTo(ox,oy+i*S);g.lineTo(ox+N*S,oy+i*S);g.stroke()}
+  const cc=c=>[ox+(c%N+.5)*S,oy+((c/N|0)+.5)*S];
+  paths.forEach((p,k)=>{if(p.length<2)return;g.strokeStyle=WIRE_COL[k];g.lineWidth=S*.28;g.lineCap='round';g.lineJoin='round';g.beginPath();p.forEach((c,i)=>{const[x,y]=cc(c);i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()});
+  term.forEach((k,c)=>{const[x,y]=cc(c);g.fillStyle=WIRE_COL[k];g.beginPath();g.arc(x,y,S*.32,0,TAU);g.fill();g.fillStyle='#0d1322';g.beginPath();g.arc(x,y,S*.12,0,TAU);g.fill();
+   if(phase==='solder'&&sold.length>k||phase==='done'){g.fillStyle='#d8dde6';g.beginPath();g.arc(x,y,S*.14,0,TAU);g.fill()}});
+  if(phase==='solder'){const k=sk,[x,y]=cc(pairs[k][0]);g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(x,y,S*.45,0,TAU);g.stroke();
+   const bw=W*.7,bx=(W-bw)/2,by=H-22;g.fillStyle='#ffffff20';g.fillRect(bx,by,bw,10);g.fillStyle='#51cf6688';g.fillRect(bx+bw*.62,by,bw*.14,10);g.fillStyle='#fff';g.fillRect(bx+bw*gauge-2,by-5,4,20)}
+  $('fgInfo').textContent=phase==='wire'?`つないだ ${paths.filter((_,k)=>joined(k)).length} / ${K}`:phase==='solder'?`はんだ付け ${sold.length} / ${K}　緑のところでタップ`:'できた！'}
+ function loop(ts){const dt=last?Math.min(.05,(ts-last)/1000):0;last=ts;if(phase==='solder'){gauge+=gdir*dt*(.8+.15*tier);if(gauge>1){gauge=1;gdir=-1}if(gauge<0){gauge=0;gdir=1}}draw();if(!done)raf=requestAnimationFrame(loop)}
+ function toSolder(){if(paths.every((_,k)=>joined(k))){phase='solder';sk=0;gauge=0;tone(880,.15,'triangle',.08,1320)}}
+ cv.onpointerdown=e=>{e.preventDefault();if(phase==='solder'){const q=Math.max(0,1-Math.abs(gauge-.69)/.2);sold.push(q);tone(q>.7?1200:500,.08,'square',.05,q>.7?900:300);sk++;if(sk>=K){phase='done';setTimeout(finish,500)}return}
+  if(phase!=='wire')return;const c=cellAt(e);if(c<0)return;pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}
+  if(term.has(c)){drag=term.get(c);paths[drag]=[c]}else{const k=owner(c);if(k<0)return;drag=k;paths[k]=paths[k].slice(0,paths[k].indexOf(c)+1)}draw()};
+ cv.onpointermove=e=>{if(e.pointerId!==pid||drag<0)return;const c=cellAt(e);if(c<0)return;const p=paths[drag],lastC=p[p.length-1];if(c===lastC)return;
+  const back=p.indexOf(c);if(back>=0){paths[drag]=p.slice(0,back+1);return}
+  if(joined(drag))return;const ax=lastC%N,ay=lastC/N|0,bx=c%N,by=c/N|0;if(Math.abs(ax-bx)+Math.abs(ay-by)!==1)return;
+  if(term.has(c)&&term.get(c)!==drag)return;const k2=owner(c);if(k2>=0&&k2!==drag)paths[k2]=paths[k2].slice(0,paths[k2].indexOf(c));
+  p.push(c);if(joined(drag))tone(1000,.06,'triangle',.06,1300)};
+ cv.onpointerup=cv.onpointercancel=e=>{if(e.pointerId!==pid)return;pid=null;drag=-1;toSolder()};
+ $('fgDone').style.display='';$('fgDone').onclick=()=>finish();raf=requestAnimationFrame(loop)})}
+const MINI={hit:{f:runHit,t:'金床で打つ',n:'打ち'},weld:{f:runWeld,t:'溶接機でつなぐ',n:'溶接'},cut:{f:runCut,t:'金切りばさみで切る',n:'切り'},wire:{f:runWire,t:'配線',n:'配線'},trace:{f:runScribe,t:'けがき',n:'けがき'}};
 
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
