@@ -857,6 +857,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .zkc.no img{filter:brightness(0) opacity(.45)}.zkc.no .hfb b{color:var(--sm)}
 .zkno{position:absolute;right:4px;top:3px;z-index:2;font-size:9px;color:var(--sm);font-family:ui-monospace,Menlo,monospace}
 .drec{display:block;font-size:11px;margin:1px 0}.drec.ok{color:#9be39b}.drec.mid{color:#ffd060}.drec.ng{color:#ff8a8a}
+#shop .stab{white-space:nowrap;font-size:13px;letter-spacing:0;padding-left:0;padding-right:0;min-width:0}#shop .stab .ic{width:16px!important;height:16px!important;margin-right:1px}#shop .stabs{gap:0}
 
 </style>
 </head>
@@ -2736,16 +2737,18 @@ function canMake(id){const R=RECIPES[id];const lackM=Object.keys(R.mats).filter(
  const noWho=R.kind==='weapon'&&!ownChar(R.who);return{ok:!lackM.length&&!lackT.length&&!noWho,lackM,lackT,noWho}}
 function prodFx(R,mul){return R.kind==='gen'?`${ATK[R.impl].type}の攻撃　威力 ×${mul}`:R.kind==='armor'?ARMOR_FX[R.slot].d(mul):`${CHARS[R.who].name}の${ATK[R.who].n}の威力 ×${mul}`}
 function curProd(R){if(R.kind==='gen'){const g=G.gen&&G.gen[Object.keys(RECIPES).find(k=>RECIPES[k]===R)];return g?`${R.n}（${g.rank}）`:'まだない'}if(R.kind==='armor'){const p=G.arm[R.slot];return p?`${RECIPES[p.rid].n}（${p.rank}）`:'なし'}const m=findOwn(R.who);return m&&m.weapon&&m.weapon.rid?`${RECIPES[m.weapon.rid].n}（${m.weapon.rank}）`:baseWeapon(R.who)}
-function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make',UIMG('u_weapon',20)+'つくる'],['dec',MIC('bp',20)+'解読'+(nRaw?`<i class="bpn">${nRaw}</i>`:'')],['tool','工具'],['mat','素材']];
+function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make',UIMG('u_weapon',20)+'つくる'],['dec',MIC('bp',20)+'解読'+(nRaw?`<i class="bpn">${nRaw}</i>`:'')],['tool','工具'],['mat','素材'],['rec',UIMG('coin',18)+'換金所']];
  let h=`<div class="stabs">${tabs.map(([k,n])=>`<button class="stab ${shopTab===k?'on':''}" data-t="${k}">${n}</button>`).join('')}</div>`;
  if(shopTab==='make'||shopTab==='dec')h+=wsListHTML(shopTab);
  if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。コインで買える。塔の資材の箱から見つかることもある（見つければ無料）。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
   h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${has?'　<span class="tag tg-ok">持っている</span>':''}<div class="note">${T.d}</div></div>
    ${has?'':(G.floor|0)<(TOOL_GATE[t]||0)?`<div class="note" style="text-align:right;max-width:130px">🔒 ${TOOL_GATE[t]}階に着くと店に並ぶ</div>`:T.price?`<div style="text-align:right"><button class="btn" data-buy="${t}" ${(G.coin|0)<T.price?'disabled':''} style="width:auto;margin:0;padding:10px 14px;font-size:15px">${coinIc(18)}${T.price}で買う</button>${T.where?`<div class="note" style="max-width:130px;margin-top:4px">${T.where}でも見つかる</div>`:''}</div>`:''}</div></div>`}).join('')}
+ if(shopTab==='rec')h+=recycleHTML();
  if(shopTab==='mat'){h+=`<div class="note">素材は塔の中で、錆の魔物を倒したり資材の箱をあけたりして集める。</div>`+MAT_ORDER.map(k=>`<div class="itr">${MIC(k,40)}<div class="itn"><b>${MATS[k].n}</b><small>${MATS[k].d}</small></div><span class="itc ${G.mats[k]?'':'z'}">×${G.mats[k]}</span></div>`).join('')}
  $('shopBody').innerHTML=h;
  $('shopBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{shopTab=b.dataset.t;renderShop()});
  $('shopBody').querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>openRecipe(b.dataset.mk));
+ $('shopBody').querySelectorAll('[data-rc]').forEach(b=>b.onclick=()=>recycleAsk(b.dataset.rc));
  $('shopBody').querySelectorAll('[data-wsk]').forEach(b=>b.onclick=()=>{WS.kind=b.dataset.wsk;renderShop()});
  $('shopBody').querySelectorAll('[data-wss]').forEach(b=>b.onclick=()=>{WS.sort=b.dataset.wss;renderShop()});
  $('shopBody').querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>decodeBp(b.dataset.dec));
@@ -3318,6 +3321,38 @@ function zkChar(id){const c=CHARS[id],m=owned(id),A=ATK[id],ab=ABIL[id]||[],ban=
   <div class="rdt"><div><span>技</span><p>${TIC(A.type,18)}${A.n}（${A.type}）<br>${A.d[0]}</p></div>${ab.map((x,i)=>`<div><span>${ABIL_RANK[i][0]}・★${ABIL_RANK[i][1]}</span><p>${x.d}</p></div>`).join('')}<div><span>入手</span><p>${ban?`ガチャ vol.${ban.vol}`:id===G.lead||id==='wolf'?'はじめからいる':'—'}</p></div></div>
   <div class="gpf">${m?`<button class="btn ghost" id="zkGo">編成で見る</button>`:''}<button class="btn" id="gpClose">とじる</button></div>`;
  $('gpClose').onclick=()=>$('genPick').classList.remove('on');{const g=$('zkGo');if(g)g.onclick=()=>{$('genPick').classList.remove('on');partySel=id;openParty()}}
+ $('genPick').classList.add('on')}
+
+/* ===================== 換金所：しまってある装備はコインに、工具は基本素材に ===================== */
+/* 売値＝階（壱・弐・参）の基本値 × 出来ばえの倍率。SS は高く売れる */
+const SELL_BASE={1:12,2:30,3:70};
+const SELL_RANK={D:.4,C:.6,B:1,A:1.5,S:2.5,SS:4};
+const sellPrice=(rid,rank)=>Math.round(SELL_BASE[RECIPES[rid].tier]*(SELL_RANK[rank]||1));
+/* 工具は基本素材（鉄くず・ボルト・鉄板）にもどる。値段が高い工具ほど多い */
+function toolScrap(t){const p=TOOLS[t].price||0,o={scrap:Math.max(1,Math.round(p/30))};if(p>=90)o.bolt=Math.round(p/90);if(p>=240)o.plate=Math.round(p/160);return o}
+const scrapTxt=o=>Object.keys(o).map(k=>`${MIC(k,16)}${MATS[k].n}×${o[k]}`).join('　');
+function recItems(){const L=[];
+ invW().forEach((x,i)=>L.push({key:'w:'+i,rid:x.w.rid,rank:x.w.rank,kind:'専用武器',sub:CHARS[x.who].name,ic:WPIC(x.who,34,RECIPES[x.w.rid].tier)}));
+ invArm().forEach((x,i)=>L.push({key:'a:'+i,rid:x.rid,rank:x.rank,kind:'防具',sub:SLOT_NAME[x.slot],ic:RIC(x.rid,34)}));
+ Object.keys(G.gen||{}).filter(r=>RECIPES[r]&&!(G.genEq||[]).includes(r)).forEach(r=>L.push({key:'g:'+r,rid:r,rank:G.gen[r].rank,kind:'汎用武器',sub:ATK[RECIPES[r].impl].type,ic:RIC(r,34)}));
+ return L}
+function recycleHTML(){const L=recItems(),T=G.tools.filter(t=>t!=='file');
+ let h=`<div class="wshint">しまってある装備はコインに、工具は基本素材に変えられる。装備中の物は売れない。出来ばえが良いほど高く売れる（SS は B の4倍）</div>
+ <div class="wsg">装備 → コイン</div>`;
+ h+=L.length?L.map(x=>`<button class="wsr ok" data-rc="${x.key}"><span class="wsi">${x.ic}</span><span class="wsm"><span class="wst"><b>${RECIPES[x.rid].n}</b>${RKIC(x.rank,18)}</span><small>${x.kind}・${x.sub}・${KANJI_TIER[RECIPES[x.rid].tier]}</small></span><span class="wss"><b class="go">${UIMG('coin',14)}${sellPrice(x.rid,x.rank)}</b></span></button>`).join('')
+  :`<div class="note" style="margin:8px 0">しまってある装備はない。加工のあと「しまっておく」を選ぶか、編成で入れかえると、ここに並ぶ</div>`;
+ h+=`<div class="wsg">工具 → 基本素材</div>`+(T.length?T.map(t=>`<button class="wsr" data-rc="t:${t}"><span class="wsi">${MIC(t,34)}</span><span class="wsm"><span class="wst"><b>${TOOLS[t].n}</b></span><small>${scrapTxt(toolScrap(t))}</small></span><span class="wss"><b class="go bp">分解</b></span></button>`).join(''):`<div class="note">分解できる工具はない（やすりは分解できない）</div>`);
+ return h}
+function recycleAsk(key){const [k,v]=[key.slice(0,1),key.slice(2)];let body='',go=null;
+ if(k==='t'){const o=toolScrap(v),need=RECIPE_ORDER.filter(r=>G.bps.includes(r)&&RECIPES[r].tools.includes(v)).length;
+  body=`<div class="rdh">${MIC(v,52)}<div><b>${TOOLS[v].n}を分解</b><small>もどる素材：${scrapTxt(o)}</small></div></div>${need?`<div class="note" style="color:#ff8a8a">この工具を使う図面が ${need}枚ある。分解すると、また買うまで加工できない</div>`:''}`;
+  go=()=>{G.tools=G.tools.filter(t=>t!==v);Object.keys(o).forEach(m=>G.mats[m]=(G.mats[m]||0)+o[m]);return `${MIC(v,28)} 分解した<br><span style="font-size:14px">${scrapTxt(o)}</span>`}}
+ else{const x=recItems().find(i=>i.key===key);if(!x)return;const pr=sellPrice(x.rid,x.rank);
+  body=`<div class="rdh">${x.ic}<div><b>${RECIPES[x.rid].n} ${RKIC(x.rank,20)}</b><small>${x.kind}・${x.sub}</small></div></div><div class="rdt"><div><span>売値</span><p>${UIMG('coin',18)}<b style="font-size:18px">${pr}</b> コイン</p></div></div>`;
+  go=()=>{if(k==='w')invW().splice(+v,1);else if(k==='a')invArm().splice(+v,1);else delete G.gen[v];G.coin=(G.coin|0)+pr;return `${UIMG('coin',28)} ${pr}コインになった`}}
+ $('gpBody').innerHTML=body+`<div class="gpf"><button class="btn ghost" id="gpClose">やめる</button><button class="btn gold" id="rcGo">${k==='t'?'分解する':'売る'}</button></div>`;
+ $('gpClose').onclick=()=>$('genPick').classList.remove('on');
+ $('rcGo').onclick=()=>{const m=go();save();$('genPick').classList.remove('on');tone(880,.15,'triangle',.1,1320);renderShop();say(m,1000)};
  $('genPick').classList.add('on')}
 
 /* ===================== 加工ミニゲーム：打つ（金床）・つなぐ（溶接機） ===================== */
