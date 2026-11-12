@@ -748,6 +748,17 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
 #craft #crDone{width:min(560px,92vw);margin:8px auto 0}
 #craft #tbar{display:none}
 
+/* ★とかけら */
+.stup{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--sl)}
+.stup .pstar{color:#ffd060;font-size:15px;letter-spacing:1px}.stup .shd{font-size:12px;color:var(--sm)}.stup .shd b{color:var(--sw);font-size:14px}
+.stup .sbtn{margin-left:auto;padding:6px 12px;font-size:13px}
+.awk{color:var(--so);font-size:11px}
+
+.pname .stup{border-top:0;margin-top:10px;padding-top:0;gap:6px 10px}.pname .stup .pstar{font-size:18px}.pname .stup .sbtn{margin-left:0}
+.pname .stup .shd{white-space:nowrap}.pname .stup{max-width:58vw}.pname .stup .sbtn{padding:5px 10px;font-size:12px}
+.pname .stup span.shd,.pname .stup span.pstar{display:inline-block;margin:0}.pname .stup .shd b{display:inline;font-size:15px}
+.pname .sbtn:not(:disabled){border-color:var(--so)}.pname .sbtn:not(:disabled) span{color:var(--so)}
+
 </style>
 </head>
 <body>
@@ -2212,7 +2223,7 @@ function fixV2(g){if(!Array.isArray(g.bpRaw))g.bpRaw=[];const m=g.mats&&typeof g
  g.bench=Array.isArray(g.bench)?g.bench.filter(m=>m&&CHARS[m.id]&&!g.party.some(p=>p.id===m.id)):[];g.bench.forEach(m=>{if(!JOBS[m.job])m.job=CHARS[m.id].job;m.lv=Math.max(1,Math.floor(+m.lv)||1)});
  /* パーティはリーダーを入れて PARTY_MAX 人まで。多いぶんは後ろから控えへ（リーダーは残す） */
  for(let i=g.party.length-1;i>=0&&g.party.length>PARTY_MAX;i--)if(g.party[i].id!==g.lead)g.bench.push(g.party.splice(i,1)[0]);
- [...g.party,...g.bench].forEach(m=>{m.star=Math.min(5,Math.max(1,Math.floor(+m.star)||1));m.dup=Math.max(0,Math.floor(+m.dup)||0)});
+ [...g.party,...g.bench].forEach(m=>{m.star=Math.min(5,Math.max(1,Math.floor(+m.star)||1));m.shard=Math.max(0,Math.floor(+m.shard)||0)+Math.max(0,Math.floor(+m.dup)||0)*2;delete m.dup});
  if(!g.lead||!g.party.some(m=>m.id===g.lead))g.lead=g.party[0].id;
  {const i=g.party.findIndex(m=>m.id===g.lead);if(i>0)g.party.unshift(g.party.splice(i,1)[0])}
  if(g.where&&g.where.s==='field')g.where={s:'town'};
@@ -2697,7 +2708,10 @@ const GROW_MAX=20;
 /* lv→lv+1 に必要なもの。Lv5・10・15・20 に上がるときは錆の核もいる */
 /* キャラのLv：コインで上げる（鉄くずは装備づくり専用）。Lv1つで基礎攻撃+5%、リーダーなら体力+5 */
 const growCost=lv=>({coin:10+lv*10});
-const ABIL_RANK=[['R',1],['SR',5],['UR',10],['LR',15]];
+/* 能力（パッシブ）は★で開く：★1＝R、★2＝SR、★3＝UR、★4＝LR、★5＝全部の能力が1.5倍（覚醒） */
+const ABIL_RANK=[['R',1],['SR',2],['UR',3],['LR',4]];
+const abOpen=(m,i)=>((m&&m.star)||1)>=ABIL_RANK[i][1];
+const abBoost=m=>((m&&m.star)||1)>=5?1.5:1;
 const ABIL={
  wolf:[{k:'teamAtk',v:.10,d:'チームの攻撃が+10%'},{k:'crit',v:.15,d:'牙刃連射が15%で会心（2倍）'},{k:'rage',v:.3,d:'体力が半分以下のとき、攻撃+30%'},{k:'startLv',v:1,d:'出撃したとき、ウルフの攻撃Lvが+1'}],
  fox: [{k:'pick',v:.2,d:'素材・経験値を吸い寄せる範囲+20%'},{k:'regen',v:2,d:'10秒ごとに体力を2回復'},{k:'orb',v:1,d:'まわる輪刃が1つ増える'},{k:'revive',v:.5,d:'1回だけ、力つきても体力50%で立ち上がる'}],
@@ -2705,7 +2719,7 @@ const ABIL={
  owl: [{k:'xp',v:.1,d:'経験値が+10%'},{k:'slow',v:1,d:'魔法陣の足止めが強くなる'},{k:'zone',v:1,d:'魔法陣が1つ増える'},{k:'lvSpd',v:.12,d:'レベルアップごとに移動速度が上昇（最大12%）'}]};
 const RANK_COL={R:'#3fae5a',SR:'#2f7fd0',UR:'#8a3fd0',LR:'#c9962a'};
 /* チーム全員の開いている能力を合計する（メダサバのチーム効果と同じ考え方） */
-function teamAb(){const a={};G.party.forEach(m=>{(ABIL[m.id]||[]).forEach((ab,i)=>{if(m.lv>=ABIL_RANK[i][1])a[ab.k]=(a[ab.k]||0)+ab.v});const at=m.weapon&&m.weapon.attr;if(at){const k={thunder:'xp',steel:'cut',wind:'wspd'}[at.k];if(k)a[k]=(a[k]||0)+at.v}});return a}
+function teamAb(){const a={};G.party.forEach(m=>{(ABIL[m.id]||[]).forEach((ab,i)=>{if(abOpen(m,i))a[ab.k]=(a[ab.k]||0)+ab.v*abBoost(m)});const at=m.weapon&&m.weapon.attr;if(at){const k={thunder:'xp',steel:'cut',wind:'wspd'}[at.k];if(k)a[k]=(a[k]||0)+at.v}});return a}
 const lvMul=m=>1+.05*((m&&m.lv||1)-1);
 const memPow=m=>Math.round(100*starMul(m)*wMul(m)*lvMul(m));
 function teamPow(){const a=teamAb();return Math.round(G.party.reduce((s,m)=>s+memPow(m),0)*(1+(a.teamAtk||0)))}
@@ -2762,13 +2776,13 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
  <div class="part"><img class="pimg" src="${c.img}" alt="">
   <div class="pbtns"><span class="plead">${m.id===G.lead?'リーダー（出撃）':inP?'パーティ':'控え'}</span>
    ${hasW?`<button class="hexb" onclick="goTab('shop')"><span>${UIMG('u_weapon',20)} 武器をつくる</span></button>`:''}</div>
-  <div class="pname"><b>${c.name}</b><span class="pstar">${starTxt(m.star||1)}</span><span>${TIC(A.type,20)}${A.n}（${A.type}）</span></div></div>
+  <div class="pname"><b>${c.name}</b><span>${TIC(A.type,20)}${A.n}（${A.type}）</span><div class="stup">${starHTML(m)}</div></div></div>
  <div class="pcards">
   <div class="abcard"><div class="abh">${w&&w.rid?RKIC(rank,26):''}<b>${WPIC(m.id,22,w&&w.rid?RECIPES[w.rid].tier:0)} ${w&&w.rid?RECIPES[w.rid].n:baseWeapon(m.id)}</b></div>
    ${w&&w.shape?`<div class="wbox">${shapeImg(w.shape,150)}${w.attr?`<div class="wattr">${attrTxt(w.attr)}</div><button class="hexb rf" onclick="reforge('${m.id}')"><span>鍛え直し ${MIC('scrap',16)}${REFORGE_COST}</span></button>`:''}</div>`:''}
-   ${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=m.lv>=need;return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>Lv${need}で開く</i>`}${x.d}</span></div>`}).join('')}</div>
+   ${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
   <div class="lvcard"><div class="lvh">Lv <b>${m.lv}</b><small>/${GROW_MAX}</small></div>
-   <div class="lvs"><span>攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)).toFixed(2)}</span><span>★ ×${starMul(m).toFixed(2)}　武器 ×${wMul(m)}</span></div>
+   <div class="lvs"><span>攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)).toFixed(2)}</span><span>武器 ×${wMul(m)}</span></div>
    ${max?'<div class="note" style="text-align:center">レベル最大</div>':`<div class="lvc ${(G.coin|0)<cost.coin?'lack':''}">${coinIc(22)}<b>${G.coin|0}</b>/${cost.coin}</div>`}
    <button class="lvup" id="pUp" ${max||!canGrow(m)?'disabled':''}>レベルアップ</button></div></div>
  <div class="prow slots">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x&&x.id===m.id?'on':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img src="${CHARS[x.id].img}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
@@ -2779,8 +2793,9 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
  const po=$('ppOut');if(po)po.onclick=()=>{const k=pickSlot,x=G.party[k];if(!x||k===0)return;G.bench.push(G.party.splice(k,1)[0]);pickSel=null;partySel=G.lead;save();tone(500,.08,'triangle',.06,300);renderParty()};
  const pi=$('ppIn');if(pi)pi.onclick=()=>slotAssign(pickSlot,pickSel);
  const pc=$('ppClose');if(pc)pc.onclick=()=>{pickSlot=null;pickSel=null;renderParty()};
+ {const sb=$('pStar');if(sb)sb.onclick=()=>starUp(m.id)}
  $('pUp').onclick=()=>{if(!canGrow(m))return;const k=growCost(m.lv);G.coin-=k.coin;m.lv++;save();tone(880,.15,'triangle',.1,1320);
-  const opened=ABIL_RANK.findIndex(r=>r[1]===m.lv);renderParty();if(opened>=0)say(`<span class="nw">${c.name}の</span><span class="nw">${ABIL_RANK[opened][0]}能力が開いた！</span><br><span style="font-size:14px">${ab[opened].d}</span>`,1800);else say(`${c.name} Lv${m.lv}！`,700)}}
+  renderParty();say(`${c.name} Lv${m.lv}！<br><span style="font-size:14px">基礎攻撃が上がった</span>`,800)}}
 
 /* 入れかえ中は、イラストを小さくして能力を見やすく。スクロールしなくても一覧まで見える */
 function previewTeam(k,id){const P=G.party.slice(),B=(G.bench||[]).slice();let r=null;
@@ -2798,7 +2813,7 @@ function renderPartyPick(m,inP){const c=CHARS[m.id],A=ATK[m.id],ab=ABIL[m.id]||[
   <div class="pcl">Lv <b>${m.lv}</b>　攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)).toFixed(2)}</div>
   <div class="pcl">${TIC(A.type,18)} ${A.n}（${A.type}）</div>
   <div class="pcl">${WPIC(m.id,18,w&&w.rid?RECIPES[w.rid].tier:0)} ${w&&w.rid?RECIPES[w.rid].n+' '+RKIC(rank,18):baseWeapon(m.id)}${w&&w.attr?'　'+attrTxt(w.attr):''}</div></div></div>
- <div class="pcab">${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=m.lv>=need;return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>Lv${need}で開く</i>`}${x.d}</span></div>`}).join('')}</div>
+ <div class="pcab">${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
  <div class="prow slots sm">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img src="${CHARS[x.id].img}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
  ${pickerHTML()}`;
  bindPartyPick()}
@@ -2838,7 +2853,7 @@ function reforge(id){const m=owned(id),w=m&&m.weapon;if(!w||!w.attr)return;if(G.
 /* =====================================================================
    ガチャ（原作マイスターの塔と同じく、キャラが出る）
    ・回すのは塔で手に入るコインだけ（本物のお金は使わない）
-   ・★はガチャで決まる。同じキャラが出ると★が上がる（最大★5）。★が高いほど攻撃が強い
+   ・★はガチャで決まる。同じキャラが出るとかけらになり、かけらで★を上げる（最大★5）。★で能力（パッシブ）が開く
    ・物語の3人（フォックス・ドド先輩・ホー博士）はガチャには入れない
    ===================================================================== */
 Object.assign(CHARS,{
@@ -2865,21 +2880,24 @@ Object.assign(ABIL,{
  onmyo:  ab4(['teamAtk',.05],['cut',.05],['xp',.05],['teamAtk',.1]),
  rocker: ab4(['lvSpd',.05],['teamAtk',.05],['xp',.08],['teamAtk',.1])});
 /* ウルフは最初からいる。ほかの仲間はすべてガチャで手に入れる */
-const GACHA_POOL=['fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker'];
+const GACHA_POOL=['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker'];
 const GACHA_COST=50,GACHA10_COST=450,STAR_MAX=5,PARTY_MAX=3;
 const STAR_RATE=[[3,.05],[2,.25],[1,.70]];
 /* コインの入り方（階の突破） */
 const COIN_FIRST=40,COIN_FIRST_BOSS=80,COIN_AGAIN=10,COIN_DROP=10;  /* COIN_DROP：強敵が落とすコイン1枚ぶん（ボスは3枚） */
-const starMul=m=>1+.15*(((m&&m.star)||1)-1);
+/* かけら：同じキャラが出ると、出た★に応じてもらえる。かけらで★を上げる */
+const SHARD_GAIN={1:1,2:3,3:10},STAR_COST={1:5,2:10,3:20,4:40};
+const starMul=m=>1;  /* ★は攻撃ではなく能力（パッシブ）に効く */
+function starHTML(m){const s=m.star||1,c=STAR_COST[s],h=m.shard||0;return `<span class="pstar">${starTxt(s)}</span><span class="shd">かけら <b>${h}</b>${c?'/'+c:''}</span>${c?`<button class="hexb sbtn" id="pStar" ${h<c?'disabled':''}><span>★${s+1}にする</span></button>`:'<span class="shd">★最大</span>'}`}
+function starUp(id){const m=owned(id);if(!m)return;const s=m.star||1,c=STAR_COST[s];if(!c||(m.shard||0)<c)return;m.shard-=c;m.star=s+1;save();tone(880,.2,'triangle',.1,1760);renderParty();
+ const ab=ABIL[id]||[],i=m.star-1;say(m.star>=5?`${CHARS[id].name} ★5！<br><span style="font-size:14px">覚醒：全部の能力が1.5倍</span>`:`${CHARS[id].name} ★${m.star}！<br><span style="font-size:14px">${ABIL_RANK[i]?ABIL_RANK[i][0]+'能力が開いた：'+(ab[i]?ab[i].d:''):''}</span>`,1800)}
 const starTxt=n=>'★'.repeat(n)+'<span class="st0">'+'★'.repeat(Math.max(0,STAR_MAX-n))+'</span>';
 const owned=id=>G.party.find(m=>m.id===id)||(G.bench||[]).find(m=>m.id===id);
 
 function rollStar(){let r=Math.random();for(const[s,p]of STAR_RATE){if(r<p)return s;r-=p}return 1}
 function pullOnce(){const id=pick(GACHA_POOL),star=rollStar(),m=owned(id);
- if(!m){const nm=newMember(id,1);nm.star=star;nm.dup=0;(G.party.length<PARTY_MAX?G.party:G.bench).push(nm);return{id,star,kind:'new',now:star}}
- if(star>(m.star||1)){m.star=star;return{id,star,kind:'up',now:m.star}}
- m.dup=(m.dup||0)+1;if(m.dup>=2&&(m.star||1)<STAR_MAX){m.dup=0;m.star=(m.star||1)+1;return{id,star,kind:'up',now:m.star}}
- return{id,star,kind:'dup',now:m.star||1}}
+ if(!m){const nm=newMember(id,1);nm.star=star;nm.shard=0;(G.party.length<PARTY_MAX?G.party:G.bench).push(nm);return{id,star,kind:'new',now:star}}
+ const g=SHARD_GAIN[star]||1;m.shard=(m.shard||0)+g;return{id,star,kind:'dup',now:m.star||1,gain:g}}
 /* 450コインで11回（10回分の値段で1回おまけ） */
 function doGacha(n){const cost=n>1?GACHA10_COST:GACHA_COST;if(G.coin<cost){say('コインが足りない<br><span style="font-size:14px">塔の階を突破するとコインがもらえる</span>',1300);return}
  G.coin-=cost;const res=[];for(let i=0;i<n;i++)res.push(pullOnce());save();showGachaResult(res);renderGacha()}
@@ -2888,12 +2906,12 @@ function renderGacha(){
  $('gaBody').innerHTML=`<div class="gacoin">${coinIc(22)}<b>${G.coin}</b><small>コイン</small></div>
  <div class="gaban"><img src="img/gacha-v1.webp" alt=""><span>塔のなかまガチャ</span></div>
  <div class="gapool">${GACHA_POOL.map(id=>{const m=owned(id);return `<div class="gpc ${m?'':'no'}"><img src="${CHARS[id].img}" alt=""><b>${CHARS[id].name}</b><small>${m?starTxt(m.star||1):'まだいない'}</small></div>`}).join('')}</div>
- <div class="garate">出る★：★3 ${STAR_RATE[0][1]*100}%　★2 ${STAR_RATE[1][1]*100}%　★1 ${STAR_RATE[2][1]*100}%<br>同じキャラが出ると★が上がる（最大★${STAR_MAX}）。★が高いほど攻撃が強い。<br>コインは塔の階を突破するともらえる（はじめて突破：${COIN_FIRST}、ボスの階：${COIN_FIRST_BOSS}、2回目から：${COIN_AGAIN}）。</div>
+ <div class="garate">出る★：★3 ${STAR_RATE[0][1]*100}%　★2 ${STAR_RATE[1][1]*100}%　★1 ${STAR_RATE[2][1]*100}%<br>同じキャラが出ると<b>かけら</b>（★1＝1、★2＝3、★3＝10）。かけらで★を上げると、パーティに入れたときの能力が開く（★5で覚醒）。<br>コインは塔の階を突破するともらえる（はじめて突破：${COIN_FIRST}、ボスの階：${COIN_FIRST_BOSS}、2回目から：${COIN_AGAIN}）。</div>
  <div class="gabtns"><button class="gab" onclick="doGacha(1)" ${G.coin<GACHA_COST?'disabled':''}><b>1回</b><small>${coinIc(16)} ${GACHA_COST}</small></button><button class="gab ten" onclick="doGacha(11)" ${G.coin<GACHA10_COST?'disabled':''}><b>11回</b><small>${coinIc(16)} ${GACHA10_COST}</small></button></div>`}
 function coinIc(s){return UIMG('coin',s)}
 function _oldCoinIc(s){return `<svg class="ic" viewBox="0 0 32 32" style="width:${s}px;height:${s}px;vertical-align:middle"><circle cx="16" cy="16" r="13" fill="#ff9a3a" stroke="#ffd7a8" stroke-width="2"/><circle cx="16" cy="16" r="8" fill="none" stroke="#7a3a00" stroke-width="2"/><path d="M16 9v14M12 12h8" stroke="#7a3a00" stroke-width="2"/></svg>`}
 function showGachaResult(res){const best=Math.max(...res.map(r=>r.star));
- $('grCards').innerHTML=res.map((r,i)=>`<div class="grc s${r.star}" style="animation-delay:${i*.12}s"><img src="${CHARS[r.id].img}" alt=""><b>${CHARS[r.id].name}</b><small>${starTxt(r.star)}</small><i class="${r.kind}">${r.kind==='new'?'NEW':r.kind==='up'?'★UP → ★'+r.now:'かけら'}</i></div>`).join('');
+ $('grCards').innerHTML=res.map((r,i)=>`<div class="grc s${r.star}" style="animation-delay:${i*.12}s"><img src="${CHARS[r.id].img}" alt=""><b>${CHARS[r.id].name}</b><small>${starTxt(r.star)}</small><i class="${r.kind}">${r.kind==='new'?'NEW':'かけら+'+(r.gain||1)}</i></div>`).join('');
  $('grCards').classList.toggle('one',res.length===1);$('gres').classList.toggle('gold',best>=3);$('gres').classList.add('on');tone(best>=3?880:660,.3,'triangle',.1,best>=3?1760:990)}
 function closeGacha(){$('gres').classList.remove('on')}
 
