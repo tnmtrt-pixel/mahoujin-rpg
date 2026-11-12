@@ -892,6 +892,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .prc:active{filter:brightness(1.3)}
 .prc{flex-direction:row;justify-content:flex-start;text-align:left;gap:8px;padding:8px}.prc small{display:none}.prc .prn{display:flex;flex-direction:column;gap:2px}
 #practice .hd{padding-left:12px}
+.prgo{display:flex;align-items:center;gap:6px;width:100%;margin:6px 0 2px;padding:6px 10px;background:none;border:1px dashed #ff7a2f88;color:var(--so);font-size:13px;font-weight:800}
 
 </style>
 </head>
@@ -3270,6 +3271,7 @@ function wsListHTML(tab){const dec=tab==='dec';
  const nx=WS_SORT[(WS_SORT.findIndex(x=>x[0]===WS.sort)+1)%WS_SORT.length][0];
  let h=`<div class="wsbar"><div class="wsch">${WS_KIND.map(([k,n])=>`<button class="${WS.kind===k?'on':''}" data-wsk="${k}">${n}</button>`).join('')}</div>
   <button class="wssort" data-wss="${nx}">並び：<b>${WS_SORT.find(x=>x[0]===WS.sort)[1]}</b> ⇅</button></div>`;
+ if(!dec)h+=`<button class="prgo" onclick="openPractice()">${MIC('file',18)} 加工ミニゲーム道場で練習する　→</button>`;
  if(!dec&&(G.bpRaw||[]).length)h+=`<button class="bpgo" data-t="dec">${MIC('bp',20)} 未解読の図面が ${G.bpRaw.length}枚　→ 解読へ</button>`;
  if(dec)h+=`<div class="wshint">図面をタップすると三面図の解読が始まる。正しい立体を選ぶと、つくれるようになる</div>`;
  
@@ -3334,8 +3336,9 @@ function openRecipe(id){const R=RECIPES[id],c=canMake(id),pr=procOf(R);
   <div class="rdt">${recipeFx(R).map(([a,b])=>`<div><span>${a}</span><p>${b}</p></div>`).join('')}<div><span>加工</span><p>${procsOf(R).map((p,i,A)=>`${A.length>1?['①','②'][i]:''}${MIC(PROC_TOOL[p],18)}${PROC_HOW[p]}`).join('<br>')}</p></div><div><span>工具の練度</span><p>Lv${recLv(R)}　${toolBonus(R)?`点数 +${toolBonus(R)}`:`許す幅 +${Math.round((assistMul({assist:recLv(R)})-1)*100)}%`}（使うほど上がる）</p></div><div><span>今</span><p>${cur}</p></div></div>
   <div class="rdn"><span>素材</span>${mats}</div><div class="rdn"><span>工具</span>${tools}</div>
   ${c.ok?'':`<div class="note" style="color:#ff8080;margin-top:6px">${c.noWho?CHARS[R.who].name+'がまだ仲間にいない':'足りないものがある（赤い字）'}</div>`}
-  <div class="gpf"><button class="btn ghost" id="gpClose">やめる</button><button class="btn gold" id="rdGo" ${c.ok?'':'disabled'}>つくる</button></div>`;
+  <div class="gpf"><button class="btn ghost" id="gpClose">やめる</button><button class="btn ghost" id="rdPr">練習</button><button class="btn gold" id="rdGo" ${c.ok?'':'disabled'}>つくる</button></div>`;
  $('gpClose').onclick=()=>$('genPick').classList.remove('on');
+ $('rdPr').onclick=()=>{$('genPick').classList.remove('on');const ps=procsOf(R);runPractice(ps[0],R.tier,()=>{openShop('tab');openRecipe(id)})};
  $('rdGo').onclick=()=>{if(!canMake(id).ok)return;$('genPick').classList.remove('on');makeProduct(id)};
  $('genPick').classList.add('on')}
 
@@ -3500,7 +3503,7 @@ Object.assign(PROC_LBL,{file:'やすり',drill:'穴あけ',tap:'ねじ切り'});
 PROC_ORDER.splice(0,PROC_ORDER.length,'file','grind','lathe','hit','cut','weld','wire','trace','drill','tap');
 Object.assign(PROC_HOW,{file:'やすり：左右に大きく、まっすぐ・同じ速さでこすってバリを取る',drill:'ボール盤：長押しで刃を下ろす。押す力を緑の帯に保つ（押しすぎると刃が折れる）',tap:'タップ：ハンドルを右に半回転すすめて、左に1/4もどす。くり返してねじを切る',trace:'けがき：ノギスで測りながら、定規とコンパスで図面の線を鉄板に写す'});
 /* 万力は補助工具：持っていると、どの加工も少し楽になる（材料をしっかり固定できるから） */
-{const _am=assistMul;assistMul=o=>_am(o)+(window.G&&G.tools&&G.tools.includes('vise')?.08:0)}
+{const _am=assistMul;assistMul=o=>_am(o)+(typeof G!=='undefined'&&G&&G.tools&&G.tools.includes('vise')?.08:0)}
 {const _tb=toolBonus;toolBonus=R=>_tb(R)+(G.tools.includes('vise')&&['grind','lathe'].includes(procOf(R))?2:0)}
 /* 加工を1つ行う */
 async function runProc(R,pr,st){let r;const tl=KANJI_TIER[R.tier];
@@ -3522,16 +3525,16 @@ function openPractice(){show('practice');const B=prBest();
  $('prBody').innerHTML=`<div class="note" style="margin:4px 0 8px">塔で使う加工ミニゲームを、ここで自由に練習できる。練習の結果はゲームの進みには関係しない。</div>
  <div class="wsch prt">${[1,2,3].map(t=>`<button class="${prTier===t?'on':''}" data-pt="${t}">${KANJI_TIER[t]}（${['やさしい','ふつう','むずかしい'][t-1]}）</button>`).join('')}</div>
  <div class="prg">${PRACTICE_LIST.map(k=>{const b=B[k+prTier];return `<button class="prc" data-pk="${k}">${MIC(PROC_TOOL[k],40)}<span class="prn"><b>${PROC_LBL[k]}</b><i>${b!=null?`ベスト ${b}点 ${RKIC(craftRank(b,1),18)}`:'まだ'}</i></span></button>`}).join('')}</div>
- <div class="gpf" style="margin-top:10px"><button class="btn ghost" id="prBack">${window.G?'ホームへ':'タイトルへ'}</button></div>`;
+ <div class="gpf" style="margin-top:10px"><button class="btn ghost" id="prBack">${(typeof G!=='undefined'&&G)?'工房へ':'タイトルへ'}</button></div>`;
  $('prBody').querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{prTier=+b.dataset.pt;openPractice()});
  $('prBody').querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>runPractice(b.dataset.pk));
- $('prBack').onclick=()=>window.G?openHome():show('title')}
-async function runPractice(k){const t=prTier,st='練習・';let r;
+ $('prBack').onclick=()=>(typeof G!=='undefined'&&G)?openShop('tab'):show('title')}
+async function runPractice(k,tt,back){const t=tt||prTier,st='練習・';let r;
  try{if(MINI[k]){const M=MINI[k];r=await M.f({tier:t,shape:PRACTICE_SHAPE[k]||'ch',title:`${st}${M.t}`,assist:1,lim:{}})}
   else if(k==='lathe'){show('craft');$('craftT').textContent=`${st}旋盤`;$('craftSub').textContent='ハンドルを回して刃物を動かす。左＝左右、右＝深さ';r=await runLathe({tier:t,label:'旋盤・'+KANJI_TIER[t]});r.reach=1}
   else{r=await runGrind({who:'wolf',tier:t,title:`${st}グラインダー`});r.reach=1}}catch(e){console.error(e);r={score:0,reach:0}}
  const rank=craftRank(r.score,r.reach==null?1:r.reach),B=prBest(),key=k+t,best=B[key]==null||r.score>B[key];if(best){B[key]=r.score;prSave(B)}
- await say(`${PROC_LBL[k]}（${KANJI_TIER[t]}）<br><span class="big">${r.score}</span> 点　${RKIC(rank,40)}${best?'<br><span style="font-size:14px;color:#ffd060">ベスト更新！</span>':''}`,1600);openPractice()}
+ await say(`${PROC_LBL[k]}（${KANJI_TIER[t]}）<br><span class="big">${r.score}</span> 点　${RKIC(rank,40)}${best?'<br><span style="font-size:14px;color:#ffd060">ベスト更新！</span>':''}`,1600);(back||openPractice)()}
 if(/practice/.test(location.search+location.hash))addEventListener('load',()=>setTimeout(openPractice,80));
 
 /* ===================== 加工ミニゲーム：打つ（金床）・つなぐ（溶接機） ===================== */
@@ -3685,7 +3688,7 @@ function scribeFig(shape,W,H,tier){const cx=W/2,cy=H/2,F=[];const L=(a,b,c,d)=>F
  else{L(cx-w,cy-h,cx+w,cy-h);L(cx+w,cy-h,cx+w,cy+h);L(cx+w,cy+h,cx-w,cy+h);L(cx-w,cy+h,cx-w,cy-h);C(cx,cy,W*.09)}
  if(tier>=2)C(cx-w*.6,cy-h*.55,W*.05);if(tier>=3)L(cx-w*.6,cy+h*.6,cx+w*.6,cy+h*.6);return F}
 function runScribe(o){return new Promise(res=>{
- const tier=o.tier||1,snapOn=!!(window.G&&G.tools&&(G.tools.includes('caliper')||G.tools.includes('dcal'))),SN=o.lim&&o.lim.dcal?2:1;
+ const tier=o.tier||1,snapOn=!!(typeof G!=='undefined'&&G&&G.tools&&(G.tools.includes('caliper')||G.tools.includes('dcal'))),SN=o.lim&&o.lim.dcal?2:1;
  const {cv,g,W,H}=forgeOpen(o.title||'けがき','図面の線を鉄板に写す。定規：始めから終わりまでドラッグ。コンパス：円の中心を押して、外へドラッグ','t_caliper');
  const F=scribeFig(o.shape||'ch',W,H,tier),drawn=[],pts=[];F.forEach(f=>{if(f.t==='l'){pts.push(f.a,f.b)}else pts.push(f.c)});
  let tool='l',cur=null,pid=null,done=false;
