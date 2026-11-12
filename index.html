@@ -758,6 +758,8 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
 .pname .stup .shd{white-space:nowrap}.pname .stup{max-width:58vw}.pname .stup .sbtn{padding:5px 10px;font-size:12px}
 .pname .stup span.shd,.pname .stup span.pstar{display:inline-block;margin:0}.pname .stup .shd b{display:inline;font-size:15px}
 .pname .sbtn:not(:disabled){border-color:var(--so)}.pname .sbtn:not(:disabled) span{color:var(--so)}
+.fcoin{display:inline-flex;align-items:center;gap:3px;margin-left:8px;padding-left:8px;border-left:1px solid #fff3;vertical-align:middle}.fcoin b{color:#ffd060;font-size:14px;font-variant-numeric:tabular-nums}
+#fTime{white-space:nowrap}#fTime .fcoin,#fTime.warn .fcoin{opacity:1;filter:none}#fTime.warn .fcoin b{color:#ffd060}
 
 </style>
 </head>
@@ -2488,7 +2490,7 @@ function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDP
  g.font='800 13px sans-serif';g.textAlign='center';for(const p of D.pops){g.globalAlpha=1-p.t/30;g.fillStyle=p.heal?'#7fffa0':'#fff';g.fillText(p.v,p.x,p.y-p.t*.8)}g.globalAlpha=1;
  g.restore();
  // 上の帯
- const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+(D.boss?`${D.floor}F　ボス戦`:`${D.floor}F　${Math.floor(lf/60)}:${String(lf%60).padStart(2,'0')}${rusty?'　錆が濃い':''}`)+`<span class="fmats">${matIcons(D.floor,18)}</span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
+ const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+(D.boss?`${D.floor}F　ボス戦`:`${D.floor}F　${Math.floor(lf/60)}:${String(lf%60).padStart(2,'0')}`)+`<span class="fmats">${matIcons(D.floor,18)}</span><span class="fcoin">${UIMG('coin',18)}<b>${D.coin|0}</b></span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
  $('fHpI').style.width=Math.max(0,100*D.hp/D.maxhp)+'%';$('fXpI').style.width=100*D.xp/D.need+'%';$('fLv').textContent='Lv'+D.lv;
  if(D.boss){$('fBoss').style.display='block';$('fBossI').style.width=Math.max(0,100*D.boss.hp/D.boss.max)+'%';$('fBossN').textContent=FOES[D.boss.k]?FOES[D.boss.k].n:'ボス'}else $('fBoss').style.display='none';
  const wn=$('fWarn');if(D.warn>0){{const h=(D.warnIc?UIMG(D.warnIc,30)+' ':'')+D.warnTxt;if(wn._h!==h){wn.innerHTML=h;wn._h=h}}wn.style.opacity=Math.min(1,D.warn/30)}else wn.style.opacity=0}
