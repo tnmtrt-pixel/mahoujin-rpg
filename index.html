@@ -745,6 +745,8 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
 #fTime .fmats{margin-left:6px;display:inline-flex;gap:1px;vertical-align:-4px}
 .flr .dmats{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:4px}.flr .dmats i{font-style:normal;font-size:11px;color:var(--sm);display:inline-flex;align-items:center;gap:1px}
 .zki .zkf{font-size:10px;color:var(--so)}
+#craft #crDone{width:min(560px,92vw);margin:8px auto 0}
+#craft #tbar{display:none}
 
 </style>
 </head>
@@ -832,6 +834,7 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
  <div id="craftSub"></div>
  <div id="stage"><canvas id="cv" class="round"></canvas><div id="hud"><span id="hudL"></span><span id="hudR"></span></div></div>
  <div id="tbar"><i id="tfill"></i></div>
+ <button class="btn gold" id="crDone" style="display:none">仕上げる</button>
 </section>
 
 <section id="field" class="scr">
@@ -1514,7 +1517,7 @@ function runDesign(o){return new Promise(res=>{
  const full=resample(shape(o.type,o.tier)),m=Math.round((o.seg||CFG.SEG[o.tier])/.012);let pts=full;
  if(full.length>m+2){const s0=Math.floor(Math.random()*(full.length-m));pts=full.slice(s0,s0+m+1)}
  const n=pts.length,L=(n-1)*.012,small=Math.min(1.6,Math.max(1,480/S));
- const w=(o.w||CFG.WID[o.tier])*small*(o.wide?1.35:1),time=(L*CFG.SPU[o.tier]+1.4)*1000,endTol=o.full?1:Math.max(2,Math.ceil(w*.5/.012));  /* o.full=最後の点までなぞらないと到達100%にしない（工房） */
+ const w=(o.w||CFG.WID[o.tier])*small*(o.wide?1.35:1),time=Infinity,endTol=o.full?1:Math.max(2,Math.ceil(w*.5/.012));  /* o.full=最後の点までなぞらないと到達100%にしない（工房） */
  window.__dbg={kind:'design',pts:pts.map(toPx)};
  const c={p:0,started:false,drawing:false,t0:0,inL:0,outL:0,last:null,trail:[],done:false,pulse:0};
  const evPos=e=>{const r=cv.getBoundingClientRect();return[((e.clientX-r.left)-S/2)/K,((e.clientY-r.top)-S/2)/K]};
@@ -1538,7 +1541,7 @@ function runDesign(o){return new Promise(res=>{
    const ang=Math.atan2(nx[1]-q[1],nx[0]-q[0]),ar=Math.max(14,wpx*.9);cx.save();cx.translate(q[0]+Math.cos(ang)*ar,q[1]+Math.sin(ang)*ar);cx.rotate(ang);cx.beginPath();cx.moveTo(8,0);cx.lineTo(-5,-6);cx.lineTo(-5,6);cx.closePath();cx.fillStyle='#fff';cx.fill();cx.restore();
    const e=P[n-1];cx.beginPath();cx.arc(e[0],e[1],6,0,TAU);cx.strokeStyle='#e8c35a';cx.lineWidth=2;cx.stroke()}}
  cancelAnimationFrame(raf);
- (function loop(){draw();if(c.done)return;if(c.started){const el=gnow()-c.t0;$('tfill').style.width=Math.max(0,100*(1-el/time))+'%';const tot=c.inL+c.outL;
+ (function loop(){draw();if(c.done)return;if(c.started){const el=gnow()-c.t0;const tot=c.inL+c.outL;
    $('hudR').textContent=`到達 ${Math.round(100*c.p/(n-1))}%　正確 ${tot?Math.round(100*c.inL/tot):100}%`;if(el>=time){finish();return}}raf=requestAnimationFrame(loop)})();
 })}
 
@@ -1555,14 +1558,19 @@ function runLathe(o){return new Promise(res=>{
  const pr=makeProfile(o.tier),N=pr.N,T=CFG.LATHE_T[o.tier]*1000,LEAD=900;
  const W=S,H=SH,x0=W*.14,x1=W*.92,cy=H*.6,R0=H*.27,tol=o.tol||CFG.LATHE_TOL,[fOver,fUnder]=CFG.LATHE_FALL;
  const cur=new Array(N).fill(1);window.__dbg={kind:'lathe',x0,x1,cy,R0,tgt:pr.tgt,T,LEAD};
- const c={started:false,t0:0,toolR:1.08,downY:0,baseR:1.08,drag:false,lastI:-1,done:false,parts:[],spin:0};
- const evY=e=>e.clientY-cv.getBoundingClientRect().top;
- handler={down(e){if(c.done)return;if(!c.started){c.started=true;c.t0=gnow();sfx.start()}c.drag=true;c.downY=evY(e);c.baseR=c.toolR},
-  move(e){if(!c.drag||c.done)return;c.toolR=clamp(c.baseR-(evY(e)-c.downY)/R0,.3,1.12)},up(){c.drag=false}};
- $('hudL').textContent=o.label||'';$('hudR').textContent='画面に触れてスタート';$('tfill').style.width='100%';
+ /* 制限時間なし：刃物の先が指についてくる。左右で材料にそって動かし、上下で深さを決める。「仕上げる」で終わり */
+ const c={started:false,t0:0,toolR:1.12,tx:x0-W*.06,drag:false,lastI:-1,done:false,parts:[],spin:0,cutAny:new Uint8Array(N)};
+ const evP=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top-24]};
+ const cw0=(x1-x0)/N,idx=x=>Math.floor((x-x0)/cw0);
+ function cutTo(nx,nr){const a=idx(c.tx),b=idx(nx),lo=Math.min(a,b),hi=Math.max(a,b);c.tx=nx;c.toolR=nr;
+  for(let k=Math.max(0,lo);k<=Math.min(N-1,hi);k++){if(c.toolR<cur[k]){cur[k]=c.toolR;c.cutAny[k]=1;c.lastI=Math.max(c.lastI,k);if(Math.random()<.5){for(let q=0;q<2;q++)c.parts.push({x:x0+k*cw0,y:cy-c.toolR*R0,vx:Math.random()*4-1,vy:-Math.random()*4,l:20})}if(Math.random()<.15)sfx.cut()}}}
+ handler={down(e){if(c.done)return;if(!c.started){c.started=true;c.t0=gnow();sfx.start();$('crDone').style.display=''}c.drag=true;const[x,y]=evP(e);c.tx=clamp(x,x0-W*.08,x1+W*.04);c.toolR=clamp((cy-y)/R0,.3,1.12)},
+  move(e){if(!c.drag||c.done)return;const[x,y]=evP(e);cutTo(clamp(x,x0-W*.08,x1+W*.04),clamp((cy-y)/R0,.3,1.12))},up(){c.drag=false}};
+ $('crDone').onclick=()=>finish();$('crDone').style.display='none';$('tbar').style.visibility='hidden';
+ $('hudL').textContent=o.label||'';$('hudR').textContent='刃物の先を指で動かして削る';
  const ptsOf=i=>{const e=cur[i]-pr.tgt[i],ae=Math.abs(e);return ae<=tol?1:clamp(1-(ae-tol)/(e<0?fOver:fUnder),0,1)};
  function score(upTo=N){let s=0;for(let i=0;i<upTo;i++)s+=ptsOf(i);return upTo?s/upTo:1}
- function finish(){if(c.done)return;c.done=true;handler=null;draw();setTimeout(()=>res({score:Math.round(score()*100)}),400)}
+ function finish(){if(c.done)return;c.done=true;handler=null;$('crDone').style.display='none';$('tbar').style.visibility='';draw();setTimeout(()=>res({score:Math.round(score()*100)}),400)}
  function draw(){cx.clearRect(0,0,W,H);c.spin+=.25;
   const bg=cx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#101a3c');bg.addColorStop(1,'#070b1c');cx.fillStyle=bg;cx.fillRect(0,0,W,H);
   /* チャック */
@@ -1579,20 +1587,17 @@ function runLathe(o){return new Promise(res=>{
   cx.fillStyle='#e8c35a';cx.font=`800 ${Math.round(W*.032)}px sans-serif`;cx.textAlign='center';
   for(let s=0;s<pr.rs.length;s++){const xm=x0+(pr.cuts[s]+pr.cuts[s+1])/2*(x1-x0);cx.fillText(s===pr.taper?'テーパー':'φ'+Math.round(pr.rs[s]*40),xm,cy+R0*1.42)}
   /* 削った部分の評価色 */
-  for(let i=0;i<=Math.min(c.lastI,N-1);i++){const p=ptsOf(i),x=x0+i*cw;cx.fillStyle=p>=1?'#4fd07a':p>.5?'#e8c35a':'#ff5a5a';cx.fillRect(x,cy-R0*1.22,cw+.5,4)}
+  for(let i=0;i<N;i++){if(!c.cutAny[i])continue;const p=ptsOf(i),x=x0+i*cw;cx.fillStyle=p>=1?'#4fd07a':p>.5?'#e8c35a':'#ff5a5a';cx.fillRect(x,cy-R0*1.22,cw+.5,4)}
   /* 刃物（バイト） */
-  const prog=c.started?(gnow()-c.t0-LEAD)/T:-.08,tx=x0+clamp(prog,-.1,1)*(x1-x0),ty=cy-c.toolR*R0;
+  const tx=c.tx,ty=cy-c.toolR*R0;
   cx.fillStyle='#c9a03a';cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx-10,ty-18);cx.lineTo(tx+10,ty-18);cx.closePath();cx.fill();
   cx.fillStyle='#6a7290';cx.fillRect(tx-9,ty-18-H*.25,18,H*.25);
   cx.strokeStyle='rgba(232,195,90,.35)';cx.beginPath();cx.moveTo(x0,ty);cx.lineTo(x1,ty);cx.stroke();
   for(const p of c.parts){p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.l--;cx.fillStyle=`rgba(255,${180+Math.random()*60|0},80,${p.l/20})`;cx.fillRect(p.x,p.y,3,3)}c.parts=c.parts.filter(p=>p.l>0);
-  if(!c.started){cx.fillStyle='rgba(255,255,255,.85)';cx.font=`800 ${Math.round(W*.04)}px sans-serif`;cx.fillText('上下にドラッグして刃物の深さを調整',W/2,H*.12)}}
+  if(!c.started){cx.fillStyle='rgba(255,255,255,.85)';cx.font=`800 ${Math.round(W*.04)}px sans-serif`;cx.fillText('刃物の先を指で動かして、金色の線まで削る',W/2,H*.12)}}
  cancelAnimationFrame(raf);
  (function loop(){if(c.done)return;
-  if(c.started){const el=gnow()-c.t0,prog=(el-LEAD)/T,i=Math.floor(prog*N);
-   for(let k=Math.max(0,c.lastI+1);k<=Math.min(N-1,i);k++){if(c.toolR<cur[k]){cur[k]=c.toolR;if(Math.random()<.5){const tx=x0+k*(x1-x0)/N;for(let q=0;q<2;q++)c.parts.push({x:tx,y:cy-c.toolR*R0,vx:Math.random()*4-1,vy:-Math.random()*4,l:20})}if(Math.random()<.15)sfx.cut()}c.lastI=k}
-   $('tfill').style.width=clamp(100*(1-prog),0,100)+'%';$('hudR').textContent=prog<0?'刃物を金色の線へ！':`加工 ${Math.round(score(Math.max(1,c.lastI+1))*100)}点`;
-   if(prog>=1){draw();finish();return}}
+  if(c.started){if(c.drag)cutTo(c.tx,c.toolR);$('hudR').textContent=`加工 ${Math.round(score()*100)}点`}
   draw();raf=requestAnimationFrame(loop)})();
 })}
 
@@ -2983,7 +2988,7 @@ function runGrind(o){return new Promise(res=>{
  $('gDone').onclick=()=>finish();
  function finish(){if(done)return;done=true;cancelAnimationFrame(raf);const s=score();sec.querySelector('#gDone').onclick=null;res({score:s.q,iou:s.iou,shape:packShape(mat)})}
  let raf=0;
- function frame(now){const dt=last?Math.min(.1,(now-last)/1000):0;last=now;if(!done&&!ROT_MQ.matches){left-=dt;if(left<=0){left=0;finish();return}}
+ function frame(now){const dt=last?Math.min(.1,(now-last)/1000):0;last=now;/* 制限時間なし。「仕上げる」で終わる */
   /* 向きを変えるときは、なめらかに回す */
   if(Math.abs(ang-angT)>.001){const st=dt*7;ang+=clamp(angT-ang,-st,st);if(Math.abs(ang-angT)<=.001)ang=angT}
   grindNow();spin+=dt*30;
@@ -3004,7 +3009,7 @@ function runGrind(o){return new Promise(res=>{
   /* 火花 */
   for(const p of sparks){p.t+=dt*60;p.x+=p.vx*.5;p.y+=p.vy*.5;p.vy+=.15;g.fillStyle=p.red?'#ff4a4a':(p.t<6?'#fff3c0':'#ff9a3a');g.globalAlpha=Math.max(0,1-p.t/24);g.fillRect(p.x*S,p.y*S,2.2,2.2)}g.globalAlpha=1;sparks=sparks.filter(p=>p.t<24);
   if(grinding>0){grinding--;if(grinding%2===0)tone(1800+Math.random()*900,.03,'sawtooth',.012)}
-  const s=score();$('gTime').textContent=`残り ${Math.ceil(left)}秒`;$('gMatch').textContent=`形の一致 ${s.q}%`;$('gMatch').className=s.broke>tgtN*.03?'bad':'';
+  const s=score();$('gTime').textContent='';$('gMatch').textContent=`形の一致 ${s.q}%`;$('gMatch').className=s.broke>tgtN*.03?'bad':'';
   $('gWarn').textContent=s.broke>tgtN*.03?'削りすぎ！ 形が欠けている':'';
   raf=requestAnimationFrame(frame)}
  raf=requestAnimationFrame(frame)})}
