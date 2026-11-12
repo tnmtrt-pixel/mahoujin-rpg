@@ -823,6 +823,26 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 /* 編成：装備の列を小さい画面で詰める */
 @media (max-width:380px){.peq{gap:4px}.eqs{width:40px;height:40px;flex-basis:40px}.peq .pel{margin-left:0}}
 
+/* ホーム：パーティ編成パネル */
+#home .sart .hform{position:absolute;left:4%;right:4%;display:grid;grid-template-columns:1.25fr 1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:6px;z-index:3}
+#home.enter .sart .hform{animation:sUp .5s both}
+.hfh{grid-column:1/4;display:flex;align-items:center;gap:10px;padding:0 2px}
+.hfk{font-family:'Dela Gothic One',sans-serif;font-size:15px;letter-spacing:.18em;color:var(--so)}
+.hfs{display:flex;align-items:baseline;gap:5px;flex:1}.hfs i{font-style:normal;font-size:10px;color:var(--sm);letter-spacing:.1em}.hfs b{font-family:'Dela Gothic One',sans-serif;font-size:16px;color:var(--sw);margin-right:6px}
+.hfe{background:none;border:1px solid #ffffff40;color:var(--sw);font-size:12px;font-weight:800;padding:4px 10px}
+.hfc{position:relative;overflow:hidden;padding:0;border:1px solid #ffffff26;background:linear-gradient(160deg,#22304f,#0c1222 70%);color:var(--sw);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);min-height:0}
+.hfc img{position:absolute;left:50%;top:6%;height:118%;transform:translateX(-50%);max-width:none;filter:drop-shadow(0 4px 8px #000a)}
+.hfc.ld{grid-row:2/4;border:2px solid var(--so);background:linear-gradient(160deg,#4a2a18,#120c14 70%)}
+.hfc.ld img{top:4%;height:112%}
+.hft{position:absolute;left:4px;top:4px;z-index:2}
+.hfl{position:absolute;right:0;top:0;z-index:2;background:var(--so);color:#1a0a00;font-size:10px;font-weight:900;letter-spacing:.15em;padding:2px 14px 2px 8px}
+.hfb{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:14px 6px 4px;background:linear-gradient(transparent,#05070dee 55%);text-align:left;display:flex;flex-direction:column}
+.hfb b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hfc.ld .hfb b{font-size:16px}
+.hfb small{font-size:10px;color:var(--sm)}.hfb small i{font-style:normal;color:#ffc94a;letter-spacing:-1px}
+.hfc.em{display:flex;flex-direction:column;align-items:center;justify-content:center;border-style:dashed;background:#0c122288;color:var(--sm)}.hfc.em span{font-size:22px}.hfc.em small{font-size:10px}
+.hfc:active{filter:brightness(1.25)}
+#hLead:empty{display:none}
+
 </style>
 </head>
 <body>
@@ -2805,21 +2825,19 @@ function openHome(){if(TW)TW.busy=false;G.where={s:'town'};save();show('home');
  $('hName').textContent='第1章　夜の工房に灯る';$('hRank').textContent=`${G.floor|0}F / ${TOP_FLOOR}F`;$('hRankI').style.width=100*(G.floor|0)/TOP_FLOOR+'%';
  $('hRes').innerHTML=resHTML();
  const others=G.party.filter(m=>m.id!==L.id);
- $('hArt').innerHTML=`<img class="hmain" data-id="${L.id}" src="${CHARS[L.id].img}" alt="${CHARS[L.id].name}">`;
- $('hArt').querySelectorAll('img').forEach(im=>im.onclick=()=>{partySel=im.dataset.id;openParty()});
- $('hLead').innerHTML=`<small>パーティ</small><span class="hpi">${[L,...others].map(m=>`<button class="hic ${m.id===L.id?'ld':''}" data-id="${m.id}"><img src="${CHARS[m.id].img}" alt="${CHARS[m.id].name}"></button>`).join('')}${Array.from({length:Math.max(0,PARTY_MAX-G.party.length)},()=>'<button class="hic em" data-id="">＋</button>').join('')}</span>`;
- $('hLead').querySelectorAll('.hic').forEach(b=>b.onclick=()=>{partySel=b.dataset.id||null;openParty()});
+ $('hArt').innerHTML=homeFormHTML(L,others);
+ $('hArt').querySelectorAll('[data-hf]').forEach(b=>b.onclick=()=>{const v=b.dataset.hf;if(v.startsWith('slot:')){partySel=G.lead;openParty();pickSlot=+v.slice(5);renderParty()}else{partySel=v||null;openParty()}});
+ $('hLead').innerHTML='';
  const g=nextGoal();$('hBanner').innerHTML=`<span class="nx">NEXT</span><span class="nm">${g.m}</span><span class="na">→</span>`;$('hBanner').onclick=()=>g.go==='go'?openDest():goTab(g.go);
  const f=bestStart();$('hGoT').textContent=`塔の${f}階から　${LAYER_NAME[FLOORS[f].area]}`;
  const h=$('home');h.classList.remove('enter');void h.offsetWidth;h.classList.add('enter');requestAnimationFrame(fitHomeArt)}
 /* キャラは「NEXT」とメニューのあいだに収める（重ならないように） */
-function fitHomeArt(){if(!onScr('home'))return;const hm=$('home').getBoundingClientRect(),nx=$('hBanner').getBoundingClientRect(),mn=document.querySelector('.gmenu').getBoundingClientRect(),W=hm.width;
- const top=nx.bottom-hm.top+6,bot=mn.top-hm.top-4,H=Math.max(120,bot-top),subs=[...$('hArt').querySelectorAll('.hsub')],n=subs.length;
- const mainH=n?H*.92:H,subH=H*.68;
- /* 並べ方：手前の真ん中に出撃キャラ、左右に1人ずつ、3人目は後ろの真ん中（少し上） */
- const pos=[[-.3,0],[.3,0],[0,-.16]];
- subs.forEach((im,i)=>{const[dx,dy]=pos[i]||[0,0],h=i===2?subH*.85:subH;Object.assign(im.style,{height:h+'px',top:(bot-h+dy*H)+'px',left:(W/2+dx*W)+'px',transform:'translateX(-50%)',bottom:'auto',right:'auto'})});
- const im=$('hArt').querySelector('.hmain');if(im)Object.assign(im.style,{height:mainH+'px',top:(bot-mainH)+'px',left:'50%',transform:'translateX(-50%)',bottom:'auto',right:'auto'})}
+function fitHomeArt(){if(!onScr('home'))return;const hm=$('home').getBoundingClientRect(),nx=$('hBanner').getBoundingClientRect(),mn=document.querySelector('.gmenu').getBoundingClientRect();
+ const top=nx.bottom-hm.top+8,bot=mn.top-hm.top-10,f=$('hArt').querySelector('.hform');if(f)Object.assign(f.style,{top:top+'px',height:Math.max(150,bot-top)+'px'})}
+function homeFormHTML(L,others){const card=(m,k,lead)=>{if(!m)return `<button class="hfc em" data-hf="slot:${k}"><span>＋</span><small>空き</small></button>`;const c=CHARS[m.id],A=ATK[m.id];
+  return `<button class="hfc ${lead?'ld':''}" data-hf="${m.id}"><img src="${c.img}" alt=""><span class="hft">${TIC(A.type,lead?24:18)}</span>${lead?'<span class="hfl">LEADER</span>':''}<span class="hfb"><b>${c.name}</b><small>Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i></small></span></button>`};
+ const rest=Array.from({length:PARTY_MAX-1},(_,i)=>card(others[i],i+1,false)).join('');
+ return `<div class="hform"><div class="hfh"><span class="hfk">PARTY</span><span class="hfs"><i>攻撃</i><b>${teamPow()}</b><i>体力</i><b>${teamHp()}</b></span><button class="hfe" data-hf="${L.id}">編成 ›</button></div>${card(L,0,true)}${rest}</div>`}
 addEventListener('resize',()=>{if(onScr('home'))fitHomeArt()});
 
 /* ---------- 編成 ---------- */
