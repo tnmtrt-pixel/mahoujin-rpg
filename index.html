@@ -1714,11 +1714,11 @@ function runLathe(o){return new Promise(res=>{
  const W=S,H=SH,x0=W*.14,x1=W*.92,cy=H*.3,R0=H*.17,tol=o.tol||CFG.LATHE_TOL,[fOver,fUnder]=CFG.LATHE_FALL;
  const cur=new Array(N).fill(1);window.__dbg={kind:'lathe',x0,x1,cy,R0,tgt:pr.tgt,T,LEAD};
  /* 制限時間なし：刃物の先が指についてくる。左右で材料にそって動かし、上下で深さを決める。「仕上げる」で終わり */
- const c={started:false,t0:0,toolR:1.12,tx:x0-W*.06,drag:false,lastI:-1,done:false,parts:[],spin:0,cutAny:new Uint8Array(N)};
+ const c={started:false,t0:0,toolR:1.12,tx:x1+W*.03,drag:false,lastI:-1,done:false,parts:[],spin:0,cutAny:new Uint8Array(N)};
  const evP=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top-24]};
  const cw0=(x1-x0)/N,idx=x=>Math.floor((x-x0)/cw0);
  function cutTo(nx,nr){const a=idx(c.tx),b=idx(nx),lo=Math.min(a,b),hi=Math.max(a,b);c.tx=nx;c.toolR=nr;
-  for(let k=Math.max(0,lo);k<=Math.min(N-1,hi);k++){if(c.toolR<cur[k]){cur[k]=c.toolR;c.cutAny[k]=1;c.lastI=Math.max(c.lastI,k);if(Math.random()<.5){for(let q=0;q<2;q++)c.parts.push({x:x0+k*cw0,y:cy-c.toolR*R0,vx:Math.random()*4-1,vy:-Math.random()*4,l:20})}if(Math.random()<.15)sfx.cut()}}}
+  for(let k=Math.max(0,lo);k<=Math.min(N-1,hi);k++){if(c.toolR<cur[k]){cur[k]=c.toolR;c.cutAny[k]=1;c.lastI=Math.max(c.lastI,k);if(Math.random()<.5){for(let q=0;q<2;q++)c.parts.push({x:x0+k*cw0,y:cy+c.toolR*R0,vx:Math.random()*4-1,vy:-Math.random()*4,l:20})}if(Math.random()<.15)sfx.cut()}}}
  /* ハンドル（実物の旋盤と同じ）：左＝往復台（刃物を左右へ）、右＝横送り（刃物の深さ）。指で円をえがくように回す。2本指で両方同時に回せる */
  const WY=H*.75,WR=Math.min(W*.17,H*.145),WX=[W*.27,W*.73],K0=(x1-x0)*.3/TAU,K1=.22/TAU;c.ang=[0,0];c.act=new Map();
  const rawP=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
@@ -1754,9 +1754,10 @@ function runLathe(o){return new Promise(res=>{
   /* 削った部分の評価色 */
   for(let i=0;i<N;i++){if(!c.cutAny[i])continue;const p=ptsOf(i),x=x0+i*cw;cx.fillStyle=p>=1?'#4fd07a':p>.5?'#e8c35a':'#ff5a5a';cx.fillRect(x,cy-R0*1.22,cw+.5,4)}
   /* 刃物（バイト） */
-  const tx=c.tx,ty=cy-c.toolR*R0;
-  cx.fillStyle='#c9a03a';cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx-10,ty-18);cx.lineTo(tx+10,ty-18);cx.closePath();cx.fill();
-  cx.fillStyle='#6a7290';cx.fillRect(tx-9,ty-18-H*.25,18,H*.25);
+  /* 刃物（バイト）は下から上向きに当てる */
+  const tx=c.tx,ty=cy+c.toolR*R0;
+  cx.fillStyle='#6a7290';cx.fillRect(tx-9,ty+18,18,H*.1);
+  cx.fillStyle='#c9a03a';cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx-10,ty+18);cx.lineTo(tx+10,ty+18);cx.closePath();cx.fill();
   cx.strokeStyle='rgba(232,195,90,.35)';cx.beginPath();cx.moveTo(x0,ty);cx.lineTo(x1,ty);cx.stroke();
   for(const p of c.parts){p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.l--;cx.fillStyle=`rgba(255,${180+Math.random()*60|0},80,${p.l/20})`;cx.fillRect(p.x,p.y,3,3)}c.parts=c.parts.filter(p=>p.l>0);
   /* ハンドル */
