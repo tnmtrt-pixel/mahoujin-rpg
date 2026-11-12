@@ -4526,7 +4526,7 @@ function openNews(){$('sheetT').textContent='お知らせ';
 /* ---------- ボスの宝箱を取らずに階段へ行ったら、先に宝箱をあける ---------- */
 {const _s=fStairs;fStairs=async function(){const c=FD&&FD.chests.find(x=>x.boss&&!x.open);if(c&&!FD.climbing){fOpenChest(c);return}return _s()}}
 
-const BUILD='11/13 02:12';
+const BUILD='11/13 06:54';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
@@ -4537,7 +4537,7 @@ if(!G&&SAVE_RAW!=null){try{localStorage.setItem(BROKEN_KEY,SAVE_RAW)}catch(e){}l
 if(G&&OPT.fast===undefined&&G.flags.fast){OPT.fast=true;saveOpt()}  /* 前の版は速さを G.flags.fast に保存していた */
 if(G)G.flags.fast=!!OPT.fast;
 $('btnStart').textContent=G?'つづきから':'はじめる';$('btnReset').style.display='none';$('btnNew').style.display=G?'':'none';
-$('tVer').textContent=`ver ${VERSION}　第1章（${BUILD}）`;$('tNote').textContent=loadNote;
+$('tVer').textContent=`ver ${VERSION}`;$('tNote').textContent=loadNote;
 /* テスト用の参照（テスト担当が G を書きかえて各エリア・ボスへ直接入れる） */
 window.__game={get FD(){return FD},startField,fEnd,makeProduct,RECIPES,FAREA,FT,get G(){return G},set G(v){G=v},save,migrate,openTown,openHome,openDest,goArea,newMember,stage,AREAS,FOES,VERSION};
 </script>
