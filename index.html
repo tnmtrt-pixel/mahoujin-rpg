@@ -741,6 +741,11 @@ body{background:radial-gradient(120% 70% at 50% 15%,#182033 0%,#0a0e1a 70%)}
 #shop .btn.bpb{background:var(--bp);border-color:var(--bp);color:#fff;margin:6px 0 0;clip-path:polygon(0 0,100% 0,100% 72%,calc(100% - 16px) 100%,0 100%)}
 #shop .btn.bpb:active{background:#2a6fd6}
 
+/* 階ごとの素材の表示 */
+#fTime .fmats{margin-left:6px;display:inline-flex;gap:1px;vertical-align:-4px}
+.flr .dmats{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:4px}.flr .dmats i{font-style:normal;font-size:11px;color:var(--sm);display:inline-flex;align-items:center;gap:1px}
+.zki .zkf{font-size:10px;color:var(--so)}
+
 </style>
 </head>
 <body>
@@ -2023,50 +2028,67 @@ const MATS={
  oil:  {n:'油',    d:'仕上げ・焼き入れに使う'},
  wire: {n:'銅線',  d:'電気の道具や防具の補強に使う'},
  gear: {n:'歯車',  d:'機械の部品。廃工場に多い'},
- core: {n:'錆の核',d:'強敵やボスが落とす。上の段階の製品に必要'}};
-const MAT_ORDER=['scrap','oil','wire','gear','core'];
+ core: {n:'錆の核',d:'ボスの階で出る。強敵やボスも落とす。上の段階の製品に必要'},
+ bolt: {n:'ボルト',d:'部品どうしを締める。下層に多い'},
+ rubber:{n:'ゴム', d:'衝撃をやわらげる。防具に使う'},
+ plate:{n:'鋼板',  d:'硬い板。中層から出る'},
+ spring:{n:'ばね', d:'はね返す力。速い武器や靴に使う'},
+ brass:{n:'真鍮',  d:'さびにくい金色の金属。上層に多い'},
+ board:{n:'基板',  d:'電子の部品。光る武器・電気の装備に使う'}};
+const MAT_ORDER=['scrap','oil','bolt','rubber','plate','gear','wire','spring','brass','board','core'];
+/* 階ごとに出る素材（2種類。ボスの階は錆の核も出る） */
+const FLOOR_MATS={1:['scrap','oil'],2:['scrap','bolt'],3:['bolt','rubber'],4:['plate','oil'],5:['gear','wire'],6:['gear','spring'],7:['wire','brass'],8:['spring','board'],9:['brass','board'],10:['plate','board']};
+const matIcons=(f,s=16)=>floorMats(f).map(k=>MIC(k,s)).join('');
+const floorMats=f=>[...(FLOOR_MATS[f]||['scrap']),...(FLOORS[f]&&FLOORS[f].boss?['core']:[])];
 /* 工具：price＝工房で買うときのコイン（0＝最初から持っている）。where＝塔の中で見つかる場所（見つければ無料） */
 const TOOLS={
  file:  {n:'やすり',     d:'金属の角やバリを取る。基本の工具',price:0},
  snips: {n:'金切りばさみ',d:'薄い鉄板や銅線を切る',price:60},
  anvil: {n:'金床',       d:'熱した鉄を打つ台',price:100},
  pliers:{n:'電工ペンチ', d:'銅線を切る・曲げる・はさむ',price:150,where:'塔の中層（4〜6階）の資材の箱'},
- welder:{n:'溶接機',     d:'鉄と鉄をつなぐ',price:250,where:'塔の上層（7〜10階）の資材の箱'}};
-const TOOL_ORDER=['file','snips','anvil','pliers','welder'];
+ welder:{n:'溶接機',     d:'鉄と鉄をつなぐ',price:250,where:'塔の上層（7〜10階）の資材の箱'},
+ caliper:{n:'ノギス',    d:'長さを正確に測る',price:40},
+ vise:  {n:'万力',       d:'材料をしっかり固定する',price:60},
+ grinder:{n:'グラインダー',d:'回る砥石で削って形を整える',price:80},
+ tap:   {n:'タップハンドル',d:'穴にねじを切る',price:100},
+ solder:{n:'はんだごて', d:'電子部品をつなぐ',price:120},
+ drill: {n:'ボール盤',   d:'材料に穴をあける',price:150},
+ lathe: {n:'旋盤',       d:'材料を回して丸く削る',price:300}};
+const TOOL_ORDER=['file','caliper','snips','vise','grinder','anvil','tap','solder','pliers','drill','welder','lathe'];
 /* 製品（レシピ）。kind:'weapon'（who のキャラの攻撃が強くなる）／'armor'（slot：head・body・feet。全員に効く）
    tier：1〜3（段階が上がるほど強い。なぞりと加工もむずかしくなる） shape：なぞる形 lathe：旋盤の加工もある
    area：図面が見つかるエリア（start:true は最初から持っている） */
 const RECIPES={
  bite1:   {n:'鋼の牙刃',     kind:'weapon',who:'wolf',tier:1,mats:{scrap:4,oil:1},        tools:['file'],          shape:'ma',lathe:true,start:true},
- spanner1:{n:'歯車の輪刃',     kind:'weapon',who:'fox', tier:1,mats:{scrap:3,gear:1,oil:1}, tools:['file'],          shape:'me',area:'alley'},
- helm:    {n:'安全ヘルメット', kind:'armor',slot:'head',tier:1,mats:{scrap:4,oil:1},        tools:['snips'],         shape:'ch',area:'alley'},
- apron:   {n:'耐火エプロン',   kind:'armor',slot:'body',tier:1,mats:{scrap:3,wire:2},       tools:['snips'],         shape:'de',area:'alley'},
- bite2:   {n:'超硬の牙刃',     kind:'weapon',who:'wolf',tier:2,mats:{scrap:6,gear:2,core:1},tools:['file','anvil'],  shape:'ma',lathe:true,area:'factory'},
- hammer1: {n:'鉄の籠手',   kind:'weapon',who:'dodo',tier:2,mats:{scrap:7,oil:2},        tools:['anvil'],         shape:'ch',area:'factory'},
- boots:   {n:'安全靴',         kind:'armor',slot:'feet',tier:1,mats:{scrap:4,gear:1},       tools:['snips'],         shape:'ch',area:'alley'},
- spanner2:{n:'双歯車の輪刃',     kind:'weapon',who:'fox', tier:3,mats:{gear:5,scrap:4,core:1},tools:['anvil','welder'],shape:'me',area:'under'},
- hammer2: {n:'錆割りの籠手', kind:'weapon',who:'dodo',tier:3,mats:{scrap:9,core:2},       tools:['anvil','welder'],shape:'ch',area:'under'},
- pen1:    {n:'銅線の杖', kind:'weapon',who:'owl', tier:3,mats:{wire:5,scrap:3,core:1},tools:['pliers'],        shape:'hikari',area:'under'},
+ spanner1:{n:'歯車の輪刃',     kind:'weapon',who:'fox', tier:1,mats:{scrap:3,bolt:2}, tools:['file'],          shape:'me',area:'alley'},
+ helm:    {n:'安全ヘルメット', kind:'armor',slot:'head',tier:1,mats:{scrap:4,rubber:1},        tools:['snips'],         shape:'ch',area:'alley'},
+ apron:   {n:'耐火エプロン',   kind:'armor',slot:'body',tier:1,mats:{scrap:3,rubber:2},       tools:['snips'],         shape:'de',area:'alley'},
+ bite2:   {n:'超硬の牙刃',     kind:'weapon',who:'wolf',tier:2,mats:{plate:3,oil:1,core:1},tools:['file','grinder'],  shape:'ma',lathe:true,area:'factory'},
+ hammer1: {n:'鉄の籠手',   kind:'weapon',who:'dodo',tier:2,mats:{plate:4,gear:1},        tools:['anvil','vise'],         shape:'ch',area:'factory'},
+ boots:   {n:'安全靴',         kind:'armor',slot:'feet',tier:1,mats:{scrap:3,bolt:1,rubber:1},       tools:['snips'],         shape:'ch',area:'alley'},
+ spanner2:{n:'双歯車の輪刃',     kind:'weapon',who:'fox', tier:3,mats:{brass:3,spring:2,core:1},tools:['drill','welder'],shape:'me',area:'under'},
+ hammer2: {n:'錆割りの籠手', kind:'weapon',who:'dodo',tier:3,mats:{plate:4,brass:2,core:2},       tools:['anvil','welder'],shape:'ch',area:'under'},
+ pen1:    {n:'銅線の杖', kind:'weapon',who:'owl', tier:3,mats:{wire:4,brass:2,core:1},tools:['pliers','solder'],        shape:'hikari',area:'under'},
  /* ガチャで仲間になるキャラの武器（そのキャラが仲間にいるときだけ図面が見つかる） */
- shield1: {n:'歯車の盾',       kind:'weapon',who:'mouse',  tier:1,mats:{scrap:4,gear:1},        tools:['file'],          area:'alley'},
- bow1:    {n:'星の弓',         kind:'weapon',who:'tsukiyo',tier:1,mats:{scrap:3,wire:2},        tools:['snips'],         area:'alley'},
- fuda1:   {n:'式神の札',       kind:'weapon',who:'onmyo',  tier:1,mats:{scrap:2,oil:2,wire:1},  tools:['file'],          area:'alley'},
- rod1:    {n:'避雷針の槍',     kind:'weapon',who:'gorilla',tier:1,mats:{scrap:4,wire:2},        tools:['snips'],         area:'factory'},
- laser1:  {n:'腕のレーザー砲', kind:'weapon',who:'robot',  tier:2,mats:{scrap:5,wire:3,oil:1},  tools:['snips','pliers'],area:'factory'},
- guitar1: {n:'鉄のギター',     kind:'weapon',who:'rocker', tier:2,mats:{scrap:6,wire:3},        tools:['snips','anvil'], area:'factory'},
- shield2: {n:'救護の大盾',     kind:'weapon',who:'mouse',  tier:2,mats:{scrap:6,gear:3,oil:2},  tools:['anvil'],         area:'factory'},
- fuda2:   {n:'鋼の式神札',     kind:'weapon',who:'onmyo',  tier:2,mats:{scrap:5,oil:2,core:1},  tools:['anvil'],         area:'factory'},
- rod2:    {n:'落雷の槍',       kind:'weapon',who:'gorilla',tier:3,mats:{scrap:3,wire:5,core:1}, tools:['pliers','welder'],area:'under'},
- laser2:  {n:'収束レーザー砲', kind:'weapon',who:'robot',  tier:3,mats:{wire:4,gear:2,core:2},  tools:['welder'],        area:'under'},
- bow2:    {n:'流星の弓',       kind:'weapon',who:'tsukiyo',tier:3,mats:{wire:4,gear:2,core:1},  tools:['anvil','welder'],area:'under'},
+ shield1: {n:'歯車の盾',       kind:'weapon',who:'mouse',  tier:1,mats:{scrap:4,bolt:2},        tools:['file','caliper'],          area:'alley'},
+ bow1:    {n:'星の弓',         kind:'weapon',who:'tsukiyo',tier:1,mats:{scrap:3,oil:1,bolt:1},        tools:['snips'],         area:'alley'},
+ fuda1:   {n:'式神の札',       kind:'weapon',who:'onmyo',  tier:1,mats:{scrap:2,oil:2},  tools:['file'],          area:'alley'},
+ rod1:    {n:'避雷針の槍',     kind:'weapon',who:'gorilla',tier:1,mats:{scrap:4,bolt:2},        tools:['snips'],         area:'factory'},
+ laser1:  {n:'腕のレーザー砲', kind:'weapon',who:'robot',  tier:2,mats:{plate:2,wire:3},  tools:['solder'],area:'factory'},
+ guitar1: {n:'鉄のギター',     kind:'weapon',who:'rocker', tier:2,mats:{plate:3,wire:2},        tools:['snips','anvil'], area:'factory'},
+ shield2: {n:'救護の大盾',     kind:'weapon',who:'mouse',  tier:2,mats:{plate:3,gear:2},  tools:['anvil','vise'],         area:'factory'},
+ fuda2:   {n:'鋼の式神札',     kind:'weapon',who:'onmyo',  tier:2,mats:{plate:2,spring:2,core:1},  tools:['grinder'],         area:'factory'},
+ rod2:    {n:'落雷の槍',       kind:'weapon',who:'gorilla',tier:3,mats:{wire:4,board:2,core:1}, tools:['solder','welder'],area:'under'},
+ laser2:  {n:'収束レーザー砲', kind:'weapon',who:'robot',  tier:3,mats:{board:3,brass:2,core:2},  tools:['solder','lathe'],        area:'under'},
+ bow2:    {n:'流星の弓',       kind:'weapon',who:'tsukiyo',tier:3,mats:{spring:3,brass:2,core:1},  tools:['lathe','caliper'],area:'under'},
  /* 強い防具（中層は2段目、上層は3段目） */
- mask:    {n:'溶接の面',       kind:'armor',slot:'head',tier:2,mats:{scrap:5,gear:2,oil:1},  tools:['anvil'],         shape:'de',area:'factory'},
- vest:    {n:'鉄板ベスト',     kind:'armor',slot:'body',tier:2,mats:{scrap:6,wire:2,gear:1}, tools:['snips','anvil'], shape:'ch',area:'factory'},
- gboots:  {n:'歯車ブーツ',     kind:'armor',slot:'feet',tier:2,mats:{scrap:4,gear:3,oil:1},  tools:['anvil'],         shape:'de',area:'factory'},
- chelm:   {n:'錆核のヘルメット',kind:'armor',slot:'head',tier:3,mats:{scrap:4,gear:2,core:2}, tools:['welder'],        shape:'ch',area:'under'},
- coat:    {n:'銅線の耐火コート',kind:'armor',slot:'body',tier:3,mats:{scrap:3,wire:6,core:1}, tools:['pliers','welder'],shape:'de',area:'under'},
- jboots:  {n:'噴射安全靴',     kind:'armor',slot:'feet',tier:3,mats:{gear:3,oil:2,core:2},   tools:['welder'],        shape:'ch',area:'under'},
- guitar2: {n:'轟音のギター',   kind:'weapon',who:'rocker', tier:3,mats:{scrap:6,wire:4,core:2}, tools:['welder'],        area:'under'}};
+ mask:    {n:'溶接の面',       kind:'armor',slot:'head',tier:2,mats:{plate:3,gear:1,oil:1},  tools:['anvil'],         shape:'de',area:'factory'},
+ vest:    {n:'鉄板ベスト',     kind:'armor',slot:'body',tier:2,mats:{plate:4,wire:1}, tools:['snips','vise'], shape:'ch',area:'factory'},
+ gboots:  {n:'歯車ブーツ',     kind:'armor',slot:'feet',tier:2,mats:{gear:3,spring:2},  tools:['tap'],         shape:'de',area:'factory'},
+ chelm:   {n:'錆核のヘルメット',kind:'armor',slot:'head',tier:3,mats:{brass:3,board:1,core:2}, tools:['welder','drill'],        shape:'ch',area:'under'},
+ coat:    {n:'銅線の耐火コート',kind:'armor',slot:'body',tier:3,mats:{wire:5,board:1,core:1}, tools:['pliers','tap'],shape:'de',area:'under'},
+ jboots:  {n:'噴射安全靴',     kind:'armor',slot:'feet',tier:3,mats:{spring:3,board:2,core:2},   tools:['welder','tap'],        shape:'ch',area:'under'},
+ guitar2: {n:'轟音のギター',   kind:'weapon',who:'rocker', tier:3,mats:{plate:3,board:2,core:2}, tools:['welder','drill'],        area:'under'}};
 const RECIPE_ORDER=Object.keys(RECIPES);
 const SLOT_NAME={head:'頭',body:'体',feet:'足'};
 /* 製品の強さ：段階の倍率 × ランクの倍率 */
@@ -2159,6 +2181,8 @@ const SVG_IC={
  feet:'<path d="M6 8h9v10l11 3v6H6z" fill="#3a3a48" stroke="#9aa0b8"/><path d="M6 23h20" stroke="#e8c35a" stroke-width="2"/>'};
 const UI_IC={scrap:'m_scrap',oil:'m_oil',wire:'m_wire',gear:'m_gear',core:'m_core',bp:'m_bp',
  file:'t_file',snips:'t_snips',anvil:'t_anvil',pliers:'t_pliers',welder:'t_welder',grinder:'t_grinder',
+ caliper:'t_caliper',vise:'t_vise',tap:'t_tap',solder:'t_solder',drill:'t_drill',lathe:'t_lathe',
+ bolt:'m_bolt',rubber:'m_rubber',plate:'m_plate',spring:'m_spring',brass:'m_brass',board:'m_board',
  hp:'p_hp',spd:'p_spd',mag:'p_mag',cd:'p_cd',head:'ar_helm',body:'ar_apron',feet:'ar_boots',coin:'coin',none:'ar_empty'};
 const ARMOR_IC={helm:'ar_helm',apron:'ar_apron',boots:'ar_boots',mask:'ar_mask',vest:'ar_vest',gboots:'ar_gboots',chelm:'ar_chelm',coat:'ar_coat',jboots:'ar_jboots'};
 const RKIC=(r,s=22)=>UIMG('r_'+r,s);
@@ -2302,9 +2326,9 @@ function fAttacks(f){const A=FD.atk,c=FD.cd,cm=fCd();
 
 /* ---------- 倒した・拾った ---------- */
 function fKill(e){FD.kills++;const F=FFOE[e.k];FD.gems.push({x:e.x,y:e.y,v:F.xp,big:F.xp>=10});
- const D=FAREA[FD.area].drop;for(const k in D)if(Math.random()<D[k]){FD.items.push({x:e.x+Math.random()*16-8,y:e.y+Math.random()*16-8,k});break}
+ {const fm=FLOOR_MATS[FD.floor]||['scrap'];for(let i=0;i<fm.length;i++)if(Math.random()<(i?.016:.026)){FD.items.push({x:e.x+Math.random()*16-8,y:e.y+Math.random()*16-8,k:fm.at(i)});break}if(FLOORS[FD.floor].boss&&Math.random()<.005)FD.items.push({x:e.x,y:e.y,k:'core'})}
  if(e.big){for(let i=0;i<6;i++)FD.gems.push({x:e.x+Math.random()*60-30,y:e.y+Math.random()*60-30,v:3});
-  const n=e.boss?4:2;for(let i=0;i<n;i++)FD.items.push({x:e.x+Math.random()*50-25,y:e.y+Math.random()*50-25,k:'scrap'});
+  const n=e.boss?4:2,fm=FLOOR_MATS[FD.floor]||['scrap'];for(let i=0;i<n;i++)FD.items.push({x:e.x+Math.random()*50-25,y:e.y+Math.random()*50-25,k:fm.at(i%fm.length)});
   FD.items.push({x:e.x,y:e.y+10,k:'core'});if(e.boss)FD.items.push({x:e.x+20,y:e.y,k:'core'});
   const bp=nextBp();if(bp)FD.items.push({x:e.x-16,y:e.y,k:'bp',id:bp});
   /* 強敵・ボスはコインも落とす */
@@ -2325,7 +2349,7 @@ function fGot(it){if(it.k==='coin'){const v=it.v||COIN_DROP;G.coin=(G.coin|0)+v;
  FD.loot[it.k]=(FD.loot[it.k]||0)+1;tone(1300,.05,'triangle',.04,1700);renderFHud()}
 function fOpenChest(c){c.open=true;const A=FAREA[FD.area],got=[];
  const add=(k,n)=>{for(let i=0;i<n;i++)FD.items.push({x:c.x+Math.random()*40-20,y:c.y+Math.random()*40-20,k})};
- add('scrap',2+Math.floor(Math.random()*3));const ks=Object.keys(A.drop).filter(k=>k!=='scrap');add(pick(ks),1+Math.floor(Math.random()*2));
+ {const fm=FLOOR_MATS[FD.floor]||['scrap'];add(fm.at(0),2+Math.floor(Math.random()*3));add(fm.at(-1),1+Math.floor(Math.random()*2))}
  const tl=A.chestTool;if(tl&&!G.tools.includes(tl)&&!FD.lootTools.includes(tl)&&!FD.items.some(i=>i.k==='tool'))FD.items.push({x:c.x,y:c.y-24,k:'tool',id:tl});
  else if(Math.random()<.35){const bp=nextBp();if(bp)FD.items.push({x:c.x,y:c.y-24,k:'bp',id:bp})}
  tone(880,.2,'triangle',.1,1320);fBanner('資材の箱をあけた！',90)}
@@ -2448,7 +2472,7 @@ function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDP
  g.font='800 13px sans-serif';g.textAlign='center';for(const p of D.pops){g.globalAlpha=1-p.t/30;g.fillStyle=p.heal?'#7fffa0':'#fff';g.fillText(p.v,p.x,p.y-p.t*.8)}g.globalAlpha=1;
  g.restore();
  // 上の帯
- const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+(D.boss?`${D.floor}F　ボス戦`:`${D.floor}F　${Math.floor(lf/60)}:${String(lf%60).padStart(2,'0')}${rusty?'　錆が濃い':''}`);const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
+ const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+(D.boss?`${D.floor}F　ボス戦`:`${D.floor}F　${Math.floor(lf/60)}:${String(lf%60).padStart(2,'0')}${rusty?'　錆が濃い':''}`)+`<span class="fmats">${matIcons(D.floor,18)}</span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
  $('fHpI').style.width=Math.max(0,100*D.hp/D.maxhp)+'%';$('fXpI').style.width=100*D.xp/D.need+'%';$('fLv').textContent='Lv'+D.lv;
  if(D.boss){$('fBoss').style.display='block';$('fBossI').style.width=Math.max(0,100*D.boss.hp/D.boss.max)+'%';$('fBossN').textContent=FOES[D.boss.k]?FOES[D.boss.k].n:'ボス'}else $('fBoss').style.display='none';
  const wn=$('fWarn');if(D.warn>0){{const h=(D.warnIc?UIMG(D.warnIc,30)+' ':'')+D.warnTxt;if(wn._h!==h){wn.innerHTML=h;wn._h=h}}wn.style.opacity=Math.min(1,D.warn/30)}else wn.style.opacity=0}
@@ -2515,7 +2539,7 @@ function fChoice(fl){return new Promise(res=>{let el=$('fNext');if(!el){el=docum
  $('fnGo').onclick=()=>{el.classList.remove('on');res(true)};$('fnHome').onclick=()=>{el.classList.remove('on');res(false)}})}
 /* 次の階へ：レベル・技・体力・素材はそのまま。階のものだけ入れかえる */
 async function fAdvance(nf){const D=FD,F=FLOORS[nf],k=F.area,newArea=k!==D.area;
- await say(`${UIMG('n_floor',40)} <b style="font-size:26px">${nf}F</b>　${F.n}<br><span style="font-size:13px">${LAYER_NAME[k]}${F.boss?'・'+UIMG('n_boss',16)+'ボスの階':''}</span>`,1000);
+ await say(`${UIMG('n_floor',40)} <b style="font-size:26px">${nf}F</b>　${F.n}<br><span style="font-size:13px">${LAYER_NAME[k]}${F.boss?'・'+UIMG('n_boss',16)+'ボスの階':''}</span><br><span style="font-size:13px">出る素材 ${matIcons(nf,22)}</span>`,1100);
  if(FD!==D)return;
  if(newArea&&!G.flags['ai_'+k]){await talk(AREA_INTRO[k]);G.flags['ai_'+k]=1;save()}
  const comp=F.join,needJoin=comp&&comp!==G.hero&&!ownChar(comp),sa=Math.random()*TAU,sd=F.stair||0;
@@ -2652,7 +2676,7 @@ function openDest(){show('dest');const best=G.floor|0,pts=startPoints();
  $('destList').innerHTML=`<div class="note" style="margin-bottom:6px">階段を見つけると、そのまま上の階へ進む。ボスの階を倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。</div>`+
   [7,4,1].map(s=>{const F=FLOORS[s],open=pts.includes(s),bossF={1:3,4:6,7:TOP_FLOOR}[s],done=best>=bossF,reach=Math.min(best,bossF);
    const st=!open?`${s-1}階のボスを倒すと開く`:done?`${UIMG('n_boss',16)}ボス撃破`:reach>=s?`${reach}Fまで到達`:'まだ入っていない';
-   return `<button class="flr ${open&&s===bestStart()?'next':''} ${open?'':'lock'}" data-f="${s}" ${open?'':'disabled'}><span class="fn">${s}F</span><span class="ft"><b>${LAYER_NAME[F.area]}　${s}F〜${bossF}F</b><small>${st}</small></span><span class="fs">${open?UIMG(done?'n_floor':'n_unlock',26)+'出撃':UIMG('n_unlock',26)+'未'}</span></button>`}).join('')+
+   return `<button class="flr ${open&&s===bestStart()?'next':''} ${open?'':'lock'}" data-f="${s}" ${open?'':'disabled'}><span class="fn">${s}F</span><span class="ft"><b>${LAYER_NAME[F.area]}　${s}F〜${bossF}F</b><small>${st}</small><span class="dmats">${Array.from({length:bossF-s+1},(_,i)=>s+i).map(f=>`<i>${f}F ${matIcons(f,15)}</i>`).join('')}</span></span><span class="fs">${open?UIMG(done?'n_floor':'n_unlock',26)+'出撃':UIMG('n_unlock',26)+'未'}</span></button>`}).join('')+
   `<div class="note" style="text-align:center;margin-top:8px">最高到達：${best}F　／　${TOP_FLOOR}F</div>`;
  $('destList').querySelectorAll('[data-f]:not([disabled])').forEach(b=>b.onclick=()=>goFloor(+b.dataset.f))}
 async function goFloor(f){audio();if(TW)TW.busy=true;const F=FLOORS[f],k=F.area;G.area=k;save();await say(`${IC('gate',28)} 塔の${f}階へ……`,700);
@@ -2799,7 +2823,7 @@ function openZukan(){show('zukan');
  $('zkBody').innerHTML=`<div class="zkh">図面 ${G.bps.length}/${RECIPE_ORDER.length}</div><div class="zkg">${RECIPE_ORDER.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);
   return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?(R.kind==='armor'?'防具・'+SLOT_NAME[R.slot]:CHARS[R.who].name+'の武器'):LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}</div>
  <div class="zkh">工具 ${G.tools.length}/${TOOL_ORDER.length}</div><div class="zkg">${TOOL_ORDER.map(t=>{const has=G.tools.includes(t);return `<div class="zki ${has?'':'no'}">${MIC(t,40)}<b>${TOOLS[t].n}</b><small>${has?'持っている':TOOLS[t].price?'工房で買える':TOOLS[t].where}</small></div>`}).join('')}</div>
- <div class="zkh">素材</div><div class="zkg">${MAT_ORDER.map(k=>`<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]}</small></div>`).join('')}</div>`}
+ <div class="zkh">素材</div><div class="zkg">${MAT_ORDER.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}</div>`}
 function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button>`;$('sheet').classList.add('on')}
 
 /* 鍛え直し：鉄くずを使って属性を付け直す */
