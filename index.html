@@ -2804,7 +2804,7 @@ async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)
  if(R.kind!=='weapon'&&MINI[procOf(R)]){const pr=procOf(R),M=MINI[pr];
   r=await M.f({tier:R.tier,shape:R.shape,title:`${M.t}　${R.n}`,assist:recLv(R),lim:limOf(R)});
   await say(`${M.n} <span class="big">${r.score}</span> 点${r.reach<1?`<br><span style="font-size:14px">最後までできなかった（${Math.round(r.reach*100)}%。SS はなし）</span>`:''}`,r.reach<1?1600:1100)}
- else if(R.kind==='gen'&&R.proc==='lathe'){show('craft');$('craftT').textContent=`旋盤　${R.n}`;$('craftSub').textContent='ハンドルを回して刃物を動かす。左＝左右、右＝深さ';
+ else if(R.proc==='lathe'){show('craft');$('craftT').textContent=`旋盤　${R.n}`;$('craftSub').textContent='ハンドルを回して刃物を動かす。左＝左右、右＝深さ';
   r=await runLathe({tier:R.tier,label:'旋盤・'+KANJI_TIER[R.tier]});r.reach=1;await say(`旋盤 <span class="big">${r.score}</span> 点`,1100)}
  else if(R.kind==='weapon'||(R.kind==='gen'&&R.proc==='grind')){r=await runGrind({who:R.who||R.impl,tier:R.tier,title:`① グラインダー　${R.n}`});r.reach=1;
   await say(`形の一致 <span class="big">${r.score}</span> %${r.score<CRAFT_RANK.C?'<br><span style="font-size:14px">もう少し点線に近づけよう</span>':''}`,1200)}
@@ -2817,7 +2817,7 @@ async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)
  if(hasLim('micro')&&Math.random()<.1&&rank!=='SS'&&rank!=='S'){rank=RANK_ORDER[RANK_ORDER.indexOf(rank)+1];extra.push(`${MIC('micro',18)}マイクロメータ：出来ばえが1段上がった！`)}
  const mul=+(prodMul(R.tier,rank)*(R.boost||1)*(1+.03*((G.bpPlus||{})[id]||0))).toFixed(2);const txp=toolXpGain(R,q);
  /* 素材は結果が決まったここで引く。装備を選ぶ前に読み込み直しても、作った製品は G.pendCraft に残る */
- Object.keys(R.mats).forEach(k=>G.mats[k]-=R.mats[k]);if(hasLim('ratchet')&&Math.random()<.2){const k=pick(Object.keys(R.mats));G.mats[k]++;extra.push(`${MIC('ratchet',18)}ラチェットレンチ：${MATS[k].n}が1つもどった`)}G.pendCraft={rid:id,rank,mul,ds:r.score,ls:R.lathe?ls:null,reach:r.reach,shape:r.shape||null,attr:R.kind==='weapon'?rollAttr(rank):R.kind==='gen'?genAttr(R,rank):null,grind:R.kind==='weapon'||R.proc==='grind',tb,txp:[...extra,txp].filter(Boolean).join('<br>')};save();showCraftResult(G.pendCraft)}finally{crafting=false}}
+ Object.keys(R.mats).forEach(k=>G.mats[k]-=R.mats[k]);if(hasLim('ratchet')&&Math.random()<.2){const k=pick(Object.keys(R.mats));G.mats[k]++;extra.push(`${MIC('ratchet',18)}ラチェットレンチ：${MATS[k].n}が1つもどった`)}G.pendCraft={rid:id,rank,mul,ds:r.score,ls:R.lathe?ls:null,reach:r.reach,shape:r.shape||null,attr:R.kind==='weapon'?rollAttr(rank):R.kind==='gen'?genAttr(R,rank):null,grind:(R.kind==='weapon'&&!R.proc)||R.proc==='grind',tb,txp:[...extra,txp].filter(Boolean).join('<br>')};save();showCraftResult(G.pendCraft)}finally{crafting=false}}
 function showCraftResult(pc){const R=RECIPES[pc.rid];if(!R){delete G.pendCraft;save();openShop();return}
  const who=R.kind==='weapon'?findOwn(R.who):null;if(R.kind==='weapon'&&!who){delete G.pendCraft;save();openShop();return}
  $('result').classList.remove('fres');
@@ -3254,6 +3254,8 @@ const PROC_LBL={grind:'削る',lathe:'旋盤',hit:'打つ',cut:'切る',weld:'�
 const PROC_TOOL={grind:'grinder',lathe:'lathe',hit:'anvil',cut:'snips',weld:'welder',wire:'pliers',trace:'caliper'};
 /* いまの加工のしかた（切る・配線はまだなぞり） */
 const procOf=R=>R.proc||(R.kind==='weapon'?'grind':'trace');
+/* ウルフの牙刃は旋盤だけで加工する（グラインダーは使わない） */
+[['bite1',['file']],['bite2',['file','vise']]].forEach(([k,t])=>{const R=RECIPES[k];if(R){R.proc='lathe';delete R.lathe;R.tools=t}});
 /* 限定工具：持っていれば加工に特別な力 */
 const limOf=R=>({dcal:hasLim('dcal'),tig:hasLim('tig'),ahammer:hasLim('ahammer')});
 /* 防具は部位で加工を分ける：ヘルメット＝打つ、エプロン・コート＝切る、ベスト＝つなぐ、靴＝けがき */
