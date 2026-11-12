@@ -808,6 +808,12 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 #shop .bpgo{padding:6px 10px;font-size:13px}
 #fTime .fmats{align-items:center}#fTime .fcn{font-size:13px;color:#ffd060;margin-left:1px;font-variant-numeric:tabular-nums;line-height:18px}
 
+.rdh{display:flex;gap:10px;align-items:center;margin-bottom:8px}.rdh b{display:block;font-size:18px}.rdh small{font-size:12px;color:var(--sm)}
+.rdt{border-top:1px solid var(--sl)}.rdt>div{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--sl)}
+.rdt span{flex:0 0 64px;font-size:11px;color:var(--sm);letter-spacing:.1em;padding-top:2px}.rdt p{margin:0;font-size:13px;line-height:1.45}
+.rdn{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:12px;margin-top:6px}.rdn>span:first-child{flex:0 0 64px;font-size:11px;color:var(--sm);letter-spacing:.1em}.rdn .lack{color:#ff7070}
+.gpf .btn.gold{background:var(--so);border-color:var(--so);color:#1a0a00}.gpf .btn:disabled{opacity:.4}
+
 </style>
 </head>
 <body>
@@ -2540,7 +2546,7 @@ function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDP
  g.font='800 13px sans-serif';g.textAlign='center';for(const p of D.pops){g.globalAlpha=1-p.t/30;g.fillStyle=p.heal?'#7fffa0':'#fff';g.fillText(p.v,p.x,p.y-p.t*.8)}g.globalAlpha=1;
  g.restore();
  // 上の帯
- const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+(D.boss?`${D.floor}F　ボス戦`:`${D.floor}F　${Math.floor(lf/60)}:${String(lf%60).padStart(2,'0')}`)+`<span class="fmats">${matIcons(D.floor,18)}${UIMG('coin',18)}<b class="fcn">${D.coin|0}</b></span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
+ const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+(D.boss?`${D.floor}F　ボス戦`:`${D.floor}F　${Math.floor(lf/60)}:${String(lf%60).padStart(2,'0')}`)+`<span class="fmats">${matIcons(D.floor,18)}</span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
  $('fHpI').style.width=Math.max(0,100*D.hp/D.maxhp)+'%';$('fXpI').style.width=100*D.xp/D.need+'%';$('fLv').textContent='Lv'+D.lv;
  if(D.boss){$('fBoss').style.display='block';$('fBossI').style.width=Math.max(0,100*D.boss.hp/D.boss.max)+'%';$('fBossN').textContent=FOES[D.boss.k]?FOES[D.boss.k].n:'ボス'}else $('fBoss').style.display='none';
  const wn=$('fWarn');if(D.warn>0){{const h=(D.warnIc?UIMG(D.warnIc,30)+' ':'')+D.warnTxt;if(wn._h!==h){wn.innerHTML=h;wn._h=h}}wn.style.opacity=Math.min(1,D.warn/30)}else wn.style.opacity=0}
@@ -2569,7 +2575,7 @@ function drawItem(g,it,t){const y=it.y+Math.sin(t*4+it.x)*2;
  if(ic){g.drawImage(ic,it.x-13,y-13,26,26);return}
  g.fillStyle=ITEM_COL[it.k]||'#fff';g.beginPath();if(it.k==='wire'){g.strokeStyle=ITEM_COL.wire;g.lineWidth=3;g.arc(it.x,y,7,0,TAU);g.stroke();return}
  g.moveTo(it.x,y-9);g.lineTo(it.x+8,y-2);g.lineTo(it.x+5,y+8);g.lineTo(it.x-5,y+8);g.lineTo(it.x-8,y-2);g.closePath();g.fill()}
-function renderFHud(){if(!FD)return;const l=FD.loot;$('fLoot').innerHTML=MAT_ORDER.filter(k=>l[k]).map(k=>`<span>${MIC(k,18)}${l[k]}</span>`).join('')+(FD.lootBps.length?`<span>${MIC('bp',18)}${FD.lootBps.length}</span>`:'')+(FD.lootTools.length?`<span>${MIC(FD.lootTools[0],18)}${FD.lootTools.length}</span>`:'')}
+function renderFHud(){if(!FD)return;const l=FD.loot;$('fLoot').innerHTML=(FD.coin?`<span>${UIMG('coin',18)}${FD.coin}</span>`:'')+MAT_ORDER.filter(k=>l[k]).map(k=>`<span>${MIC(k,18)}${l[k]}</span>`).join('')+(FD.lootBps.length?`<span>${MIC('bp',18)}${FD.lootBps.length}</span>`:'')+(FD.lootTools.length?`<span>${MIC(FD.lootTools[0],18)}${FD.lootTools.length}</span>`:'')}
 
 const ROT_MQ=matchMedia('(min-aspect-ratio:1/1) and (max-height:499px)');
 function fLoop(now){if(!FD||!FD.run||!onScr('field')){fRaf=0;return}
@@ -2684,7 +2690,7 @@ function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make',UIMG('u_weap
  if(shopTab==='mat'){h+=`<div class="note">素材は塔の中で、錆の魔物を倒したり資材の箱をあけたりして集める。</div>`+MAT_ORDER.map(k=>`<div class="itr">${MIC(k,40)}<div class="itn"><b>${MATS[k].n}</b><small>${MATS[k].d}</small></div><span class="itc ${G.mats[k]?'':'z'}">×${G.mats[k]}</span></div>`).join('')}
  $('shopBody').innerHTML=h;
  $('shopBody').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{shopTab=b.dataset.t;renderShop()});
- $('shopBody').querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>wsTap(b.dataset.mk));
+ $('shopBody').querySelectorAll('[data-mk]').forEach(b=>b.onclick=()=>openRecipe(b.dataset.mk));
  $('shopBody').querySelectorAll('[data-wsk]').forEach(b=>b.onclick=()=>{WS.kind=b.dataset.wsk;renderShop()});
  $('shopBody').querySelectorAll('[data-wss]').forEach(b=>b.onclick=()=>{WS.sort=b.dataset.wss;renderShop()});
  $('shopBody').querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>decodeBp(b.dataset.dec));
@@ -2714,9 +2720,9 @@ function showCraftResult(pc){const R=RECIPES[pc.rid];if(!R){delete G.pendCraft;s
  $('resP').innerHTML=`<div style="text-align:center">${RIC(pc.rid,72)}<div style="margin:2px 0">${RKIC(pc.rank,84)}</div><b>${R.n}</b>
   ${pc.shape?shapeImg(pc.shape,200):''}${pc.attr?`<div class="note" style="margin:4px 0">属性：${attrTxt(pc.attr)}</div>`:''}<div class="note">${pc.grind?'形の一致 '+pc.ds+'%':({hit:'打ち ',weld:'溶接 ',lathe:'旋盤 '}[R.proc]||'設計 ')+pc.ds}${pc.ls!=null?'・加工 '+pc.ls:''}　→　${prodFx(R,pc.mul)}${pc.reach<1&&pc.rank!=='SS'?'<br>（SS は、図面を最後までなぞったときだけ）':''}</div>
   <div class="note">今の装備：${curProd(R)}</div></div>`;
- const done=eq=>{if(!G.pendCraft)return;if(eq){const p={rid:pc.rid,rank:pc.rank,mul:pc.mul};if(R.kind==='gen')genGet(pc);else if(R.kind==='armor')G.arm[R.slot]=p;else{const J=JOBS[who.job];who.weapon={name:R.n+'（'+pc.rank+'）',k:J.uses,v:Math.round(pc.mul*5),bv:Math.round(pc.mul*5),plus:0,rank:pc.rank,tier:R.tier,rid:pc.rid,mul:pc.mul,shape:pc.shape||null,attr:pc.attr||null}}}
+ const done=eq=>{if(!G.pendCraft)return;if(!eq)invStore(pc,who);else{const p={rid:pc.rid,rank:pc.rank,mul:pc.mul};if(R.kind==='gen')genGet(pc);else if(R.kind==='armor'){invPut(G.arm[R.slot],R.slot);G.arm[R.slot]=p}else{const J=JOBS[who.job];invPutW(who);who.weapon={name:R.n+'（'+pc.rank+'）',k:J.uses,v:Math.round(pc.mul*5),bv:Math.round(pc.mul*5),plus:0,rank:pc.rank,tier:R.tier,rid:pc.rid,mul:pc.mul,shape:pc.shape||null,attr:pc.attr||null}}}
   delete G.pendCraft;save();openShop()};
- $('resBtns').innerHTML='';addBtn('装備する',()=>done(true),'gold');addBtn('今の装備のままにする（手放す）',()=>done(false),'ghost');show('result')}
+ $('resBtns').innerHTML='';addBtn('装備する',()=>done(true),'gold');addBtn('しまっておく（あとで編成で装備できる）',()=>done(false),'ghost');show('result')}
 
 /* ===================== パーティ（出撃キャラ・装備） ===================== */
 function miniHTML(m){const c=CHARS[m.id];return `<div class="mini ${m.id===G.lead?'lead':''}"><img src="${c.img}" alt=""><div class="t">${c.name}${m.id===G.lead?'<span class="ld">出撃</span>':''}<div class="note" style="font-size:11px;line-height:1.3">${ATK[m.id]?TIC(ATK[m.id].type,14)+ATK[m.id].type:''}・×${wMul(m)}</div></div></div>`}
@@ -2839,6 +2845,8 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
  const pc=$('ppClose');if(pc)pc.onclick=()=>{pickSlot=null;pickSel=null;renderParty()};
  {const sb=$('pStar');if(sb)sb.onclick=()=>starUp(m.id)}
  $('partyList').querySelectorAll('[data-gs]').forEach(b=>b.onclick=()=>openGenPick(+b.dataset.gs));
+ $('partyList').querySelectorAll('[data-es]').forEach(b=>b.onclick=()=>openEqPick('w'));
+ $('partyList').querySelectorAll('[data-as]').forEach(b=>b.onclick=()=>openEqPick('a',b.dataset.as));
  $('pUp').onclick=()=>{if(!canGrow(m))return;const k=growCost(m.lv);G.coin-=k.coin;m.lv++;save();tone(880,.15,'triangle',.1,1320);
   renderParty();say(`${c.name} Lv${m.lv}！<br><span style="font-size:14px">基礎攻撃が上がった</span>`,800)}}
 
@@ -3115,8 +3123,8 @@ function genGet(pc){G.gen=G.gen||{};G.gen[pc.rid]={rank:pc.rank,mul:pc.mul,attr:
 /* ---------- 編成画面：装備の列（汎用2・防具3） ---------- */
 function equipRowHTML(){const L=findOwn(G.lead),wr=L&&L.weapon&&L.weapon.rid;
  const gs=[0,1].map(i=>{const r=(G.genEq||[])[i],g=r&&G.gen[r];return `<button class="eqs ${g?'':'empty'} ${g&&genClash(r)?'ng':''}" data-gs="${i}">${g?RIC(r,30)+RKIC(g.rank,18):'<span class="pplus">＋</span>'}</button>`}).join('');
- const as=['head','body','feet'].map(s=>{const p=G.arm[s];return `<span class="eqs arm ${p?'':'empty'}">${p?RIC(p.rid,30)+RKIC(p.rank,18):MIC(s,24)}</span>`}).join('');
- return `<div class="peq"><span class="pel">専用</span><span class="eqs">${WPIC(G.lead,30,wr?RECIPES[wr].tier:0)}</span><span class="pel">汎用</span>${gs}<span class="pel">防具</span>${as}</div>`}
+ const as=['head','body','feet'].map(s=>{const p=G.arm[s];return `<button class="eqs arm ${p?'':'empty'}" data-as="${s}">${p?RIC(p.rid,30)+RKIC(p.rank,18):MIC(s,24)}</button>`}).join('');
+ return `<div class="peq"><span class="pel">専用</span><button class="eqs" data-es="1">${WPIC(G.lead,30,wr?RECIPES[wr].tier:0)}${wr?RKIC(L.weapon.rank,18):''}</button><span class="pel">汎用</span>${gs}<span class="pel">防具</span>${as}</div>`}
 function openGenPick(i){const own=Object.keys(G.gen||{}).filter(r=>RECIPES[r]);const cur=(G.genEq||[])[i];
  const other=(G.genEq||[])[1-i];
  const rows=own.map(r=>{const R=RECIPES[r],g=G.gen[r],A=ATK[R.impl],clash=genClash(r),dup=other&&other!==r&&RECIPES[other].impl===R.impl,on=r===cur;
@@ -3164,6 +3172,56 @@ function wsListHTML(tab){const dec=tab==='dec';
 function wsTap(id){const c=canMake(id);if(c.ok){makeProduct(id);return}
  const ls=[...c.lackM.map(k=>`${MIC(k,22)}${MATS[k].n} ${G.mats[k]||0}/${RECIPES[id].mats[k]}`),...c.lackT.map(t=>`${MIC(t,22)}${TOOLS[t].n}`)];
  say(`<span style="font-size:15px">足りないもの</span><br>${ls.join('<br>')}${c.noWho?'<br>'+CHARS[RECIPES[id].who].name+'がまだ仲間にいない':''}`,1500)}
+
+/* ===================== 持ち物（つくった装備をしまっておき、あとで入れかえる） ===================== */
+/* G.armInv：[{slot,rid,rank,mul}]　G.wInv：[{who,w:{…武器}}] */
+const invArm=()=>G.armInv||(G.armInv=[]),invW=()=>G.wInv||(G.wInv=[]);
+function weaponObj(R,pc,who){const J=JOBS[who.job]||{};return{name:R.n+'（'+pc.rank+'）',k:J.uses,v:Math.round(pc.mul*5),bv:Math.round(pc.mul*5),plus:0,rank:pc.rank,tier:R.tier,rid:pc.rid,mul:pc.mul,shape:pc.shape||null,attr:pc.attr||null}}
+function invPut(p,slot){if(p&&p.rid)invArm().push({slot,rid:p.rid,rank:p.rank,mul:p.mul})}
+function invPutW(m){const w=m.weapon;if(w&&w.rid)invW().push({who:m.id,w});else if(w&&!m.baseW)m.baseW=w}
+function invStore(pc,who){const R=RECIPES[pc.rid];
+ if(R.kind==='gen'){const old=G.gen&&G.gen[pc.rid];if(!old||RANK_ORDER.indexOf(pc.rank)>RANK_ORDER.indexOf(old.rank)){G.gen=G.gen||{};G.gen[pc.rid]={rank:pc.rank,mul:pc.mul,attr:pc.attr||null}}return}
+ if(R.kind==='armor')invPut({rid:pc.rid,rank:pc.rank,mul:pc.mul},R.slot);else invW().push({who:who.id,w:weaponObj(R,pc,who)})}
+const RANK_ORDER=['D','C','B','A','S','SS'];
+/* 専用武器・防具の入れかえ */
+function openEqPick(kind,slot){const L=findOwn(G.lead);let rows='',head='';
+ if(kind==='w'){head=`${CHARS[L.id].name}の専用武器`;const cur=L.weapon;
+  const list=invW().map((x,i)=>[x,i]).filter(([x])=>x.who===L.id);
+  rows=`<button class="gpk on" disabled>${WPIC(L.id,38,cur&&cur.rid?RECIPES[cur.rid].tier:0)}<span class="gpn"><b>${cur&&cur.rid?RECIPES[cur.rid].n+' '+RKIC(cur.rank,18):baseWeapon(L.id)}</b><small>${cur&&cur.rid?`威力×${cur.mul}${cur.attr?'　'+attrTxt(cur.attr):''}`:'はじめの武器'}</small></span><i>装備中</i></button>`+
+   list.map(([x,i])=>`<button class="gpk" data-wi="${i}">${WPIC(L.id,38,RECIPES[x.w.rid].tier)}<span class="gpn"><b>${RECIPES[x.w.rid].n} ${RKIC(x.w.rank,18)}</b><small>威力×${x.w.mul}${x.w.attr?'　'+attrTxt(x.w.attr):''}</small></span></button>`).join('')+
+   (cur&&cur.rid&&L.baseW?`<button class="gpk" data-wi="base">${WPIC(L.id,38,0)}<span class="gpn"><b>${baseWeapon(L.id)}</b><small>はじめの武器</small></span></button>`:'');
+  if(!list.length&&!(cur&&cur.rid&&L.baseW))rows+=`<div class="note" style="text-align:center;margin:12px 0">しまってある専用武器はない。工房でつくると、ここで入れかえられる</div>`}
+ else{head=`防具・${SLOT_NAME[slot]}`;const cur=G.arm[slot];
+  const list=invArm().map((x,i)=>[x,i]).filter(([x])=>x.slot===slot);
+  rows=(cur?`<button class="gpk on" disabled>${RIC(cur.rid,38)}<span class="gpn"><b>${RECIPES[cur.rid].n} ${RKIC(cur.rank,18)}</b><small>${ARMOR_FX[slot].d(cur.mul)}</small></span><i>装備中</i></button>`:'')+
+   list.map(([x,i])=>`<button class="gpk" data-ai="${i}">${RIC(x.rid,38)}<span class="gpn"><b>${RECIPES[x.rid].n} ${RKIC(x.rank,18)}</b><small>${ARMOR_FX[slot].d(x.mul)}</small></span></button>`).join('');
+  if(!cur&&!list.length)rows=`<div class="note" style="text-align:center;margin:12px 0">${MIC(slot,28)}<br>この部位の防具はまだない。工房でつくろう</div>`}
+ $('gpBody').innerHTML=`<div class="gph">${head}</div>${rows}<div class="gpf">${kind==='a'&&G.arm[slot]?'<button class="btn ghost" id="gpOff">はずす</button>':''}<button class="btn" id="gpClose">とじる</button></div>`;
+ const close=()=>{$('genPick').classList.remove('on');save();renderParty()};
+ $('gpBody').querySelectorAll('[data-wi]').forEach(b=>b.onclick=()=>{const v=b.dataset.wi;if(v==='base'){invPutW(L);L.weapon=L.baseW}else{const x=invW()[+v];invW().splice(+v,1);invPutW(L);L.weapon=x.w}tone(700,.1,'triangle',.06,1000);close()});
+ $('gpBody').querySelectorAll('[data-ai]').forEach(b=>b.onclick=()=>{const x=invArm()[+b.dataset.ai];invArm().splice(+b.dataset.ai,1);invPut(G.arm[slot],slot);G.arm[slot]={rid:x.rid,rank:x.rank,mul:x.mul};tone(700,.1,'triangle',.06,1000);close()});
+ {const o=$('gpOff');if(o)o.onclick=()=>{invPut(G.arm[slot],slot);delete G.arm[slot];close()}}
+ $('gpClose').onclick=()=>$('genPick').classList.remove('on');$('genPick').classList.add('on')}
+
+/* ===================== 加工の前に、その装備の特徴を見て、つくるか決める ===================== */
+const PROC_HOW={grind:'グラインダー：鉄を砥石に押し当てて、点線の形に削る',lathe:'旋盤：回る材料に刃物を当てて、金色の線どおりに削る',hit:'金床：輪が金色の円に重なった瞬間にたたく',weld:'溶接機：トーチでつなぎ目をなぞる',cut:'切る：図面の線をなぞって切り出す（いまは図面なぞり）',wire:'配線：図面の線をなぞる（いまは図面なぞり）',trace:'図面の線をなぞって形をつくる'};
+function recipeFx(R){const lo=prodMul(R.tier,'C'),b=prodMul(R.tier,'B'),hi=prodMul(R.tier,'SS');
+ if(R.kind==='armor')return[['効果',`${ARMOR_FX[R.slot].d(b)}（B）`],['出来ばえで',`${ARMOR_FX[R.slot].d(lo)}（C）〜 ${ARMOR_FX[R.slot].d(hi)}（SS）`]];
+ if(R.kind==='gen'){const A=ATK[R.impl],k=MAT_ATTR[genMain(R)],v=+(ATTR_BASE[k]*ATTR_RANK.B).toFixed(3);
+  return[['攻撃',`${TIC(A.type,18)}${A.type}：${A.d[0]}`],['強くなると',A.d.slice(1).join('／')],['威力',`×${b}（B）　C ×${lo} 〜 SS ×${hi}`],['属性',`${attrTxt({k,v})}　主材料「${MATS[genMain(R)].n}」で決まる`],['使える人',genClash(Object.keys(RECIPES).find(x=>RECIPES[x]===R))?`<span style="color:#ff8080">今の出撃キャラ（${CHARS[G.lead].name}）は同じ動きの技なので使えない</span>`:'リーダーが汎用の枠に装備する（2つまで）']]}
+ const A=ATK[R.who];return[['攻撃',`${CHARS[R.who].name}の${TIC(A.type,18)}${A.n}`],['威力',`×${b}（B）　C ×${lo} 〜 SS ×${hi}`],['属性','できあがりでランダム（炎・雷・鋼・風）']]}
+function openRecipe(id){const R=RECIPES[id],c=canMake(id),pr=procOf(R);
+ const mats=Object.keys(R.mats).map(k=>{const lack=(G.mats[k]||0)<R.mats[k];return `<span class="${lack?'lack':''}">${MIC(k,20)}${MATS[k].n} ${G.mats[k]||0}/${R.mats[k]}</span>`}).join('');
+ const tools=R.tools.map(t=>`<span class="${G.tools.includes(t)?'':'lack'}">${MIC(t,20)}${TOOLS[t].n}</span>`).join('');
+ const cur=curProd(R);
+ $('gpBody').innerHTML=`<div class="rdh">${RIC(id,52)}<div><b>${R.n}</b><small>${recTag(R)}・${KANJI_TIER[R.tier]}</small></div></div>
+  <div class="rdt">${recipeFx(R).map(([a,b])=>`<div><span>${a}</span><p>${b}</p></div>`).join('')}<div><span>加工</span><p>${MIC(PROC_TOOL[pr],18)}${PROC_HOW[pr]}</p></div><div><span>今</span><p>${cur}</p></div></div>
+  <div class="rdn"><span>素材</span>${mats}</div><div class="rdn"><span>工具</span>${tools}</div>
+  ${c.ok?'':`<div class="note" style="color:#ff8080;margin-top:6px">${c.noWho?CHARS[R.who].name+'がまだ仲間にいない':'足りないものがある（赤い字）'}</div>`}
+  <div class="gpf"><button class="btn ghost" id="gpClose">やめる</button><button class="btn gold" id="rdGo" ${c.ok?'':'disabled'}>つくる</button></div>`;
+ $('gpClose').onclick=()=>$('genPick').classList.remove('on');
+ $('rdGo').onclick=()=>{if(!canMake(id).ok)return;$('genPick').classList.remove('on');makeProduct(id)};
+ $('genPick').classList.add('on')}
 
 /* ===================== 加工ミニゲーム：打つ（金床）・つなぐ（溶接機） ===================== */
 const HIT_N={1:5,2:7,3:9};          /* 打つ回数 */
