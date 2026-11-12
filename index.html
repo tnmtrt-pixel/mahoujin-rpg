@@ -861,6 +861,20 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 
 .tlv{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11px;color:var(--sm)}.tlv b{color:var(--so)}.tlv i{flex:1;max-width:120px;height:5px;background:#ffffff18;display:block}.tlv u{display:block;height:100%;background:var(--so)}
 .txp{font-size:12px;line-height:1.6;margin:6px auto;padding:6px 10px;border:1px solid #ff7a2f55;background:#ff7a2f10;display:inline-block;text-align:left}.txp b{color:var(--so)}
+/* ガチャ：種類の切りかえ・工具／図面のバナー */
+.gatype{display:flex;gap:0;margin:6px 0 2px;border-bottom:1px solid var(--sl)}.gatype button{flex:1;background:none;border:none;border-bottom:3px solid transparent;color:var(--sm);font-weight:900;font-size:16px;padding:8px 0}
+.gatype button.on{color:var(--so);border-bottom-color:var(--so)}
+.gacss{aspect-ratio:16/10;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:14px}
+.gacss.tl{background:radial-gradient(circle at 80% 20%,#ff7a2f55,transparent 50%),repeating-linear-gradient(45deg,#1b2338 0 10px,#151c2e 10px 20px)}
+.gacss.bp{background:radial-gradient(circle at 80% 20%,#3d8bff66,transparent 50%),linear-gradient(#ffffff10 1px,transparent 1px) 0 0/16px 16px,linear-gradient(90deg,#ffffff10 1px,transparent 1px) 0 0/16px 16px,#0f2448}
+.gcb small{display:block;font-family:'Dela Gothic One',sans-serif;font-size:11px;letter-spacing:.3em;color:#ffffffaa}.gcb b{display:block;font-family:'Dela Gothic One',sans-serif;font-size:30px;letter-spacing:.06em;text-shadow:0 3px 0 #0008}
+.gcb span{display:inline-block;margin-top:4px;background:var(--so);color:#1a0a00;font-weight:900;font-size:12px;padding:2px 8px}.gacss.bp .gcb span{background:var(--bp);color:#fff}
+.gci{display:flex;flex-wrap:wrap;gap:6px}.gci .ic{background:#0008;border:1px solid #ffffff30;padding:4px}
+.gapity{font-size:12px;color:var(--sm);text-align:center;margin:6px 0 0}.gapity b{color:var(--so);font-size:15px}
+.grc.it .gri{display:flex;justify-content:center;padding:10px 0 4px}.grc.it i.dup{background:#3d8bff}
+.lim{font-size:10px;background:linear-gradient(90deg,#ffc94a,#ff7a2f);color:#1a0a00;padding:1px 6px;font-weight:900;vertical-align:middle}
+.gaban.gacss .gcb span{position:static;inset:auto;width:auto;height:auto;font-family:inherit;letter-spacing:0}
+.grc.it i.dup{color:#fff!important}.grc.it i{font-size:10px;line-height:1.3}
 
 </style>
 </head>
@@ -2474,7 +2488,7 @@ function fKill(e){FD.kills++;const F=FFOE[e.k];FD.gems.push({x:e.x,y:e.y,v:F.xp,
 const ownedAll=()=>[...G.party,...(G.bench||[])];
 const findOwn=id=>G.party.find(m=>m.id===id)||(G.bench||[]).find(m=>m.id===id);
 const ownChar=id=>G.party.some(m=>m.id===id)||(G.bench||[]).some(m=>m.id===id);
-function nextBp(){const have=new Set([...G.bps,...(G.bpRaw||[]),...FD.lootBps,...FD.items.filter(i=>i.k==='bp').map(i=>i.id)]);return bpArea(FD.area).find(b=>!have.has(b)&&(RECIPES[b].kind!=='weapon'||ownChar(RECIPES[b].who)||!GACHA_POOL.includes(RECIPES[b].who)))||null}
+function nextBp(){const have=new Set([...G.bps,...(G.bpRaw||[]),...FD.lootBps,...FD.items.filter(i=>i.k==='bp').map(i=>i.id)]);return bpArea(FD.area).find(b=>!RECIPES[b].limited&&!have.has(b)&&(RECIPES[b].kind!=='weapon'||ownChar(RECIPES[b].who)||!GACHA_POOL.includes(RECIPES[b].who)))||null}
 function fGot(it){if(it.k==='coin'){const v=it.v||COIN_DROP;G.coin=(G.coin|0)+v;FD.coin+=v;FD.pops.push({x:FD.x,y:FD.y-40,v:'+'+v,t:0,heal:1});tone(1500,.06,'triangle',.06,2000);renderFHud();return}
  if(it.k==='bp'){FD.lootBps.push(it.id);fBanner(`図面を拾った！「${RECIPES[it.id].n}」`,170,'m_bp');tone(990,.15,'triangle',.08,1480);return}
  if(it.k==='tool'){FD.lootTools.push(it.id);fBanner(`工具を手に入れた！「${TOOLS[it.id].n}」`,170,UI_IC[it.id]);tone(990,.15,'triangle',.08,1480);return}
@@ -2736,7 +2750,7 @@ async function decodeBp(id){const R=RECIPES[id];if(!R||!(G.bpRaw||[]).includes(i
 let shopTab='make',shopFrom='tab';
 /* from：'town'＝町の扉から（タブなし・「町へ」で戻る）／'tab'＝下のタブから */
 function openShop(from){if(from)shopFrom=from;show('shop');G.where={s:'town'};save();renderShop()}
-function canMake(id){const R=RECIPES[id];const lackM=Object.keys(R.mats).filter(k=>(G.mats[k]||0)<R.mats[k]);const lackT=R.tools.filter(t=>!G.tools.includes(t));
+function canMake(id){const R=RECIPES[id];const lackM=Object.keys(R.mats).filter(k=>(G.mats[k]||0)<R.mats[k]);const lackT=R.tools.filter(t=>!hasTool(t));
  const noWho=R.kind==='weapon'&&!ownChar(R.who);return{ok:!lackM.length&&!lackT.length&&!noWho,lackM,lackT,noWho}}
 function prodFx(R,mul){return R.kind==='gen'?`${ATK[R.impl].type}の攻撃　威力 ×${mul}`:R.kind==='armor'?ARMOR_FX[R.slot].d(mul):`${CHARS[R.who].name}の${ATK[R.who].n}の威力 ×${mul}`}
 function curProd(R){if(R.kind==='gen'){const g=G.gen&&G.gen[Object.keys(RECIPES).find(k=>RECIPES[k]===R)];return g?`${R.n}（${g.rank}）`:'まだない'}if(R.kind==='armor'){const p=G.arm[R.slot];return p?`${RECIPES[p.rid].n}（${p.rank}）`:'なし'}const m=findOwn(R.who);return m&&m.weapon&&m.weapon.rid?`${RECIPES[m.weapon.rid].n}（${m.weapon.rank}）`:baseWeapon(R.who)}
@@ -2744,8 +2758,8 @@ function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make',UIMG('u_weap
  let h=`<div class="stabs">${tabs.map(([k,n])=>`<button class="stab ${shopTab===k?'on':''}" data-t="${k}">${n}</button>`).join('')}</div>`;
  if(shopTab==='make'||shopTab==='dec')h+=wsListHTML(shopTab);
  if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。使うほど<b>練度</b>が上がって、その工具を使う加工が楽になる（Lv1〜5）。コインで買えるほか、塔の資材の箱から見つかることもある。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
-  h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${has?'　<span class="tag tg-ok">持っている</span>':''}<div class="note">${T.d}</div>${has?tlvHTML(t):''}</div>
-   ${has?'':(G.floor|0)<(TOOL_GATE[t]||0)?`<div class="note" style="text-align:right;max-width:130px">🔒 ${TOOL_GATE[t]}階に着くと店に並ぶ</div>`:T.price?`<div style="text-align:right"><button class="btn" data-buy="${t}" ${(G.coin|0)<T.price?'disabled':''} style="width:auto;margin:0;padding:10px 14px;font-size:15px">${coinIc(18)}${T.price}で買う</button>${T.where?`<div class="note" style="max-width:130px;margin-top:4px">${T.where}でも見つかる</div>`:''}</div>`:''}</div></div>`}).join('')}
+  h+=TOOL_ORDER.map(t=>{const T=TOOLS[t],has=G.tools.includes(t);return `<div class="rcp"><div class="rh">${MIC(t,34)}<div style="flex:1"><b>${T.n}</b>${T.limited?' <span class="lim">限定</span>':''}${has?'　<span class="tag tg-ok">持っている</span>':''}<div class="note">${T.d}</div>${has?tlvHTML(t):''}</div>
+   ${has?'':T.limited?`<div class="note" style="text-align:right;max-width:130px">工具ガチャだけで出る限定工具</div>`:(G.floor|0)<(TOOL_GATE[t]||0)?`<div class="note" style="text-align:right;max-width:130px">🔒 ${TOOL_GATE[t]}階に着くと店に並ぶ</div>`:T.price?`<div style="text-align:right"><button class="btn" data-buy="${t}" ${(G.coin|0)<T.price?'disabled':''} style="width:auto;margin:0;padding:10px 14px;font-size:15px">${coinIc(18)}${T.price}で買う</button>${T.where?`<div class="note" style="max-width:130px;margin-top:4px">${T.where}でも見つかる</div>`:''}</div>`:''}</div></div>`}).join('')}
  if(shopTab==='rec')h+=recycleHTML();
  if(shopTab==='mat'){h+=`<div class="note">素材は塔の中で、錆の魔物を倒したり資材の箱をあけたりして集める。</div>`+MAT_ORDER.map(k=>`<div class="itr">${MIC(k,40)}<div class="itn"><b>${MATS[k].n}</b><small>${MATS[k].d}</small></div><span class="itc ${G.mats[k]?'':'z'}">×${G.mats[k]}</span></div>`).join('')}
  $('shopBody').innerHTML=h;
@@ -2761,7 +2775,7 @@ let crafting=false;
 async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)return;crafting=true;try{
  let r;
  if(R.kind!=='weapon'&&MINI[procOf(R)]){const pr=procOf(R),M=MINI[pr];
-  r=await M.f({tier:R.tier,shape:R.shape,title:`${M.t}　${R.n}`,assist:recLv(R)});
+  r=await M.f({tier:R.tier,shape:R.shape,title:`${M.t}　${R.n}`,assist:recLv(R),lim:limOf(R)});
   await say(`${M.n} <span class="big">${r.score}</span> 点${r.reach<1?`<br><span style="font-size:14px">最後までできなかった（${Math.round(r.reach*100)}%。SS はなし）</span>`:''}`,r.reach<1?1600:1100)}
  else if(R.kind==='gen'&&R.proc==='lathe'){show('craft');$('craftT').textContent=`旋盤　${R.n}`;$('craftSub').textContent='指で刃物を動かして、金色の線に合わせて削ろう';
   r=await runLathe({tier:R.tier,label:'旋盤・'+KANJI_TIER[R.tier]});r.reach=1;await say(`旋盤 <span class="big">${r.score}</span> 点`,1100)}
@@ -2772,9 +2786,11 @@ async function makeProduct(id){const R=RECIPES[id];if(crafting||!canMake(id).ok)
   await say(`設計 <span class="big">${r.score}</span> 点${r.reach<1?`<br><span style="font-size:14px">最後までなぞれなかった（到達 ${Math.round(r.reach*100)}%。SS はなし）</span>`:''}`,r.reach<1?1700:1200)}
  let ls=r.score;if(R.lathe&&R.kind!=='gen'){show('craft');$('craftT').textContent=`② 加工（旋盤）　${R.n}`;$('craftSub').textContent='上下にドラッグして、刃物の深さを金色の線に合わせよう';
   const L=await runLathe({tier:R.tier,label:'加工・'+KANJI_TIER[R.tier]});ls=L.score;await say(`加工 <span class="big">${L.score}</span> 点`,1100)}
- const tb=toolBonus(R),q=Math.min(100,Math.floor((r.score+ls)/2)+tb),rank=craftRank(q,r.reach),mul=prodMul(R.tier,rank);const txp=toolXpGain(R,q);
+ const tb=toolBonus(R),q=Math.min(100,Math.floor((r.score+ls)/2)+tb);let rank=craftRank(q,r.reach),extra=[];
+ if(hasLim('micro')&&Math.random()<.1&&rank!=='SS'&&rank!=='S'){rank=RANK_ORDER[RANK_ORDER.indexOf(rank)+1];extra.push(`${MIC('micro',18)}マイクロメータ：出来ばえが1段上がった！`)}
+ const mul=+(prodMul(R.tier,rank)*(R.boost||1)*(1+.03*((G.bpPlus||{})[id]||0))).toFixed(2);const txp=toolXpGain(R,q);
  /* 素材は結果が決まったここで引く。装備を選ぶ前に読み込み直しても、作った製品は G.pendCraft に残る */
- Object.keys(R.mats).forEach(k=>G.mats[k]-=R.mats[k]);G.pendCraft={rid:id,rank,mul,ds:r.score,ls:R.lathe?ls:null,reach:r.reach,shape:r.shape||null,attr:R.kind==='weapon'?rollAttr(rank):R.kind==='gen'?genAttr(R,rank):null,grind:R.kind==='weapon'||R.proc==='grind',tb,txp};save();showCraftResult(G.pendCraft)}finally{crafting=false}}
+ Object.keys(R.mats).forEach(k=>G.mats[k]-=R.mats[k]);if(hasLim('ratchet')&&Math.random()<.2){const k=pick(Object.keys(R.mats));G.mats[k]++;extra.push(`${MIC('ratchet',18)}ラチェットレンチ：${MATS[k].n}が1つもどった`)}G.pendCraft={rid:id,rank,mul,ds:r.score,ls:R.lathe?ls:null,reach:r.reach,shape:r.shape||null,attr:R.kind==='weapon'?rollAttr(rank):R.kind==='gen'?genAttr(R,rank):null,grind:R.kind==='weapon'||R.proc==='grind',tb,txp:[...extra,txp].filter(Boolean).join('<br>')};save();showCraftResult(G.pendCraft)}finally{crafting=false}}
 function showCraftResult(pc){const R=RECIPES[pc.rid];if(!R){delete G.pendCraft;save();openShop();return}
  const who=R.kind==='weapon'?findOwn(R.who):null;if(R.kind==='weapon'&&!who){delete G.pendCraft;save();openShop();return}
  $('result').classList.remove('fres');
@@ -3019,13 +3035,12 @@ function openGacha(){show('gacha');renderGacha()}
 /* バナーは今後ふえる（vol.2、vol.3…）。soon:true はまだ引けない */
 const GACHA_BANNERS=[{id:'v1',vol:1,n:'塔のなかまガチャ',img:'img/gacha-v1.webp',pool:GACHA_POOL},{id:'v2',vol:2,n:'近日登場',soon:true},{id:'v3',vol:3,n:'近日登場',soon:true}];
 let gaBan=0;
-function renderGacha(){const B=GACHA_BANNERS[gaBan];
- $('gaBody').innerHTML=`<div class="gacoin">${coinIc(22)}<b>${G.coin}</b><small>コイン</small></div>
- <div class="gavol">${GACHA_BANNERS.map((b,i)=>`<button class="${i===gaBan?'on':''} ${b.soon?'soon':''}" data-gb="${i}">vol.${b.vol}</button>`).join('')}</div>
+function renderCharGacha(){const B=GACHA_BANNERS[gaBan];
+ $('gaBody').innerHTML=gaHead()+`<div class="gavol">${GACHA_BANNERS.map((b,i)=>`<button class="${i===gaBan?'on':''} ${b.soon?'soon':''}" data-gb="${i}">vol.${b.vol}</button>`).join('')}</div>
  <div class="gaban ${B.soon?'soon':''}">${B.soon?`<div class="gasoon"><b>vol.${B.vol}</b><span>近日登場</span></div>`:`<img src="${B.img}" alt=""><span>${B.n}　vol.${B.vol}</span>`}</div>
  <div class="galink"><button data-ga="rate">提供割合</button><button data-ga="list">出るキャラ（図鑑）</button></div>
  <div class="gabtns"><button class="gab" onclick="doGacha(1)" ${B.soon||G.coin<GACHA_COST?'disabled':''}><b>1回</b><small>${coinIc(16)} ${GACHA_COST}</small></button><button class="gab ten" onclick="doGacha(11)" ${B.soon||G.coin<GACHA10_COST?'disabled':''}><b>11回</b><small>${coinIc(16)} ${GACHA10_COST}</small></button></div>`;
- $('gaBody').querySelectorAll('[data-gb]').forEach(b=>b.onclick=()=>{gaBan=+b.dataset.gb;renderGacha()});
+ $('gaBody').querySelectorAll('[data-gb]').forEach(b=>b.onclick=()=>{gaBan=+b.dataset.gb;renderGacha()});gaBind();
  $('gaBody').querySelector('[data-ga=list]').onclick=()=>{ZK.tab='char';goTab('zukan')};
  $('gaBody').querySelector('[data-ga=rate]').onclick=()=>{$('gpBody').innerHTML=`<div class="gph">提供割合　vol.${B.vol}</div><div class="rdt"><div><span>★3</span><p>${STAR_RATE[0][1]*100}%</p></div><div><span>★2</span><p>${STAR_RATE[1][1]*100}%</p></div><div><span>★1</span><p>${STAR_RATE[2][1]*100}%</p></div><div><span>出るキャラ</span><p>${(B.pool||[]).map(id=>CHARS[id].name).join('・')}（どれも同じ確率）</p></div><div><span>かけら</span><p>同じキャラが出ると、かけら（★1＝1、★2＝3、★3＝10）。かけらで★を上げると能力が開く（★5で覚醒）</p></div><div><span>11回</span><p>10回分の値段（${GACHA10_COST}コイン）で11回引ける</p></div></div><div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;$('gpClose').onclick=()=>$('genPick').classList.remove('on');$('genPick').classList.add('on')}}
 function coinIc(s){return UIMG('coin',s)}
@@ -3212,6 +3227,8 @@ const PROC_LBL={grind:'削る',lathe:'旋盤',hit:'打つ',cut:'切る',weld:'�
 const PROC_TOOL={grind:'grinder',lathe:'lathe',hit:'anvil',cut:'snips',weld:'welder',wire:'pliers',trace:'caliper'};
 /* いまの加工のしかた（切る・配線はまだなぞり） */
 const procOf=R=>R.proc||(R.kind==='weapon'?'grind':'trace');
+/* 限定工具：持っていれば加工に特別な力 */
+const limOf=R=>({dcal:hasLim('dcal'),tig:hasLim('tig'),ahammer:hasLim('ahammer')});
 /* 防具は部位で加工を分ける：ヘルメット＝打つ、エプロン・コート＝切る、ベスト＝つなぐ、靴＝けがき */
 Object.entries({helm:['hit',['anvil']],apron:['cut',['snips']],boots:['trace',['file']],mask:['hit',['anvil']],vest:['weld',['welder','vise']],gboots:['trace',['caliper','tap']],chelm:['hit',['anvil','welder']],coat:['cut',['snips','pliers']],jboots:['trace',['caliper','welder']]}).forEach(([k,[p,t]])=>{if(RECIPES[k]){RECIPES[k].proc=p;RECIPES[k].tools=t}});
 function wsListHTML(tab){const dec=tab==='dec';
@@ -3230,7 +3247,7 @@ function wsListHTML(tab){const dec=tab==='dec';
  let last=null;
  h+=ids.map(id=>{const R=RECIPES[id],pr=procOf(R),g=grp(id),c=dec?null:canMake(id);let head='';if(g!==last){head=`<div class="wsg">${g}</div>`;last=g}
   const mats=Object.keys(R.mats).map(k=>{const lack=(G.mats[k]||0)<R.mats[k];return `<i class="${!dec&&lack?'lack':''}">${MIC(k,16)}${dec?'':(G.mats[k]||0)+'/'}${R.mats[k]}</i>`}).join('');
-  const tools=R.tools.map(t=>`<i class="${!dec&&!G.tools.includes(t)?'lack':''}">${MIC(t,16)}</i>`).join('');
+  const tools=R.tools.map(t=>`<i class="${!dec&&!hasTool(t)?'lack':''}">${MIC(useTool(t),16)}</i>`).join('');
   const cur=dec?null:R.kind==='gen'?(G.gen&&G.gen[id]):R.kind==='armor'?G.arm[R.slot]&&G.arm[R.slot].rid===id&&G.arm[R.slot]:(()=>{const m=findOwn(R.who);return m&&m.weapon&&m.weapon.rid===id&&m.weapon})();
   return head+`<button class="wsr ${dec?'dec':c.ok?'ok':''}" ${dec?`data-dec="${id}"`:`data-mk="${id}"`}>
    <span class="wsi">${RIC(id,30)}</span>
@@ -3282,7 +3299,7 @@ function recipeFx(R){const lo=prodMul(R.tier,'C'),b=prodMul(R.tier,'B'),hi=prodM
  const A=ATK[R.who];return[['攻撃',`${CHARS[R.who].name}の${TIC(A.type,18)}${A.n}`],['威力',`×${b}（B）　C ×${lo} 〜 SS ×${hi}`],['属性','できあがりでランダム（炎・雷・鋼・風）']]}
 function openRecipe(id){const R=RECIPES[id],c=canMake(id),pr=procOf(R);
  const mats=Object.keys(R.mats).map(k=>{const lack=(G.mats[k]||0)<R.mats[k];return `<span class="${lack?'lack':''}">${MIC(k,20)}${MATS[k].n} ${G.mats[k]||0}/${R.mats[k]}</span>`}).join('');
- const tools=R.tools.map(t=>`<span class="${G.tools.includes(t)?'':'lack'}">${MIC(t,20)}${TOOLS[t].n}</span>`).join('');
+ const tools=R.tools.map(t=>`<span class="${hasTool(t)?'':'lack'}">${MIC(useTool(t),20)}${TOOLS[useTool(t)].n}</span>`).join('');
  const cur=curProd(R);
  $('gpBody').innerHTML=`<div class="rdh">${RIC(id,52)}<div><b>${R.n}</b><small>${recTag(R)}・${KANJI_TIER[R.tier]}</small></div></div>
   <div class="rdt">${recipeFx(R).map(([a,b])=>`<div><span>${a}</span><p>${b}</p></div>`).join('')}<div><span>加工</span><p>${MIC(PROC_TOOL[pr],18)}${PROC_HOW[pr]}</p></div><div><span>工具の練度</span><p>Lv${recLv(R)}　${toolBonus(R)?`点数 +${toolBonus(R)}`:`許す幅 +${Math.round((assistMul({assist:recLv(R)})-1)*100)}%`}（使うほど上がる）</p></div><div><span>今</span><p>${cur}</p></div></div>
@@ -3308,9 +3325,9 @@ function renderZukan(){const t=ZK.tab,so=ZK.sort[t],S=ZK_SORTS[t],nx=S[(S.findIn
   h+=ids.map(id=>{const m=owned(id),c=CHARS[id];return `<button class="zkc ${m?'':'no'}" data-zc="${id}"><img src="${c.img}" alt=""><span class="hft">${TIC(ATK[id].type,18)}</span><span class="zkno">No.${String(no(id)+1).padStart(2,'0')}</span><span class="hfb"><b>${c.name}</b><small>${m?`Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i>`:'まだいない'}</small></span></button>`}).join('')}
  else if(t==='bp'){let ids=RECIPE_ORDER.slice();if(ZK.own)ids=ids.filter(id=>G.bps.includes(id));const fl={alley:1,factory:2,under:3};
   const key={kind:id=>['weapon','gen','armor'].indexOf(RECIPES[id].kind),proc:id=>PROC_ORDER.indexOf(procOf(RECIPES[id])),floor:id=>fl[RECIPES[id].area]||RECIPES[id].tier}[so];ids.sort((a,b)=>key(a)-key(b)||RECIPES[a].tier-RECIPES[b].tier);
-  h+=ids.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R)+'・'+PROC_LBL[procOf(R)]:LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}
+  h+=ids.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R)+'・'+PROC_LBL[procOf(R)]:R.limited?'図面ガチャ（限定）':LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}
  else if(t==='tool'){let ids=TOOL_ORDER.slice();if(ZK.own)ids=ids.filter(k=>G.tools.includes(k));const key={price:k=>TOOLS[k].price||0,have:k=>G.tools.includes(k)?0:1}[so];ids.sort((a,b)=>key(a)-key(b)||TOOL_ORDER.indexOf(a)-TOOL_ORDER.indexOf(b));
-  h+=ids.map(k=>{const has=G.tools.includes(k);return `<div class="zki ${has?'':'no'}">${MIC(k,40)}<b>${TOOLS[k].n}</b><small>${has?'練度 Lv'+tlv(k):TOOLS[k].price?`${UIMG('coin',12)}${TOOLS[k].price}`:TOOLS[k].where||''}</small></div>`}).join('')}
+  h+=ids.map(k=>{const has=G.tools.includes(k);return `<div class="zki ${has?'':'no'}">${MIC(k,40)}<b>${TOOLS[k].n}</b><small>${has?'練度 Lv'+tlv(k):TOOLS[k].limited?'工具ガチャ（限定）':TOOLS[k].price?`${UIMG('coin',12)}${TOOLS[k].price}`:TOOLS[k].where||''}</small></div>`}).join('')}
  else{let ids=MAT_ORDER.slice();if(ZK.own)ids=ids.filter(k=>G.mats[k]>0);const f1=k=>{const f=Object.keys(FLOOR_MATS).find(f=>floorMats(+f).includes(k));return f?+f:99};
   const key={floor:k=>f1(k),num:k=>-(G.mats[k]||0)}[so];ids.sort((a,b)=>key(a)-key(b)||MAT_ORDER.indexOf(a)-MAT_ORDER.indexOf(b));
   h+=ids.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]||0}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}
@@ -3332,7 +3349,7 @@ const SELL_BASE={1:12,2:30,3:70};
 const SELL_RANK={D:.4,C:.6,B:1,A:1.5,S:2.5,SS:4};
 const sellPrice=(rid,rank)=>Math.round(SELL_BASE[RECIPES[rid].tier]*(SELL_RANK[rank]||1));
 /* 工具は基本素材（鉄くず・ボルト・鉄板）にもどる。値段が高い工具ほど多い */
-function toolScrap(t){const p=TOOLS[t].price||0,o={scrap:Math.max(1,Math.round(p/30))};if(p>=90)o.bolt=Math.round(p/90);if(p>=240)o.plate=Math.round(p/160);return o}
+function toolScrap(t){if(TOOLS[t].limited)return{scrap:4,bolt:2,plate:1};const p=TOOLS[t].price||0,o={scrap:Math.max(1,Math.round(p/30))};if(p>=90)o.bolt=Math.round(p/90);if(p>=240)o.plate=Math.round(p/160);return o}
 const scrapTxt=o=>Object.keys(o).map(k=>`${MIC(k,16)}${MATS[k].n}×${o[k]}`).join('　');
 function recItems(){const L=[];
  invW().forEach((x,i)=>L.push({key:'w:'+i,rid:x.w.rid,rank:x.w.rank,kind:'専用武器',sub:CHARS[x.who].name,ic:WPIC(x.who,34,RECIPES[x.w.rid].tier)}));
@@ -3361,17 +3378,83 @@ function recycleAsk(key){const [k,v]=[key.slice(0,1),key.slice(2)];let body='',g
 /* ===================== 工具の練度（使い込み）：使うほど上がり、その工具を使う加工が楽になる ===================== */
 /* G.tlx：{工具: 経験}。Lv1〜5。被った工具（工具ガチャ）でも大きく上がる */
 const TLV_XP=[0,30,80,160,300];
-const tlv=t=>{const x=(G.tlx||{})[t]||0;let l=1;TLV_XP.forEach((v,i)=>{if(x>=v)l=i+1});return l};
+const tlv=t=>{const x=(G.tlx||{})[t]||0;let l=1;TLV_XP.forEach((v,i)=>{if(x>=v)l=i+1});return TOOLS[t]&&TOOLS[t].limited?Math.max(3,l):l};
 /* そのレシピで使う工具のうち、いちばん練度の高いもの */
-const recLv=R=>Math.max(1,...R.tools.filter(t=>G.tools.includes(t)).map(tlv));
+const recLv=R=>Math.max(1,...R.tools.filter(hasTool).map(t=>tlv(useTool(t))));
 /* グラインダー・旋盤など、ずれの幅を変えにくい加工は点数ボーナスで助ける（Lv5で+8点）。ほかは各ミニゲームで幅が広がる */
-const toolBonus=R=>{const pr=procOf(R);return ['grind','lathe'].includes(pr)||!MINI[pr]?(recLv(R)-1)*2:0};
+const toolBonus=R=>{const pr=procOf(R);return (['grind','lathe'].includes(pr)||!MINI[pr]?(recLv(R)-1)*2:0)+(pr==='lathe'&&hasLim('cnc')?5:0)};
 const assistMul=o=>1+.08*(((o&&o.assist)||1)-1);   /* Lv5で許す幅が+32% */
 function toolXpGain(R,q){G.tlx=G.tlx||{};const g=5+Math.round(q/10),msg=[];
- R.tools.filter(t=>G.tools.includes(t)).forEach(t=>{const b=tlv(t);G.tlx[t]=(G.tlx[t]||0)+g;const a=tlv(t);msg.push(`${MIC(t,18)}${TOOLS[t].n} 練度+${g}${a>b?` <b>Lv${a}に上がった！</b>`:''}`)});
+ R.tools.filter(hasTool).map(useTool).forEach(t=>{const b=tlv(t);G.tlx[t]=(G.tlx[t]||0)+g;const a=tlv(t);msg.push(`${MIC(t,18)}${TOOLS[t].n} 練度+${g}${a>b?` <b>Lv${a}に上がった！</b>`:''}`)});
  return msg.join('<br>')}
 function tlvHTML(t){const x=(G.tlx||{})[t]||0,l=tlv(t),nx=TLV_XP[l],pv=TLV_XP[l-1];
  return `<div class="tlv"><span>練度 <b>Lv${l}</b></span><i><u style="width:${l>=5?100:Math.round((x-pv)/(nx-pv)*100)}%"></u></i><small>${l>=5?'最大':`${x}/${nx}`}</small></div>`}
+
+/* ===================== 限定工具（工具ガチャだけ）・限定装備（図面ガチャだけ） ===================== */
+/* up：いつもの工具の代わりになる（持っていれば、その工具がなくても加工できる）。新品でも練度Lv3から */
+Object.assign(TOOLS,{
+ dcal:   {n:'デジタルノギス',d:'限定。けがきで点にすいつく範囲が2倍',limited:true,up:'caliper'},
+ tig:    {n:'TIG溶接機',    d:'限定。つなぐの「ちょうどいい速さ」の幅が広い',limited:true,up:'welder'},
+ ahammer:{n:'空気ハンマー', d:'限定。打つの輪が少しゆっくりちぢむ',limited:true,up:'anvil'},
+ cnc:    {n:'CNC旋盤',      d:'限定。旋盤の点数+5',limited:true,up:'lathe'},
+ micro:  {n:'マイクロメータ',d:'限定。どの加工でも、出来ばえがたまに1段上がる（10%）',limited:true},
+ ratchet:{n:'ラチェットレンチ',d:'限定。どの加工でも、素材が1つもどってくることがある（20%）',limited:true}});
+const LIM_TOOLS=['dcal','tig','ahammer','cnc','micro','ratchet'];
+Object.assign(UI_IC,{dcal:'t_caliper',tig:'t_welder',ahammer:'t_anvil',cnc:'t_lathe',micro:'t_caliper',ratchet:'t_vise'});
+/* 限定装備：限定工具がないと作れない。boost＝ふつうより強い */
+Object.assign(RECIPES,{
+ dglass:  {n:'デジタル安全メガネ',kind:'armor',slot:'head',tier:1,mats:{plate:2,wire:1},tools:['dcal'],proc:'trace',shape:'ch',area:'gacha',limited:true,boost:1.25},
+ tigarmor:{n:'TIG溶接の鎧',      kind:'armor',slot:'body',tier:2,mats:{plate:3,gear:2},tools:['tig'], proc:'weld', shape:'de',area:'gacha',limited:true,boost:1.25},
+ cncblade:{n:'CNC加工の刃',      kind:'gen',impl:'robot',tier:3,mats:{brass:2,board:2,core:1},tools:['cnc'],proc:'lathe',area:'gacha',limited:true,boost:1.2}});
+Object.assign(ARMOR_IC,{dglass:'ar_mask',tigarmor:'ar_vest'});
+['dglass','tigarmor','cncblade'].forEach(k=>{if(!RECIPE_ORDER.includes(k))RECIPE_ORDER.push(k)});
+const UPG={};Object.keys(TOOLS).forEach(k=>{if(TOOLS[k].up)UPG[TOOLS[k].up]=k});
+/* その工具を持っている？（限定の上位版でもよい）。使う工具＝上位版があればそちら */
+const hasTool=t=>G.tools.includes(t)||(!!UPG[t]&&G.tools.includes(UPG[t]));
+const useTool=t=>UPG[t]&&G.tools.includes(UPG[t])?UPG[t]:t;
+const hasLim=k=>G.tools.includes(k);
+LIM_TOOLS.forEach(k=>{if(!TOOL_ORDER.includes(k))TOOL_ORDER.push(k)});
+
+/* ===================== ガチャ：キャラ／工具／図面 ===================== */
+let gaType='char';
+const TOOL_G={cost:30,cost11:300,lim:.03,pity:30},BP_G={cost:40,cost11:400,lim:.03,pity:30};
+const TOOL_POOL=()=>TOOL_ORDER.filter(t=>!TOOLS[t].limited&&t!=='file');
+const BP_POOL=()=>RECIPE_ORDER.filter(id=>{const R=RECIPES[id];return !R.limited&&(R.kind!=='weapon'||ownChar(R.who))});
+const BP_LIM=()=>RECIPE_ORDER.filter(id=>RECIPES[id].limited);
+function gaHead(){return `<div class="gacoin">${coinIc(22)}<b>${G.coin}</b><small>コイン</small></div>
+ <div class="gatype">${[['char','キャラ'],['tool','工具'],['bp','図面']].map(([k,n])=>`<button class="${gaType===k?'on':''}" data-gt="${k}">${n}</button>`).join('')}</div>`}
+function gaBind(){$('gaBody').querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gaType=b.dataset.gt;renderGacha()})}
+function renderGacha(){if(gaType==='char'){renderCharGacha();return}
+ const tool=gaType==='tool',C=tool?TOOL_G:BP_G,pity=((G.pity||{})[gaType])||0,lims=tool?LIM_TOOLS:BP_LIM();
+ const icons=lims.map(k=>tool?MIC(k,44):RIC(k,44)).join('');
+ $('gaBody').innerHTML=gaHead()+`<div class="gavol"><button class="on">vol.1</button><button class="soon">vol.2</button><button class="soon">vol.3</button></div>
+ <div class="gaban gacss ${tool?'tl':'bp'}"><div class="gcb"><small>${tool?'TOOL':'BLUEPRINT'} GACHA</small><b>${tool?'工具ガチャ':'図面ガチャ'}</b><span>限定${tool?'工具':'装備の図面'} ${Math.round(C.lim*100)}%</span></div><div class="gci">${icons}</div></div>
+ <div class="gapity">限定まで あと <b>${C.pity-pity}</b> 回（${C.pity}回で必ず出る）</div>
+ <div class="galink"><button data-ga="rate">提供割合</button><button data-ga="list">${tool?'工具':'図面'}の一覧（図鑑）</button></div>
+ <div class="gabtns"><button class="gab" data-gp="1" ${G.coin<C.cost?'disabled':''}><b>1回</b><small>${coinIc(16)} ${C.cost}</small></button><button class="gab ten" data-gp="11" ${G.coin<C.cost11?'disabled':''}><b>11回</b><small>${coinIc(16)} ${C.cost11}</small></button></div>`;
+ gaBind();
+ $('gaBody').querySelectorAll('[data-gp]').forEach(b=>b.onclick=()=>pullItems(gaType,+b.dataset.gp));
+ $('gaBody').querySelector('[data-ga=list]').onclick=()=>{ZK.tab=tool?'tool':'bp';goTab('zukan')};
+ $('gaBody').querySelector('[data-ga=rate]').onclick=()=>{$('gpBody').innerHTML=`<div class="gph">提供割合　${tool?'工具':'図面'}ガチャ vol.1</div><div class="rdt">
+  <div><span>限定</span><p>${Math.round(C.lim*100)}%：${lims.map(k=>tool?TOOLS[k].n:RECIPES[k].n).join('・')}</p></div>
+  <div><span>ふつう</span><p>${100-Math.round(C.lim*100)}%：${tool?'工房で売っている工具（やすり以外）':'塔で見つかる図面（仲間の専用武器は、持っているキャラのぶんだけ）'}</p></div>
+  <div><span>天井</span><p>${C.pity}回引くと限定が必ず出る（限定が出たら数えなおし）</p></div>
+  <div><span>被ったら</span><p>${tool?'工具の練度が大きく上がる（+40）。練度Lv5のあとは基本素材になる':'改良図面：その装備の威力+3%（最大+3回）。そのあとは基本素材になる'}</p></div>
+  <div><span>11回</span><p>10回分の値段で11回</p></div></div><div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;$('gpClose').onclick=()=>$('genPick').classList.remove('on');$('genPick').classList.add('on')}}
+function pullItems(type,n){const tool=type==='tool',C=tool?TOOL_G:BP_G,cost=n>1?C.cost11:C.cost;if(G.coin<cost){say('コインが足りない',1000);return}
+ G.coin-=cost;G.pity=G.pity||{};G.bpPlus=G.bpPlus||{};const res=[];
+ for(let i=0;i<n;i++){G.pity[type]=(G.pity[type]||0)+1;let lim=Math.random()<C.lim||G.pity[type]>=C.pity;const pool=lim?(tool?LIM_TOOLS:BP_LIM()):(tool?TOOL_POOL():BP_POOL());if(lim)G.pity[type]=0;
+  const k=pick(pool);res.push(tool?getTool(k,lim):getBp(k,lim))}
+ save();showItemResult(res);renderGacha()}
+function getTool(t,lim){if(!G.tools.includes(t)){G.tools.push(t);return{ic:MIC(t,56),n:TOOLS[t].n,lim,tag:'NEW',cls:'new'}}
+ G.tlx=G.tlx||{};if(tlv(t)>=5){const o=toolScrap(t);Object.keys(o).forEach(m=>G.mats[m]=(G.mats[m]||0)+o[m]);return{ic:MIC(t,56),n:TOOLS[t].n,lim,tag:'素材に',cls:'dup'}}
+ const b=tlv(t);G.tlx[t]=(G.tlx[t]||0)+40;return{ic:MIC(t,56),n:TOOLS[t].n,lim,tag:`練度+40${tlv(t)>b?' ↑Lv'+tlv(t):''}`,cls:'dup'}}
+function getBp(id,lim){const R=RECIPES[id];if(!G.bps.includes(id)&&!(G.bpRaw||[]).includes(id)){(G.bpRaw=G.bpRaw||[]).push(id);return{ic:RIC(id,56),n:R.n,lim,tag:'NEW（要解読）',cls:'new'}}
+ const p=G.bpPlus[id]||0;if(p>=3){G.mats.scrap=(G.mats.scrap||0)+2;G.mats.bolt=(G.mats.bolt||0)+1;return{ic:RIC(id,56),n:R.n,lim,tag:'素材に',cls:'dup'}}
+ G.bpPlus[id]=p+1;return{ic:RIC(id,56),n:R.n,lim,tag:`改良 +${p+1}`,cls:'dup'}}
+function showItemResult(res){const any=res.some(r=>r.lim);
+ $('grCards').innerHTML=res.map((r,i)=>`<div class="grc it ${r.lim?'s3':'s1'}" style="animation-delay:${i*.12}s"><span class="gri">${r.ic}</span><b>${r.n}</b><small>${r.lim?'限定':'　'}</small><i class="${r.cls==='new'?'new':'dup'}">${r.tag}</i></div>`).join('');
+ $('grCards').classList.toggle('one',res.length===1);$('gres').classList.toggle('gold',any);$('gres').classList.add('on');tone(any?880:660,.3,'triangle',.1,any?1760:990)}
 
 /* ===================== 加工ミニゲーム：打つ（金床）・つなぐ（溶接機） ===================== */
 const HIT_N={1:5,2:7,3:9};          /* 打つ回数 */
@@ -3385,7 +3468,7 @@ function forgeOpen(title,sub,ic){$('fgBar').style.display='none';$('fgBar').inne
 
 /* ---------- 打つ：真っ赤な鉄を金床の上でたたいて、金色の線までのばす ---------- */
 function runHit(o){return new Promise(res=>{
- const tier=o.tier||1,N=HIT_N[tier],P=HIT_PERIOD[tier],AM=assistMul(o);
+ const tier=o.tier||1,N=HIT_N[tier],P=HIT_PERIOD[tier]*(o.lim&&o.lim.ahammer?1.25:1),AM=assistMul(o);
  const {cv,g,W,H}=forgeOpen(o.title||'金床で打つ','輪が金色の円に重なった瞬間にタップ。ぴったりなほど、鉄が金色の線どおりにのびる','t_anvil');
  const ax0=W*.1,ax1=W*.9,ay=H*.62;        /* 鉄の中心線 */
  const tgtT=H*.045,startT=H*.11;           /* 目標の厚み（半分）と、はじめの厚み */
@@ -3435,7 +3518,7 @@ function weldPath(shape,W,H){const y=H*.5,x0=W*.1,x1=W*.9,P=[];const n=80;
   else if(shape==='ma')yy=y+Math.sin(u*Math.PI*2)*H*.18;
   P.push([x,yy])}return P}
 function runWeld(o){return new Promise(res=>{
- const tier=o.tier||1,AM=assistMul(o),TOL=WELD_TOL[tier]*AM,VMIN=WELD_V[tier][0]/AM,VMAX=WELD_V[tier][1]*AM;
+ const tier=o.tier||1,AM=assistMul(o),TOL=WELD_TOL[tier]*AM,TG=o.lim&&o.lim.tig?1.3:1,VMIN=WELD_V[tier][0]/AM/TG,VMAX=WELD_V[tier][1]*AM*TG;
  const {cv,g,W,H}=forgeOpen(o.title||'溶接機でつなぐ','指でトーチを動かして、つなぎ目をなぞる。速すぎると細く、遅すぎると焼けすぎる','t_welder');
  const P=weldPath(o.shape||'ch',W,H),n=P.length-1,q=new Float32Array(n).fill(-1),heat=new Float32Array(n);
  let pid=null,tx=W*.5,ty=H*.85,lx=0,ly=0,lt=0,v=0,last=0,raf=0,done=false,spat=0,sparks=[],on=false;
@@ -3524,13 +3607,13 @@ function scribeFig(shape,W,H,tier){const cx=W/2,cy=H/2,F=[];const L=(a,b,c,d)=>F
  else{L(cx-w,cy-h,cx+w,cy-h);L(cx+w,cy-h,cx+w,cy+h);L(cx+w,cy+h,cx-w,cy+h);L(cx-w,cy+h,cx-w,cy-h);C(cx,cy,W*.09)}
  if(tier>=2)C(cx-w*.6,cy-h*.55,W*.05);if(tier>=3)L(cx-w*.6,cy+h*.6,cx+w*.6,cy+h*.6);return F}
 function runScribe(o){return new Promise(res=>{
- const tier=o.tier||1,snapOn=!!(window.G&&G.tools&&G.tools.includes('caliper'));
+ const tier=o.tier||1,snapOn=!!(window.G&&G.tools&&(G.tools.includes('caliper')||G.tools.includes('dcal'))),SN=o.lim&&o.lim.dcal?2:1;
  const {cv,g,W,H}=forgeOpen(o.title||'けがき','図面の線を鉄板に写す。定規：始めから終わりまでドラッグ。コンパス：円の中心を押して、外へドラッグ','t_caliper');
  const F=scribeFig(o.shape||'ch',W,H,tier),drawn=[],pts=[];F.forEach(f=>{if(f.t==='l'){pts.push(f.a,f.b)}else pts.push(f.c)});
  let tool='l',cur=null,pid=null,done=false;
  const bar=$('fgBar');bar.innerHTML=`<button data-tl="l" class="on">📏 定規</button><button data-tl="c">⭕ コンパス</button><button data-tl="u">↶ 1つ消す</button>`;bar.style.display='flex';
  bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{const t=b.dataset.tl;if(t==='u'){drawn.pop();draw();return}tool=t;bar.querySelectorAll('[data-tl]').forEach(x=>x.classList.toggle('on',x.dataset.tl===t))});
- const AM=assistMul(o),snapP=p=>{if(!snapOn)return p;let best=p,bd=12*AM;pts.forEach(q=>{const d=Math.hypot(q[0]-p[0],q[1]-p[1]);if(d<bd){bd=d;best=q}});return best};
+ const AM=assistMul(o),snapP=p=>{if(!snapOn)return p;let best=p,bd=12*AM*SN;pts.forEach(q=>{const d=Math.hypot(q[0]-p[0],q[1]-p[1]);if(d<bd){bd=d;best=q}});return best};
  function match(f){let best=0;drawn.forEach(d=>{if(d.t!==f.t)return;let q;
   if(f.t==='l'){const e1=Math.hypot(d.a[0]-f.a[0],d.a[1]-f.a[1])+Math.hypot(d.b[0]-f.b[0],d.b[1]-f.b[1]),e2=Math.hypot(d.a[0]-f.b[0],d.a[1]-f.b[1])+Math.hypot(d.b[0]-f.a[0],d.b[1]-f.a[1]);q=1-Math.min(e1,e2)/(40*AM)}
   else q=1-(Math.hypot(d.c[0]-f.c[0],d.c[1]-f.c[1])+Math.abs(d.r-f.r)*1.2)/(26*AM);best=Math.max(best,q)});return Math.max(0,best)}
