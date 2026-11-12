@@ -906,6 +906,9 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 /* 進化・覚醒のカード */
 .fpick.evo{border:2px solid #ffc94a!important;background:linear-gradient(90deg,#ffc94a22,transparent 70%),var(--sk2)!important}
 .fpick.evo .lvt{background:#ffc94a;color:#1a0a00}.fpe{position:relative;width:52px;height:44px;flex:none}.fpe img{position:absolute;height:44px;width:auto}.fpe img+img{left:18px}
+.fhelp{display:inline-flex;align-items:center;gap:3px;margin-right:6px;padding:1px 6px 1px 1px;background:#ffc94a22;border:1px solid #ffc94a88;color:#ffd25a;font-size:11px;font-weight:800}
+.fhelp img{width:20px;height:20px;object-fit:cover;object-position:50% 0}
+.pgd{margin:6px 0 8px;padding-left:22px;font-size:15px;line-height:1.7}.pgd li{margin-bottom:4px}
 
 </style>
 </head>
@@ -2671,6 +2674,7 @@ function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDP
  const wsh=(G.party.find(m=>m.id==='wolf')||{}).weapon,wspr=wsh&&wsh.shape?shapeCanvas(wsh.shape,30,'#ffd27f'):null;
  for(const s of D.shots){if(wspr){g.save();g.translate(s.x,s.y);g.rotate(Math.atan2(s.vy,s.vx));g.drawImage(wspr,-15,-9,30,18);g.restore();continue}g.save();g.translate(s.x,s.y);g.rotate(s.rot);g.fillStyle='#e8c35a';g.strokeStyle='#fff3c0';g.lineWidth=1.5;g.beginPath();g.moveTo(10,0);g.lineTo(-6,-5);g.lineTo(-3,0);g.lineTo(-6,5);g.closePath();g.fill();g.stroke();g.restore()}
  g.font='800 13px sans-serif';g.textAlign='center';for(const p of D.pops){g.globalAlpha=1-p.t/30;g.fillStyle=p.heal?'#7fffa0':'#fff';g.fillText(p.v,p.x,p.y-p.t*.8)}g.globalAlpha=1;
+ fDrawExtra(g,D);
  g.restore();
  // 上の帯
  const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+`<span class="ffl">${D.floor}F</span><span class="ftm">${D.boss?'ボス戦':Math.floor(lf/60)+':'+String(lf%60).padStart(2,'0')}</span>`+`<span class="fmats">${matIcons(D.floor,18)}</span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
@@ -3946,6 +3950,39 @@ function evoPick(t,k){FD.evo=FD.evo||{};FD.awk=FD.awk||{};if(t==='e'){FD.evo[k]=
   if(!D._said&&D.t>1.2&&!D.paused){D._said=true;const L=FLOOR_LINES[D.floor];if(L)fSay(speaker(),pick(L))}
   if(D.stairs&&D.stairs.open&&!D._key&&!FLOORS[D.floor].boss){D._key=true;fSay(speaker(),pick(KEY_LINES))}}
  return _u(f)}}
+
+/* ---------- 画面の足りないところ：鍵持ちの目印・進化／覚醒の光・お助け仲間の表示・はじめての加工の案内 ---------- */
+function fDrawExtra(g,D){const t=D.t;
+ /* 鍵を持った強敵：頭の上に鍵 */
+ const ki=fspr('img/ui/f_key.webp',40);
+ for(const e of D.foes){if(!e.key)continue;const y=e.y-e.r-30+Math.sin(t*5)*3;g.save();g.globalAlpha=.55+.45*Math.sin(t*6);g.strokeStyle='#ffc94a';g.lineWidth=2;g.beginPath();g.arc(e.x,y,17,0,TAU);g.stroke();g.globalAlpha=1;
+  if(ki)g.drawImage(ki,e.x-15,y-15,30,30);else{g.fillStyle='#ffc94a';g.fillRect(e.x-6,y-6,12,12)}g.restore()}
+ /* 進化・覚醒：自分のまわりに金の光。進化した連射の弾は金色の尾 */
+ const n=Object.keys(D.evo||{}).filter(k=>D.evo[k]).length+Object.keys(D.awk||{}).filter(k=>D.awk[k]).length;
+ if(n){g.save();g.globalAlpha=.35+.15*Math.sin(t*4);g.strokeStyle='#ffc94a';g.lineWidth=3;g.beginPath();g.arc(D.x,D.y-14,30+3*Math.sin(t*3),0,TAU);g.stroke();g.globalAlpha=1;g.fillStyle='#ffe58a';
+  for(let i=0;i<n;i++){const a=t*2.4+i/n*TAU;g.beginPath();g.arc(D.x+Math.cos(a)*34,D.y-14+Math.sin(a)*34,3,0,TAU);g.fill()}g.restore()}
+ if(D.evo&&D.evo.wolf){g.save();g.fillStyle='#ffd25a';for(const s of D.shots){g.globalAlpha=.5;g.beginPath();g.arc(s.x-s.vx*1.5,s.y-s.vy*1.5,4,0,TAU);g.fill();g.globalAlpha=.25;g.beginPath();g.arc(s.x-s.vx*3,s.y-s.vy*3,3,0,TAU);g.fill()}g.restore()}}
+/* お助け仲間が今いること：拾った物の列の前に顔 */
+{const _r=renderFHud;renderFHud=function(){_r();if(!FD)return;const ids=[...Object.keys(FD.helperMs||{}),...Object.keys(FD.hboost||{})];if(!ids.length)return;
+ const h=ids.map(id=>`<span class="fhelp"><img src="${CHARS[id].img}" alt="">${FD.hboost&&FD.hboost[id]?'強化':'お助け'}</span>`).join('');$('fLoot').insertAdjacentHTML('afterbegin',h)}}
+
+/* はじめての加工の案内（本編で、その加工を初めてするときだけ） */
+const PROC_GUIDE={
+ file:['材料の上を、左右に大きくこする','まっすぐ・同じ速さで往復するほど、たくさん削れる','下の色が緑になったら止める。削りすぎると赤'],
+ grind:['鉄の板を指で動かして、回る砥石に押し当てる','点線の形になるように削る','⟲⟳ボタンで板を45°回せる'],
+ lathe:['下のハンドルを、指で円をえがくように回す','左＝刃物を左右へ、右＝刃物を深く','金色の線まで削れたら「仕上げる」'],
+ hit:['輪がちぢんで、金色の円に重なった瞬間にタップ','ぴったりなほど、鉄が金色の線までのびる','輪は何度でもまたちぢむ。あわてなくていい'],
+ cut:['タップで、はさみがひと切り進む','左右にドラッグすると、はさみの向きが変わる','角では止まって、向きを合わせてから切る'],
+ weld:['トーチを指で動かして、つなぎ目をなぞる','下のメーターの金色の帯の速さで動かす','速すぎると細く、遅すぎると焼けすぎる'],
+ wire:['同じ色の端子を、指でなぞってつなぐ','線どうしは交差できない','全部つないだら、ゲージが緑のときにタップ（はんだ付け）'],
+ trace:['定規：始めから終わりまでドラッグ','コンパス：円の中心を押して、外へドラッグ','金色の点線にぴったり重ねる'],
+ drill:['画面を長押しすると、刃が下がる','右のメーターを、緑の帯に保つ','赤まで押し続けると刃が折れる。少し離して調整'],
+ tap:['ハンドルを、指で円をえがくように回す','右に半回転すすめたら、左に1/4もどす','もどさずに回し続けると、タップが折れる']};
+function procGuide(pr){return new Promise(res=>{const st=PROC_GUIDE[pr];if(!st){res();return}
+ $('gpBody').innerHTML=`<div class="rdh">${MIC(PROC_TOOL[pr],52)}<div><b>はじめての${PROC_LBL[pr]}</b><small>やり方</small></div></div><ol class="pgd">${st.map(x=>`<li>${x}</li>`).join('')}</ol>
+  <div class="note">道場（工房の「加工ミニゲーム道場」）で、いつでも練習できる</div><div class="gpf"><button class="btn gold" id="pgOk">わかった！ はじめる</button></div>`;
+ $('genPick').classList.add('on');$('pgOk').onclick=()=>{$('genPick').classList.remove('on');res()}})}
+{const _p=runProc;runProc=async function(R,pr,st){if(typeof G!=='undefined'&&G&&!G.flags['guide_'+pr]){await procGuide(pr);G.flags['guide_'+pr]=1;save()}return _p(R,pr,st)}}
 
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
