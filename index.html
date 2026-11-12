@@ -2895,7 +2895,7 @@ function slotAssign(k,id){if(k==null||!id)return;const x=G.party[k];if(x&&x.id==
 /* ---------- 図鑑（図面・工具・素材） ---------- */
 function openZukan(){show('zukan');
  $('zkBody').innerHTML=`<div class="zkh">図面 ${G.bps.length}/${RECIPE_ORDER.length}</div><div class="zkg">${RECIPE_ORDER.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);
-  return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?(R.kind==='armor'?'防具・'+SLOT_NAME[R.slot]:CHARS[R.who].name+'の武器'):LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}</div>
+  return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R):LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}</div>
  <div class="zkh">工具 ${G.tools.length}/${TOOL_ORDER.length}</div><div class="zkg">${TOOL_ORDER.map(t=>{const has=G.tools.includes(t);return `<div class="zki ${has?'':'no'}">${MIC(t,40)}<b>${TOOLS[t].n}</b><small>${has?'持っている':TOOLS[t].price?'工房で買える':TOOLS[t].where}</small></div>`}).join('')}</div>
  <div class="zkh">素材</div><div class="zkg">${MAT_ORDER.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}</div>`}
 function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button>`;$('sheet').classList.add('on')}
