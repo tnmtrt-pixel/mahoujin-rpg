@@ -3019,7 +3019,7 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
    ${hasW?`<button class="hexb" onclick="goTab('shop')"><span>${UIMG('u_weapon',20)} 武器をつくる</span></button>`:''}</div>
   <div class="pname"><b>${c.name}</b><span>${TIC(A.type,20)}${A.n}（${A.type}）</span><div class="stup">${starHTML(m)}</div></div></div>
  <div class="pcards">
-  <div class="abcard"><div class="abh">${w&&w.rid?RKIC(rank,26):''}<b>${WPIC(m.id,22,w&&w.rid?RECIPES[w.rid].tier:0)} ${w&&w.rid?RECIPES[w.rid].n:baseWeapon(m.id)}</b></div>
+  <div class="abcard">
    ${w&&w.attr?`<div class="wattr2"><span class="wattr">${attrTxt(w.attr)}</span><button class="hexb rf" onclick="reforge('${m.id}')"><span>鍛え直し ${MIC('scrap',14)}${REFORGE_COST}</span></button></div>`:''}
    ${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
   <div class="lvcard"><div class="lvh">Lv <b>${m.lv}</b><small>/${GROW_MAX}</small></div>
