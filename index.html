@@ -969,6 +969,10 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .wmp b{font-size:12px}.wmp small{font-size:10px;color:#e8c35a}.wmp.fog{background:#3a3f50cc;border-color:#9aa0b0;color:#e6e6ee}.wmp.sel{box-shadow:0 0 0 2px #fff}
 .wmd{width:100%;max-width:520px;margin-top:8px;background:#0b1024;border:1px solid var(--line,#2a3150);border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.55;color:#c8cbe0;min-height:52px}
 .wmd b{display:block;color:#fff;font-size:13px;margin-bottom:2px}
+/* ホームのボタンが押せない・改行する問題 */
+#home .hfh,#home .hfh *{pointer-events:auto}.hfh .hfe{white-space:nowrap;flex:none}.hfh .hfs{min-width:0;white-space:nowrap;overflow:hidden}
+/* 工房の鍛え直し */
+.rfr{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--sl)}.rfr span{flex:1;display:flex;flex-direction:column;min-width:0}.rfr small{font-size:12px;color:var(--sm)}.rfr .hexb{white-space:nowrap;padding:5px 10px}
 
 </style>
 </head>
@@ -3020,7 +3024,7 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
   <div class="pname"><b>${c.name}</b><span>${TIC(A.type,20)}${A.n}（${A.type}）</span><div class="stup">${starHTML(m)}</div></div></div>
  <div class="pcards">
   <div class="abcard">
-   ${w&&w.attr?`<div class="wattr2"><span class="wattr">${attrTxt(w.attr)}</span><button class="hexb rf" onclick="reforge('${m.id}')"><span>鍛え直し ${MIC('scrap',14)}${REFORGE_COST}</span></button></div>`:''}
+   
    ${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
   <div class="lvcard"><div class="lvh">Lv <b>${m.lv}</b><small>/${GROW_MAX}</small></div>
    <div class="lvs"><span>攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)).toFixed(2)}</span><span>武器 ×${wMul(m)}</span></div>
@@ -3092,7 +3096,7 @@ function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML
 
 /* 鍛え直し：鉄くずを使って属性を付け直す */
 function reforge(id){const m=owned(id),w=m&&m.weapon;if(!w||!w.attr)return;if(G.mats.scrap<REFORGE_COST){say('鉄くずが足りない',900);return}
- G.mats.scrap-=REFORGE_COST;const old=w.attr;w.attr=rollAttr(w.rank||'B');save();tone(700,.15,'square',.06,1400);renderParty();say(`鍛え直した！<br><span style="font-size:14px">${ATTRS[old.k].n} → ${ATTRS[w.attr.k].n}（${ATTRS[w.attr.k].d(w.attr.v)}）</span>`,1500)}
+ G.mats.scrap-=REFORGE_COST;const old=w.attr;w.attr=rollAttr(w.rank||'B');save();tone(700,.15,'square',.06,1400);if(onScr('party'))renderParty();else openReforge();say(`鍛え直した！<br><span style="font-size:14px">${ATTRS[old.k].n} → ${ATTRS[w.attr.k].n}（${ATTRS[w.attr.k].d(w.attr.v)}）</span>`,1500)}
 
 /* =====================================================================
    ガチャ（原作マイスターの塔と同じく、キャラが出る）
@@ -3357,7 +3361,7 @@ function wsListHTML(tab){const dec=tab==='dec';
  const nx=WS_SORT[(WS_SORT.findIndex(x=>x[0]===WS.sort)+1)%WS_SORT.length][0];
  let h=`<div class="wsbar"><div class="wsch">${WS_KIND.map(([k,n])=>`<button class="${WS.kind===k?'on':''}" data-wsk="${k}">${n}</button>`).join('')}</div>
   <button class="wssort" data-wss="${nx}">並び：<b>${WS_SORT.find(x=>x[0]===WS.sort)[1]}</b> ⇅</button></div>`;
- if(!dec)h+=`<button class="prgo" onclick="openPractice()">${UIMG('u_dojo',22)} 加工ミニゲーム道場で練習する　→</button>`;
+ if(!dec)h+=`<button class="prgo" onclick="openPractice()">${UIMG('u_dojo',22)} 加工ミニゲーム道場で練習する　→</button>`+(ownedAll().some(m=>m.weapon&&m.weapon.attr)?`<button class="prgo rfgo" onclick="openReforge()">${MIC('scrap',20)} 武器の鍛え直し（属性をつけ直す）　→</button>`:'');
  if(!dec&&(G.bpRaw||[]).length)h+=`<button class="bpgo" data-t="dec">${MIC('bp',20)} 未解読の図面が ${G.bpRaw.length}枚　→ 解読へ</button>`;
  if(dec)h+=`<div class="wshint">図面をタップすると三面図の解読が始まる。正しい立体を選ぶと、つくれるようになる</div>`;
  
@@ -4499,6 +4503,13 @@ function openWorldMap(){let el=$('wmap');if(!el){el=document.createElement('div'
  el.querySelectorAll('[data-wm]').forEach(b=>b.onclick=()=>{const p=WMAP.places.find(q=>q.k===b.dataset.wm),o=p.open();
   el.querySelectorAll('.wmp.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');
   $('wmD').innerHTML=o?`<b>${p.n}　${p.t}</b>${p.d}`:`<b>？？？</b>${p.hint||'霧に包まれていて、まだ見えない。'}`})}
+
+/* ---------- 工房：武器の鍛え直し（編成から移した） ---------- */
+function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
+ $('gpBody').innerHTML=`<div class="gph">武器の鍛え直し</div><div class="note">鉄くず ${REFORGE_COST}個で、武器の属性をつけ直す（いま ${MIC('scrap',16)}${G.mats.scrap|0}）</div>
+  ${ms.map(m=>{const w=m.weapon;return `<div class="rfr">${WPIC(m.id,40,w.rid&&RECIPES[w.rid]?RECIPES[w.rid].tier:0)}<span><b>${CHARS[m.id].name}　${w.rid&&RECIPES[w.rid]?RECIPES[w.rid].n:''}</b><small>${attrTxt(w.attr)}</small></span><button class="hexb rf" onclick="reforge('${m.id}')" ${(G.mats.scrap|0)<REFORGE_COST?'disabled':''}><span>鍛え直し</span></button></div>`}).join('')||'<div class="note">属性のついた武器がない</div>'}
+  <div class="gpf"><button class="btn" id="rfX">とじる</button></div>`;
+ $('genPick').classList.add('on');$('rfX').onclick=()=>$('genPick').classList.remove('on')}
 
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
