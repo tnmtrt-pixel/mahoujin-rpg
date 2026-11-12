@@ -959,6 +959,16 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 #partyList .pname .stup{max-width:70vw;gap:4px 8px;margin-top:6px}
 #partyList .pbtns .plead{display:none}#partyList .pbtns{bottom:8px}
 .wattr2 .hexb.rf span{white-space:nowrap}
+/* 世界地図 */
+#wmap{position:fixed;inset:0;z-index:60;background:#0b0f1ef2;display:none;flex-direction:column;align-items:center;padding:calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 10px);overflow-y:auto}
+#wmap.on{display:flex}
+.wmh{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}.wmh b{font-size:18px;color:var(--gold,#e8c35a)}.wmh .btn{width:auto;padding:6px 14px;margin:0}
+.wmbox{position:relative;width:min(100%,calc((100dvh - 190px)*.75),520px);aspect-ratio:1086/1448;border-radius:10px;overflow:hidden;flex:none}
+.wmbox img,.wmbox canvas{position:absolute;inset:0;width:100%;height:100%}
+.wmp{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;background:#0b1024d9;border:1px solid #e8c35a;border-radius:10px;padding:3px 8px;color:#fff;line-height:1.2;white-space:nowrap}
+.wmp b{font-size:12px}.wmp small{font-size:10px;color:#e8c35a}.wmp.fog{background:#3a3f50cc;border-color:#9aa0b0;color:#e6e6ee}.wmp.sel{box-shadow:0 0 0 2px #fff}
+.wmd{width:100%;max-width:520px;margin-top:8px;background:#0b1024;border:1px solid var(--line,#2a3150);border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.55;color:#c8cbe0;min-height:52px}
+.wmd b{display:block;color:#fff;font-size:13px;margin-bottom:2px}
 
 </style>
 </head>
@@ -2990,7 +3000,7 @@ function fitHomeArt(){if(!onScr('home'))return;const hm=$('home').getBoundingCli
 function homeFormHTML(L,others){const card=(m,k,lead)=>{if(!m)return `<button class="hfc em" data-hf="slot:${k}"><span>＋</span><small>空き</small></button>`;const c=CHARS[m.id],A=ATK[m.id];
   return `<button class="hfc ${lead?'ld':'fc'}" data-hf="${m.id}"><img src="${lead?c.img:FACE(m.id)}" alt=""><span class="hft">${TIC(A.type,lead?24:18)}</span>${lead?'<span class="hfl">LEADER</span>':''}<span class="hfb"><b>${c.name}</b><small>Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i></small></span></button>`};
  const rest=Array.from({length:PARTY_MAX-1},(_,i)=>card(others[i],i+1,false)).join('');
- return `<div class="hform"><div class="hfh"><span class="hfk">PARTY</span><span class="hfs"><i>攻撃</i><b>${teamPow()}</b><i>体力</i><b>${teamHp()}</b></span>${(()=>{const n=chatNew().length;return `<button class="hfe hch ${n?'on':''}" onclick="openChats()">チャット${n?`<i>${n}</i>`:''}</button>`})()}<button class="hfe" data-hf="${L.id}">編成 ›</button></div>${card(L,0,true)}${rest}</div>`}
+ return `<div class="hform"><div class="hfh"><span class="hfk">PARTY</span><span class="hfs"><i>攻撃</i><b>${teamPow()}</b><i>体力</i><b>${teamHp()}</b></span>${(()=>{const n=chatNew().length;return `<button class="hfe hch ${n?'on':''}" onclick="openChats()">チャット${n?`<i>${n}</i>`:''}</button>`})()}<button class="hfe" onclick="openWorldMap()">地図</button><button class="hfe" data-hf="${L.id}">編成 ›</button></div>${card(L,0,true)}${rest}</div>`}
 addEventListener('resize',()=>{if(onScr('home'))fitHomeArt()});
 
 /* ---------- 編成 ---------- */
@@ -3078,7 +3088,7 @@ function _oldZukan(){show('zukan');
   return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R):LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}</div>
  <div class="zkh">工具 ${G.tools.length}/${TOOL_ORDER.length}</div><div class="zkg">${TOOL_ORDER.map(t=>{const has=G.tools.includes(t);return `<div class="zki ${has?'':'no'}">${MIC(t,40)}<b>${TOOLS[t].n}</b><small>${has?'持っている':TOOLS[t].price?'工房で買える':TOOLS[t].where}</small></div>`}).join('')}</div>
  <div class="zkh">素材</div><div class="zkg">${MAT_ORDER.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}</div>`}
-function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openChats()">チャット一覧</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button>`;$('sheet').classList.add('on')}
+function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openChats()">チャット一覧</button><button class="btn ghost" onclick="closeSheet();openWorldMap()">世界地図</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button>`;$('sheet').classList.add('on')}
 
 /* 鍛え直し：鉄くずを使って属性を付け直す */
 function reforge(id){const m=owned(id),w=m&&m.weapon;if(!w||!w.attr)return;if(G.mats.scrap<REFORGE_COST){say('鉄くずが足りない',900);return}
@@ -4464,6 +4474,31 @@ function chestRewards(){const D=FD,out=[];D.evo=D.evo||{};D.awk=D.awk||{};
 Object.assign(UI_IC,{titan:'m_titan',cell:'m_cell',carbon:'m_carbon'});
 Object.assign(ARMOR_IC,{thelm:'ar_thelm',cvest:'ar_cvest',tboots:'ar_tboots'});
 Object.assign(GEN_IC,{g_star:'wg_star',g_ring:'wg_ring'});
+
+/* ===================== 世界地図：行ったことのない場所は霧。章が進むと晴れる ===================== */
+const WMAP={img:'img/worldmap.webp',places:[
+ {k:'tetto', x:.43,y:.77,r:.25,n:'鉄灯の街',  t:'マイスターの塔',d:'夜の工業の街。塔の灯りが、街の名前のもとになった。塔には、錆を元の道具にもどす「再生の陣」が刻まれている。',open:()=>true},
+ {k:'judge', x:.18,y:.19,r:.2, n:'白黒の高原',t:'審判の塔',    d:'正しさを量る「天秤の陣」の塔。過ちを犯した者が登り、自分の罪と向き合う。第2章の舞台。',open:()=>!!G.flags.ch1b,hint:'霧の向こうに、白と黒の塔の影が見える……'},
+ {k:'sougi', x:.86,y:.35,r:.19,n:'黄金の港町',t:'創技の塔',    d:'新しい技を生み出す「創成の陣」の塔。第3章の舞台。',open:()=>false,hint:'東の海の向こうから、金色の光がもれている……'},
+ {k:'hw',    x:.82,y:.67,r:.14,n:'いたずらの島',t:'ハロウィンの塔',d:'遊びと文化を生む「祭りの陣」の塔。季節のイベントで開く。',open:()=>false,hint:'海の上から、にぎやかな笑い声が聞こえる……'},
+ {k:'inf',   x:.54,y:.07,r:.12,n:'雲海',      t:'？？？',      d:'',open:()=>false,hint:'雲の上に、てっぺんの見えない塔の影がある……'}]};
+function openWorldMap(){let el=$('wmap');if(!el){el=document.createElement('div');el.id='wmap';document.body.appendChild(el)}
+ el.innerHTML=`<div class="wmh"><b>世界地図</b><button class="btn ghost" id="wmX">とじる</button></div>
+  <div class="wmbox" id="wmBox"><img src="${WMAP.img}" alt="世界地図" id="wmImg"><canvas id="wmFog"></canvas>
+  ${WMAP.places.map(p=>{const o=p.open();return `<button class="wmp ${o?'on':'fog'}" data-wm="${p.k}" style="left:${p.x*100}%;top:${p.y*100}%">${o?`<b>${p.n}</b><small>${p.t}</small>`:'<b>？？？</b>'}</button>`}).join('')}</div>
+  <div class="wmd" id="wmD">場所をタップすると、くわしく見られる</div>`;
+ el.classList.add('on');$('wmX').onclick=()=>el.classList.remove('on');
+ const draw=()=>{const box=$('wmBox'),c=$('wmFog'),W=box.clientWidth,H=box.clientHeight;if(!W)return;const dpr=Math.min(2,devicePixelRatio||1);c.width=W*dpr;c.height=H*dpr;const g=c.getContext('2d');g.scale(dpr,dpr);
+  g.fillStyle='rgba(226,224,218,.93)';g.fillRect(0,0,W,H);
+  let s=7;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  for(let i=0;i<140;i++){const x=rnd()*W,y=rnd()*H,r=20+rnd()*60;const gr=g.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,'rgba(255,255,255,.55)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,TAU);g.fill()}
+  g.globalCompositeOperation='destination-out';
+  for(const p of WMAP.places){if(!p.open())continue;const x=p.x*W,y=p.y*H,r=p.r*W*1.25;const gr=g.createRadialGradient(x,y,r*.45,x,y,r);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,TAU);g.fill()}
+  g.globalCompositeOperation='source-over'};
+ const im=$('wmImg');if(im.complete)draw();else im.onload=draw;
+ el.querySelectorAll('[data-wm]').forEach(b=>b.onclick=()=>{const p=WMAP.places.find(q=>q.k===b.dataset.wm),o=p.open();
+  el.querySelectorAll('.wmp.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');
+  $('wmD').innerHTML=o?`<b>${p.n}　${p.t}</b>${p.d}`:`<b>？？？</b>${p.hint||'霧に包まれていて、まだ見えない。'}`})}
 
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
