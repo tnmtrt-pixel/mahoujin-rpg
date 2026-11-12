@@ -1023,7 +1023,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 
 <section id="pick" class="scr">
  <div class="hd"><h2>主人公</h2></div>
- <p class="note">ドド先輩・ギアフォックス・ホー博士の3人は、マイスターの塔の2階・5階・7階で1人ずつ仲間になります。</p>
+ <p class="note">塔の各層で、お助け仲間が手を貸してくれます。</p>
  <div class="cgrid" id="pickGrid"></div>
  <div class="panel" id="pickInfo" style="display:none"></div>
  <button class="btn gold" id="pickOk" disabled>ウルフで始める</button>
@@ -2927,9 +2927,9 @@ function openItems(){const row=(ic,n,cnt,d)=>`<div class="itr">${ic}<div class="
  $('sheetB').scrollTop=0;$('sheet').classList.add('on')}
 function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイスターの塔を登る。階段を見つけると、そのまま上の階へ。ボスを倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。工房で武器・防具づくり、編成でパーティ、ガチャで仲間集め。'],
  [null,'説明','塔の中では、出撃キャラを指で動かす。攻撃は自動。はじめは出撃キャラの技だけ。'],
- [null,'説明','各層で、お助け仲間（下層：ギアフォックス、中層：ドド先輩、上層：ホー博士）に会える。その挑戦の間だけ一緒に戦ってくれる。パーティにいるときは技が強化される。'],
+ [null,'説明','各層で、お助け仲間（下層：ギアフォックス、中層：ドド先輩、上層：ホー博士、試作の層：チュータ、発電の層：ボルトゴリラ、空の層：セブンティーン→ツキヨ）に会える。その挑戦の間だけ一緒に戦ってくれる。パーティにいるときは技が強化される。'],
  [null,'説明','2つの技をどちらも最大Lvにすると進化できる（例：連射＋追尾）。技が最大Lvで、その技の武器がSランク以上なら覚醒できる。どちらか一方だけ。磁石を拾うと、まわりの経験値を全部集める。'],
- [null,'説明','階段には鍵がかかっている。その階の強敵が鍵を持っているので、たおしてから階段へ。上の階ほど敵が強い。出撃画面の「推奨戦力」とチームの攻撃をくらべよう。'],
+ [null,'説明','階段には鍵がかかっている。その階の強敵が鍵を持っているので、たおしてから階段へ。上の階ほど敵が強い。ボスを倒すと「ボスの宝箱」から強化とコインが出る。途中で「ひと休み」を押すと、いまの技と能力を確かめられる。出撃画面の「推奨戦力」とチームの攻撃をくらべよう。'],
  [null,'説明','攻撃は装備した武器で決まる。はじめは出撃キャラの専用武器の技だけ。レベルアップすると、パーティの仲間の技と、装備した汎用武器（2つまで）の技が NEW で出てくる。パーティ（5人）の仲間は、能力（パッシブ）で助けてくれる。'],
  [null,'説明','倒した錆や資材の箱から、素材と図面が手に入る。途中で帰っても全部持ち帰れるが、力つきると素材は半分になる。'],
  [null,'説明','工房では「素材＋工具＋図面」がそろうと加工できる。工具は工房で買うか、塔の中で見つける。なぞりの出来ばえで強さが決まる。']])}
@@ -2984,7 +2984,7 @@ function nextGoal(){const k=AREA_ORDER.find(a=>areaOpen(a)&&!areaDone(a));
  if(mk)return{t:'工房',m:`「${RECIPES[mk].n}」を作れる！`,ic:RIC(mk,40),go:'shop'};
  const up=G.party.find(m=>m.lv<GROW_MAX&&canGrow(m));if(up)return{t:'編成',m:`${CHARS[up.id].name}をレベルアップできる`,ic:`<img src="${CHARS[up.id].img}" style="width:40px;height:40px;object-fit:contain">`,go:'party'};
  if((G.floor|0)<TOP_FLOOR){const f=nextFloor();return{t:'次の目標',m:`塔の${f}階「${FLOORS[f].n}」を突破する`,ic:IC('node_boss',40),go:'go'}}
- return{t:'第1章 前編クリア',m:'後編（11F〜）は次のアップデートで公開。素材を集めて、最強の装備を作ろう',ic:IC('clear',40),go:'shop'}}
+ return{t:'第1章クリア',m:'第2章「審判の塔」は次のアップデートで公開。素材を集めて、最強の装備を作ろう',ic:IC('clear',40),go:'shop'}}
 function isEquipped(id){const R=RECIPES[id];if(R.kind==='armor')return G.arm[R.slot]&&G.arm[R.slot].rid===id;const m=G.party.find(x=>x.id===R.who);return m&&m.weapon&&m.weapon.rid===id}
 function resHTML(){return ['scrap','gear','core'].map((k,i)=>`<span class="gslot s${i}">${MIC(k,20)}<b>${G.mats[k]}</b></span>`).join('')}
 function openHome(){if(TW)TW.busy=false;G.where={s:'town'};save();show('home');
@@ -3983,7 +3983,7 @@ function helperSetup(){if(!FD)return;FD.helped=FD.helped||{};const id=(typeof HE
 /* ---------- 階ごとの一言：入口・鍵を手に入れたとき・ボスの前（2回目から） ---------- */
 const FLOOR_LINES={1:['錆のにおいが濃い……。気をつけて行こう','まずは強敵をさがして、階段の鍵だ'],2:['街灯が消えてる。足もとに注意だ','この先、敵がふえてくるぞ'],3:['廃材の山……ボスの気配がする','ここを越えれば下層はおしまいだ'],
  4:['ここから工場か。機械のにおいがする','中層の敵は硬い。装備は大丈夫か？'],5:['制御室……まだ動いてる機械があるな','強敵が鍵を持ってる。さがそう'],6:['クレーンが動いてる……来るぞ','中層のボスだ。気を引きしめよう'],
- 7:['図面の回廊……壁一面に図面がある','上層だ。ここからが本番だ'],8:['錆の巣……空気が重い','錆が濃い。長居は禁物だ'],9:['鏡の作業台……自分の姿が映ってる','あと少しで頂上だ'],10:['錆の炉……すべての錆はここから','行こう。この塔の灯りを取りもどす']};
+ 7:['図面の回廊……壁一面に図面がある','上層だ。ここからが本番だ'],8:['錆の巣……空気が重い','錆が濃い。長居は禁物だ'],9:['鏡の作業台……自分の姿が映ってる','次は錆の炉だ。気を引きしめよう'],10:['錆の炉……すべての錆はここから','行こう。この塔の灯りを取りもどす']};
 const KEY_LINES=['よし、鍵だ！ 上へ行こう','鍵を手に入れた！ 階段へ急ごう','これで階段が開くはず！'];
 const BOSS_LINES={alley:'あのボスだ……前より強くなってる。でも負けない！',factory:'あのクレーンだ。気を抜くなよ',under:'錆の炉の主……決着をつけよう'};
 function speaker(){const ps=G.party.filter(m=>m.id!==FD._lastSp),m=(ps.length?pick(ps):G.party[0]);FD._lastSp=m.id;return m.id}
@@ -4136,14 +4136,14 @@ return [
  {id:'c_robo2',t:'頭の中の文字',st:2,who:['mouse','robot'],L:[['mouse',MO,'ロボの頭の中、文字がいっぱい並んでるチュー。'],['mouse',MO,'……これ、プログラムっていうのかな？'],['robot',RB,'ワタシ……古イ型……モウ……役ニ……タタナイ……？'],['mouse',MO,'そんなことない！ ボク、ロボがいないと何もできないもん。'],['mouse',MO,'なんとか、読めるようになりたいチュー。']]},
  {id:'c_tsukiyo2',t:'星の見えない場所',st:2,who:['tsukiyo'],L:[['tsukiyo',TK,'星が告げてる。きみたちの道は、上へ……もっと上へ続いているって。'],['tsukiyo',TK,'……でも、上の階は星が見えない。わたしには、先が読めない場所。'],['tsukiyo',TK,'気をつけて。']]},
  {id:'c_onmyo2',t:'描きかけの図',st:2,who:['onmyo'],L:[['onmyo',OM,'……塔の上には、描きかけの図が眠っている。'],['onmyo',OM,'途中で止めた図は、陰に転びやすい。'],['wolf',W,'なんでそんなこと知ってるんだ？'],['onmyo',OM,'……我も昔、図を描きかけで捨てたことがある。'],['onmyo',OM,'……今は、関係のない話だ。']]},
- {id:'c_rocker2',t:'油のにおい',st:2,who:['rocker'],L:[['rocker',RK,'港の倉庫街のほう、最近やけに油くせぇ。'],['rocker',RK,'錆の連中、何かためこんでやがるな。'],['rocker',RK,'火がついたら、ギターソロじゃすまねぇぜ。']]},
+ {id:'c_rocker2',t:'油のにおい',st:2,who:['rocker'],L:[['rocker',RK,'塔の上のほう、最近やけに油くせぇ。研究所でもあるのか？'],['rocker',RK,'錆の連中、何かためこんでやがるな。'],['rocker',RK,'火がついたら、ギターソロじゃすまねぇぜ。']]},
  {id:'c_owl2',t:'組み合わせ',st:2,who:['owl','tsukiyo'],L:[['owl',OW,'ツキヨ殿の星の位置と、わしの錆の地図。重ねてみると……。'],['tsukiyo',TK,'ぴったり、同じ円。'],['owl',OW,'ホッホッ。星と計算、組み合わせれば、陣の中心が読めるかもしれんのう。'],['wolf',W,'二人とも、なんか楽しそうだな……。']]},
  /* ---------- 上層クリア（10F） ---------- */
- {id:'c_gorilla3',t:'静かすぎる',st:3,who:['gorilla'],L:[['gorilla',GR,'炉の親玉まで倒したって！？ 100万ボルトの勝利だな！'],['gorilla',GR,'……ただな、変電所のほうが、どうも静かすぎる。'],['gorilla',GR,'いやな予感がするぜ、ウホッ。']]},
+ {id:'c_gorilla3',t:'静かすぎる',st:3,who:['gorilla'],L:[['gorilla',GR,'炉の親玉まで倒したって！？ 100万ボルトの勝利だな！'],['gorilla',GR,'……ただな、塔の上の発電所のほうが、どうも静かすぎる。'],['gorilla',GR,'いやな予感がするぜ、ウホッ。']]},
  {id:'c_robo3',t:'再起動に必要なもの',st:3,who:['mouse','robot'],L:[['mouse',MO,'やったチュー！ 街の錆が少し減ったよ！'],['mouse',MO,'でも、ロボが寝言みたいに「パイソン」って言うんだ。ヘビの夢でも見てるのかな……？'],['robot',RB,'ピ……再起動ニ……必要ナモノ……'],['robot',RB,'……プログラム……ト……トモダチ……'],[null,'','メカロボの目が、一瞬だけ青く光った気がした。']]},
  {id:'c_tsukiyo3',t:'星座にない光',st:3,who:['tsukiyo'],L:[['tsukiyo',TK,'星読みどおり。……ううん、星読み以上かな。'],['tsukiyo',TK,'夜明けに、空をまっすぐ飛ぶ光を見た。'],['tsukiyo',TK,'あれは星じゃない。星座の図面にも、のってない。']]},
- {id:'c_onmyo3',t:'半分の図面',st:3,who:['onmyo'],L:[['onmyo',OM,'……面白い。'],['onmyo',OM,'その半分の図面。残りは、星の図面庫か、あるいは空か。'],['onmyo',OM,'……いずれ、また会うだろう。']]},
- {id:'c_rocker3',t:'今夜の主役',st:3,who:['rocker'],L:[['rocker',RK,'……やるじゃねぇか。今夜の主役は、お前らだ。'],['rocker',RK,'けどな、ステージはまだ続く。'],['rocker',RK,'倉庫のほうで火が出たら……そのときは、俺も弾く。']]},
+ {id:'c_onmyo3',t:'半分の図面',st:3,who:['onmyo'],L:[['onmyo',OM,'……面白い。'],['onmyo',OM,'その半分の図面。残りは、星見の回廊か、あるいは空か。'],['onmyo',OM,'……いずれ、また会うだろう。']]},
+ {id:'c_rocker3',t:'今夜の主役',st:3,who:['rocker'],L:[['rocker',RK,'……やるじゃねぇか。今夜の主役は、お前らだ。'],['rocker',RK,'けどな、ステージはまだ続く。'],['rocker',RK,'上で嵐が来たら……そのときは、俺も弾く。']]},
  {id:'c_live3',t:'アンプに火を',st:3,who:['gorilla','rocker'],L:[['rocker',RK,'おい、ゴリラ。停電でアンプが鳴らねぇんだが。'],['gorilla',GR,'ウホッ？ だったら俺の電気を流してやろうか。'],['rocker',RK,'……壊すなよ。'],['gorilla',GR,'力まかせじゃ電気は流れねぇ。……ちゃんと分かってるさ。'],[null,'','アンプから、塔じゅうに響くような音が鳴った。'],['wolf:smile',W,'（これ、戦いに使えたらすげぇな……）']]},
  {id:'c_end3',t:'鉄灯の名前',st:3,who:['owl','fox','dodo'],L:[['owl',OW,'「鉄灯」という街の名はな、あの塔の灯りから来ておる。初代マイスターが錆を道具にもどす陣を塔に刻み、その光が夜の工場街を照らしたのじゃ。'],['fox',FX,'じゃあ、灯りが消えてたのって、陣が止まってたってこと？'],['owl',OW,'うむ。そして十年前に灯りを消したのが……わしの古い知り合い、匠じゃ。'],['dodo',DD,'えっ、博士、匠さんと知り合いだったの〜？'],['owl',OW,'若いころ、同じ図面台で線を引いた仲じゃ。あやつは、だれよりも正確な線を引いた。……正確すぎるほどにのう。'],['wolf:serious',W,'だったら、上で会ったら聞いてやる。なんで灯りを消したのかってな。']]}
 ]})();
@@ -4523,7 +4523,10 @@ function openNews(){$('sheetT').textContent='お知らせ';
   <b>次の予定</b><ul><li>ver2.0.0　第2章「審判の塔」</li></ul></div><button class="btn ghost" id="nsX">閉じる</button>`;
  $('nsX').onclick=closeSheet;$('sheet').classList.add('on')}
 
-const BUILD='11/13 02:05';
+/* ---------- ボスの宝箱を取らずに階段へ行ったら、先に宝箱をあける ---------- */
+{const _s=fStairs;fStairs=async function(){const c=FD&&FD.chests.find(x=>x.boss&&!x.open);if(c&&!FD.climbing){fOpenChest(c);return}return _s()}}
+
+const BUILD='11/13 02:12';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
