@@ -881,6 +881,8 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 .gaimg .gci{position:absolute;left:10px;bottom:10px;gap:4px}.gaimg .gci .ic{width:36px!important;height:36px!important}
 .tlv .ic{margin-right:-2px}
 .gaimg .gci{display:none}
+.gatype button{display:flex;align-items:center;justify-content:center;gap:4px}.gatype button .ic{filter:saturate(.6) brightness(.8)}.gatype button.on .ic{filter:none}.gapity .ic{vertical-align:-5px}
+.gaimg .gcb em{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}.gaimg .gcb em .ic{width:16px;height:16px}
 
 </style>
 </head>
@@ -3052,7 +3054,7 @@ function renderCharGacha(){const B=GACHA_BANNERS[gaBan];
 function coinIc(s){return UIMG('coin',s)}
 function _oldCoinIc(s){return `<svg class="ic" viewBox="0 0 32 32" style="width:${s}px;height:${s}px;vertical-align:middle"><circle cx="16" cy="16" r="13" fill="#ff9a3a" stroke="#ffd7a8" stroke-width="2"/><circle cx="16" cy="16" r="8" fill="none" stroke="#7a3a00" stroke-width="2"/><path d="M16 9v14M12 12h8" stroke="#7a3a00" stroke-width="2"/></svg>`}
 function showGachaResult(res){const best=Math.max(...res.map(r=>r.star));
- $('grCards').innerHTML=res.map((r,i)=>`<div class="grc s${r.star}" style="animation-delay:${i*.12}s"><img src="${CHARS[r.id].img}" alt=""><b>${CHARS[r.id].name}</b><small>${starTxt(r.star)}</small><i class="${r.kind}">${r.kind==='new'?'NEW':'かけら+'+(r.gain||1)}</i></div>`).join('');
+ $('grCards').innerHTML=res.map((r,i)=>`<div class="grc s${r.star}" style="animation-delay:${i*.12}s"><img src="${CHARS[r.id].img}" alt=""><b>${CHARS[r.id].name}</b><small>${starTxt(r.star)}</small><i class="${r.kind}">${r.kind==='new'?UIMG('u_new',14)+'NEW':'かけら+'+(r.gain||1)}</i></div>`).join('');
  $('grCards').classList.toggle('one',res.length===1);$('gres').classList.toggle('gold',best>=3);$('gres').classList.add('on');tone(best>=3?880:660,.3,'triangle',.1,best>=3?1760:990)}
 function closeGacha(){$('gres').classList.remove('on')}
 
@@ -3429,14 +3431,14 @@ const TOOL_POOL=()=>TOOL_ORDER.filter(t=>!TOOLS[t].limited&&t!=='file');
 const BP_POOL=()=>RECIPE_ORDER.filter(id=>{const R=RECIPES[id];return !R.limited&&(R.kind!=='weapon'||ownChar(R.who))});
 const BP_LIM=()=>RECIPE_ORDER.filter(id=>RECIPES[id].limited);
 function gaHead(){return `<div class="gacoin">${coinIc(22)}<b>${G.coin}</b><small>コイン</small></div>
- <div class="gatype">${[['char','キャラ'],['tool','工具'],['bp','図面']].map(([k,n])=>`<button class="${gaType===k?'on':''}" data-gt="${k}">${n}</button>`).join('')}</div>`}
+ <div class="gatype">${[['char','キャラ'],['tool','工具'],['bp','図面']].map(([k,n])=>`<button class="${gaType===k?'on':''}" data-gt="${k}">${UIMG('g_'+k,26)}${n}</button>`).join('')}</div>`}
 function gaBind(){$('gaBody').querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gaType=b.dataset.gt;renderGacha()})}
 function renderGacha(){if(gaType==='char'){renderCharGacha();return}
  const tool=gaType==='tool',C=tool?TOOL_G:BP_G,pity=((G.pity||{})[gaType])||0,lims=tool?LIM_TOOLS:BP_LIM();
  const icons=lims.map(k=>tool?MIC(k,44):RIC(k,44)).join('');
  $('gaBody').innerHTML=gaHead()+`<div class="gavol"><button class="on">vol.1</button><button class="soon">vol.2</button><button class="soon">vol.3</button></div>
- <div class="gaban gaimg"><img src="img/${tool?'gacha-tool':'gacha-bp'}.webp" alt=""><div class="gcb"><small>${tool?'TOOL':'BLUEPRINT'} GACHA</small><b>${tool?'工具ガチャ':'図面ガチャ'}</b><em class="${tool?'':'bp'}">限定${tool?'工具':'装備の図面'} ${Math.round(C.lim*100)}%</em></div><div class="gci">${icons}</div></div>
- <div class="gapity">限定まで あと <b>${C.pity-pity}</b> 回（${C.pity}回で必ず出る）</div>
+ <div class="gaban gaimg"><img src="img/${tool?'gacha-tool':'gacha-bp'}.webp" alt=""><div class="gcb"><small>${tool?'TOOL':'BLUEPRINT'} GACHA</small><b>${tool?'工具ガチャ':'図面ガチャ'}</b><em class="${tool?'':'bp'}">${UIMG('u_limited',16)}限定${tool?'工具':'装備の図面'} ${Math.round(C.lim*100)}%</em></div><div class="gci">${icons}</div></div>
+ <div class="gapity">${UIMG('u_pity',20)} 限定まで あと <b>${C.pity-pity}</b> 回（${C.pity}回で必ず出る）</div>
  <div class="galink"><button data-ga="rate">提供割合</button><button data-ga="list">${tool?'工具':'図面'}の一覧（図鑑）</button></div>
  <div class="gabtns"><button class="gab" data-gp="1" ${G.coin<C.cost?'disabled':''}><b>1回</b><small>${coinIc(16)} ${C.cost}</small></button><button class="gab ten" data-gp="11" ${G.coin<C.cost11?'disabled':''}><b>11回</b><small>${coinIc(16)} ${C.cost11}</small></button></div>`;
  gaBind();
@@ -3460,7 +3462,7 @@ function getBp(id,lim){const R=RECIPES[id];if(!G.bps.includes(id)&&!(G.bpRaw||[]
  const p=G.bpPlus[id]||0;if(p>=3){G.mats.scrap=(G.mats.scrap||0)+2;G.mats.bolt=(G.mats.bolt||0)+1;return{ic:RIC(id,56),n:R.n,lim,tag:'素材に',cls:'dup'}}
  G.bpPlus[id]=p+1;return{ic:RIC(id,56),n:R.n,lim,tag:`${UIMG('u_bpplus',14)}改良 +${p+1}`,cls:'dup'}}
 function showItemResult(res){const any=res.some(r=>r.lim);
- $('grCards').innerHTML=res.map((r,i)=>`<div class="grc it ${r.lim?'s3':'s1'}" style="animation-delay:${i*.12}s"><span class="gri">${r.ic}</span><b>${r.n}</b><small>${r.lim?'限定':'　'}</small><i class="${r.cls==='new'?'new':'dup'}">${r.tag}</i></div>`).join('');
+ $('grCards').innerHTML=res.map((r,i)=>`<div class="grc it ${r.lim?'s3':'s1'}" style="animation-delay:${i*.12}s"><span class="gri">${r.ic}</span><b>${r.n}</b><small>${r.lim?UIMG('u_limited',16)+'限定':'　'}</small><i class="${r.cls==='new'?'new':'dup'}">${r.cls==='new'?UIMG('u_new',14):''}${r.tag}</i></div>`).join('');
  $('grCards').classList.toggle('one',res.length===1);$('gres').classList.toggle('gold',any);$('gres').classList.add('on');tone(any?880:660,.3,'triangle',.1,any?1760:990)}
 
 /* ===================== 加工ミニゲーム：打つ（金床）・つなぐ（溶接機） ===================== */
