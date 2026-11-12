@@ -4446,6 +4446,11 @@ function chestRewards(){const D=FD,out=[];D.evo=D.evo||{};D.awk=D.awk||{};
 {const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);for(const c of D.chests){if(!c.boss||c.open)continue;g.save();g.strokeStyle='#ffd23a';g.lineWidth=4;g.globalAlpha=.5+.5*Math.sin(D.t*5);g.beginPath();g.arc(c.x,c.y-6,40,0,TAU);g.stroke();
  g.globalAlpha=1;g.fillStyle='#ffd23a';g.font='900 12px sans-serif';g.textAlign='center';g.fillText('ボスの宝箱',c.x,c.y-52);g.restore()}}}
 
+/* ---------- 4段目のアイコン（素材・防具・汎用武器） ---------- */
+Object.assign(UI_IC,{titan:'m_titan',cell:'m_cell',carbon:'m_carbon'});
+Object.assign(ARMOR_IC,{thelm:'ar_thelm',cvest:'ar_cvest',tboots:'ar_tboots'});
+Object.assign(GEN_IC,{g_star:'wg_star',g_ring:'wg_ring'});
+
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
