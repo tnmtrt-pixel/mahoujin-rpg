@@ -915,6 +915,13 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 #fSay .fsi img,.fhelp img{height:100%;object-fit:contain;object-position:50% 50%}
 .hfc.fc img{top:4%;height:78%;width:auto;left:50%;transform:translateX(-50%)}
 .pface{object-fit:contain!important}
+.hfe.hch{position:relative;margin-left:auto}.hfe.hch.on{border-color:var(--so);color:var(--so)}.hfe.hch i{position:absolute;top:-7px;right:-7px;min-width:16px;height:16px;line-height:16px;border-radius:8px;background:var(--so);color:#1a0a00;font-style:normal;font-size:10px;font-weight:900;text-align:center;padding:0 3px}
+.hfs{flex:1}.hfh .hfe+.hfe{margin-left:6px}
+.chl{display:flex;flex-direction:column;gap:4px;max-height:58vh;overflow:auto}
+.chr{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--sk2);border:1px solid var(--sl);color:var(--sw);text-align:left}
+.chr.nw{border-color:#ff7a2f88}.chr b{flex:1;font-size:14px}.chr i{font-style:normal;font-size:10px;font-weight:900;background:var(--so);color:#1a0a00;padding:1px 5px}
+.chf{display:flex}.chf img{width:30px;height:30px;object-fit:contain;background:#0f1626;border:1px solid var(--sl);margin-right:-6px}
+.hfs i{white-space:nowrap}.hfh{gap:6px}@media (max-width:400px){.hfk{font-size:13px;letter-spacing:.1em}.hfs b{font-size:14px;margin-right:2px}.hfh .hfe{padding:4px 7px;font-size:11px}}
 
 </style>
 </head>
@@ -2943,7 +2950,7 @@ function fitHomeArt(){if(!onScr('home'))return;const hm=$('home').getBoundingCli
 function homeFormHTML(L,others){const card=(m,k,lead)=>{if(!m)return `<button class="hfc em" data-hf="slot:${k}"><span>＋</span><small>空き</small></button>`;const c=CHARS[m.id],A=ATK[m.id];
   return `<button class="hfc ${lead?'ld':'fc'}" data-hf="${m.id}"><img src="${lead?c.img:FACE(m.id)}" alt=""><span class="hft">${TIC(A.type,lead?24:18)}</span>${lead?'<span class="hfl">LEADER</span>':''}<span class="hfb"><b>${c.name}</b><small>Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i></small></span></button>`};
  const rest=Array.from({length:PARTY_MAX-1},(_,i)=>card(others[i],i+1,false)).join('');
- return `<div class="hform"><div class="hfh"><span class="hfk">PARTY</span><span class="hfs"><i>攻撃</i><b>${teamPow()}</b><i>体力</i><b>${teamHp()}</b></span><button class="hfe" data-hf="${L.id}">編成 ›</button></div>${card(L,0,true)}${rest}</div>`}
+ return `<div class="hform"><div class="hfh"><span class="hfk">PARTY</span><span class="hfs"><i>攻撃</i><b>${teamPow()}</b><i>体力</i><b>${teamHp()}</b></span>${(()=>{const n=chatNew().length;return `<button class="hfe hch ${n?'on':''}" onclick="openChats()">チャット${n?`<i>${n}</i>`:''}</button>`})()}<button class="hfe" data-hf="${L.id}">編成 ›</button></div>${card(L,0,true)}${rest}</div>`}
 addEventListener('resize',()=>{if(onScr('home'))fitHomeArt()});
 
 /* ---------- 編成 ---------- */
@@ -3031,7 +3038,7 @@ function _oldZukan(){show('zukan');
   return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R):LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}</div>
  <div class="zkh">工具 ${G.tools.length}/${TOOL_ORDER.length}</div><div class="zkg">${TOOL_ORDER.map(t=>{const has=G.tools.includes(t);return `<div class="zki ${has?'':'no'}">${MIC(t,40)}<b>${TOOLS[t].n}</b><small>${has?'持っている':TOOLS[t].price?'工房で買える':TOOLS[t].where}</small></div>`}).join('')}</div>
  <div class="zkh">素材</div><div class="zkg">${MAT_ORDER.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}</div>`}
-function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button>`;$('sheet').classList.add('on')}
+function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openChats()">チャット一覧</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button>`;$('sheet').classList.add('on')}
 
 /* 鍛え直し：鉄くずを使って属性を付け直す */
 function reforge(id){const m=owned(id),w=m&&m.weapon;if(!w||!w.attr)return;if(G.mats.scrap<REFORGE_COST){say('鉄くずが足りない',900);return}
@@ -3934,7 +3941,8 @@ function fSay(id,text){const fl=$('field');if(!fl)return;let el=$('fSay');if(!el
 
 /* ---------- 技の進化と覚醒 ---------- */
 /* 進化：2つの技がどちらも最大Lv → 合わさって進化（2つとも威力1.3倍＋合体の動き） */
-const EVO=[['wolf','onmyo','追尾牙刃','連射の弾が敵を追いかける'],['fox','owl','歯車結界','まわる輪が魔法陣を置いていく'],['dodo','rocker','轟音衝撃','たたいた所から音の波が広がる'],['gorilla','robot','雷電レーザー','貫くレーザーが次の敵へ飛び移る'],['tsukiyo','mouse','月光の雨','降る星が落ちるたびに少し回復']];
+const EVO=[['wolf','onmyo','陰陽牙刃','連射の弾が敵を追いかける'],['fox','dodo','歯車の守り','まわる輪が衝撃波を出して敵をはじく'],['gorilla','rocker','雷鳴ライブ','雷のたびに音の波が広がる'],['mouse','robot','プログラム・レーザー','レーザーが次の敵へ飛び移り、少し回復'],['tsukiyo','owl','星図の陣','星の落ちた所に魔法陣が残る']];
+const EVO_IC={wolf:'ev_wolf',fox:'ev_fox',gorilla:'ev_dodo',mouse:'ev_gorilla',tsukiyo:'ev_tsukiyo'};
 /* 覚醒：技が最大Lv＋その技の武器がSランク以上 → 威力1.5倍。1つの技は進化か覚醒のどちらか */
 const evoOn=id=>!!(FD.evo&&EVO.some(p=>p.includes(id)&&FD.evo[p[0]]));
 function fPowX(id){let m=1;if(!FD)return m;if(FD.awk&&FD.awk[id])m*=1.5;if(evoOn(id))m*=1.3;if(FD.hboost&&FD.hboost[id])m*=FD.hboost[id];return m}
@@ -3942,16 +3950,16 @@ function wRank(id){if(FD.helperMs&&FD.helperMs[id])return null;const g=id!==G.le
 function extraOpts(){const o=[];FD.evo=FD.evo||{};FD.awk=FD.awk||{};const mx=id=>(FD.atk[id]||0)>=ATK_MAX;
  EVO.forEach(p=>{if(!FD.evo[p[0]]&&mx(p[0])&&mx(p[1])&&!FD.awk[p[0]]&&!FD.awk[p[1]])o.push('e:'+p[0])});
  Object.keys(FD.atk).forEach(id=>{if(mx(id)&&!FD.awk[id]&&!evoOn(id)&&['S','SS'].includes(wRank(id)))o.push('w:'+id)});return o}
-function evoCardHTML(t,k){if(t==='e'){const p=EVO.find(x=>x[0]===k);return `<button class="fpick evo" data-k="e:${k}">${UIMG('ev_'+k,48)}<span><b>進化！ ${p[2]}</b><small>${ATK[p[0]].type}＋${ATK[p[1]].type}：${p[3]}。2つとも威力1.3倍</small></span><span class="lvt">${UIMG('u_evo',18)}進化</span></button>`}
+function evoCardHTML(t,k){if(t==='e'){const p=EVO.find(x=>x[0]===k);return `<button class="fpick evo" data-k="e:${k}">${UIMG(EVO_IC[k],48)}<span><b>進化！ ${p[2]}</b><small>${ATK[p[0]].type}＋${ATK[p[1]].type}：${p[3]}。2つとも威力1.3倍</small></span><span class="lvt">${UIMG('u_evo',18)}進化</span></button>`}
  return `<button class="fpick evo awk" data-k="w:${k}"><span class="fpi"><img src="${CHARS[k].img}" alt="">${TIC(ATK[k].type,26)}</span><span><b>覚醒！ ${ATK[k].n}</b><small>武器のランク${wRank(k)}で覚醒。威力1.5倍</small></span><span class="lvt">${UIMG('u_awk',18)}覚醒</span></button>`}
-function evoPick(t,k){FD.evo=FD.evo||{};FD.awk=FD.awk||{};if(t==='e'){FD.evo[k]=true;const p=EVO.find(x=>x[0]===k);fBanner(`進化！「${p[2]}」`,170,'ev_'+k)}else{FD.awk[k]=true;fBanner(`覚醒！「${ATK[k].n}」`,170,'u_awk')}tone(880,.3,'triangle',.1,1760)}
+function evoPick(t,k){FD.evo=FD.evo||{};FD.awk=FD.awk||{};if(t==='e'){FD.evo[k]=true;const p=EVO.find(x=>x[0]===k);fBanner(`進化！「${p[2]}」`,170,EVO_IC[k])}else{FD.awk[k]=true;fBanner(`覚醒！「${ATK[k].n}」`,170,'u_awk')}tone(880,.3,'triangle',.1,1760)}
 /* 合体の動き（進化したときだけ） */
 {const _fa=fAttacks;fAttacks=function(f){const c=FD.cd,b={...c};_fa(f);const E=FD.evo;if(!E)return;const fired=id=>c[id]!=null&&b[id]!=null&&c[id]>b[id];
  if(E.wolf)FD.shots.forEach(s=>{const t=nearestFoes(1,s.x,s.y,260)[0];if(!t)return;const sp=Math.hypot(s.vx,s.vy)||7,ca=Math.atan2(s.vy,s.vx);let d=Math.atan2(t.y-s.y,t.x-s.x)-ca;d=Math.atan2(Math.sin(d),Math.cos(d));const na=ca+d*Math.min(1,.15*f);s.vx=Math.cos(na)*sp;s.vy=Math.sin(na)*sp});
- if(E.fox&&FD.orb){FD._ez=(FD._ez||0)+f;if(FD._ez>=70){FD._ez=0;const dmg=2.6*fPow('owl');FD.orb.forEach(([x,y])=>FD.zones.push({x,y,r:40,t:0,life:90,dmg}))}}
- if(E.dodo&&fired('dodo'))FD.waves.push({x:FD.x,y:FD.y,r:20,max:230,dmg:10*fPow('rocker'),kb:10,hit:new Set()});
- if(E.gorilla&&fired('robot')){let from={x:FD.x,y:FD.y-14};const hit=new Set();for(let i=0;i<3;i++){const t=FD.foes.filter(e=>!hit.has(e.id)&&(e.x-from.x)**2+(e.y-from.y)**2<(i?170:300)**2).sort((a,z)=>((a.x-from.x)**2+(a.y-from.y)**2)-((z.x-from.x)**2+(z.y-from.y)**2))[0];if(!t)break;FD.fx.push({k:'bolt',x:from.x,y:from.y,x2:t.x,y2:t.y,t:0});fDamage(t,10*fPow('gorilla'),0,0);hit.add(t.id);from=t}}
- if(E.tsukiyo&&fired('tsukiyo')){const a=2;FD.hp=Math.min(FD.maxhp,FD.hp+a);FD.pops.push({x:FD.x,y:FD.y-40,v:'+'+a,t:0,heal:1})}}}
+ if(E.fox&&FD.orb){FD._ez=(FD._ez||0)+f;if(FD._ez>=60){FD._ez=0;const dmg=6*fPow('dodo');FD.orb.forEach(([x,y])=>FD.waves.push({x,y,r:8,max:70,dmg,kb:12,hit:new Set()}))}}
+ if(E.gorilla&&fired('gorilla'))FD.waves.push({x:FD.x,y:FD.y,r:20,max:230,dmg:10*fPow('rocker'),kb:10,hit:new Set()});
+ if(E.mouse&&fired('robot')){FD.hp=Math.min(FD.maxhp,FD.hp+1);let from={x:FD.x,y:FD.y-14};const hit=new Set();for(let i=0;i<3;i++){const t=FD.foes.filter(e=>!hit.has(e.id)&&(e.x-from.x)**2+(e.y-from.y)**2<(i?170:300)**2).sort((a,z)=>((a.x-from.x)**2+(a.y-from.y)**2)-((z.x-from.x)**2+(z.y-from.y)**2))[0];if(!t)break;FD.fx.push({k:'bolt',x:from.x,y:from.y,x2:t.x,y2:t.y,t:0});fDamage(t,10*fPow('mouse'),0,0);hit.add(t.id);from=t}}
+ if(E.tsukiyo&&fired('tsukiyo')){const dmg=2.6*fPow('owl');nearestFoes(3,FD.x,FD.y,400).forEach(t=>FD.zones.push({x:t.x,y:t.y,r:44,t:0,life:100,dmg}))}}}
 
 /* ---------- 毎フレームの見はり：階が変わったら、お助けの準備と入口の一言。鍵の一言 ---------- */
 {const _u=fUpdate;fUpdate=function(f){const D=FD;if(D&&!D.climbing){if(D._fl!==D.floor){D._fl=D.floor;D._said=false;D._key=false;helperSetup()}
@@ -3991,6 +3999,59 @@ function procGuide(pr){return new Promise(res=>{const st=PROC_GUIDE[pr];if(!st){
   <div class="note">${UIMG('u_dojo',18)} 道場（工房の「加工ミニゲーム道場」）で、いつでも練習できる</div><div class="gpf"><button class="btn gold" id="pgOk">わかった！ はじめる</button></div>`;
  $('genPick').classList.add('on');$('pgOk').onclick=()=>{$('genPick').classList.remove('on');res()}})}
 {const _p=runProc;runProc=async function(R,pr,st){if(typeof G!=='undefined'&&G&&!G.flags['guide_'+pr]){await procGuide(pr);G.flags['guide_'+pr]=1;save()}return _p(R,pr,st)}}
+
+/* ===================== チャット（テイルズのスキットのような、仲間どうしの短い掛け合い） =====================
+   st：どこまで登ったら出るか（0＝はじめから、1＝3Fクリア、2＝6Fクリア、3＝10Fクリア）
+   who：出るのに必要な仲間（持っていること。ウルフはいつもいる）
+   魔法陣のときの「町の会話」を、塔の話に合わせて直したもの */
+const CHATS=(()=>{const W='ウルフ',FX='ギアフォックス',DD='ドド先輩',OW='ホー博士',GR='ボルトゴリラ',MO='チュータ',RB='メカロボ',TK='ツキヨ',OM='オンミョウ',RK='セブンティーン';
+return [
+ /* ---------- はじめから ---------- */
+ {id:'c_wolf1',t:'休憩もトレーニング？',st:0,who:['wolf'],L:[['wolf',W,'休憩もトレーニングのうちだって、博士が言ってた。'],['wolf:worry',W,'……ほんとかよ。じっとしてると、腕がなまりそうなんだけど。'],['wolf:smile',W,'よし、工房で刃物でも研ぐか。いい刃物は、いい仕事をする！']]},
+ {id:'c_fox1',t:'設計どおり！',st:0,who:['fox'],L:[['fox',FX,'塔の入口の手すり、ボルトが一本ゆるんでたから直しといた！ 設計どおり！'],['wolf',W,'いつの間に……。'],['fox',FX,'ねぇ、工房の旋盤、あとで分解していい？'],['wolf:worry',W,'だめだ。'],['fox',FX,'……冗談だよ、たぶん。']]},
+ {id:'c_dodo1',t:'五分だけ〜',st:0,who:['dodo'],L:[['dodo',DD,'ふわぁ……。ちょっとだけ寝ていい？ 五分だけ〜。'],['wolf',W,'先輩、まだ1階も登ってないっす。'],['dodo',DD,'あせらなくていいよ〜。でも、オイルは持っていこうね。'],['dodo',DD,'前はぼくが立つから、きみは思いきり行っていいよ〜。']]},
+ {id:'c_owl1',t:'錆の円',st:0,who:['owl'],L:[['owl',OW,'ホッホッ。錆の出た場所を地図に記してみたんじゃが……。'],['wolf',W,'……円になってる？'],['owl',OW,'うむ。ただの錆なら、こうはきれいに並ばん。'],['owl',OW,'やはり、何かの「陣」じゃのう。']]},
+ {id:'c_gorilla0',t:'停電の原因',st:0,who:['gorilla'],L:[['gorilla',GR,'停電の原因？ 錆の連中が電線をかじってやがるんだ、ウホッ。'],['gorilla',GR,'フルパワーでぶっ飛ばしてぇところだが……あいつら、電気が効きにくい。'],['wolf',W,'電気が効かない？'],['gorilla',GR,'何か秘密があるはずだ。俺の勘がそう言ってる。']]},
+ {id:'c_robo0',t:'動かないロボ',st:0,who:['mouse','robot'],L:[['mouse',MO,'チュー……メカロボが動かなくなっちゃった。'],['robot',RB,'ピ……ガ……システム……エラー……サビ……検出……'],['mouse',MO,'錆が関節に入りこんだみたい。修理しなきゃ……。'],['mouse',MO,'工房のスパナ、貸してもらえないかな。']]},
+ {id:'c_tsukiyo0',t:'星が告げてる',st:0,who:['tsukiyo'],L:[['tsukiyo',TK,'今夜は星がよく見える。街の灯りが消えたせいだね。'],['wolf',W,'星なんて、見てる余裕ないって。'],['tsukiyo',TK,'ふふ。星が告げてる。きみたちの道は、塔の門の向こうから始まるって。']]},
+ {id:'c_onmyo0',t:'陰の気',st:0,who:['onmyo'],L:[['onmyo',OM,'……その門の先から、陰の気が流れてくる。'],['wolf',W,'陰の気？ 錆のことか？'],['onmyo',OM,'……陰と陽、どちらに転ぶか。見届けさせてもらおう。']]},
+ {id:'c_rocker0',t:'静かな街',st:0,who:['rocker'],L:[['rocker',RK,'よう。街が静かすぎて、ギターの音がよく響くぜ。'],['rocker',RK,'錆の連中、いいリズムで攻めてきやがる。'],['wolf',W,'のんきだな……。'],['rocker',RK,'俺の出番は、もう少し先だ。']]},
+ /* ---------- 下層クリア（3F） ---------- */
+ {id:'c_gorilla1',t:'下がり続ける電圧',st:1,who:['gorilla'],L:[['gorilla',GR,'路地の番人を倒したって？ やるじゃねぇか、ウホッ！'],['gorilla',GR,'けど変だな。錆を倒したのに、電圧が下がり続けてる。'],['wolf',W,'まだ、どこかで電気を食ってるやつがいる……？'],['gorilla',GR,'そういうこった。']]},
+ {id:'c_robo1',t:'スパナで',st:1,who:['mouse','robot'],L:[['mouse',MO,'スパナで関節は少し動いたチュー！'],['robot',RB,'ピピ……関節……可動率……12％……'],['robot',RB,'チュータ……アリガトウ……ゴザイ……マス……'],['mouse',MO,'でも、中の命令が止まってるみたいで……。']]},
+ {id:'c_tsukiyo1',t:'空から見た円',st:1,who:['tsukiyo'],L:[['tsukiyo',TK,'錆の広がる形、空から見ると円になってる。'],['tsukiyo',TK,'まるで、大きな魔法陣みたいに。'],['wolf',W,'博士も同じこと言ってた……。'],['tsukiyo',TK,'次の星は、工場の上で光ってるよ。']]},
+ {id:'c_onmyo1',t:'さらに奥へ',st:1,who:['onmyo'],L:[['onmyo',OM,'……番人を退けたか。'],['onmyo',OM,'だが陰の気は、さらに奥……工場から濃く流れている。']]},
+ {id:'c_rocker1',t:'イントロ',st:1,who:['rocker'],L:[['rocker',RK,'番人を倒したって？ 悪くねぇイントロだ。'],['rocker',RK,'ただ、本番はまだ先だろ。'],['rocker',RK,'アンコールはいらねぇ……と言いたいとこだがな。']]},
+ {id:'c_fox2',t:'直す役',st:1,who:['fox','dodo'],L:[['fox',FX,'先輩、また最前列でつっこんでたでしょ！ 傷だらけじゃん。'],['dodo',DD,'えへへ〜。前はぼくの場所だから〜。'],['fox',FX,'……もう。じゃあ直すのはボクの役ね。ケガしたら言ってよ。'],['wolf:smile',W,'直す役と、守る役か。いいコンビだな。']]},
+ /* ---------- 中層クリア（6F） ---------- */
+ {id:'c_gorilla2',t:'親方の口ぐせ',st:2,who:['gorilla'],L:[['gorilla',GR,'工場のクレーンか……昔、あそこの配線は俺がやったんだ。'],['gorilla',GR,'きれいな複線図だったぜ。'],['wolf',W,'ゴリラさんが？'],['gorilla',GR,'力まかせじゃ、電気は流れねぇ。……親方の口ぐせさ。'],['gorilla',GR,'今さら、身にしみるぜ。']]},
+ {id:'c_robo2',t:'頭の中の文字',st:2,who:['mouse','robot'],L:[['mouse',MO,'ロボの頭の中、文字がいっぱい並んでるチュー。'],['mouse',MO,'……これ、プログラムっていうのかな？'],['robot',RB,'ワタシ……古イ型……モウ……役ニ……タタナイ……？'],['mouse',MO,'そんなことない！ ボク、ロボがいないと何もできないもん。'],['mouse',MO,'なんとか、読めるようになりたいチュー。']]},
+ {id:'c_tsukiyo2',t:'星の見えない場所',st:2,who:['tsukiyo'],L:[['tsukiyo',TK,'星が告げてる。きみたちの道は、上へ……もっと上へ続いているって。'],['tsukiyo',TK,'……でも、上の階は星が見えない。わたしには、先が読めない場所。'],['tsukiyo',TK,'気をつけて。']]},
+ {id:'c_onmyo2',t:'描きかけの図',st:2,who:['onmyo'],L:[['onmyo',OM,'……塔の上には、描きかけの図が眠っている。'],['onmyo',OM,'途中で止めた図は、陰に転びやすい。'],['wolf',W,'なんでそんなこと知ってるんだ？'],['onmyo',OM,'……我も昔、図を描きかけで捨てたことがある。'],['onmyo',OM,'……今は、関係のない話だ。']]},
+ {id:'c_rocker2',t:'油のにおい',st:2,who:['rocker'],L:[['rocker',RK,'港の倉庫街のほう、最近やけに油くせぇ。'],['rocker',RK,'錆の連中、何かためこんでやがるな。'],['rocker',RK,'火がついたら、ギターソロじゃすまねぇぜ。']]},
+ {id:'c_owl2',t:'組み合わせ',st:2,who:['owl','tsukiyo'],L:[['owl',OW,'ツキヨ殿の星の位置と、わしの錆の地図。重ねてみると……。'],['tsukiyo',TK,'ぴったり、同じ円。'],['owl',OW,'ホッホッ。星と計算、組み合わせれば、陣の中心が読めるかもしれんのう。'],['wolf',W,'二人とも、なんか楽しそうだな……。']]},
+ /* ---------- 上層クリア（10F） ---------- */
+ {id:'c_gorilla3',t:'静かすぎる',st:3,who:['gorilla'],L:[['gorilla',GR,'炉の親玉まで倒したって！？ 100万ボルトの勝利だな！'],['gorilla',GR,'……ただな、変電所のほうが、どうも静かすぎる。'],['gorilla',GR,'いやな予感がするぜ、ウホッ。']]},
+ {id:'c_robo3',t:'再起動に必要なもの',st:3,who:['mouse','robot'],L:[['mouse',MO,'やったチュー！ 街の錆が少し減ったよ！'],['mouse',MO,'でも、ロボが寝言みたいに「パイソン」って言うんだ。ヘビの夢でも見てるのかな……？'],['robot',RB,'ピ……再起動ニ……必要ナモノ……'],['robot',RB,'……プログラム……ト……トモダチ……'],[null,'','メカロボの目が、一瞬だけ青く光った気がした。']]},
+ {id:'c_tsukiyo3',t:'星座にない光',st:3,who:['tsukiyo'],L:[['tsukiyo',TK,'星読みどおり。……ううん、星読み以上かな。'],['tsukiyo',TK,'夜明けに、空をまっすぐ飛ぶ光を見た。'],['tsukiyo',TK,'あれは星じゃない。星座の図面にも、のってない。']]},
+ {id:'c_onmyo3',t:'半分の図面',st:3,who:['onmyo'],L:[['onmyo',OM,'……面白い。'],['onmyo',OM,'その半分の図面。残りは、星の図面庫か、あるいは空か。'],['onmyo',OM,'……いずれ、また会うだろう。']]},
+ {id:'c_rocker3',t:'今夜の主役',st:3,who:['rocker'],L:[['rocker',RK,'……やるじゃねぇか。今夜の主役は、お前らだ。'],['rocker',RK,'けどな、ステージはまだ続く。'],['rocker',RK,'倉庫のほうで火が出たら……そのときは、俺も弾く。']]},
+ {id:'c_live3',t:'アンプに火を',st:3,who:['gorilla','rocker'],L:[['rocker',RK,'おい、ゴリラ。停電でアンプが鳴らねぇんだが。'],['gorilla',GR,'ウホッ？ だったら俺の電気を流してやろうか。'],['rocker',RK,'……壊すなよ。'],['gorilla',GR,'力まかせじゃ電気は流れねぇ。……ちゃんと分かってるさ。'],[null,'','アンプから、塔じゅうに響くような音が鳴った。'],['wolf:smile',W,'（これ、戦いに使えたらすげぇな……）']]},
+ {id:'c_end3',t:'夜は、まだまだ',st:3,who:['owl','fox','dodo'],L:[['owl',OW,'錆は、捨てられた道具とあきらめた夢から生まれる……。そして、匠の図面を求めておった。'],['fox',FX,'図面で錆を消したいのか、それとも図面で「もう一度動きたい」のか……どっちなんだろ。'],['dodo',DD,'ま、今日のところは、みんな無事でよかったよ〜。'],['wolf:smile',W,'おう。けど、休んだらまた磨くぞ。夜は、まだまだ続くんだからな。']]}
+]})();
+const chatStage=()=>{const f=G.floor|0;return f>=10?3:f>=6?2:f>=3?1:0};
+const chatOpen=c=>c.st<=chatStage()&&c.who.every(id=>id==='wolf'||!!owned(id));
+const chatNew=()=>CHATS.filter(c=>chatOpen(c)&&!(G.chatRead||[]).includes(c.id));
+async function playChat(id){const c=CHATS.find(x=>x.id===id);if(!c)return;await talk(c.L);G.chatRead=G.chatRead||[];if(!G.chatRead.includes(id)){G.chatRead.push(id);save()}}
+function openChats(){const all=CHATS.filter(chatOpen),rd=G.chatRead||[],lock=CHATS.length-all.length;
+ const face=id=>`<img src="${FACE(id)}" alt="">`;
+ $('gpBody').innerHTML=`<div class="gph">チャット <small style="font-weight:600;color:var(--sm)">${all.length - all.filter(c=>!rd.includes(c.id)).length}/${CHATS.length}</small></div>
+  <div class="chl">${all.slice().sort((a,b)=>(rd.includes(a.id)?1:0)-(rd.includes(b.id)?1:0)||b.st-a.st).map(c=>`<button class="chr ${rd.includes(c.id)?'':'nw'}" data-ch="${c.id}"><span class="chf">${[...new Set(c.L.map(l=>(l[0]||'').split(':')[0]).filter(Boolean))].slice(0,3).map(face).join('')}</span><b>${c.t}</b>${rd.includes(c.id)?'':'<i>NEW</i>'}</button>`).join('')||'<div class="note">まだチャットはない</div>'}</div>
+  ${lock?`<div class="note" style="margin-top:6px">まだ見られないチャット：${lock}（塔を登る・仲間を増やすと出てくる）</div>`:''}
+  <div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;
+ $('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};
+ $('gpBody').querySelectorAll('[data-ch]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await playChat(b.dataset.ch);openChats()});
+ $('genPick').classList.add('on')}
 
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
