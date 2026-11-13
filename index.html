@@ -1109,7 +1109,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.1.0';
+const VERSION='1.1.1';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -4531,7 +4531,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.1.0　セーブの守り・引き継ぎ</b><ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.1.1</b><ul><li>資材の箱をあけると一時停止して、出たもの（素材・図面・工具）を確認できる</li></ul>
+  <b>ver 1.1.0　セーブの守り・引き継ぎ</b><ul>
   <li>セーブの守り：ファイルに保存・引っ越しコード・端末の中の控え（3日分）・ひとつ前にもどす</li>
   <li>マイスターの塔（サイコロ版）から、仲間とコイン（上限1,350）を1回だけ引き継げる</li>
   <li>同じ階に長くいると「錆Lv」が上がり、敵がどんどん強くなる</li>
@@ -4548,6 +4549,17 @@ function openNews(){$('sheetT').textContent='お知らせ';
 
 /* ---------- ボスの宝箱を取らずに階段へ行ったら、先に宝箱をあける ---------- */
 {const _s=fStairs;fStairs=async function(){const c=FD&&FD.chests.find(x=>x.boss&&!x.open);if(c&&!FD.climbing){fOpenChest(c);return}return _s()}}
+/* ---------- ふつうの資材の箱：ばらまかずに一時停止して中身を見せ、そのまま受け取る ---------- */
+{const _o=fOpenChest;fOpenChest=function(c){if(c.boss)return _o(c);const D=FD,n0=D.items.length;_o(c);
+ const got=D.items.splice(n0),cnt={},rows=[];
+ for(const it of got){if(it.k==='bp'){D.lootBps.push(it.id);rows.push({ic:UIMG('m_bp',44),n:'図面',d:`「${RECIPES[it.id].n}」`})}
+  else if(it.k==='tool'){D.lootTools.push(it.id);rows.push({ic:UIMG(UI_IC[it.id]||'m_bp',44),n:'工具',d:`「${TOOLS[it.id].n}」`})}
+  else{D.loot[it.k]=(D.loot[it.k]||0)+1;cnt[it.k]=(cnt[it.k]||0)+1}}
+ Object.keys(cnt).forEach(k=>rows.unshift({ic:MIC(k,44),n:MATS[k]?MATS[k].n:k,d:`×${cnt[k]}`}));
+ if(!rows.length)return;D.paused=true;fReleaseStick();renderFHud();
+ let el=$('fChest');if(!el){el=document.createElement('div');el.className='fov';el.id='fChest';$('fPause').parentNode.appendChild(el)}
+ el.innerHTML=`<div class="fcard chb"><div class="chh">資材の箱オープン</div>${rows.map((r,i)=>`<div class="chr" style="animation-delay:${i*120}ms">${r.ic}<span><b>${r.n}</b><small>${r.d}</small></span></div>`).join('')}<button class="btn gold" id="chOk">OK</button></div>`;
+ el.classList.add('on');$('chOk').onclick=()=>{el.classList.remove('on');if(FD===D){D.paused=false;fLast=0}}}}
 
 /* ================= セーブの守り（マイスターの塔 Ver 2.20 を参考） =================
  * ・ファイルに保存：引っ越しコード入りの .txt をダウンロード（iPhone は「ファイル」→「ダウンロード」）
@@ -4675,7 +4687,7 @@ function inhNag(){if(!G||G.flags.inh||OPT.inhAsked||!G.flags.intro)return;if($('
  const d=diceGift(diceLocal());if(!d||(!d.chars.length&&!d.coins))return;OPT.inhAsked=1;saveOpt();inhAsk(d,'この端末に「マイスターの塔」（サイコロ版）のデータがあります。')}
 {const _oh2=openHome;openHome=function(){const r=_oh2.apply(this,arguments);setTimeout(inhNag,500);return r}}
 
-const BUILD='11/13 08:40';
+const BUILD='11/13 13:04';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
