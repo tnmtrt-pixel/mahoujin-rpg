@@ -1005,6 +1005,24 @@ body.hasTabs{overflow:hidden;height:100%}
 body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:20px;min-height:0}
 .wsgh .sp{font-size:11px;color:var(--sm);border:1px solid var(--sl);padding:0 5px}
 .ftm.warn{color:#ff6a3d;font-weight:800;animation:fwarn 1s infinite}@keyframes fwarn{50%{opacity:.45}}
+/* 会話：もどる・ログ */
+#talk .tbar{display:flex;gap:6px;margin-top:4px;flex:none}
+#talk .tbar button{font:inherit;font-size:12px;font-weight:700;color:var(--sub,#9aa5cc);background:#0b1024;border:1px solid #33406e;border-radius:8px;padding:4px 10px;min-height:30px}
+#talk .tbar button:disabled{opacity:.35}
+#talk .box>div:last-child{position:relative}
+#talk .nx{margin-top:-26px;pointer-events:none}
+.logov{position:fixed;inset:0;z-index:300;background:#000b;display:none;align-items:flex-end;justify-content:center;padding:calc(20px + env(safe-area-inset-top)) 10px calc(10px + env(safe-area-inset-bottom))}
+.logov.on{display:flex}
+.login{width:100%;max-width:600px;max-height:100%;display:flex;flex-direction:column;background:#141b38;border:2px solid var(--gold,#e8c35a);border-radius:16px;overflow:hidden}
+.logh{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #2a3560}
+.logh b{color:var(--gold,#e8c35a)}.logh button{font:inherit;font-weight:700;color:#fff;background:#232d55;border:none;border-radius:8px;padding:6px 14px;min-height:36px}
+.logl{overflow-y:auto;padding:8px 12px 14px;-webkit-overflow-scrolling:touch}
+.logr{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid #ffffff10}
+.logr img,.logr .lsp{width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none;background:#0b1024}
+.logr .lsp{background:none}
+.logr b{font-size:12px;color:var(--gold,#e8c35a)}.logr p{margin:1px 0 0;font-size:14px;line-height:1.6;white-space:pre-wrap}
+.logr.nar p{color:#c8cede;font-style:normal}
+.chr.stl .stf{flex:none;min-width:34px;font:700 12px ui-monospace,Menlo,monospace;color:var(--so,#ff8a3d)}
 
 </style>
 </head>
@@ -1127,7 +1145,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.2.5';
+const VERSION='1.3.0';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3137,7 +3155,7 @@ function _oldZukan(){show('zukan');
   return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R):LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}</div>
  <div class="zkh">工具 ${G.tools.length}/${TOOL_ORDER.length}</div><div class="zkg">${TOOL_ORDER.map(t=>{const has=G.tools.includes(t);return `<div class="zki ${has?'':'no'}">${MIC(t,40)}<b>${TOOLS[t].n}</b><small>${has?'持っている':TOOLS[t].price?'工房で買える':TOOLS[t].where}</small></div>`}).join('')}</div>
  <div class="zkh">素材</div><div class="zkg">${MAT_ORDER.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}</div>`}
-function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openChats()">チャット一覧</button><button class="btn ghost" onclick="closeSheet();openWorldMap()">世界地図</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();openSaveGuard()">セーブの守り</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button><div class="note" style="text-align:center;margin-top:6px">更新日時：${typeof BUILD!=='undefined'?BUILD:'-'}</div>`;$('sheet').classList.add('on')}
+function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openChats()">チャット一覧</button><button class="btn ghost" onclick="closeSheet();openWorldMap()">世界地図</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();openStory()">ストーリーをふりかえる</button><button class="btn ghost" onclick="closeSheet();openSaveGuard()">セーブの守り</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button><div class="note" style="text-align:center;margin-top:6px">更新日時：${typeof BUILD!=='undefined'?BUILD:'-'}</div>`;$('sheet').classList.add('on')}
 
 /* 鍛え直し：鉄くずを使って属性を付け直す */
 function reforge(id){const m=owned(id),w=m&&m.weapon;if(!w||!w.attr)return;if(G.mats.scrap<REFORGE_COST){say('鉄くずが足りない',900);return}
@@ -4214,7 +4232,8 @@ function openChats(){const all=CHATS.filter(chatOpen),rd=G.chatRead||[],lock=CHA
  $('gpBody').innerHTML=`<div class="gph">チャット <small style="font-weight:600;color:var(--sm)">${all.length - all.filter(c=>!rd.includes(c.id)).length}/${CHATS.length}</small></div>
   <div class="chl">${all.slice().sort((a,b)=>(rd.includes(a.id)?1:0)-(rd.includes(b.id)?1:0)||b.st-a.st).map(c=>`<button class="chr ${rd.includes(c.id)?'':'nw'}" data-ch="${c.id}"><span class="chf">${[...new Set(c.L.map(l=>(l[0]||'').split(':')[0]).filter(Boolean))].slice(0,3).map(face).join('')}</span><b>${c.t}</b>${rd.includes(c.id)?'':'<i>NEW</i>'}</button>`).join('')||'<div class="note">まだチャットはない</div>'}</div>
   ${lock?`<div class="note" style="margin-top:6px">まだ見られないチャット：${lock}（塔を登る・仲間を増やすと出てくる）</div>`:''}
-  <div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;
+  <div class="gpf"><button class="btn" id="chStory">ストーリーをふりかえる</button><button class="btn" id="gpClose">とじる</button></div>`;
+ $('chStory').onclick=()=>openStory();
  $('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};
  $('gpBody').querySelectorAll('[data-ch]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await playChat(b.dataset.ch);openChats()});
  $('genPick').classList.add('on')}
@@ -4571,7 +4590,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.2.5</b><ul><li>20Fのボス戦の前と、たおしたあとの場面に挿絵を追加</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.3.0　会話のふりかえり</b><ul><li>会話中に「◀ もどる」でひとつ前のセリフへ、「ログ」でここまでのセリフを一覧できる</li><li>メニューとチャット画面に「ストーリーをふりかえる」。見た場面をもう一度見られる（前のセーブで見た場面も出てくる）</li></ul>
+  <b>ver 1.2.5</b><ul><li>20Fのボス戦の前と、たおしたあとの場面に挿絵を追加</li></ul>
   <b>ver 1.2.4</b><ul><li>ボスをたおしたあと、残った敵にやられてHPが0になってもゲームが終わらない不具合を直した（ボスをたおすと残りの敵も消え、その階の時間も止まる）</li></ul>
   <b>ver 1.2.3</b><ul><li>見直し：資材の箱にコインが入っていたときも受け取れるように。ホームで会話中は、保存・引き継ぎの案内を出さないように</li></ul>
   <b>ver 1.2.2</b><ul><li>錆の大波のあとに次の階へ上がっても、画面のオレンジの点滅が消えなかった不具合を直した</li></ul>
@@ -4738,7 +4758,59 @@ function inhNag(){if(!G||G.flags.inh||OPT.inhAsked||!G.flags.intro)return;if(sgB
  const d=diceGift(diceLocal());if(!d||(!d.chars.length&&!d.coins))return;OPT.inhAsked=1;saveOpt();inhAsk(d,'この端末に「マイスターの塔」（サイコロ版）のデータがあります。')}
 {const _oh2=openHome;openHome=function(){const r=_oh2.apply(this,arguments);setTimeout(inhNag,500);return r}}
 
-const BUILD='11/14 00:20';
+/* ================= 会話のふりかえり =================
+ * ・会話中：「◀ もどる」でひとつ前のセリフへ、「ログ」でこの会話のここまでを一覧
+ * ・ストーリーのふりかえり：見た場面を、セーブの印（flags・到達階）から組み立てて、もう一度再生できる
+ *   （会話の中身はセーブに入れない。今のパーティで再生される）
+ * チャットは前から、チャット画面で読み返せる */
+talk=function(list,bg){if(!list||!list.length)return Promise.resolve();return new Promise(res=>{let i=0;const T=$('talk');
+ T.classList.toggle('ev',!!bg);T.style.backgroundImage=bg?`url(img/ev/${bg}.webp)`:'';T.classList.add('on');document.body.classList.add('talking');
+ let bar=$('tBar');if(!bar){bar=document.createElement('div');bar.id='tBar';bar.className='tbar';T.querySelector('.nx').before(bar)}
+ bar.innerHTML=`<button id="tBack" aria-label="ひとつ前へ">◀ もどる</button><button id="tLog">ログ</button>`;
+ const sh=()=>{const[rid,who,txt]=list[i];const[id,ex]=(rid||'').split(':');const c=id&&CHARS[id];const fb=$('tImg').parentNode,im=$('tImg');
+  const src=!hasFace(id)?'':c?(ex&&(FACES[id]||[]).includes(ex)?`img/face/${id}_${ex}.webp`:c.img):`img/${id}.webp`;
+  fb.style.display=src?'block':'none';if(src){im.onerror=()=>{fb.style.display='none'};im.src=src;portrait(im,id)}$('tWho').textContent=who||'';$('tTxt').textContent=txt;$('tTxt').scrollTop=0;
+  $('tBack').disabled=i===0};
+ const stop=e=>{e.stopPropagation();e.preventDefault()};
+ $('tBack').onclick=e=>{stop(e);if(i>0){i--;sh()}};
+ $('tLog').onclick=e=>{stop(e);logShow(list.slice(0,i+1),'この会話のログ')};
+ sh();T.onclick=e=>{if(e.target.closest('#tBar'))return;i++;
+  if(i>=list.length){T.classList.remove('on','ev');T.style.backgroundImage='';T.onclick=null;bar.innerHTML='';document.body.classList.remove('talking');lockInput(350);res()}else sh()}})};
+/* ログの一覧（会話の上に重ねる） */
+function logShow(L,title){let o=$('logOv');if(!o){o=document.createElement('div');o.id='logOv';o.className='logov';document.body.append(o)}
+ const nm=(rid,who)=>who||'';
+ o.innerHTML=`<div class="login"><div class="logh"><b>${title}</b><button id="logX">とじる</button></div><div class="logl">${L.map(([rid,who,txt])=>{const id=(rid||'').split(':')[0];
+  return `<div class="logr ${who?'':'nar'}">${id&&hasFace(id)&&CHARS[id]?`<img src="${FACE(id)}" alt="">`:'<span class="lsp"></span>'}<div>${who?`<b>${nm(rid,who)}</b>`:''}<p>${String(txt).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</p></div></div>`}).join('')}</div></div>`;
+ const x=e=>{e&&e.stopPropagation();o.classList.remove('on')};$('logX').onclick=x;o.onclick=e=>{if(e.target===o)x(e)};
+ o.classList.add('on');const l=o.querySelector('.logl');l.scrollTop=l.scrollHeight}
+/* ---- 見た場面の一覧（ふりかえり） ---- */
+function storyScenes(){const S=[],fl=G.floor|0,f=G.flags||{},K=['onmyo','sora','takumi'];
+ const add=(n,t,run)=>S.push({n,t,run});
+ if(f.intro)add(0,'はじまり',()=>talk(INTRO[G.hero]||[]));
+ const areas=[];for(let i=1;i<FLOORS.length;i++){const F=FLOORS[i];if(!F)continue;let a=areas.find(x=>x.k===F.area);if(!a)areas.push(a={k:F.area,f0:i,fb:0});if(F.boss)a.fb=i}
+ const hpFl={};Object.entries(HELPER).forEach(([k,id])=>{const a=areas.find(x=>x.k===k);if(a&&hpFl[id]==null)hpFl[id]=a.f0+.2});
+ if(typeof HELPER_FL!=='undefined')Object.entries(HELPER_FL).forEach(([n,id])=>{if(hpFl[id]==null||hpFl[id]>+n)hpFl[id]=+n+.2});
+ Object.entries(hpFl).forEach(([id,n])=>{if(f['hp_'+id]&&JOIN_TALK[id])add(n,`${CHARS[id].name}と出会う`,()=>talk(JOIN_TALK[id]))});
+ areas.forEach(a=>{const A=AREAS[a.k];
+  if(f['ai_'+a.k]&&AREA_INTRO[a.k])add(a.f0+.1,`${A.n}に入る`,()=>talk(AREA_INTRO[a.k]));
+  if(a.fb&&f['bt_'+A.boss]&&BOSS_TALK[a.k])add(a.fb+.3,'ボス戦の前',()=>talk(storyFit(BOSS_TALK[a.k]||[],null,K),BOSS_EV[a.k]&&BOSS_EV[a.k][0]));
+  const won=a.fb===TOP_FLOOR?!!f.ch1b:fl>a.fb;
+  if(a.fb&&won&&BOSS_WIN[a.k])add(a.fb+.5,'ボスをたおした',()=>talk(storyFit(BOSS_WIN[a.k],null,K),BOSS_EV[a.k]&&BOSS_EV[a.k][1]))});
+ if(f.selfRust)add(9.4,'鏡の作業台',()=>talk(storyFit(SELF_RUST[G.hero]||[],SELF_RUST_FB),EV_IMG.includes('rust_'+G.hero)?'ev_rust_'+G.hero:null));
+ if(f.ch1)add(10.8,'第1章 前編　エンディング',()=>talk(storyFit(ENDING,null,['gorilla']),'ev_ending1'));
+ if(f.ch1b)add(20.8,'第1章　エンディング',()=>talk(storyFit(ENDING2,null,['owl','takumi'])));
+ return S.sort((a,b)=>a.n-b.n)}
+function openStory(){const S=storyScenes();
+ $('gpBody').innerHTML=`<div class="gph">ストーリーをふりかえる <small style="font-weight:600;color:var(--sm)">${S.length}場面</small></div>
+  <div class="note" style="margin-bottom:6px">これまでに見た場面を、もう一度見られます。会話の中の「ログ」で、読み飛ばしたセリフも一覧できます。</div>
+  <div class="chl">${S.map((s,i)=>`<button class="chr stl" data-st="${i}"><span class="stf">${s.n<1?'序':Math.floor(s.n)+'F'}</span><b>${s.t}</b></button>`).join('')||'<div class="note">まだ見た場面はありません</div>'}</div>
+  <div class="gpf"><button class="btn" id="stChat">チャットを見る</button><button class="btn" id="gpClose">とじる</button></div>`;
+ $('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};
+ $('stChat').onclick=()=>openChats();
+ $('gpBody').querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await S[+b.dataset.st].run();openStory()});
+ $('genPick').classList.add('on')}
+
+const BUILD='11/14 07:18';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
