@@ -1004,6 +1004,7 @@ button.eqs{cursor:pointer;border-color:var(--so)}button.eqs.empty{border-style:d
 body.hasTabs{overflow:hidden;height:100%}
 body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(safe-area-inset-bottom));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:20px;min-height:0}
 .wsgh .sp{font-size:11px;color:var(--sm);border:1px solid var(--sl);padding:0 5px}
+.ftm.warn{color:#ff6a3d;font-weight:800;animation:fwarn 1s infinite}@keyframes fwarn{50%{opacity:.45}}
 
 </style>
 </head>
@@ -1126,7 +1127,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.2.0';
+const VERSION='1.2.1';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -2443,6 +2444,8 @@ const TOOL_GATE={tap:3,solder:3,drill:3,pliers:4,welder:4,lathe:4};
 const rustMul=()=>FD.st>FT.RUST?1+(FD.st-FT.RUST)/45:1;
 /* 長居の錆：錆が出てから25秒ごとに錆Lvが上がり、新しく出る敵のHPと攻撃が強くなる（低い階での放置稼ぎを止める） */
 const rustK=()=>Math.max(0,(FD.st-FT.RUST)/25),rustLv=()=>FD.st>=FT.RUST?Math.floor(rustK())+1:0;
+/* 1つの階にいられるのは5分まで。錆が出てから経験値はだんだん減り、5分で0。5分をこえると「錆の大波」でHPがけずれ続ける */
+const FLOOR_MAX=300,xpT=()=>!FD||FD.boss||FD.st<FT.RUST?1:Math.max(0,1-(FD.st-FT.RUST)/(FLOOR_MAX-FT.RUST));
 const rustHp=k=>1+.6*k+.25*k*k,rustDm=k=>1+.5*k+.2*k*k;
 const FCFG={HP:100,SPD:1.9,PICK:70,MAX_FOES:170};
 const AREA_JOIN={alley:'fox',factory:'dodo',under:'owl'};
@@ -2625,7 +2628,7 @@ function fAttacks(f){const A=FD.atk,c=FD.cd,cm=fCd();
  FD.zones=FD.zones.filter(z=>z.t<z.life)}
 
 /* ---------- 倒した・拾った ---------- */
-function fKill(e){FD.kills++;const F=FFOE[e.k];FD.gems.push({x:e.x,y:e.y,v:F.xp,big:F.xp>=10});
+function fKill(e){FD.kills++;const F=FFOE[e.k];{const v=F.xp*xpT();if(v>0)FD.gems.push({x:e.x,y:e.y,v,big:F.xp>=10})}
  {const fm=FLOOR_MATS[FD.floor]||['scrap'];for(let i=0;i<fm.length;i++)if(Math.random()<(i?.016:.026)){FD.items.push({x:e.x+Math.random()*16-8,y:e.y+Math.random()*16-8,k:fm.at(i)});break}if(FLOORS[FD.floor].boss&&Math.random()<.005)FD.items.push({x:e.x,y:e.y,k:'core'})}
  if(e.big){for(let i=0;i<6;i++)FD.gems.push({x:e.x+Math.random()*60-30,y:e.y+Math.random()*60-30,v:3});
   const n=e.boss?4:2,fm=FLOOR_MATS[FD.floor]||['scrap'];for(let i=0;i<n;i++)FD.items.push({x:e.x+Math.random()*50-25,y:e.y+Math.random()*50-25,k:fm.at(i%fm.length)});
@@ -2701,7 +2704,7 @@ function fUpdate(f){const D=FD;D.t+=f/60;
  if(D.join&&!D.join.shown&&D.t>=FT.JOIN){const a=Math.random()*TAU;Object.assign(D.join,{shown:true,x:D.x+Math.cos(a)*230,y:D.y+Math.sin(a)*230});fBanner(`だれかの気配がする…（${CHARS[D.join.id].name}）`,180,'n_join')}
  if(FLOORS[D.floor].boss&&!D.boss&&!D.bossDone&&!D.bossCalled&&D.t>=FT.BOSS){fBossCome();return}
  if(D.stairs&&!D.stairShown&&D.t>=FT.HINT){D.stairShown=true;fBanner(D.stairs.open?'階段の気配がする！ 矢印の方へ':'階段に鍵がかかっている。強敵が鍵を持っているらしい',170,D.stairs.open?'n_floor':'n_join')}
- D.tt+=f/60;if(!D.boss){D.st+=f/60;if(D.st>=FT.RUST&&!D.rustMsg){D.rustMsg=1;fBanner('錆が濃くなってきた…… 長居すると敵がどんどん強くなる',170,'n_time')}{const rl=rustLv();if(rl>=2&&rl>(D.rustLvMsg||1)){D.rustLvMsg=rl;fBanner(rl>=5?`錆Lv${rl}！ 敵がとても強い。早く階段へ`:`錆Lv${rl}　敵が強くなった`,150,'n_time')}}}
+ D.tt+=f/60;if(!D.boss){D.st+=f/60;if(D.st>=FLOOR_MAX-60&&!D.waveWarn){D.waveWarn=1;fBanner('錆の大波が近づいている…… あと1分でこの階は錆にのまれる',200,'n_time')}if(D.st>=FLOOR_MAX-10&&D.waveWarn<2){D.waveWarn=2;fBanner('あと10秒！ 階段へ急げ',150,'n_time')}if(D.st>=FLOOR_MAX&&!D.bossDone){if(!D.wave){D.wave=1;fBanner('錆の大波！ この階はもう持たない',220,'n_time')}D.hp-=D.maxhp*(.05+.03*(D.st-FLOOR_MAX))*f/60;D.shake=Math.max(D.shake||0,3);if((D.wt=(D.wt||0)+f)>=30){D.wt=0;renderFHud()}}if(D.st>=FT.RUST&&!D.rustMsg){D.rustMsg=1;fBanner('錆が濃くなってきた…… 長居すると敵がどんどん強くなる',170,'n_time')}{const rl=rustLv();if(rl>=2&&rl>(D.rustLvMsg||1)){D.rustLvMsg=rl;fBanner(rl>=5?`錆Lv${rl}！ 敵がとても強い。早く階段へ`:`錆Lv${rl}　敵が強くなった`,150,'n_time')}}}
  // 攻撃
  fAttacks(f);
  for(const s of D.shots){s.x+=s.vx*f;s.y+=s.vy*f;s.life-=f;s.rot+=.35*f;
@@ -2776,7 +2779,7 @@ function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDP
  fDrawExtra(g,D);
  g.restore();
  // 上の帯
- const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+`<span class="ffl">${D.floor}F</span><span class="ftm">${D.boss?'ボス戦':Math.floor(lf/60)+':'+String(lf%60).padStart(2,'0')}</span>${rusty?`<span class="frl">錆Lv${rustLv()}</span>`:''}`+`<span class="fmats">${matIcons(D.floor,18)}</span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
+ const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+`<span class="ffl">${D.floor}F</span><span class="ftm ${!D.boss&&D.st>=FLOOR_MAX-60?'warn':''}">${D.boss?'ボス戦':!D.boss&&D.st>=FLOOR_MAX-60?'残り'+Math.max(0,FLOOR_MAX-lf)+'秒':Math.floor(lf/60)+':'+String(lf%60).padStart(2,'0')}</span>${rusty?`<span class="frl">錆Lv${rustLv()}</span>`:''}`+`<span class="fmats">${matIcons(D.floor,18)}</span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
  $('fHpI').style.width=Math.max(0,100*D.hp/D.maxhp)+'%';$('fXpI').style.width=100*D.xp/D.need+'%';$('fLv').textContent='Lv'+D.lv;
  if(D.boss){$('fBoss').style.display='block';$('fBossI').style.width=Math.max(0,100*D.boss.hp/D.boss.max)+'%';$('fBossN').textContent=FOES[D.boss.k]?FOES[D.boss.k].n:'ボス'}else $('fBoss').style.display='none';
  const wn=$('fWarn');if(D.warn>0){{const h=(D.warnIc?UIMG(D.warnIc,30)+' ':'')+D.warnTxt;if(wn._h!==h){wn.innerHTML=h;wn._h=h}}wn.style.opacity=Math.min(1,D.warn/30)}else wn.style.opacity=0}
@@ -2965,7 +2968,7 @@ function openItems(){const row=(ic,n,cnt,d)=>`<div class="itr">${ic}<div class="
   `<div class="note" style="margin-top:6px"><b>図面</b>　${G.bps.map(b=>'「'+RECIPES[b].n+'」').join('')}</div>`+
   `<button class="btn" style="margin-top:10px" onclick="closeSheet()">とじる</button>`;
  $('sheetB').scrollTop=0;$('sheet').classList.add('on')}
-function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイスターの塔を登る。階段を見つけると、そのまま上の階へ。ボスを倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。さらに25秒ごとに「錆Lv」が上がり、敵のHPと攻撃がどんどん強くなる（低い階での長居は危険）。工房で武器・防具づくり、編成でパーティ、ガチャで仲間集め。'],
+function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイスターの塔を登る。階段を見つけると、そのまま上の階へ。ボスを倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。さらに25秒ごとに「錆Lv」が上がり、敵のHPと攻撃がどんどん強くなる。もらえる経験値もだんだん減る。1つの階にいられるのは5分まで。5分をこえると「錆の大波」でHPがけずれ続ける。工房で武器・防具づくり、編成でパーティ、ガチャで仲間集め。'],
  [null,'説明','塔の中では、出撃キャラを指で動かす。攻撃は自動。はじめは出撃キャラの技だけ。'],
  [null,'説明','各層で、お助け仲間（下層：ギアフォックス、中層：ドド先輩、上層：ホー博士、試作の層：チュータ、発電の層：ボルトゴリラ、空の層：セブンティーン→ツキヨ）に会える。その挑戦の間だけ一緒に戦ってくれる。パーティにいるときは技が強化される。'],
  [null,'説明','2つの技をどちらも最大Lvにすると進化できる（例：連射＋追尾）。技が最大Lvで、その技の武器がSランク以上なら覚醒できる。どちらか一方だけ。磁石を拾うと、まわりの経験値を全部集める。'],
@@ -2975,7 +2978,7 @@ function openHelp(){talk([[null,'説明','ホームの「出撃」で、マイ�
  [null,'説明','工房では「素材＋工具＋図面」がそろうと加工できる。工具は工房で買うか、塔の中で見つける。なぞりの出来ばえで強さが決まる。']])}
 function signLines(){return [[null,'看板','↑ 古い工房（武器・防具づくり、工具）\n↓ 渦の門（マイスターの塔の入口。錆が出るので注意）'],[null,'看板',`塔の${G.floor|0}階まで突破。次は ${nextFloor()}階「${FLOORS[nextFloor()].n}」`]]}
 function openDest(){show('dest');const best=G.floor|0,pts=startPoints();
- $('destList').innerHTML=`<div class="note" style="margin-bottom:6px">階段には鍵がかかっている。強敵をたおすと鍵が手に入り、そのまま上の階へ進める。ボスの階を倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。さらに25秒ごとに「錆Lv」が上がり、敵のHPと攻撃がどんどん強くなる（低い階での長居は危険）。</div>`+
+ $('destList').innerHTML=`<div class="note" style="margin-bottom:6px">階段には鍵がかかっている。強敵をたおすと鍵が手に入り、そのまま上の階へ進める。ボスの階を倒したら、続けて登るかホームへ帰るかを選べる。同じ階に長くいると錆が濃くなり、敵が増えていく。さらに25秒ごとに「錆Lv」が上がり、敵のHPと攻撃がどんどん強くなる。もらえる経験値もだんだん減る。1つの階にいられるのは5分まで。5分をこえると「錆の大波」でHPがけずれ続ける。</div>`+
   [17,14,11,7,4,1].map(s=>{const F=FLOORS[s],open=pts.includes(s),bossF={1:3,4:6,7:10,11:13,14:16,17:20}[s],done=best>=bossF,reach=Math.min(best,bossF);
    const st=!open?`${s-1}階のボスを倒すと開く`:done?`${UIMG('n_boss',16)}ボス撃破`:reach>=s?`${reach}Fまで到達`:'まだ入っていない';
    return `<button class="flr ${open&&s===bestStart()?'next':''} ${open?'':'lock'}" data-f="${s}" ${open?'':'disabled'}><span class="fn">${s}F</span><span class="ft"><b>${LAYER_NAME[F.area]}　${s}F〜${bossF}F</b><small>${st}</small><span class="drec ${teamPow()>=REC_POW[bossF]?'ok':teamPow()>=REC_POW[s]?'mid':'ng'}">推奨戦力 ${REC_POW[s]}〜${REC_POW[bossF]}　いま ${teamPow()}</span><span class="dmats">${Array.from({length:bossF-s+1},(_,i)=>s+i).map(f=>`<i>${f}F ${matIcons(f,15)}</i>`).join('')}</span></span><span class="fs">${open?UIMG(done?'n_floor':'n_unlock',26)+'出撃':UIMG('n_unlock',26)+'未'}</span></button>`}).join('')+
@@ -4566,7 +4569,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.2.0</b><ul><li>工房の「つくる」を、仲間ごと・汎用・防具のまとまりで開け閉めできるようにした（専用武器はキャラごと）</li><li>工房の「工具」を「店で買える／持っている／まだ店にない」に分けた</li><li>スクロールすると下のタブが動いてしまう不具合を直した</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.2.1</b><ul><li>1つの階にいられるのは5分まで。のこり1分で知らせ、5分をこえると「錆の大波」でHPがけずれ続ける</li><li>錆が出てからは、もらえる経験値がだんだん減る（5分で0）</li></ul>
+  <b>ver 1.2.0</b><ul><li>工房の「つくる」を、仲間ごと・汎用・防具のまとまりで開け閉めできるようにした（専用武器はキャラごと）</li><li>工房の「工具」を「店で買える／持っている／まだ店にない」に分けた</li><li>スクロールすると下のタブが動いてしまう不具合を直した</li></ul>
   <b>ver 1.1.1</b><ul><li>資材の箱をあけると一時停止して、出たもの（素材・図面・工具）を確認できる</li></ul>
   <b>ver 1.1.0　セーブの守り・引き継ぎ</b><ul>
   <li>セーブの守り：ファイルに保存・引っ越しコード・端末の中の控え（3日分）・ひとつ前にもどす</li>
@@ -4596,6 +4600,9 @@ function openNews(){$('sheetT').textContent='お知らせ';
  let el=$('fChest');if(!el){el=document.createElement('div');el.className='fov';el.id='fChest';$('fPause').parentNode.appendChild(el)}
  el.innerHTML=`<div class="fcard chb"><div class="chh">資材の箱オープン</div>${rows.map((r,i)=>`<div class="chr" style="animation-delay:${i*120}ms">${r.ic}<span><b>${r.n}</b><small>${r.d}</small></span></div>`).join('')}<button class="btn gold" id="chOk">OK</button></div>`;
  el.classList.add('on');$('chOk').onclick=()=>{el.classList.remove('on');if(FD===D){D.paused=false;fLast=0}}}}
+
+/* 錆の大波：画面を錆色にそめる */
+{const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);if(!D.wave||D.boss)return;g.save();g.setTransform(1,0,0,1,0,0);g.globalAlpha=.18+.1*Math.sin(D.t*6);g.fillStyle='#b4461a';g.fillRect(0,0,g.canvas.width,g.canvas.height);g.restore()}}
 
 /* ================= セーブの守り（マイスターの塔 Ver 2.20 を参考） =================
  * ・ファイルに保存：引っ越しコード入りの .txt をダウンロード（iPhone は「ファイル」→「ダウンロード」）
@@ -4723,7 +4730,7 @@ function inhNag(){if(!G||G.flags.inh||OPT.inhAsked||!G.flags.intro)return;if($('
  const d=diceGift(diceLocal());if(!d||(!d.chars.length&&!d.coins))return;OPT.inhAsked=1;saveOpt();inhAsk(d,'この端末に「マイスターの塔」（サイコロ版）のデータがあります。')}
 {const _oh2=openHome;openHome=function(){const r=_oh2.apply(this,arguments);setTimeout(inhNag,500);return r}}
 
-const BUILD='11/13 14:50';
+const BUILD='11/13 15:19';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
