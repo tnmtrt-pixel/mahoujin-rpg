@@ -1127,7 +1127,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.2.4';
+const VERSION='1.2.5';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -2682,8 +2682,10 @@ async function fJoin(){const J=FD.join;FD.paused=true;fReleaseStick();const id=J
   (full?G.bench:G.party).push(newMember(id,1));G.joined.push(id);save();FD.atk[id]=0;FD.join=null;if(FD.stairs){FD.stairs.open=true;FD.stairShown=true}
   await say(`${UIMG('n_join',40)} <span class="nw">${CHARS[id].name}が</span><span class="nw">仲間になった！</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n}が、レベルアップの候補に出るようになった${full?`<br>パーティが${PARTY_MAX}人なので控えに入った`:''}</span>`,full?2200:1700)}
  finally{show('field');resizeField();renderFHud();FD.paused=false;fLast=0;if(!fRaf)fRaf=requestAnimationFrame(fLoop)}}
+/* ボス戦の前と後の挿絵（img/ev/）。ないエリアは今までどおり */
+const BOSS_EV={top:['ev_boss20_before','ev_boss20_after']};
 async function fBossCome(){const k=FD.area,tk='bt_'+AREAS[k].boss;FD.bossCalled=true;FD.paused=true;fReleaseStick();
- try{if(!G.flags[tk]){await talk(storyFit(BOSS_TALK[k]||[],null,['onmyo','sora','takumi']));G.flags[tk]=1;save()}}finally{FD.paused=false;fLast=0}
+ try{if(!G.flags[tk]){await talk(storyFit(BOSS_TALK[k]||[],null,['onmyo','sora','takumi']),BOSS_EV[k]&&BOSS_EV[k][0]);G.flags[tk]=1;save()}}finally{FD.paused=false;fLast=0}
  const b=fSpawn(FAREA[k].boss,null,320);b.ai={st:'walk',t:0};FD.boss=b;fBanner(`${FOES[b.k]?FOES[b.k].n:'ボス'}が現れた！`,180,'n_boss')}
 /* ボスの動き：歩く → 予告（赤い線）→ 突進。手下を呼ぶ */
 function fBossAI(b,f){const a=b.ai;a.t+=f;
@@ -2830,7 +2832,7 @@ async function fStairs(){const D=FD;if(!D||D.climbing)return;D.climbing=true;D.p
  const fl=D.floor,FLR=FLOORS[fl],k=D.area;const first=commitFloor(fl);sfx.win&&sfx.win();
  try{
   if(FLR.boss){
-   if(first&&BOSS_WIN[k])await talk(storyFit(BOSS_WIN[k],null,['onmyo','sora','takumi']));
+   if(first&&BOSS_WIN[k])await talk(storyFit(BOSS_WIN[k],null,['onmyo','sora','takumi']),BOSS_EV[k]&&BOSS_EV[k][1]);
    if(fl===10&&!G.flags.ch1){fEnd('ending');return}
    if(fl>=TOP_FLOOR){fEnd('ending2');return}
    if(!await fChoice(fl)){fEnd('home');return}}
@@ -2898,7 +2900,7 @@ function fEnd(why){const D=FD;if(!D||D.ending)return;D.ending=true;D.run=false;c
 function resGo(f){$('result').classList.remove('fres');goFloor(f)}
 async function afterField(){$('result').classList.remove('fres');
  /* 前の版のセーブに残った印（いまは階段の場で会話が流れる） */
- delete G.flags.pendFloorUp;const k=G.flags.pendFieldWin;if(k){delete G.flags.pendFieldWin;save();await talk(storyFit(BOSS_WIN[k]||[],null,['onmyo','sora','takumi']))}
+ delete G.flags.pendFloorUp;const k=G.flags.pendFieldWin;if(k){delete G.flags.pendFieldWin;save();await talk(storyFit(BOSS_WIN[k]||[],null,['onmyo','sora','takumi']),BOSS_EV[k]&&BOSS_EV[k][1])}
  openHome()}
 
 /* ===================== 工房（素材＋工具＋図面 → 製品） ===================== */
@@ -4569,7 +4571,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.2.4</b><ul><li>ボスをたおしたあと、残った敵にやられてHPが0になってもゲームが終わらない不具合を直した（ボスをたおすと残りの敵も消え、その階の時間も止まる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.2.5</b><ul><li>20Fのボス戦の前と、たおしたあとの場面に挿絵を追加</li></ul>
+  <b>ver 1.2.4</b><ul><li>ボスをたおしたあと、残った敵にやられてHPが0になってもゲームが終わらない不具合を直した（ボスをたおすと残りの敵も消え、その階の時間も止まる）</li></ul>
   <b>ver 1.2.3</b><ul><li>見直し：資材の箱にコインが入っていたときも受け取れるように。ホームで会話中は、保存・引き継ぎの案内を出さないように</li></ul>
   <b>ver 1.2.2</b><ul><li>錆の大波のあとに次の階へ上がっても、画面のオレンジの点滅が消えなかった不具合を直した</li></ul>
   <b>ver 1.2.1</b><ul><li>1つの階にいられるのは5分まで。のこり1分で知らせ、5分をこえると「錆の大波」でHPがけずれ続ける</li><li>錆が出てからは、もらえる経験値がだんだん減る（5分で0）</li></ul>
@@ -4735,7 +4738,7 @@ function inhNag(){if(!G||G.flags.inh||OPT.inhAsked||!G.flags.intro)return;if(sgB
  const d=diceGift(diceLocal());if(!d||(!d.chars.length&&!d.coins))return;OPT.inhAsked=1;saveOpt();inhAsk(d,'この端末に「マイスターの塔」（サイコロ版）のデータがあります。')}
 {const _oh2=openHome;openHome=function(){const r=_oh2.apply(this,arguments);setTimeout(inhNag,500);return r}}
 
-const BUILD='11/13 20:43';
+const BUILD='11/14 00:20';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
