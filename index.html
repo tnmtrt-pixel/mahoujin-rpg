@@ -1127,7 +1127,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.2.3';
+const VERSION='1.2.4';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -2637,7 +2637,7 @@ function fKill(e){FD.kills++;const F=FFOE[e.k];{const v=F.xp*xpT();if(v>0)FD.gem
   if(e.boss||Math.random()<BP_ELITE){const bp=nextBp();if(bp)FD.items.push({x:e.x-16,y:e.y,k:'bp',id:bp})}
   /* 強敵・ボスはコインも落とす */
   const cn=e.boss?5:2;for(let i=0;i<cn;i++)FD.items.push({x:e.x+Math.random()*44-22,y:e.y-14+Math.random()*20,k:'coin',v:COIN_DROP})}
- if(e.boss){FD.bossDone=true;FD.boss=null;fBanner(`${FOES[e.k]?FOES[e.k].n:'ボス'}をたおした！`,200,'n_boss');sfx.win&&sfx.win();FD.stairs={x:e.x,y:e.y,open:true};FD.stairShown=true;
+ if(e.boss){FD.bossDone=true;FD.boss=null;FD.foes.forEach(f=>{if(f!==e&&f.hp>0)f.hp=0});FD.ebul=[];FD.hp=Math.max(FD.hp,1);fBanner(`${FOES[e.k]?FOES[e.k].n:'ボス'}をたおした！`,200,'n_boss');sfx.win&&sfx.win();FD.stairs={x:e.x,y:e.y,open:true};FD.stairShown=true;
   /* ボスが倒れると、まわりの錆もくずれ落ちる */
   for(const o of FD.foes)if(o!==e&&o.hp>0){o.hp=0;FD.gems.push({x:o.x,y:o.y,v:1})}
   fBanner('錆がくずれ落ちた！ 上への階段が現れた',200,'n_floor')}}
@@ -2697,14 +2697,14 @@ function fUpdate(f){const D=FD;D.t+=f/60;
  let mx=FIN.dx,my=FIN.dy;if(FKEY.ArrowLeft)mx=-1;if(FKEY.ArrowRight)mx=1;if(FKEY.ArrowUp)my=-1;if(FKEY.ArrowDown)my=1;const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml}
  if(ml>.05){D.x+=mx*fSpd()*f;D.y+=my*fSpd()*f;D.walk+=f;D.face=Math.abs(mx)>Math.abs(my)?(mx<0?'left':'right'):(my<0?'up':'down')}
  // 出現
- const w=waveNow(),rate=w[2]*(D.boss?.6:1)*(1+.12*(D.step||0))*rustMul();D.acc+=rate*f/60;while(D.acc>=1){D.acc--;fSpawn(pick(w[1]))}
+ const w=waveNow(),rate=w[2]*(D.boss?.6:1)*(1+.12*(D.step||0))*rustMul();if(!D.bossDone)D.acc+=rate*f/60;while(D.acc>=1){D.acc--;fSpawn(pick(w[1]))}
  if(D.elite<FT.ELITE.length&&D.t>=FT.ELITE[D.elite]){const key=!!(D.stairs&&!D.stairs.open);D.elite++;const e=fSpawn(FAREA[D.area].elite);if(e&&key)e.key=true;fBanner(key?'強敵が来た！ 階段の鍵を持っている':'強敵が来た！',150,key?'f_key':'n_boss')}
  if(D.stairs&&!D.stairs.open&&D.elite>=FT.ELITE.length&&!D.foes.some(e=>e.key)&&D.t>(D.keyT||0)){D.keyT=D.t+20;const e=fSpawn(FAREA[D.area].elite);if(e){e.key=true;fBanner('鍵を持った強敵がまた来た！',150,'f_key')}}
  if(D.chestN<FT.CHEST.length&&D.t>=FT.CHEST[D.chestN]){D.chestN++;const a=Math.random()*TAU;D.chests.push({x:D.x+Math.cos(a)*260,y:D.y+Math.sin(a)*260,open:false});fBanner('近くに資材の箱がある！',120)}
  if(D.join&&!D.join.shown&&D.t>=FT.JOIN){const a=Math.random()*TAU;Object.assign(D.join,{shown:true,x:D.x+Math.cos(a)*230,y:D.y+Math.sin(a)*230});fBanner(`だれかの気配がする…（${CHARS[D.join.id].name}）`,180,'n_join')}
  if(FLOORS[D.floor].boss&&!D.boss&&!D.bossDone&&!D.bossCalled&&D.t>=FT.BOSS){fBossCome();return}
  if(D.stairs&&!D.stairShown&&D.t>=FT.HINT){D.stairShown=true;fBanner(D.stairs.open?'階段の気配がする！ 矢印の方へ':'階段に鍵がかかっている。強敵が鍵を持っているらしい',170,D.stairs.open?'n_floor':'n_join')}
- D.tt+=f/60;if(!D.boss){D.st+=f/60;if(D.st>=FLOOR_MAX-60&&!D.waveWarn){D.waveWarn=1;fBanner('錆の大波が近づいている…… あと1分でこの階は錆にのまれる',200,'n_time')}if(D.st>=FLOOR_MAX-10&&D.waveWarn<2){D.waveWarn=2;fBanner('あと10秒！ 階段へ急げ',150,'n_time')}if(D.st>=FLOOR_MAX&&!D.bossDone){if(!D.wave){D.wave=1;fBanner('錆の大波！ この階はもう持たない',220,'n_time')}D.hp-=D.maxhp*(.05+.03*(D.st-FLOOR_MAX))*f/60;D.shake=Math.max(D.shake||0,3);if((D.wt=(D.wt||0)+f)>=30){D.wt=0;renderFHud()}}if(D.st>=FT.RUST&&!D.rustMsg){D.rustMsg=1;fBanner('錆が濃くなってきた…… 長居すると敵がどんどん強くなる',170,'n_time')}{const rl=rustLv();if(rl>=2&&rl>(D.rustLvMsg||1)){D.rustLvMsg=rl;fBanner(rl>=5?`錆Lv${rl}！ 敵がとても強い。早く階段へ`:`錆Lv${rl}　敵が強くなった`,150,'n_time')}}}
+ D.tt+=f/60;if(D.bossDone&&D.hp<1)D.hp=1;if(!D.boss&&!D.bossDone){D.st+=f/60;if(D.st>=FLOOR_MAX-60&&!D.waveWarn){D.waveWarn=1;fBanner('錆の大波が近づいている…… あと1分でこの階は錆にのまれる',200,'n_time')}if(D.st>=FLOOR_MAX-10&&D.waveWarn<2){D.waveWarn=2;fBanner('あと10秒！ 階段へ急げ',150,'n_time')}if(D.st>=FLOOR_MAX&&!D.bossDone){if(!D.wave){D.wave=1;fBanner('錆の大波！ この階はもう持たない',220,'n_time')}D.hp-=D.maxhp*(.05+.03*(D.st-FLOOR_MAX))*f/60;D.shake=Math.max(D.shake||0,3);if((D.wt=(D.wt||0)+f)>=30){D.wt=0;renderFHud()}}if(D.st>=FT.RUST&&!D.rustMsg){D.rustMsg=1;fBanner('錆が濃くなってきた…… 長居すると敵がどんどん強くなる',170,'n_time')}{const rl=rustLv();if(rl>=2&&rl>(D.rustLvMsg||1)){D.rustLvMsg=rl;fBanner(rl>=5?`錆Lv${rl}！ 敵がとても強い。早く階段へ`:`錆Lv${rl}　敵が強くなった`,150,'n_time')}}}
  // 攻撃
  fAttacks(f);
  for(const s of D.shots){s.x+=s.vx*f;s.y+=s.vy*f;s.life-=f;s.rot+=.35*f;
@@ -4569,7 +4569,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.2.3</b><ul><li>見直し：資材の箱にコインが入っていたときも受け取れるように。ホームで会話中は、保存・引き継ぎの案内を出さないように</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.2.4</b><ul><li>ボスをたおしたあと、残った敵にやられてHPが0になってもゲームが終わらない不具合を直した（ボスをたおすと残りの敵も消え、その階の時間も止まる）</li></ul>
+  <b>ver 1.2.3</b><ul><li>見直し：資材の箱にコインが入っていたときも受け取れるように。ホームで会話中は、保存・引き継ぎの案内を出さないように</li></ul>
   <b>ver 1.2.2</b><ul><li>錆の大波のあとに次の階へ上がっても、画面のオレンジの点滅が消えなかった不具合を直した</li></ul>
   <b>ver 1.2.1</b><ul><li>1つの階にいられるのは5分まで。のこり1分で知らせ、5分をこえると「錆の大波」でHPがけずれ続ける</li><li>錆が出てからは、もらえる経験値がだんだん減る（5分で0）</li></ul>
   <b>ver 1.2.0</b><ul><li>工房の「つくる」を、仲間ごと・汎用・防具のまとまりで開け閉めできるようにした（専用武器はキャラごと）</li><li>工房の「工具」を「店で買える／持っている／まだ店にない」に分けた</li><li>スクロールすると下のタブが動いてしまう不具合を直した</li></ul>
@@ -4734,7 +4735,7 @@ function inhNag(){if(!G||G.flags.inh||OPT.inhAsked||!G.flags.intro)return;if(sgB
  const d=diceGift(diceLocal());if(!d||(!d.chars.length&&!d.coins))return;OPT.inhAsked=1;saveOpt();inhAsk(d,'この端末に「マイスターの塔」（サイコロ版）のデータがあります。')}
 {const _oh2=openHome;openHome=function(){const r=_oh2.apply(this,arguments);setTimeout(inhNag,500);return r}}
 
-const BUILD='11/13 17:01';
+const BUILD='11/13 20:43';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
