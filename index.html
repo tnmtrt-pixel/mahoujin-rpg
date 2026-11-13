@@ -1127,7 +1127,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.2.1';
+const VERSION='1.2.2';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -2853,7 +2853,7 @@ async function fAdvance(nf){const D=FD,F=FLOORS[nf],k=F.area,newArea=k!==D.area;
  const comp=F.join,needJoin=comp&&comp!==G.hero&&!ownChar(comp),sa=Math.random()*TAU,sd=F.stair||0;
  Object.assign(D,{floor:nf,area:k,step:F.step,stairs:F.boss?null:{x:Math.cos(sa)*sd,y:Math.sin(sa)*sd,open:false},
   t:0,st:0,x:0,y:0,foes:[],shots:[],gems:[],items:[],pops:[],fx:[],zones:[],chests:[],stars:[],seeks:[],waves:[],acc:0,elite:0,chestN:0,
-  join:needJoin?{id:comp,shown:false,x:0,y:0,cool:0}:null,boss:null,bossDone:false,bossCalled:false,stairShown:false,lockMsg:0,rustMsg:0,inv:90,climbing:false});
+  join:needJoin?{id:comp,shown:false,x:0,y:0,cool:0}:null,boss:null,bossDone:false,bossCalled:false,stairShown:false,lockMsg:0,rustMsg:0,rustLvMsg:0,wave:0,waveWarn:0,wt:0,inv:90,climbing:false});
  D.hp=Math.min(D.maxhp,D.hp+Math.round(D.maxhp*.2));
  G.area=k;G.where={s:'field'};save();
  show('field');resizeField();renderFHud();
@@ -4569,7 +4569,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.2.1</b><ul><li>1つの階にいられるのは5分まで。のこり1分で知らせ、5分をこえると「錆の大波」でHPがけずれ続ける</li><li>錆が出てからは、もらえる経験値がだんだん減る（5分で0）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.2.2</b><ul><li>錆の大波のあとに次の階へ上がっても、画面のオレンジの点滅が消えなかった不具合を直した</li></ul>
+  <b>ver 1.2.1</b><ul><li>1つの階にいられるのは5分まで。のこり1分で知らせ、5分をこえると「錆の大波」でHPがけずれ続ける</li><li>錆が出てからは、もらえる経験値がだんだん減る（5分で0）</li></ul>
   <b>ver 1.2.0</b><ul><li>工房の「つくる」を、仲間ごと・汎用・防具のまとまりで開け閉めできるようにした（専用武器はキャラごと）</li><li>工房の「工具」を「店で買える／持っている／まだ店にない」に分けた</li><li>スクロールすると下のタブが動いてしまう不具合を直した</li></ul>
   <b>ver 1.1.1</b><ul><li>資材の箱をあけると一時停止して、出たもの（素材・図面・工具）を確認できる</li></ul>
   <b>ver 1.1.0　セーブの守り・引き継ぎ</b><ul>
@@ -4730,7 +4731,7 @@ function inhNag(){if(!G||G.flags.inh||OPT.inhAsked||!G.flags.intro)return;if($('
  const d=diceGift(diceLocal());if(!d||(!d.chars.length&&!d.coins))return;OPT.inhAsked=1;saveOpt();inhAsk(d,'この端末に「マイスターの塔」（サイコロ版）のデータがあります。')}
 {const _oh2=openHome;openHome=function(){const r=_oh2.apply(this,arguments);setTimeout(inhNag,500);return r}}
 
-const BUILD='11/13 15:19';
+const BUILD='11/13 16:54';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
