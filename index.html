@@ -1037,6 +1037,15 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .hexb.pwb i{font-style:normal;font-size:11px;font-weight:800;color:var(--so,#ff8a3d);margin-left:auto;flex:none}
 .hexb.pwb{width:min(60vw,250px);max-width:none}
 @media (max-height:700px){#partyList .part .pbtns{display:flex}.hexb.pwb{min-height:42px;padding:4px 8px}}
+/* 専用武器の帯（キャラ絵の下・押すと入れかえ） */
+.pwstrip{display:flex;align-items:center;gap:8px;width:100%;margin:0;padding:6px 8px;min-height:46px;background:#0a0e1acc;border:none;border-bottom:1px solid var(--sl);color:var(--sw);font:inherit;text-align:left}
+.pwstrip .pwl{flex:none;font-size:11px;font-weight:800;color:var(--sm);letter-spacing:.06em;writing-mode:horizontal-tb}
+.pwstrip img,.pwstrip .ic{width:30px!important;height:30px!important;flex:none}
+.pwstrip .pwn{display:flex;flex-direction:row;align-items:baseline;gap:8px;min-width:0;flex:1}
+.pwstrip .pwn b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:3px}
+.pwstrip .pwn small{font-size:12px;color:var(--sm);white-space:nowrap}
+.pwstrip i{font-style:normal;font-size:12px;font-weight:800;color:var(--so);flex:none;border:1px solid var(--so);padding:3px 8px}
+#partyList .part{height:clamp(130px,calc(100dvh - 690px),230px)}
 
 </style>
 </head>
@@ -1159,7 +1168,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.4.1';
+const VERSION='1.4.2';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3098,8 +3107,9 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
  <div class="pstat"><div class="pst pw"><span>攻撃</span><b>${teamPow()}</b></div><div class="pst ar"><span>体力</span><b>${teamHp()}</b></div></div>
  <div class="part"><img class="pimg" src="${c.img}" alt="">
   <div class="pbtns"><span class="plead">${m.id===G.lead?'リーダー（出撃）':inP?'パーティ':'控え'}</span>
-   <button class="hexb pwb" id="pW">${WPIC(m.id,30,w&&w.rid&&RECIPES[w.rid]?RECIPES[w.rid].tier:0)}<span class="pwn"><b>${w&&w.rid&&RECIPES[w.rid]?RECIPES[w.rid].n:baseWeapon(m.id)}${w&&w.rid?' '+RKIC(w.rank,16):''}</b><small>専用武器 ×${wMul(m)}${w&&w.attr?'　'+attrTxt(w.attr):''}</small></span><i>変える</i></button></div>
+   </div>
   <div class="pname"><b>${c.name}</b><span>${TIC(A.type,20)}${A.n}（${A.type}）</span><div class="stup">${starHTML(m)}</div></div></div>
+ <button class="pwstrip" id="pW">${WPIC(m.id,30,w&&w.rid&&RECIPES[w.rid]?RECIPES[w.rid].tier:0)}<span class="pwl">専用武器</span><span class="pwn"><b>${w&&w.rid&&RECIPES[w.rid]?RECIPES[w.rid].n:baseWeapon(m.id)}${w&&w.rid?' '+RKIC(w.rank,16):''}</b><small>×${wMul(m)}${w&&w.attr?'　'+attrTxt(w.attr):''}</small></span><i>変える</i></button>
  <div class="pcards">
   <div class="abcard">
    
@@ -4612,7 +4622,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.4.1</b><ul><li>編成画面：キャラの名前の下に、いま付けている専用武器を表示。タップで入れかえ。「工房でつくる」は右の欄へ</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.4.2</b><ul><li>編成画面：専用武器の表示が★やボタンに重なっていたので、キャラ絵の下の帯に移した</li></ul>
+  <b>ver 1.4.1</b><ul><li>編成画面：キャラの名前の下に、いま付けている専用武器を表示。タップで入れかえ。「工房でつくる」は右の欄へ</li></ul>
   <b>ver 1.4.0　汎用武器の「支援」</b><ul><li>パーティにいるキャラと同じ動きの汎用武器は「支援」になり、そのキャラの攻撃が上がる（C+5%・B+8%・A+12%・S+16%・SS+20%）。リーダーと同じ動きでも付けられる</li><li>編成画面：専用武器は上の「武器 変える」から。下の列は「チーム装備（汎用・防具）」にまとめた</li></ul>
   <b>ver 1.3.1</b><ul><li>編成画面で仲間を選ぶと、下の「専用」の枠がその仲間の武器になり、リーダー以外の専用武器も入れかえられるようにした</li></ul>
   <b>ver 1.3.0　会話のふりかえり</b><ul><li>会話中に「◀ もどる」でひとつ前のセリフへ、「ログ」でここまでのセリフを一覧できる</li><li>メニューとチャット画面に「ストーリーをふりかえる」。見た場面をもう一度見られる（前のセーブで見た場面も出てくる）</li></ul>
@@ -4835,7 +4846,7 @@ function openStory(){const S=storyScenes();
  $('gpBody').querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await S[+b.dataset.st].run();openStory()});
  $('genPick').classList.add('on')}
 
-const BUILD='11/14 12:18';
+const BUILD='11/14 12:21';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
