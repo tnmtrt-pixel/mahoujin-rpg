@@ -1114,7 +1114,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 </section>
 
 <section id="dest" class="scr">
- <div class="hd"><button class="back" onclick="openHome()">◀ ホーム</button><h2><img class="ic" src="img/icon/gate.webp" alt="" style="width:28px;height:28px"> マイスターの塔</h2></div>
+ <div class="hd"><button class="back" onclick="openHome()">◀ ホーム</button><h2><img class="ic" src="img/icon/gate.webp" alt="" style="width:28px;height:28px"> <span id="destTw">マイスターの塔</span></h2></div>
  <div id="destList"></div>
 </section>
 
@@ -1171,7 +1171,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.5.0';
+const VERSION='1.6.0';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -2545,7 +2545,7 @@ const RIC=(id,s=22)=>{const R=RECIPES[id];return R.kind==='gen'?(GEN_IC[id]?UIMG
 const matText=o=>Object.keys(o).filter(k=>o[k]).map(k=>`${MIC(k,18)}${MATS[k]?MATS[k].n:k}×${o[k]}`).join('　');
 
 /* ---------- セーブの補い（v2 の項目） ---------- */
-function fixV2(g){if(!g.tw||typeof g.tw!=='object')g.tw={judge:{floor:0}};if(!Array.isArray(g.bpRaw))g.bpRaw=[];if(!g.gen||typeof g.gen!=='object')g.gen={};if(!Array.isArray(g.genEq))g.genEq=[null,null];const m=g.mats&&typeof g.mats==='object'?g.mats:{};g.mats={};MAT_ORDER.forEach(k=>g.mats[k]=Math.max(0,Math.floor(+m[k]||0)));
+function fixV2(g){if(!g.tw||typeof g.tw!=='object')g.tw={judge:{floor:0}};if(g.towerAt&&g.towerAt!=='meister'){g.tw[g.towerAt]=g.tw[g.towerAt]||{};g.tw[g.towerAt].floor=g.floor|0;g.floor=(g.tw.meister&&g.tw.meister.floor)|0;g.towerAt='meister'}if(!Array.isArray(g.bpRaw))g.bpRaw=[];if(!g.gen||typeof g.gen!=='object')g.gen={};if(!Array.isArray(g.genEq))g.genEq=[null,null];const m=g.mats&&typeof g.mats==='object'?g.mats:{};g.mats={};MAT_ORDER.forEach(k=>g.mats[k]=Math.max(0,Math.floor(+m[k]||0)));
  g.tools=Array.isArray(g.tools)?g.tools.filter(t=>TOOLS[t]):[];if(!g.tools.includes('file'))g.tools.unshift('file');
  g.bps=Array.isArray(g.bps)?g.bps.filter(b=>RECIPES[b]):[];RECIPE_ORDER.filter(b=>RECIPES[b].start).forEach(b=>{if(!g.bps.includes(b))g.bps.push(b)});
  const a=g.arm&&typeof g.arm==='object'?g.arm:{};g.arm={};['head','body','feet'].forEach(s=>{const p=a[s];g.arm[s]=p&&RECIPES[p.rid]&&Number.isFinite(+p.mul)?p:null});
@@ -2623,8 +2623,8 @@ const fPow=id=>fPow0(id)*fPowX(id);
 /* 敵の波：1分の探索に合わせて、時間を2.5倍速で進める */
 const fSearchT=()=>FD.st;   /* この階を探索した時間（ボス戦の間は進まない） */
 function waveNow(){const mix=FAREA[FD.area].mix,t=fSearchT()*2.5;let w=mix[0];for(const v of mix)if(t>=v[0])w=v;return w}
-function fSpawn(kind,ang,dist){if(FD.foes.length>=FCFG.MAX_FOES&&!FFOE[kind].big)return null;const F=FFOE[kind],a=ang==null?Math.random()*TAU:ang,r=dist||Math.hypot(fW,fH)/2/fZ+60,fs=FSCALE(FD.floor),rk=F.boss?0:rustK(),hm=F.boss?BOSS_HP[FD.floor]||1:(1+fSearchT()/60)*(1+.22*(FD.step||0))*fs.hp*rustHp(rk);
- const e={id:++FD.uid,k:kind,x:FD.x+Math.cos(a)*r,y:FD.y+Math.sin(a)*r,hp:F.hp*hm,max:F.hp*hm,r:F.r,spd:F.spd*(F.boss?1:.9+Math.random()*.2),hit:0,kb:[0,0],wob:Math.random()*TAU,oh:0,big:!!F.big,boss:!!F.boss,dm:F.boss?1+.08*((FD.floor||1)-1):fs.dmg*rustDm(rk)};
+function fSpawn(kind,ang,dist){if(FD.foes.length>=FCFG.MAX_FOES&&!FFOE[kind].big)return null;const F=FFOE[kind],a=ang==null?Math.random()*TAU:ang,r=dist||Math.hypot(fW,fH)/2/fZ+60,fs=FSCALE(fEff(FD.floor)),rk=F.boss?0:rustK(),hm=F.boss?BOSS_HP[FD.floor]||1:(1+fSearchT()/60)*(1+.22*(FD.step||0))*fs.hp*rustHp(rk);
+ const e={id:++FD.uid,k:kind,x:FD.x+Math.cos(a)*r,y:FD.y+Math.sin(a)*r,hp:F.hp*hm,max:F.hp*hm,r:F.r,spd:F.spd*(F.boss?1:.9+Math.random()*.2),hit:0,kb:[0,0],wob:Math.random()*TAU,oh:0,big:!!F.big,boss:!!F.boss,dm:F.boss?1+.08*((fEff(FD.floor)||1)-1):fs.dmg*rustDm(rk)};
  FD.foes.push(e);return e}
 function nearestFoes(n,x=FD.x,y=FD.y,maxD=1e9){return FD.foes.map(f=>[f,(f.x-x)**2+(f.y-y)**2]).filter(a=>a[1]<maxD*maxD).sort((a,b)=>a[1]-b[1]).slice(0,n).map(a=>a[0])}
 function fDamage(e,d,kx,ky){if(e.hp<=0)return;e.hp-=d;e.hit=6;if(!e.boss)e.kb=[kx||0,ky||0];if(FD.pops.length<90)FD.pops.push({x:e.x,y:e.y-e.r,v:Math.round(d),t:0});
@@ -2877,8 +2877,8 @@ async function fStairs(){const D=FD;if(!D||D.climbing)return;D.climbing=true;D.p
  try{
   if(FLR.boss){
    if(first&&BOSS_WIN[k])await talk(storyFit(BOSS_WIN[k],null,['onmyo','sora','takumi']),BOSS_EV[k]&&BOSS_EV[k][1]);
-   if(fl===10&&!G.flags.ch1){fEnd('ending');return}
-   if(fl>=TOP_FLOOR){fEnd('ending2');return}
+   if(fl===10&&!G.flags.ch1&&towerAt()==='meister'){fEnd('ending');return}
+   if(fl>=TOP_FLOOR){if(towerAt()!=='meister'){G.flags['tw_'+towerAt()]=1;save();fEnd('home');return}fEnd('ending2');return}
    if(!await fChoice(fl)){fEnd('home');return}}
   if(fl>=TOP_FLOOR){fEnd('home');return}
   await fAdvance(fl+1)}
@@ -4633,7 +4633,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.5.0　出撃は世界地図から</b><ul><li>「出撃」を押すと世界地図が開き、出撃する塔を選べるようにした（第2章「審判の塔」は第1章クリアで地図に出る。公開は ver2.0.0）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.6.0</b><ul><li>第2章「審判の塔」の試し遊び版を入れた（白黒の魔物13種・ボス7体）。まだ準備中で、ふつうには出撃できない</li></ul>
+  <b>ver 1.5.0　出撃は世界地図から</b><ul><li>「出撃」を押すと世界地図が開き、出撃する塔を選べるようにした（第2章「審判の塔」は第1章クリアで地図に出る。公開は ver2.0.0）</li></ul>
   <b>ver 1.4.4</b><ul><li>ホームとメニューから「地図」をなくした（今は使う場面がないため）</li></ul>
   <b>ver 1.4.3</b><ul><li>ホーム：攻撃・体力の数字が途切れないように。「編成 ›」ボタンは下のタブと重なるのでなくした</li></ul>
   <b>ver 1.4.2</b><ul><li>編成画面：専用武器の表示が★やボタンに重なっていたので、キャラ絵の下の帯に移した</li></ul>
@@ -4860,7 +4861,111 @@ function openStory(){const S=storyScenes();
  $('gpBody').querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await S[+b.dataset.st].run();openStory()});
  $('genPick').classList.add('on')}
 
-const BUILD='11/14 17:53';
+/* ===================== 第2章「審判の塔」（1〜20F）：別の塔 =====================
+ * 塔を切りかえるとき、階ごとの表（FLOORS・素材・ボスの体力・推奨攻撃・お助け・ひとこと・出撃Lv）と
+ * G.floor（到達階）をその塔のものに入れかえる。ホームにもどるとマイスターの塔にもどす。
+ * セーブ中に審判の塔のままでも、読みこみ時（fixV2）にマイスターの塔へもどす。
+ * 今は試し遊び用：URLに ?judge をつけたときだけ出撃できる。お話・お助け・階のルールはこれから */
+const J_TEST=/[?&]judge\b/.test(location.search);
+const JFLOORS=[null,
+ {n:'開廷の間',area:'jk',step:0,stair:1500},
+ {n:'白の証言台',area:'jk',step:1,stair:1600},
+ {n:'黒の証言台',area:'jk',step:2,boss:true},
+ {n:'天秤の間',area:'jt',step:0,stair:1550},
+ {n:'鏡の法廷',area:'jt',step:1,stair:1650},
+ {n:'証拠保管庫',area:'jt',step:2,boss:true},
+ {n:'黙秘の間',area:'jm',step:0,stair:1600},
+ {n:'表裏の間',area:'jm',step:1,stair:1700},
+ {n:'木槌の間',area:'jm',step:2,stair:1750},
+ {n:'判決の止まり木',area:'jm',step:3,boss:true},
+ {n:'陪審員席',area:'jb',step:0,stair:1650},
+ {n:'弁論の間',area:'jb',step:1,stair:1750},
+ {n:'鏡の回廊',area:'jb',step:2,boss:true},
+ {n:'六法の書庫',area:'js',step:0,stair:1700},
+ {n:'封印の間',area:'js',step:1,stair:1800},
+ {n:'判例の間',area:'js',step:2,boss:true},
+ {n:'双子の証人',area:'jr',step:0,stair:1750},
+ {n:'雷鳴の大法廷',area:'jr',step:1,stair:1850},
+ {n:'最終弁論',area:'jr',step:2,boss:true},
+ {n:'日蝕の玉座',area:'jg',step:3,boss:true}];
+Object.assign(LAYER_NAME,{jk:'開廷の層',jt:'天秤の層',jm:'黙秘の層',jb:'陪審の層',js:'書庫の層',jr:'雷鳴の層',jg:'玉座'});
+Object.assign(AREAS,{
+ jk:{n:'開廷の層',need:null,lv:'',bossLv:0,tier:4,boss:'j_tenbin',bg:'#1e1a2a'},
+ jt:{n:'天秤の層',need:null,lv:'',bossLv:0,tier:4,boss:'j_vault',bg:'#1c1a26'},
+ jm:{n:'黙秘の層',need:null,lv:'',bossLv:0,tier:4,boss:'j_verdict',bg:'#18142a'},
+ jb:{n:'陪審の層',need:null,lv:'',bossLv:0,tier:4,boss:'j_masq',bg:'#201628'},
+ js:{n:'書庫の層',need:null,lv:'',bossLv:0,tier:4,boss:'j_roppo',bg:'#1a1622'},
+ jr:{n:'雷鳴の層',need:null,lv:'',bossLv:0,tier:4,boss:'j_gaveldon',bg:'#14122a'},
+ jg:{n:'玉座',    need:null,lv:'',bossLv:0,tier:4,boss:'j_eclipse',bg:'#100c1c'}});
+/* 敵：白黒の魔物（ゆがんだ正しさ）。強さは第1章の頂上より上から始まる */
+Object.assign(FFOE,{
+ j_wwing: {hp:34, spd:1.9,dmg:13,xp:4,r:16,fly:1,dash:210},
+ j_bwing: {hp:34, spd:1.9,dmg:13,xp:4,r:16,fly:1,dash:190},
+ j_paper: {hp:30, spd:1.0,dmg:12,xp:3,r:17,fly:1,split:1},
+ j_gavel: {hp:60, spd:.9, dmg:16,xp:5,r:21,dash:240},
+ j_book:  {hp:46, spd:.9, dmg:14,xp:5,r:19,fly:1,shoot:210},
+ j_mirror:{hp:44, spd:1.4,dmg:14,xp:5,r:18,fly:1,shoot:250},
+ j_chain: {hp:80, spd:.7, dmg:15,xp:6,r:22},
+ j_cloud: {hp:40, spd:1.0,dmg:13,xp:5,r:20,fly:1,shoot:190},
+ j_stamp: {hp:56, spd:1.0,dmg:16,xp:5,r:20,dash:220},
+ j_mask:  {hp:48, spd:1.2,dmg:14,xp:5,r:18,shoot:230},
+ j_weight:{hp:110,spd:.6, dmg:18,xp:7,r:24,dash:280},
+ j_scale: {hp:900, spd:.58,dmg:27,xp:34,r:36,big:1},
+ j_hour:  {hp:1000,spd:.64,dmg:28,xp:36,r:36,big:1},
+ j_tenbin:  {hp:4200,spd:.85,dmg:36,xp:150,r:56,big:1,boss:1,ring:150},
+ j_vault:   {hp:4500,spd:.8, dmg:38,xp:160,r:56,big:1,boss:1,ring:140,call:480},
+ j_verdict: {hp:5000,spd:1.0,dmg:40,xp:180,r:54,big:1,boss:1,fly:1,ring:125},
+ j_masq:    {hp:5400,spd:.9, dmg:42,xp:190,r:58,big:1,boss:1,fly:1,ring:120,call:440},
+ j_roppo:   {hp:5800,spd:.85,dmg:44,xp:200,r:58,big:1,boss:1,fly:1,ring:110},
+ j_gaveldon:{hp:6300,spd:.9, dmg:46,xp:220,r:60,big:1,boss:1,ring:100},
+ j_eclipse: {hp:7200,spd:1.0,dmg:48,xp:260,r:62,big:1,boss:1,ring:95,call:400}});
+Object.assign(FOES,{
+ j_wwing:{n:'白羽',col:'#f0eef8'},j_bwing:{n:'黒羽',col:'#6a4a8a'},j_paper:{n:'証言の紙',col:'#e8dcc0'},j_gavel:{n:'木槌ハンマー',col:'#b070e0'},
+ j_book:{n:'六法の書',col:'#a060d0'},j_mirror:{n:'鏡の影',col:'#9a50d0'},j_chain:{n:'封印の鎖',col:'#c0a0e0'},j_cloud:{n:'雷雲の陪審員',col:'#d0c0f0'},
+ j_stamp:{n:'判子ゴースト',col:'#c070f0'},j_mask:{n:'仮面の傍聴人',col:'#e0d0f0'},j_weight:{n:'秤の分銅',col:'#8a6ab0'},
+ j_scale:{n:'天秤ゴーレム',col:'#d8c070'},j_hour:{n:'砂時計の番兵',col:'#c890f0'},
+ j_tenbin:{n:'テンビンガ',col:'#d8c070'},j_vault:{n:'クラガード',col:'#8a6ab0'},j_verdict:{n:'ヴェルディクト',col:'#6b4a9e'},
+ j_masq:{n:'マスカード',col:'#c0a0e0'},j_roppo:{n:'ロッポーン',col:'#a060d0'},j_gaveldon:{n:'ガベルドン',col:'#b070e0'},j_eclipse:{n:'エクリプス',col:'#e0c060'}});
+FOE_IMG_OK.push('j_wwing','j_bwing','j_paper','j_gavel','j_book','j_mirror','j_chain','j_cloud','j_stamp','j_mask','j_weight','j_scale','j_hour','j_tenbin','j_vault','j_verdict','j_masq','j_roppo','j_gaveldon','j_eclipse');
+const JD={scrap:.02,titan:.008,cell:.008,carbon:.008,core:.006};
+Object.assign(FAREA,{
+ jk:{mix:[[0,['j_wwing','j_bwing'],1.5],[25,['j_wwing','j_bwing','j_paper'],2.2],[70,['j_paper','j_gavel','j_wwing'],3],[130,['j_gavel','j_bwing','j_paper'],3.7],[200,['j_wwing','j_bwing','j_gavel'],4.6]],elite:'j_scale',boss:'j_tenbin',drop:JD,chestTool:null,ground:['#1e1a2a','200,190,230']},
+ jt:{mix:[[0,['j_weight','j_wwing'],1.4],[25,['j_weight','j_mirror'],2.1],[70,['j_mirror','j_weight','j_bwing'],2.9],[130,['j_weight','j_mirror','j_paper'],3.6],[200,['j_mirror','j_weight','j_gavel'],4.5]],elite:'j_scale',boss:'j_vault',drop:JD,chestTool:null,ground:['#1c1a26','190,170,230']},
+ jm:{mix:[[0,['j_chain','j_paper'],1.4],[25,['j_chain','j_stamp'],2.1],[70,['j_stamp','j_chain','j_gavel'],2.9],[130,['j_gavel','j_stamp','j_chain'],3.6],[200,['j_stamp','j_chain','j_bwing'],4.5]],elite:'j_hour',boss:'j_verdict',drop:JD,chestTool:null,ground:['#18142a','150,110,220']},
+ jb:{mix:[[0,['j_mask','j_wwing'],1.5],[25,['j_mask','j_mirror'],2.2],[70,['j_mirror','j_mask','j_weight'],3],[130,['j_weight','j_mask','j_mirror'],3.7],[200,['j_mask','j_mirror','j_stamp'],4.6]],elite:'j_hour',boss:'j_masq',drop:JD,chestTool:null,ground:['#201628','190,120,220']},
+ js:{mix:[[0,['j_book','j_paper'],1.5],[25,['j_book','j_chain'],2.2],[70,['j_book','j_chain','j_paper'],3],[130,['j_chain','j_book','j_stamp'],3.7],[200,['j_book','j_chain','j_mask'],4.6]],elite:'j_scale',boss:'j_roppo',drop:JD,chestTool:null,ground:['#1a1622','200,170,120']},
+ jr:{mix:[[0,['j_cloud','j_bwing'],1.5],[25,['j_cloud','j_gavel'],2.2],[70,['j_cloud','j_gavel','j_weight'],3],[130,['j_gavel','j_cloud','j_stamp'],3.8],[200,['j_cloud','j_gavel','j_mirror'],4.7]],elite:'j_hour',boss:'j_gaveldon',drop:JD,chestTool:null,ground:['#14122a','170,120,255']},
+ jg:{mix:[[0,['j_wwing','j_bwing','j_mask'],1.7],[25,['j_mirror','j_cloud','j_book'],2.5],[70,['j_weight','j_gavel','j_mirror'],3.3],[130,['j_gavel','j_cloud','j_book'],4.1],[200,['j_wwing','j_bwing','j_weight'],4.9]],elite:'j_hour',boss:'j_eclipse',drop:JD,chestTool:null,ground:['#100c1c','230,200,120']}});
+Object.assign(FLOOR_TINT,{jk:['alley','rgba(220,210,245,.32)'],jt:['factory','rgba(200,180,240,.30)'],jm:['under','rgba(120,80,200,.34)'],jb:['alley','rgba(170,90,210,.34)'],js:['factory','rgba(210,170,110,.30)'],jr:['under','rgba(110,80,240,.38)'],jg:['alley','rgba(40,20,70,.45)']});
+/* 塔ごとの表 */
+const TW_TABLE={
+ judge:{
+  FLOORS:JFLOORS,
+  FLOOR_MATS:{1:['titan','scrap'],2:['cell','scrap'],3:['carbon','titan'],4:['titan','cell'],5:['cell','carbon'],6:['carbon','titan'],7:['titan','cell'],8:['cell','carbon'],9:['carbon','titan'],10:['titan','core'],11:['cell','carbon'],12:['carbon','titan'],13:['titan','cell'],14:['cell','carbon'],15:['carbon','titan'],16:['titan','cell'],17:['cell','carbon'],18:['carbon','titan'],19:['titan','cell'],20:['core','carbon']},
+  BOSS_HP:{3:3.4,6:3.6,10:4,13:4.2,16:4.4,19:4.6,20:5},
+  REC_POW:Object.fromEntries(Array.from({length:20},(_,i)=>[i+1,2300+i*70])),
+  HELPER_FL:{},FLOOR_LINES:{},
+  START_LV:{1:14,4:16,7:18,11:20,14:22,17:24},
+  feff:f=>18+(f||1)*.8}};
+const TW_SAVED={};
+function twTables(){return{FLOORS,FLOOR_MATS,BOSS_HP,REC_POW,HELPER_FL,FLOOR_LINES,START_LV}}
+const towerAt=()=>G&&G.towerAt||'meister';
+/* 敵の強さの基準になる階（審判の塔は第1章の頂上より上から） */
+const fEff=f=>{const T=TW_TABLE[towerAt()];return T?T.feff(f):f};
+function enterTower(k){if(!G)return;const cur=towerAt();if(cur===k)return;
+ G.tw=G.tw||{};G.tw[cur]=G.tw[cur]||{};G.tw[cur].floor=G.floor|0;
+ const tb=twTables();
+ if(cur==='meister'){for(const n in tb)TW_SAVED[n]=Array.isArray(tb[n])?tb[n].slice():{...tb[n]}}
+ const src=k==='meister'?TW_SAVED:TW_TABLE[k];
+ for(const n in tb){const t=tb[n],s=src[n]||(Array.isArray(t)?[]:{});if(Array.isArray(t))t.splice(0,t.length,...s);else{for(const x in t)delete t[x];Object.assign(t,s)}}
+ G.tw[k]=G.tw[k]||{};G.floor=G.tw[k].floor|0;G.towerAt=k}
+/* ホームにもどったら、いつもマイスターの塔 */
+{const _oh=openHome;openHome=function(){enterTower('meister');return _oh.apply(this,arguments)}}
+TOWERS.judge.ready=J_TEST;TOWERS.judge.go=()=>{enterTower('judge');openDest()};
+if(J_TEST){const p=WMAP.places.find(q=>q.k==='judge');const o=p.open;p.open=()=>true}
+{const _od=openDest;openDest=function(){const r=_od.apply(this,arguments);const t=$('destTw');if(t)t.textContent=(TOWERS[towerAt()]||TOWERS.meister).n;return r}}
+
+const BUILD='11/14 19:20';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
