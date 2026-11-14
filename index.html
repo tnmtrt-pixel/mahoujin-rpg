@@ -1171,7 +1171,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.7.1';
+const VERSION='1.7.2';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3580,9 +3580,9 @@ function zkChar(id){const c=CHARS[id],m=owned(id),A=ATK[id],ab=ABIL[id]||[],ban=
 
 /* ===================== 換金所：しまってある装備はコインに、工具は基本素材に ===================== */
 /* 売値＝階（壱・弐・参）の基本値 × 出来ばえの倍率。SS は高く売れる */
-const SELL_BASE={1:12,2:30,3:70};
+const SELL_BASE={1:12,2:30,3:70,4:150,5:300};
 const SELL_RANK={D:.4,C:.6,B:1,A:1.5,S:2.5,SS:4};
-const sellPrice=(rid,rank)=>Math.round(SELL_BASE[RECIPES[rid].tier]*(SELL_RANK[rank]||1));
+const sellPrice=(rid,rank)=>Math.round((SELL_BASE[RECIPES[rid].tier]||SELL_BASE[4])*(SELL_RANK[rank]||1));
 /* 工具は基本素材（鉄くず・ボルト・鉄板）にもどる。値段が高い工具ほど多い */
 function toolScrap(t){if(TOOLS[t].limited)return{scrap:4,bolt:2,plate:1};const p=TOOLS[t].price||0,o={scrap:Math.max(1,Math.round(p/30))};if(p>=90)o.bolt=Math.round(p/90);if(p>=240)o.plate=Math.round(p/160);return o}
 const scrapTxt=o=>Object.keys(o).map(k=>`${MIC(k,16)}${MATS[k].n}×${o[k]}`).join('　');
@@ -4634,7 +4634,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
+  <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
   <b>ver 1.7.0</b><ul><li>審判の塔に階のルールを3種類：白黒の床（2・3・8F）、鏡（5・13F）、雷鳴（18F）</li></ul>
   <b>ver 1.6.1</b><ul><li>審判の塔6Fのボス「クラガード」の絵を入れた</li></ul>
   <b>ver 1.6.0</b><ul><li>第2章「審判の塔」の試し遊び版を入れた（白黒の魔物13種・ボス7体）。まだ準備中で、ふつうには出撃できない</li></ul>
@@ -4999,7 +5000,7 @@ function fDrawRuleFloor(g,D,cx0,cy0,z){if(ruleOf()!=='wb')return;const T=WB_TILE
  for(const q of D.thunder){g.save();if(q.t<q.warn){const k=q.t/q.warn;g.globalAlpha=.25+.35*k;g.fillStyle='rgba(255,230,120,.45)';g.beginPath();g.arc(q.x,q.y,q.r*k,0,TAU);g.fill();g.strokeStyle='#ffe680';g.lineWidth=4;g.setLineDash([10,8]);g.beginPath();g.arc(q.x,q.y,q.r,0,TAU);g.stroke()}
   else{g.globalAlpha=1-(q.t-q.warn)/18;g.strokeStyle='#fff';g.lineWidth=6;g.beginPath();g.moveTo(q.x+20,q.y-600);g.lineTo(q.x-10,q.y-300);g.lineTo(q.x+15,q.y-150);g.lineTo(q.x,q.y);g.stroke();g.fillStyle='rgba(220,190,255,.6)';g.beginPath();g.arc(q.x,q.y,q.r,0,TAU);g.fill()}g.restore()}}}
 
-const BUILD='11/14 23:55';
+const BUILD='11/14 23:59';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
