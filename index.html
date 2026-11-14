@@ -1171,7 +1171,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.6.0';
+const VERSION='1.6.1';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -4633,7 +4633,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.6.0</b><ul><li>第2章「審判の塔」の試し遊び版を入れた（白黒の魔物13種・ボス7体）。まだ準備中で、ふつうには出撃できない</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.6.1</b><ul><li>審判の塔6Fのボス「クラガード」の絵を入れた</li></ul>
+  <b>ver 1.6.0</b><ul><li>第2章「審判の塔」の試し遊び版を入れた（白黒の魔物13種・ボス7体）。まだ準備中で、ふつうには出撃できない</li></ul>
   <b>ver 1.5.0　出撃は世界地図から</b><ul><li>「出撃」を押すと世界地図が開き、出撃する塔を選べるようにした（第2章「審判の塔」は第1章クリアで地図に出る。公開は ver2.0.0）</li></ul>
   <b>ver 1.4.4</b><ul><li>ホームとメニューから「地図」をなくした（今は使う場面がないため）</li></ul>
   <b>ver 1.4.3</b><ul><li>ホーム：攻撃・体力の数字が途切れないように。「編成 ›」ボタンは下のタブと重なるのでなくした</li></ul>
@@ -4965,7 +4966,7 @@ TOWERS.judge.ready=J_TEST;TOWERS.judge.go=()=>{enterTower('judge');openDest()};
 if(J_TEST){const p=WMAP.places.find(q=>q.k==='judge');const o=p.open;p.open=()=>true}
 {const _od=openDest;openDest=function(){const r=_od.apply(this,arguments);const t=$('destTw');if(t)t.textContent=(TOWERS[towerAt()]||TOWERS.meister).n;return r}}
 
-const BUILD='11/14 19:20';
+const BUILD='11/14 19:40';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
