@@ -1026,6 +1026,10 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .lvs .lvw{display:inline-flex;align-items:center;gap:4px;font:inherit;font-size:12px;color:inherit;background:#ffffff0d;border:1px solid var(--sl,#33406e);padding:2px 6px;min-height:28px}
 .lvs .lvw i{font-style:normal;font-size:11px;font-weight:800;color:var(--so,#ff8a3d)}
 .lvs .lvw img,.lvs .lvw .ic{width:18px!important;height:18px!important}
+.peqh{font-size:12px;font-weight:800;color:var(--sm,#9aa5cc);margin:8px 2px 2px;letter-spacing:.06em}.peqh small{font-weight:600;margin-left:4px}
+.eqs.sup{border-color:#5ad48a;box-shadow:inset 0 0 0 1px #5ad48a55}
+.gpn small.sup{color:#7be3a4}
+.supt{display:block;font-size:10px;color:#7be3a4}
 
 </style>
 </head>
@@ -1148,7 +1152,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.3.1';
+const VERSION='1.4.0';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -2595,7 +2599,7 @@ const fSpd=()=>FCFG.SPD*(1+.1*FD.ps.spd)*(1+.08*armMul('feet'))*(1+Math.min(FD.a
 const fCd=()=>1-.08*FD.ps.cd;
 const fPick=()=>FCFG.PICK*(1+.6*FD.ps.mag)*(1+(FD.ab.pick||0));
 const fCut=()=>(1-Math.min(.45,.14*armMul('body')))*(1-(FD.ab.cut||0));
-const fPow0=id=>{const g=id!==G.lead&&!G.party.some(m=>m.id===id)&&genFor(id);if(g){const L=findOwn(G.lead);return (g.attr&&g.attr.k==='fire'?1+g.attr.v:1)*g.mul*lvMul(L)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)}const m=findOwn(id)||(FD.helperMs&&FD.helperMs[id])||null;const at=m&&m.weapon&&m.weapon.attr;return (at&&at.k==='fire'?1+at.v:1)*(G.flags.selfRust&&id===G.hero?1.1:1)*starMul(m)*wMul(m)*lvMul(m)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)};
+const fPow0=id=>{const g=id!==G.lead&&!G.party.some(m=>m.id===id)&&genFor(id);if(g){const L=findOwn(G.lead);return (g.attr&&g.attr.k==='fire'?1+g.attr.v:1)*g.mul*lvMul(L)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)}const m=findOwn(id)||(FD.helperMs&&FD.helperMs[id])||null;const at=m&&m.weapon&&m.weapon.attr;return (at&&at.k==='fire'?1+at.v:1)*(G.flags.selfRust&&id===G.hero?1.1:1)*starMul(m)*wMul(m)*lvMul(m)*(m?genSup(m.id):1)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)};
 const fPow=id=>fPow0(id)*fPowX(id);
 /* 敵の波：1分の探索に合わせて、時間を2.5倍速で進める */
 const fSearchT=()=>FD.st;   /* この階を探索した時間（ボス戦の間は進まない） */
@@ -3033,7 +3037,7 @@ const RANK_COL={R:'#3fae5a',SR:'#2f7fd0',UR:'#8a3fd0',LR:'#c9962a'};
 /* チーム全員の開いている能力を合計する（メダサバのチーム効果と同じ考え方） */
 function teamAb(){const a={};G.party.forEach(m=>{(ABIL[m.id]||[]).forEach((ab,i)=>{if(abOpen(m,i))a[ab.k]=(a[ab.k]||0)+ab.v*abBoost(m)});const at=m.weapon&&m.weapon.attr;if(at){const k={thunder:'xp',steel:'cut',wind:'wspd'}[at.k];if(k)a[k]=(a[k]||0)+at.v}});return a}
 const lvMul=m=>1+.05*((m&&m.lv||1)-1);
-const memPow=m=>Math.round(100*starMul(m)*wMul(m)*lvMul(m));
+const memPow=m=>Math.round(100*starMul(m)*wMul(m)*lvMul(m)*genSup(m.id));
 function teamPow(){const a=teamAb();return Math.round(G.party.reduce((s,m)=>s+memPow(m),0)*(1+(a.teamAtk||0)))}
 function teamHp(){const a=teamAb(),L=G.party.find(m=>m.id===G.lead);return Math.round(FCFG.HP+5*((L&&L.lv||1)-1)+30*armMul('head')+(a.hp||0))}
 
@@ -3094,7 +3098,7 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
    
    ${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
   <div class="lvcard"><div class="lvh">Lv <b>${m.lv}</b><small>/${GROW_MAX}</small></div>
-   <div class="lvs"><span>攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)).toFixed(2)}</span><button class="lvw" id="pW">${WPIC(m.id,18,w&&w.rid&&RECIPES[w.rid]?RECIPES[w.rid].tier:0)}武器 ×${wMul(m)} <i>変える</i></button></div>
+   <div class="lvs"><span>攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)*genSup(m.id)).toFixed(2)}${genSup(m.id)>1?'<small class="supt">支援込み</small>':''}</span><button class="lvw" id="pW">${WPIC(m.id,18,w&&w.rid&&RECIPES[w.rid]?RECIPES[w.rid].tier:0)}武器 ×${wMul(m)} <i>変える</i></button></div>
    ${max?'<div class="note" style="text-align:center">レベル最大</div>':`<div class="lvc ${(G.coin|0)<cost.coin?'lack':''}">${coinIc(22)}<b>${G.coin|0}</b>/${cost.coin}</div>`}
    <button class="lvup" id="pUp" ${max||!canGrow(m)?'disabled':''}>レベルアップ</button></div></div>
  <div class="prow slots">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x&&x.id===m.id?'on':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img class="pface" src="${FACE(x.id)}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
@@ -3386,8 +3390,12 @@ const genFor=impl=>{const r=genRid(impl);return r?G.gen[r]:null};
 const genImpls=()=>genEqList().map(r=>RECIPES[r].impl).filter(k=>k!==G.lead&&!G.party.some(m=>m.id===k));
 const genInParty=r=>RECIPES[r].impl!==G.lead&&G.party.some(m=>m.id===RECIPES[r].impl);
 const genClash=r=>RECIPES[r].impl===G.lead;
+/* 汎用武器の技が、パーティの誰かと同じ動きのとき：そのキャラの攻撃を強化する（支援） */
+const GEN_SUP={C:.05,B:.08,A:.12,S:.16,SS:.2};
+const genSupOf=r=>RECIPES[r]&&G.gen[r]?GEN_SUP[G.gen[r].rank]||.05:0;
+const genSup=id=>{if(!G.party.some(m=>m.id===id))return 1;const r=genRid(id);return r?1+genSupOf(r):1};
 function genGet(pc){G.gen=G.gen||{};G.gen[pc.rid]={rank:pc.rank,mul:pc.mul,attr:pc.attr||null};
- const eq=G.genEq||(G.genEq=[null,null]);if(!eq.includes(pc.rid)&&!genClash(pc.rid)&&!eq.some(r=>r&&RECIPES[r].impl===RECIPES[pc.rid].impl)){const i=eq.findIndex(r=>!r||!G.gen[r]);if(i>=0)eq[i]=pc.rid}}
+ const eq=G.genEq||(G.genEq=[null,null]);if(!eq.includes(pc.rid)&&!eq.some(r=>r&&RECIPES[r].impl===RECIPES[pc.rid].impl)){const i=eq.findIndex(r=>!r||!G.gen[r]);if(i>=0)eq[i]=pc.rid}}
 /* 汎用武器の属性も、炎以外はチームの力になる */
 {const _ab=teamAb;teamAb=function(){const a=_ab();genEqList().forEach(r=>{const at=G.gen[r].attr;const k=at&&{thunder:'xp',steel:'cut',wind:'wspd'}[at.k];if(k)a[k]=(a[k]||0)+at.v});return a}}
 
@@ -3395,13 +3403,13 @@ function genGet(pc){G.gen=G.gen||{};G.gen[pc.rid]={rank:pc.rank,mul:pc.mul,attr:
 /* 専用武器の枠は、上で選んでいる仲間のもの（リーダー以外も入れかえられる） */
 const eqWho=()=>(typeof partyShow!=='undefined'&&partyShow&&findOwn(partyShow))||findOwn(G.lead);
 function equipRowHTML(){const L=eqWho(),wr=L&&L.weapon&&L.weapon.rid;
- const gs=[0,1].map(i=>{const r=(G.genEq||[])[i],g=r&&G.gen[r];return `<button class="eqs ${g?'':'empty'} ${g&&genClash(r)?'ng':''}" data-gs="${i}">${g?RIC(r,30)+RKIC(g.rank,18):'<span class="pplus">＋</span>'}</button>`}).join('');
+ const gs=[0,1].map(i=>{const r=(G.genEq||[])[i],g=r&&G.gen[r];return `<button class="eqs ${g?'':'empty'} ${g&&G.party.some(m=>m.id===RECIPES[r].impl)?'sup':''}" data-gs="${i}">${g?RIC(r,30)+RKIC(g.rank,18):'<span class="pplus">＋</span>'}</button>`}).join('');
  const as=['head','body','feet'].map(s=>{const p=G.arm[s];return `<button class="eqs arm ${p?'':'empty'}" data-as="${s}">${p?RIC(p.rid,30)+RKIC(p.rank,18):MIC(s,24)}</button>`}).join('');
- return `<div class="peq"><span class="pel">専用</span><button class="eqs" data-es="1" aria-label="${CHARS[L.id].name}の専用武器">${WPIC(L.id,30,wr?RECIPES[wr].tier:0)}${wr?RKIC(L.weapon.rank,18):''}</button><span class="pel">汎用</span>${gs}<span class="pel">防具</span>${as}</div>`}
+ return `<div class="peqh">チーム装備<small>（全員に効く）</small></div><div class="peq"><span class="pel">汎用</span>${gs}<span class="pel">防具</span>${as}</div>`}
 function openGenPick(i){const own=Object.keys(G.gen||{}).filter(r=>RECIPES[r]);const cur=(G.genEq||[])[i];
  const other=(G.genEq||[])[1-i];
  const rows=own.map(r=>{const R=RECIPES[r],g=G.gen[r],A=ATK[R.impl],clash=genClash(r),dup=other&&other!==r&&RECIPES[other].impl===R.impl,on=r===cur;
-  return `<button class="gpk ${on?'on':''}" data-gr="${r}" ${clash||dup?'disabled':''}>${RIC(r,38)}<span class="gpn"><b>${R.n} ${RKIC(g.rank,18)}</b><small>${A.type}：${A.d[0]}　威力×${g.mul}${g.attr?'　'+attrTxt(g.attr):''}</small>${clash?'<small class="ng">出撃キャラの技と同じ動きなので使えない</small>':genInParty(r)?`<small class="ng">パーティの${CHARS[R.impl].name}と同じ技なので、${CHARS[R.impl].name}の技として出る</small>`:dup?'<small class="ng">もう1つの枠と同じ動き</small>':''}</span>${on?'<i>装備中</i>':''}</button>`}).join('');
+  return `<button class="gpk ${on?'on':''}" data-gr="${r}" ${dup?'disabled':''}>${RIC(r,38)}<span class="gpn"><b>${R.n} ${RKIC(g.rank,18)}</b><small>${A.type}：${A.d[0]}　威力×${g.mul}${g.attr?'　'+attrTxt(g.attr):''}</small>${dup?'<small class="ng">もう1つの枠と同じ動き</small>':G.party.some(m=>m.id===R.impl)?`<small class="sup">支援：パーティの${CHARS[R.impl].name}の技を強化（攻撃+${Math.round((GEN_SUP[g.rank]||.05)*100)}%）</small>`:'<small>この技が使えるようになる</small>'}</span>${on?'<i>装備中</i>':''}</button>`}).join('');
  $('gpBody').innerHTML=`<div class="gph">汎用武器 枠${i+1}</div>`+(rows||`<div class="note" style="text-align:center;margin:18px 0">${UIMG('u_weapon',30)}<br>汎用武器をまだ持っていない。<br>工房の「つくる」で汎用武器をつくろう</div>`)+
   `<div class="gpf">${cur?`<button class="btn ghost" data-gr="">はずす</button>`:''}<button class="btn" id="gpClose">とじる</button></div>`;
  $('gpBody').querySelectorAll('[data-gr]').forEach(b=>b.onclick=()=>{const r=b.dataset.gr||null;G.genEq[i]=r;if(r&&G.genEq[1-i]===r)G.genEq[1-i]=null;save();$('genPick').classList.remove('on');renderParty()});
@@ -3500,7 +3508,7 @@ const PROC_HOW={grind:'グラインダー：鉄を砥石に押し当てて、点
 function recipeFx(R){const lo=prodMul(R.tier,'C'),b=prodMul(R.tier,'B'),hi=prodMul(R.tier,'SS');
  if(R.kind==='armor')return[['効果',`${ARMOR_FX[R.slot].d(b)}（B）`],['出来ばえで',`${ARMOR_FX[R.slot].d(lo)}（C）〜 ${ARMOR_FX[R.slot].d(hi)}（SS）`]];
  if(R.kind==='gen'){const A=ATK[R.impl],k=MAT_ATTR[genMain(R)],v=+(ATTR_BASE[k]*ATTR_RANK.B).toFixed(3);
-  return[['攻撃',`${TIC(A.type,18)}${A.type}：${A.d[0]}`],['強くなると',A.d.slice(1).join('／')],['威力',`×${b}（B）　C ×${lo} 〜 SS ×${hi}`],['属性',`${attrTxt({k,v})}　主材料「${MATS[genMain(R)].n}」で決まる`],['使える人',genClash(Object.keys(RECIPES).find(x=>RECIPES[x]===R))?`<span style="color:#ff8080">今の出撃キャラ（${CHARS[G.lead].name}）は同じ動きの技なので使えない</span>`:'リーダーが汎用の枠に装備する（2つまで）']]}
+  return[['攻撃',`${TIC(A.type,18)}${A.type}：${A.d[0]}`],['強くなると',A.d.slice(1).join('／')],['威力',`×${b}（B）　C ×${lo} 〜 SS ×${hi}`],['属性',`${attrTxt({k,v})}　主材料「${MATS[genMain(R)].n}」で決まる`],['使いかた','チーム装備の汎用の枠に付ける（2つまで）。パーティにいないキャラの技なら、その技が使えるようになる。パーティにいるキャラと同じ動きなら、そのキャラの攻撃を強化する（C+5%〜SS+20%）']]}
  const A=ATK[R.who];return[['攻撃',`${CHARS[R.who].name}の${TIC(A.type,18)}${A.n}`],['威力',`×${b}（B）　C ×${lo} 〜 SS ×${hi}`],['属性','できあがりでランダム（炎・雷・鋼・風）']]}
 function openRecipe(id){const R=RECIPES[id],c=canMake(id),pr=procOf(R);
  const mats=Object.keys(R.mats).map(k=>{const lack=(G.mats[k]||0)<R.mats[k];return `<span class="${lack?'lack':''}">${MIC(k,20)}${MATS[k].n} ${G.mats[k]||0}/${R.mats[k]}</span>`}).join('');
@@ -4597,7 +4605,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.3.1</b><ul><li>編成画面で仲間を選ぶと、下の「専用」の枠がその仲間の武器になり、リーダー以外の専用武器も入れかえられるようにした</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.4.0　汎用武器の「支援」</b><ul><li>パーティにいるキャラと同じ動きの汎用武器は「支援」になり、そのキャラの攻撃が上がる（C+5%・B+8%・A+12%・S+16%・SS+20%）。リーダーと同じ動きでも付けられる</li><li>編成画面：専用武器は上の「武器 変える」から。下の列は「チーム装備（汎用・防具）」にまとめた</li></ul>
+  <b>ver 1.3.1</b><ul><li>編成画面で仲間を選ぶと、下の「専用」の枠がその仲間の武器になり、リーダー以外の専用武器も入れかえられるようにした</li></ul>
   <b>ver 1.3.0　会話のふりかえり</b><ul><li>会話中に「◀ もどる」でひとつ前のセリフへ、「ログ」でここまでのセリフを一覧できる</li><li>メニューとチャット画面に「ストーリーをふりかえる」。見た場面をもう一度見られる（前のセーブで見た場面も出てくる）</li></ul>
   <b>ver 1.2.5</b><ul><li>20Fのボス戦の前と、たおしたあとの場面に挿絵を追加</li></ul>
   <b>ver 1.2.4</b><ul><li>ボスをたおしたあと、残った敵にやられてHPが0になってもゲームが終わらない不具合を直した（ボスをたおすと残りの敵も消え、その階の時間も止まる）</li></ul>
@@ -4818,7 +4827,7 @@ function openStory(){const S=storyScenes();
  $('gpBody').querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await S[+b.dataset.st].run();openStory()});
  $('genPick').classList.add('on')}
 
-const BUILD='11/14 11:15';
+const BUILD='11/14 12:11';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
