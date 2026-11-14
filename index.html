@@ -1171,7 +1171,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.6.1';
+const VERSION='1.7.0';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -2617,8 +2617,9 @@ function fBanner(t,frames,ic){if(!FD)return;FD.warnTxt=t;FD.warnIc=ic||'';FD.war
 const fSpd=()=>FCFG.SPD*(1+.1*FD.ps.spd)*(1+.08*armMul('feet'))*(1+Math.min(FD.ab.lvSpd||0,.01*(FD.lv-1)))*(1+(FD.ab.wspd||0));
 const fCd=()=>1-.08*FD.ps.cd;
 const fPick=()=>FCFG.PICK*(1+.6*FD.ps.mag)*(1+(FD.ab.pick||0));
-const fCut=()=>(1-Math.min(.45,.14*armMul('body')))*(1-(FD.ab.cut||0));
-const fPow0=id=>{const g=id!==G.lead&&!G.party.some(m=>m.id===id)&&genFor(id);if(g){const L=findOwn(G.lead);return (g.attr&&g.attr.k==='fire'?1+g.attr.v:1)*g.mul*lvMul(L)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)}const m=findOwn(id)||(FD.helperMs&&FD.helperMs[id])||null;const at=m&&m.weapon&&m.weapon.attr;return (at&&at.k==='fire'?1+at.v:1)*(G.flags.selfRust&&id===G.hero?1.1:1)*starMul(m)*wMul(m)*lvMul(m)*(m?genSup(m.id):1)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)};
+const fCut=()=>(1-Math.min(.45,.14*armMul('body')))*(1-(FD.ab.cut||0))*ruleCut();
+const fPow0=id=>fPow0b(id)*ruleAtk();
+const fPow0b=id=>{const g=id!==G.lead&&!G.party.some(m=>m.id===id)&&genFor(id);if(g){const L=findOwn(G.lead);return (g.attr&&g.attr.k==='fire'?1+g.attr.v:1)*g.mul*lvMul(L)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)}const m=findOwn(id)||(FD.helperMs&&FD.helperMs[id])||null;const at=m&&m.weapon&&m.weapon.attr;return (at&&at.k==='fire'?1+at.v:1)*(G.flags.selfRust&&id===G.hero?1.1:1)*starMul(m)*wMul(m)*lvMul(m)*(m?genSup(m.id):1)*(1+(FD.ab.teamAtk||0))*(FD.ab.rage&&FD.hp<FD.maxhp/2?1+FD.ab.rage:1)};
 const fPow=id=>fPow0(id)*fPowX(id);
 /* 敵の波：1分の探索に合わせて、時間を2.5倍速で進める */
 const fSearchT=()=>FD.st;   /* この階を探索した時間（ボス戦の間は進まない） */
@@ -2785,7 +2786,7 @@ function fUpdate(f){const D=FD;D.t+=f/60;
 function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDPR,0,0,fDPR,0,0);
  const sx=D.shake?Math.random()*6-3:0,sy=D.shake?Math.random()*6-3:0,cx0=D.x-fW/2/z,cy0=D.y-fH/2/z;
  g.save();g.scale(z,z);g.translate(-cx0+sx,-cy0+sy);
- g.fillStyle=groundFor(D.area);g.fillRect(cx0-20,cy0-20,fW/z+40,fH/z+40);
+ g.fillStyle=groundFor(D.area);g.fillRect(cx0-20,cy0-20,fW/z+40,fH/z+40);fDrawRuleFloor(g,D,cx0,cy0,z);
  // 魔法陣・衝撃波
  for(const q of D.zones){const k=q.t/q.life;g.save();g.translate(q.x,q.y);g.rotate(q.t*.02);g.globalAlpha=Math.min(1,(1-k)*2)*.85;g.strokeStyle='#8fd0ff';g.lineWidth=2.5;g.beginPath();g.arc(0,0,q.r,0,TAU);g.stroke();
   g.beginPath();for(let i=0;i<=5;i++){const a=i*TAU*2/5-Math.PI/2;g.lineTo(Math.cos(a)*q.r*.9,Math.sin(a)*q.r*.9)}g.stroke();g.fillStyle='#8fd0ff22';g.beginPath();g.arc(0,0,q.r,0,TAU);g.fill();g.restore()}g.globalAlpha=1;
@@ -4633,7 +4634,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.6.1</b><ul><li>審判の塔6Fのボス「クラガード」の絵を入れた</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.0</b><ul><li>審判の塔に階のルールを3種類：白黒の床（2・3・8F）、鏡（5・13F）、雷鳴（18F）</li></ul>
+  <b>ver 1.6.1</b><ul><li>審判の塔6Fのボス「クラガード」の絵を入れた</li></ul>
   <b>ver 1.6.0</b><ul><li>第2章「審判の塔」の試し遊び版を入れた（白黒の魔物13種・ボス7体）。まだ準備中で、ふつうには出撃できない</li></ul>
   <b>ver 1.5.0　出撃は世界地図から</b><ul><li>「出撃」を押すと世界地図が開き、出撃する塔を選べるようにした（第2章「審判の塔」は第1章クリアで地図に出る。公開は ver2.0.0）</li></ul>
   <b>ver 1.4.4</b><ul><li>ホームとメニューから「地図」をなくした（今は使う場面がないため）</li></ul>
@@ -4870,23 +4872,23 @@ function openStory(){const S=storyScenes();
 const J_TEST=/[?&]judge\b/.test(location.search);
 const JFLOORS=[null,
  {n:'開廷の間',area:'jk',step:0,stair:1500},
- {n:'白の証言台',area:'jk',step:1,stair:1600},
- {n:'黒の証言台',area:'jk',step:2,boss:true},
+ {n:'白の証言台',area:'jk',step:1,stair:1600,rule:'wb'},
+ {n:'黒の証言台',area:'jk',step:2,boss:true,rule:'wb'},
  {n:'天秤の間',area:'jt',step:0,stair:1550},
- {n:'鏡の法廷',area:'jt',step:1,stair:1650},
+ {n:'鏡の法廷',area:'jt',step:1,stair:1650,rule:'mirror'},
  {n:'証拠保管庫',area:'jt',step:2,boss:true},
  {n:'黙秘の間',area:'jm',step:0,stair:1600},
- {n:'表裏の間',area:'jm',step:1,stair:1700},
+ {n:'表裏の間',area:'jm',step:1,stair:1700,rule:'wb'},
  {n:'木槌の間',area:'jm',step:2,stair:1750},
  {n:'判決の止まり木',area:'jm',step:3,boss:true},
  {n:'陪審員席',area:'jb',step:0,stair:1650},
  {n:'弁論の間',area:'jb',step:1,stair:1750},
- {n:'鏡の回廊',area:'jb',step:2,boss:true},
+ {n:'鏡の回廊',area:'jb',step:2,boss:true,rule:'mirror'},
  {n:'六法の書庫',area:'js',step:0,stair:1700},
  {n:'封印の間',area:'js',step:1,stair:1800},
  {n:'判例の間',area:'js',step:2,boss:true},
  {n:'双子の証人',area:'jr',step:0,stair:1750},
- {n:'雷鳴の大法廷',area:'jr',step:1,stair:1850},
+ {n:'雷鳴の大法廷',area:'jr',step:1,stair:1850,rule:'thunder'},
  {n:'最終弁論',area:'jr',step:2,boss:true},
  {n:'日蝕の玉座',area:'jg',step:3,boss:true}];
 Object.assign(LAYER_NAME,{jk:'開廷の層',jt:'天秤の層',jm:'黙秘の層',jb:'陪審の層',js:'書庫の層',jr:'雷鳴の層',jg:'玉座'});
@@ -4966,7 +4968,36 @@ TOWERS.judge.ready=J_TEST;TOWERS.judge.go=()=>{enterTower('judge');openDest()};
 if(J_TEST){const p=WMAP.places.find(q=>q.k==='judge');const o=p.open;p.open=()=>true}
 {const _od=openDest;openDest=function(){const r=_od.apply(this,arguments);const t=$('destTw');if(t)t.textContent=(TOWERS[towerAt()]||TOWERS.meister).n;return r}}
 
-const BUILD='11/14 19:40';
+/* ===================== 階のルール（3種類だけ） =====================
+ * wb　　：白黒の床。白の上は攻撃+25%、黒の上は受けるダメージ+20%
+ * mirror：鏡。敵の弾が画面のはしで1回だけ跳ね返る
+ * thunder：雷鳴。3.5秒ごとに予告の円が出て、少しあとに雷が落ちる（自分にも敵にも当たる） */
+const RULES={wb:{n:'白黒の床',d:'白の床では攻撃+25%、黒の床では受けるダメージ+20%'},mirror:{n:'鏡',d:'敵の弾が画面のはしで1回跳ね返る'},thunder:{n:'雷鳴',d:'予告の円に雷が落ちる。円から出よう（敵にも当たる）'}};
+const WB_TILE=260;
+const ruleOf=()=>FD&&FD.run&&FLOORS[FD.floor]&&FLOORS[FD.floor].rule;
+const wbWhite=(x,y)=>((Math.floor(x/WB_TILE)+Math.floor(y/WB_TILE))&1)===0;
+function ruleAtk(){return ruleOf()==='wb'&&wbWhite(FD.x,FD.y)?1.25:1}
+function ruleCut(){return ruleOf()==='wb'&&!wbWhite(FD.x,FD.y)?1.2:1}
+function fDrawRuleFloor(g,D,cx0,cy0,z){if(ruleOf()!=='wb')return;const T=WB_TILE,x0=Math.floor((cx0-20)/T),y0=Math.floor((cy0-20)/T),nx=Math.ceil((fW/z+40)/T)+1,ny=Math.ceil((fH/z+40)/T)+1;
+ g.save();for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const X=x0+i,Y=y0+j,w=((X+Y)&1)===0;g.fillStyle=w?'rgba(255,255,255,.16)':'rgba(10,0,20,.30)';g.fillRect(X*T,Y*T,T,T)}
+ g.strokeStyle='rgba(230,200,120,.25)';g.lineWidth=2;for(let i=0;i<=nx;i++){g.beginPath();g.moveTo((x0+i)*T,y0*T);g.lineTo((x0+i)*T,(y0+ny)*T);g.stroke()}for(let j=0;j<=ny;j++){g.beginPath();g.moveTo(x0*T,(y0+j)*T);g.lineTo((x0+nx)*T,(y0+j)*T);g.stroke()}g.restore()}
+{const _s=startFloor;startFloor=function(fl){_s(fl);const r=FLOORS[fl]&&FLOORS[fl].rule;if(r&&FD){FD.thunder=[];FD.thT=0;setTimeout(()=>{if(FD&&FD.floor===fl)fBanner(`この階のルール「${RULES[r].n}」：${RULES[r].d}`,260,'n_floor')},1600)}}}
+{const _a=fAdvance;fAdvance=async function(fl){const r=await _a.apply(this,arguments);const R=FLOORS[fl]&&FLOORS[fl].rule;if(R&&FD){FD.thunder=[];FD.thT=0;fBanner(`この階のルール「${RULES[R].n}」：${RULES[R].d}`,260,'n_floor')}return r}}
+{const _u=fUpdate;fUpdate=function(f){_u(f);const D=FD;if(!D||!D.run||D.paused||D.climbing)return;const r=ruleOf();
+ if(r==='mirror'&&D.ebul){const hw=fW/2/fZ,hh=fH/2/fZ;for(const b of D.ebul){if(b.mr)continue;const ox=b.x-D.x,oy=b.y-D.y;
+   if(Math.abs(ox)>hw-6&&ox*b.vx>0){b.vx=-b.vx;b.mr=1;b.life=Math.max(b.life,120)}else if(Math.abs(oy)>hh-6&&oy*b.vy>0){b.vy=-b.vy;b.mr=1;b.life=Math.max(b.life,120)}}}
+ if(r==='thunder'){D.thunder=D.thunder||[];D.thT=(D.thT||0)+f;
+  if(D.thT>=210){D.thT=0;const pts=[[D.x+(Math.random()-.5)*60,D.y+(Math.random()-.5)*60]];for(let i=0;i<2;i++){const a=Math.random()*TAU,d=120+Math.random()*160;pts.push([D.x+Math.cos(a)*d,D.y+Math.sin(a)*d])}
+   pts.forEach(([x,y])=>D.thunder.push({x,y,t:0,warn:80,r:70}));tone(300,.06,'triangle',.03)}
+  for(const q of D.thunder){q.t+=f;if(!q.hit&&q.t>=q.warn){q.hit=1;D.shake=Math.max(D.shake||0,6);tone(70,.25,'sawtooth',.08,40);
+    if(D.inv<=0&&(D.x-q.x)**2+(D.y-q.y)**2<q.r*q.r){D.hp-=D.maxhp*.12*fCut();D.inv=Math.max(D.inv,20);renderFHud()}
+    for(const e of D.foes)if(!e.boss&&(e.x-q.x)**2+(e.y-q.y)**2<q.r*q.r)e.hp-=(e.max||60)*.35}}
+  D.thunder=D.thunder.filter(q=>q.t<q.warn+18)}}}
+{const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);if(!D.thunder||!D.thunder.length)return;
+ for(const q of D.thunder){g.save();if(q.t<q.warn){const k=q.t/q.warn;g.globalAlpha=.25+.35*k;g.fillStyle='rgba(170,100,255,.35)';g.beginPath();g.arc(q.x,q.y,q.r*k,0,TAU);g.fill();g.strokeStyle='#d0a0ff';g.lineWidth=3;g.setLineDash([10,8]);g.beginPath();g.arc(q.x,q.y,q.r,0,TAU);g.stroke()}
+  else{g.globalAlpha=1-(q.t-q.warn)/18;g.strokeStyle='#fff';g.lineWidth=6;g.beginPath();g.moveTo(q.x+20,q.y-600);g.lineTo(q.x-10,q.y-300);g.lineTo(q.x+15,q.y-150);g.lineTo(q.x,q.y);g.stroke();g.fillStyle='rgba(220,190,255,.6)';g.beginPath();g.arc(q.x,q.y,q.r,0,TAU);g.fill()}g.restore()}}}
+
+const BUILD='11/14 19:48';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
