@@ -1046,6 +1046,9 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .pwstrip .pwn small{font-size:12px;color:var(--sm);white-space:nowrap}
 .pwstrip i{font-style:normal;font-size:12px;font-weight:800;color:var(--so);flex:none;border:1px solid var(--so);padding:3px 8px}
 #partyList .part{height:clamp(130px,calc(100dvh - 690px),230px)}
+.wmgo{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.wmgo span{font-size:12px;color:var(--sm,#9aa5cc)}.wmgo .btn{width:auto;margin:0;padding:10px 18px}
+#wmap{background:#0b0f1e;z-index:120}
 
 </style>
 </head>
@@ -1069,7 +1072,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
  <div class="gtop"><span class="gch" id="hName"></span><div class="gres" id="hRes"></div></div>
  <button class="gnext" id="hBanner"></button>
  <nav class="gmenu">
-  <button class="ggo" onclick="openDest()"><b>出撃</b><small id="hGoT"></small></button>
+  <button class="ggo" onclick="openSortie()"><b>出撃</b><small id="hGoT"></small></button>
   <button class="gb" onclick="goTab('shop')"><img src="img/ui/icon0.webp" alt=""><b>工房</b></button>
   <button class="gb" onclick="goTab('party')"><img src="img/ui/icon1.webp" alt=""><b>編成</b></button>
   <button class="gb" onclick="goTab('zukan')"><img src="img/ui/icon3.webp" alt=""><b>図鑑</b></button>
@@ -1168,7 +1171,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.4.4';
+const VERSION='1.5.0';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -2542,7 +2545,7 @@ const RIC=(id,s=22)=>{const R=RECIPES[id];return R.kind==='gen'?(GEN_IC[id]?UIMG
 const matText=o=>Object.keys(o).filter(k=>o[k]).map(k=>`${MIC(k,18)}${MATS[k]?MATS[k].n:k}×${o[k]}`).join('　');
 
 /* ---------- セーブの補い（v2 の項目） ---------- */
-function fixV2(g){if(!Array.isArray(g.bpRaw))g.bpRaw=[];if(!g.gen||typeof g.gen!=='object')g.gen={};if(!Array.isArray(g.genEq))g.genEq=[null,null];const m=g.mats&&typeof g.mats==='object'?g.mats:{};g.mats={};MAT_ORDER.forEach(k=>g.mats[k]=Math.max(0,Math.floor(+m[k]||0)));
+function fixV2(g){if(!g.tw||typeof g.tw!=='object')g.tw={judge:{floor:0}};if(!Array.isArray(g.bpRaw))g.bpRaw=[];if(!g.gen||typeof g.gen!=='object')g.gen={};if(!Array.isArray(g.genEq))g.genEq=[null,null];const m=g.mats&&typeof g.mats==='object'?g.mats:{};g.mats={};MAT_ORDER.forEach(k=>g.mats[k]=Math.max(0,Math.floor(+m[k]||0)));
  g.tools=Array.isArray(g.tools)?g.tools.filter(t=>TOOLS[t]):[];if(!g.tools.includes('file'))g.tools.unshift('file');
  g.bps=Array.isArray(g.bps)?g.bps.filter(b=>RECIPES[b]):[];RECIPE_ORDER.filter(b=>RECIPES[b].start).forEach(b=>{if(!g.bps.includes(b))g.bps.push(b)});
  const a=g.arm&&typeof g.arm==='object'?g.arm:{};g.arm={};['head','body','feet'].forEach(s=>{const p=a[s];g.arm[s]=p&&RECIPES[p.rid]&&Number.isFinite(+p.mul)?p:null});
@@ -3082,7 +3085,7 @@ function openHome(){if(TW)TW.busy=false;G.where={s:'town'};save();show('home');
  $('hArt').innerHTML=homeFormHTML(L,others);
  $('hArt').querySelectorAll('[data-hf]').forEach(b=>b.onclick=()=>{const v=b.dataset.hf;if(v.startsWith('slot:')){partySel=G.lead;openParty();pickSlot=+v.slice(5);renderParty()}else{partySel=v||null;openParty()}});
  $('hLead').innerHTML='';
- const g=nextGoal();$('hBanner').innerHTML=`<span class="nx">NEXT</span><span class="nm">${g.m}</span><span class="na">→</span>`;$('hBanner').onclick=()=>g.go==='go'?openDest():goTab(g.go);
+ const g=nextGoal();$('hBanner').innerHTML=`<span class="nx">NEXT</span><span class="nm">${g.m}</span><span class="na">→</span>`;$('hBanner').onclick=()=>g.go==='go'?openSortie():goTab(g.go);
  const f=bestStart();$('hGoT').textContent=`塔の${f}階から　${LAYER_NAME[FLOORS[f].area]}`;
  const h=$('home');h.classList.remove('enter');void h.offsetWidth;h.classList.add('enter');requestAnimationFrame(fitHomeArt)}
 /* キャラは「NEXT」とメニューのあいだに収める（重ならないように） */
@@ -4589,17 +4592,21 @@ Object.assign(ARMOR_IC,{thelm:'ar_thelm',cvest:'ar_cvest',tboots:'ar_tboots'});
 Object.assign(GEN_IC,{g_star:'wg_star',g_ring:'wg_ring'});
 
 /* ===================== 世界地図：行ったことのない場所は霧。章が進むと晴れる ===================== */
+/* 塔ごとの出撃先。ready=遊べる。進みぐあいは G.tw[塔].floor（マイスターの塔は今までどおり G.floor） */
+const TOWERS={meister:{n:'マイスターの塔',ready:true,go:()=>openDest()},judge:{n:'審判の塔',ready:false,soon:'ver2.0.0　第2章で公開'}};
+const towerFloor=k=>k==='meister'?G.floor|0:(G.tw&&G.tw[k]&&G.tw[k].floor)|0;
 const WMAP={img:'img/worldmap.webp',places:[
- {k:'tetto', x:.43,y:.77,r:.25,n:'鉄灯の街',  t:'マイスターの塔',d:'夜の工業の街。塔の灯りが、街の名前のもとになった。塔には、錆を元の道具にもどす「再生の陣」が刻まれている。',open:()=>true},
- {k:'judge', x:.18,y:.19,r:.2, n:'白黒の高原',t:'審判の塔',    d:'正しさを量る「天秤の陣」の塔。過ちを犯した者が登り、自分の罪と向き合う。第2章の舞台。',open:()=>!!G.flags.ch1b,hint:'霧の向こうに、白と黒の塔の影が見える……'},
+ {k:'tetto',tw:'meister', x:.43,y:.77,r:.25,n:'鉄灯の街',  t:'マイスターの塔',d:'夜の工業の街。塔の灯りが、街の名前のもとになった。塔には、錆を元の道具にもどす「再生の陣」が刻まれている。',open:()=>true},
+ {k:'judge',tw:'judge', x:.18,y:.19,r:.2, n:'白黒の高原',t:'審判の塔',    d:'正しさを量る「天秤の陣」の塔。過ちを犯した者が登り、自分の罪と向き合う。第2章の舞台。',open:()=>!!G.flags.ch1b,hint:'霧の向こうに、白と黒の塔の影が見える……'},
  {k:'sougi', x:.86,y:.35,r:.19,n:'黄金の港町',t:'創技の塔',    d:'新しい技を生み出す「創成の陣」の塔。第3章の舞台。',open:()=>false,hint:'東の海の向こうから、金色の光がもれている……'},
  {k:'hw',    x:.82,y:.67,r:.14,n:'いたずらの島',t:'ハロウィンの塔',d:'遊びと文化を生む「祭りの陣」の塔。季節のイベントで開く。',open:()=>false,hint:'海の上から、にぎやかな笑い声が聞こえる……'},
  {k:'inf',   x:.54,y:.07,r:.12,n:'雲海',      t:'？？？',      d:'',open:()=>false,hint:'雲の上に、てっぺんの見えない塔の影がある……'}]};
-function openWorldMap(){let el=$('wmap');if(!el){el=document.createElement('div');el.id='wmap';document.body.appendChild(el)}
- el.innerHTML=`<div class="wmh"><b>世界地図</b><button class="btn ghost" id="wmX">とじる</button></div>
+function openSortie(){openWorldMap(true)}
+function openWorldMap(sortie){let el=$('wmap');if(!el){el=document.createElement('div');el.id='wmap';document.body.appendChild(el)}
+ el.innerHTML=`<div class="wmh"><b>${sortie?'どの塔へ出撃する？':'世界地図'}</b><button class="btn ghost" id="wmX">${sortie?'もどる':'とじる'}</button></div>
   <div class="wmbox" id="wmBox"><img src="${WMAP.img}" alt="世界地図" id="wmImg"><canvas id="wmFog"></canvas>
   ${WMAP.places.map(p=>{const o=p.open();return `<button class="wmp ${o?'on':'fog'}" data-wm="${p.k}" style="left:${p.x*100}%;top:${p.y*100}%">${o?`<b>${p.n}</b><small>${p.t}</small>`:'<b>？？？</b>'}</button>`}).join('')}</div>
-  <div class="wmd" id="wmD">場所をタップすると、くわしく見られる</div>`;
+  <div class="wmd" id="wmD">${sortie?'塔をタップして、出撃する塔を選ぶ':'場所をタップすると、くわしく見られる'}</div>`;
  el.classList.add('on');$('wmX').onclick=()=>el.classList.remove('on');
  const draw=()=>{const box=$('wmBox'),c=$('wmFog'),W=box.clientWidth,H=box.clientHeight;if(!W)return;const dpr=Math.min(2,devicePixelRatio||1);c.width=W*dpr;c.height=H*dpr;const g=c.getContext('2d');g.scale(dpr,dpr);
   g.fillStyle='rgba(226,224,218,.93)';g.fillRect(0,0,W,H);
@@ -4611,7 +4618,11 @@ function openWorldMap(){let el=$('wmap');if(!el){el=document.createElement('div'
  const im=$('wmImg');if(im.complete)draw();else im.onload=draw;
  el.querySelectorAll('[data-wm]').forEach(b=>b.onclick=()=>{const p=WMAP.places.find(q=>q.k===b.dataset.wm),o=p.open();
   el.querySelectorAll('.wmp.sel').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');
-  $('wmD').innerHTML=o?`<b>${p.n}　${p.t}</b>${p.d}`:`<b>？？？</b>${p.hint||'霧に包まれていて、まだ見えない。'}`})}
+  const T=p.tw&&TOWERS[p.tw];
+  $('wmD').innerHTML=(o?`<b>${p.n}　${p.t}</b>${p.d}`:`<b>？？？</b>${p.hint||'霧に包まれていて、まだ見えない。'}${p.k==='judge'?'<br><small>第1章（マイスターの塔20F）をクリアすると、霧が晴れる</small>':''}`)
+   +(sortie&&o&&T?(T.ready?`<div class="wmgo"><span>最高 ${towerFloor(p.tw)}F</span><button class="btn gold" id="wmGo">${T.n}へ出撃</button></div>`:`<div class="wmgo"><span>${T.soon}</span><button class="btn" disabled>準備中</button></div>`):'');
+  const go=$('wmGo');if(go)go.onclick=()=>{el.classList.remove('on');T.go()}});
+ if(sortie){const t=el.querySelector('[data-wm="tetto"]');if(t)t.click()}}
 
 /* ---------- 工房：武器の鍛え直し（編成から移した） ---------- */
 function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
@@ -4622,7 +4633,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.4.4</b><ul><li>ホームとメニューから「地図」をなくした（今は使う場面がないため）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.5.0　出撃は世界地図から</b><ul><li>「出撃」を押すと世界地図が開き、出撃する塔を選べるようにした（第2章「審判の塔」は第1章クリアで地図に出る。公開は ver2.0.0）</li></ul>
+  <b>ver 1.4.4</b><ul><li>ホームとメニューから「地図」をなくした（今は使う場面がないため）</li></ul>
   <b>ver 1.4.3</b><ul><li>ホーム：攻撃・体力の数字が途切れないように。「編成 ›」ボタンは下のタブと重なるのでなくした</li></ul>
   <b>ver 1.4.2</b><ul><li>編成画面：専用武器の表示が★やボタンに重なっていたので、キャラ絵の下の帯に移した</li></ul>
   <b>ver 1.4.1</b><ul><li>編成画面：キャラの名前の下に、いま付けている専用武器を表示。タップで入れかえ。「工房でつくる」は右の欄へ</li></ul>
@@ -4848,7 +4860,7 @@ function openStory(){const S=storyScenes();
  $('gpBody').querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await S[+b.dataset.st].run();openStory()});
  $('genPick').classList.add('on')}
 
-const BUILD='11/14 13:07';
+const BUILD='11/14 17:53';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
