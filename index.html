@@ -1049,6 +1049,8 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .wmgo{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
 .wmgo span{font-size:12px;color:var(--sm,#9aa5cc)}.wmgo .btn{width:auto;margin:0;padding:10px 18px}
 #wmap{background:#0b0f1e;z-index:120}
+.wsgh.vol{background:#1a2238;border-left-color:var(--gold,#e8c35a)}.wsgh.vol b{color:var(--gold,#e8c35a)}
+.wsgb.vb{padding-left:10px}.wsgh.sub{min-height:42px;margin-top:4px}
 
 </style>
 </head>
@@ -1171,7 +1173,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.7.2';
+const VERSION='1.7.3';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3468,9 +3470,9 @@ function wsListHTML(tab){const dec=tab==='dec';
  
  /* 行をグループに分け、見出しで開け閉めする。専用武器はキャラごと */
  const ord=[...G.party.map(m=>m.id),...(G.bench||[]).map(m=>m.id)];
- const gkey=id=>{const R=RECIPES[id];if(WS.sort==='kind'&&R.kind==='weapon')return ownChar(R.who)?'w:'+R.who:'g:まだ仲間にいないキャラの専用武器';return 'g:'+grp(id)};
- const gname=k=>k.startsWith('w:')?CHARS[k.slice(2)].name:k.slice(2);
- const grank=k=>{if(k==='g:まだ仲間にいないキャラの専用武器')return 1e4;if(!k.startsWith('w:'))return 0;const i=ord.indexOf(k.slice(2));return i<0?999:i};
+ const gkey=id=>{const R=RECIPES[id];if(WS.sort==='kind'&&R.kind==='weapon')return ownChar(R.who)?'w:'+R.who:'g:まだ仲間にいないキャラの専用武器|'+R.who.replace(/.*/,w=>{const b=GACHA_BANNERS.find(x=>x.pool&&x.pool.includes(w));return b?b.pool[0]:w});return 'g:'+grp(id)};
+ const gname=k=>k.startsWith('w:')?CHARS[k.slice(2)].name:k.slice(2).split('|')[0];
+ const grank=k=>{if(k.startsWith('g:まだ仲間にいない'))return 1e4;if(!k.startsWith('w:'))return 0;const i=ord.indexOf(k.slice(2));return i<0?999:i};
  if(WS.sort==='kind')ids.sort((a,b)=>key(a)-key(b)||grank(gkey(a))-grank(gkey(b))||RECIPES[a].tier-RECIPES[b].tier);
  const groups=[];ids.forEach(id=>{const k=gkey(id);let g=groups.find(x=>x.k===k);if(!g)groups.push(g={k,ids:[]});g.ids.push(id)});
  WS.open=WS.open||new Set(['g:いま加工できる']);
@@ -3483,8 +3485,15 @@ function wsListHTML(tab){const dec=tab==='dec';
    <span class="wsm"><span class="wst"><b>${R.n}</b><small>${R.kind==='gen'?ATK[R.impl].type:R.kind==='armor'?SLOT_NAME[R.slot]:CHARS[R.who].name}・${KANJI_TIER[R.tier]}・${procsOf(R).map(p=>PROC_LBL[p]).join('→')}</small></span><span class="wsn">${mats}<em></em>${tools}</span></span>
    <span class="wss">${dec?'<b class="go bp">解読</b>':cur&&cur.rank?RKIC(cur.rank,24):''}${dec?'':c.ok?'<b class="go">加工</b>':''}</span></button>`};
  const one=groups.length<=1||dec;
- h+=groups.map(g=>{const op=one||WS.open.has(g.k),w=g.k.startsWith('w:')?g.k.slice(2):null,nOk=dec?0:g.ids.filter(ok).length,away=g.k==='g:まだ仲間にいないキャラの専用武器';
-  return (one?'':`<button class="wsgh ${op?'op':''} ${away?'away':''}" data-wsg="${g.k}">${w?`<img src="${FACE(w)}" alt="">`:''}<b>${gname(g.k)}</b>${w?'<span class="sp">専用</span>':''}<small>${g.ids.length}</small>${away?'':nOk?`<i class="okn">加工できる ${nOk}</i>`:''}<em>${op?'▾':'▸'}</em></button>`)+(op?`<div class="wsgb">${g.ids.map(row).join('')}</div>`:'')}).join('');
+ const ghtml=(g,sub)=>{const op=one||WS.open.has(g.k),w=g.k.startsWith('w:')?g.k.slice(2):null,nOk=dec?0:g.ids.filter(ok).length,away=g.k.startsWith('g:まだ仲間にいない');
+  return (one?'':`<button class="wsgh ${sub?'sub':''} ${op?'op':''} ${away?'away':''}" data-wsg="${g.k}">${w?`<img src="${FACE(w)}" alt="">`:''}<b>${gname(g.k)}</b>${w?'<span class="sp">専用</span>':''}<small>${g.ids.length}</small>${away?'':nOk?`<i class="okn">加工できる ${nOk}</i>`:''}<em>${op?'▾':'▸'}</em></button>`)+(op?`<div class="wsgb">${g.ids.map(row).join('')}</div>`:'')};
+ /* 専用武器は「ガチャの巻（vol1・vol2…）」→ キャラ の2段 */
+ const volOf=k=>{const id=k.startsWith('w:')?k.slice(2):k.startsWith('g:まだ仲間にいない')?k.split('|')[1]:null;if(!id)return 0;const b=GACHA_BANNERS.find(x=>x.pool&&x.pool.includes(id));return b?b.vol:1};
+ const done=new Set();
+ h+=groups.map(g=>{if(done.has(g.k))return '';const v=one?0:volOf(g.k);if(!v)return ghtml(g);
+  const mem=groups.filter(x=>volOf(x.k)===v);mem.forEach(x=>done.add(x.k));const vk='v:'+v,op=WS.open.has(vk),n=mem.reduce((a,x)=>a+x.ids.length,0),nOk=dec?0:mem.reduce((a,x)=>a+x.ids.filter(ok).length,0);
+  const bn=GACHA_BANNERS.find(x=>x.vol===v);
+  return `<button class="wsgh vol ${op?'op':''}" data-wsg="${vk}"><b>専用武器 vol${v}</b><span class="sp">${bn&&!bn.soon?bn.n:''}</span><small>${n}</small>${nOk?`<i class="okn">加工できる ${nOk}</i>`:''}<em>${op?'▾':'▸'}</em></button>`+(op?`<div class="wsgb vb">${mem.map(x=>ghtml(x,1)).join('')}</div>`:'')}).join('');
  if(!ids.length)h+=`<div class="note" style="text-align:center;margin:24px 0">${MIC('bp',28)}<br>${dec?'未解読の図面はない。強敵や資材の箱から図面が見つかる':'この種類の図面はまだない'}</div>`;
  if(!dec){const unk=RECIPE_ORDER.length-G.bps.length-(G.bpRaw||[]).length;if(unk>0)h+=`<div class="wshint" style="text-align:center">まだ見つけていない図面：あと ${unk}</div>`}
  return h}
@@ -4634,7 +4643,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
+  <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
   <b>ver 1.7.0</b><ul><li>審判の塔に階のルールを3種類：白黒の床（2・3・8F）、鏡（5・13F）、雷鳴（18F）</li></ul>
   <b>ver 1.6.1</b><ul><li>審判の塔6Fのボス「クラガード」の絵を入れた</li></ul>
@@ -5000,7 +5010,7 @@ function fDrawRuleFloor(g,D,cx0,cy0,z){if(ruleOf()!=='wb')return;const T=WB_TILE
  for(const q of D.thunder){g.save();if(q.t<q.warn){const k=q.t/q.warn;g.globalAlpha=.25+.35*k;g.fillStyle='rgba(255,230,120,.45)';g.beginPath();g.arc(q.x,q.y,q.r*k,0,TAU);g.fill();g.strokeStyle='#ffe680';g.lineWidth=4;g.setLineDash([10,8]);g.beginPath();g.arc(q.x,q.y,q.r,0,TAU);g.stroke()}
   else{g.globalAlpha=1-(q.t-q.warn)/18;g.strokeStyle='#fff';g.lineWidth=6;g.beginPath();g.moveTo(q.x+20,q.y-600);g.lineTo(q.x-10,q.y-300);g.lineTo(q.x+15,q.y-150);g.lineTo(q.x,q.y);g.stroke();g.fillStyle='rgba(220,190,255,.6)';g.beginPath();g.arc(q.x,q.y,q.r,0,TAU);g.fill()}g.restore()}}}
 
-const BUILD='11/14 23:59';
+const BUILD='11/15 00:01';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
