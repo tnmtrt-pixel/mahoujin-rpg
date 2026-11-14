@@ -1198,7 +1198,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.7.6';
+const VERSION='1.7.7';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -4671,7 +4671,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -5253,7 +5253,7 @@ fHurt=function(v,src){const D=FD;if(!D)return v;const A=D.atk,V=D.v2||{};
  g.restore()}}
 
 /* =====================================================================
-   ランキング（無限の塔の攻略回数）
+   ランキング（無限の塔の攻略階数＝何階まで登ったか）
    ・名前はサイコロ版マイスターの塔と同じく「前・中・後」の3つの単語を組み合わせる。後ろに識別ID の末尾4けたを付ける
    ・識別ID はこの端末で1回だけ作る（12バイトの乱数）。セーブに入るので、引っ越しても同じ ID
    ・いまはランキングは準備中。名前の登録だけできる
@@ -5290,8 +5290,8 @@ function openRank(){show('rank');rEdit=false;rDraft=null;renderRank()}
 function renderRank(){const p=rProf(),el=$('rkBody');
  const card=!rEdit&&p.reg?`<div class="rkcard"><div class="rkh">プレイヤー</div><div class="rkname">${rName(p.w)}<small>#${rTag(p.id)}</small></div>
    <div class="rkid">識別ID　${rIdTxt(p.id)}</div><button class="btn ghost" id="rkEd">名前を変える</button></div>`:rEditHTML(p);
- el.innerHTML=card+`<div class="rkcard rkboard"><div class="rkh">無限の塔　攻略回数ランキング</div>
-  <div class="rksoon"><b>準備中</b><span>無限の塔（ver2.0.0）で、攻略した回数を全国のプレイヤーと競えるようになります。<br>いまのうちに名前を登録しておこう。</span></div>
+ el.innerHTML=card+`<div class="rkcard rkboard"><div class="rkh">無限の塔　攻略階数ランキング</div>
+  <div class="rksoon"><b>準備中</b><span>無限の塔（ver2.0.0）で、何階まで登ったか（攻略階数）を全国のプレイヤーと競えるようになります。<br>いまのうちに名前を登録しておこう。</span></div>
   <div class="note">ランキングに出るのは、この名前と識別IDの末尾4けた（#${rTag(p.id)}）と記録だけです。本名は使わないでね。</div></div>`;
  if(!rEdit&&p.reg){$('rkEd').onclick=()=>{rEdit=true;rDraft=[...p.w];renderRank()};return}
  const d=rDraft||(rDraft=[...p.w]);
@@ -5310,7 +5310,7 @@ function rEditHTML(p){const d=rDraft||(rDraft=[...p.w]);
   <div class="rkid">識別ID　${rIdTxt(p.id)}<small>（自動でつく。名前が同じ人と見分けるための番号）</small></div>
   <div class="rkbtns"><button class="btn ghost" id="rkRand">🎲 ランダム</button><button class="btn gold" id="rkOk">${p.reg?'保存する':'登録する'}</button>${p.reg?'<button class="btn ghost" id="rkNo">やめる</button>':''}</div></div>`}
 
-const BUILD='11/15 01:58';
+const BUILD='11/15 02:07';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
