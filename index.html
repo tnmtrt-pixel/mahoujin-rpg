@@ -1168,7 +1168,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.4.2';
+const VERSION='1.4.3';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3091,7 +3091,7 @@ function fitHomeArt(){if(!onScr('home'))return;const hm=$('home').getBoundingCli
 function homeFormHTML(L,others){const card=(m,k,lead)=>{if(!m)return `<button class="hfc em" data-hf="slot:${k}"><span>＋</span><small>空き</small></button>`;const c=CHARS[m.id],A=ATK[m.id];
   return `<button class="hfc ${lead?'ld':'fc'}" data-hf="${m.id}"><img src="${lead?c.img:FACE(m.id)}" alt=""><span class="hft">${TIC(A.type,lead?24:18)}</span>${lead?'<span class="hfl">LEADER</span>':''}<span class="hfb"><b>${c.name}</b><small>Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i></small></span></button>`};
  const rest=Array.from({length:PARTY_MAX-1},(_,i)=>card(others[i],i+1,false)).join('');
- return `<div class="hform"><div class="hfh"><span class="hfk">PARTY</span><span class="hfs"><i>攻撃</i><b>${teamPow()}</b><i>体力</i><b>${teamHp()}</b></span>${(()=>{const n=chatNew().length;return `<button class="hfe hch ${n?'on':''}" onclick="openChats()">チャット${n?`<i>${n}</i>`:''}</button>`})()}<button class="hfe" onclick="openWorldMap()">地図</button><button class="hfe" data-hf="${L.id}">編成 ›</button></div>${card(L,0,true)}${rest}</div>`}
+ return `<div class="hform"><div class="hfh"><span class="hfk">PARTY</span><span class="hfs"><i>攻撃</i><b>${teamPow()}</b><i>体力</i><b>${teamHp()}</b></span>${(()=>{const n=chatNew().length;return `<button class="hfe hch ${n?'on':''}" onclick="openChats()">チャット${n?`<i>${n}</i>`:''}</button>`})()}<button class="hfe" onclick="openWorldMap()">地図</button></div>${card(L,0,true)}${rest}</div>`}
 addEventListener('resize',()=>{if(onScr('home'))fitHomeArt()});
 
 /* ---------- 編成 ---------- */
@@ -4622,7 +4622,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.4.2</b><ul><li>編成画面：専用武器の表示が★やボタンに重なっていたので、キャラ絵の下の帯に移した</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.4.3</b><ul><li>ホーム：攻撃・体力の数字が途切れないように。「編成 ›」ボタンは下のタブと重なるのでなくした</li></ul>
+  <b>ver 1.4.2</b><ul><li>編成画面：専用武器の表示が★やボタンに重なっていたので、キャラ絵の下の帯に移した</li></ul>
   <b>ver 1.4.1</b><ul><li>編成画面：キャラの名前の下に、いま付けている専用武器を表示。タップで入れかえ。「工房でつくる」は右の欄へ</li></ul>
   <b>ver 1.4.0　汎用武器の「支援」</b><ul><li>パーティにいるキャラと同じ動きの汎用武器は「支援」になり、そのキャラの攻撃が上がる（C+5%・B+8%・A+12%・S+16%・SS+20%）。リーダーと同じ動きでも付けられる</li><li>編成画面：専用武器は上の「武器 変える」から。下の列は「チーム装備（汎用・防具）」にまとめた</li></ul>
   <b>ver 1.3.1</b><ul><li>編成画面で仲間を選ぶと、下の「専用」の枠がその仲間の武器になり、リーダー以外の専用武器も入れかえられるようにした</li></ul>
@@ -4846,7 +4847,7 @@ function openStory(){const S=storyScenes();
  $('gpBody').querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await S[+b.dataset.st].run();openStory()});
  $('genPick').classList.add('on')}
 
-const BUILD='11/14 12:21';
+const BUILD='11/14 12:57';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
