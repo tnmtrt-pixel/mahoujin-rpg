@@ -1054,6 +1054,27 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 #hBanner.news .nx{background:#e8c35a;color:#1a1200}
 #hBanner.news .nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
+/* ===== ランキング ===== */
+.gfoot{display:none!important}
+.gmenu{bottom:calc(14px + env(safe-area-inset-bottom))}
+#home.enter .gmenu button:nth-child(7){animation-delay:.24s}
+#rank{overflow-y:auto;padding:12px 12px calc(24px + env(safe-area-inset-bottom))}
+#rank .hd{margin-bottom:10px}
+.rkback{width:38px;height:38px;border-radius:10px;border:1px solid #ffffff33;background:#ffffff10;color:#fff;font-size:26px;line-height:1;padding:0}
+.rkcard{background:linear-gradient(180deg,#1c2130,#141822);border:1px solid #ff8a3d55;border-radius:14px;padding:14px;margin-bottom:12px}
+.rkh{font-size:13px;font-weight:800;color:#ff9a4a;letter-spacing:.06em;margin-bottom:8px}
+.rkname{font-size:24px;font-weight:900;color:#fff;margin:4px 0 8px;word-break:break-all}
+.rkname small{font-size:14px;color:#9aa6bd;margin-left:6px;font-weight:700}
+.rkid{font-size:12px;color:#9aa6bd;margin:8px 0;font-family:ui-monospace,Menlo,monospace}
+.rkid small{display:block;font-family:inherit;opacity:.8;margin-top:2px}
+.rksels{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.rksel{display:flex;align-items:center;gap:8px}
+.rksel span{width:28px;height:28px;border-radius:8px;background:#ff8a3d;color:#1a1208;font-weight:900;display:grid;place-items:center;flex:none}
+.rksel select{flex:1;min-width:0;font-size:17px;padding:9px 10px;border-radius:10px;background:#0f131c;color:#fff;border:1px solid #ffffff2e}
+.rkbtns{display:flex;gap:8px;flex-wrap:wrap}.rkbtns .btn{flex:1;min-width:30%}
+.rksoon{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:18px 6px;border:1px dashed #ffffff30;border-radius:12px;margin-bottom:8px}
+.rksoon b{font-size:22px;color:#ffc94a}.rksoon span{font-size:13px;color:#c9d2e3;line-height:1.6}
+
 </style>
 </head>
 <body>
@@ -1081,6 +1102,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
   <button class="gb" onclick="goTab('party')"><img src="img/ui/icon1.webp" alt=""><b>編成</b></button>
   <button class="gb" onclick="goTab('zukan')"><img src="img/ui/icon3.webp" alt=""><b>図鑑</b></button>
   <button class="gb gga" onclick="goTab('gacha')"><img src="img/ui/icon_gacha.webp" alt=""><b>ガチャ</b></button>
+  <button class="gb" onclick="openRank()"><img src="img/ui/icon_rank.webp" alt=""><b>ランキング</b></button>
   <button class="gb" onclick="openMenu()"><img src="img/ui/icon5.webp" alt=""><b>メニュー</b></button>
  </nav>
  <div class="gfoot"><span class="slead" id="hLead"></span><span class="sprog"><span id="hRank"></span><span class="sbar"><i id="hRankI"></i></span></span></div>
@@ -1089,6 +1111,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <div id="gres" onclick="if(event.target===this)closeGacha()"><div class="grin"><div id="grCards"></div><button class="gab ok" onclick="closeGacha()"><b>OK</b></button></div></div>
 <section id="grind" class="scr"><div class="gh"><b id="gTitle"></b><small id="gSub"></small></div><div class="gst"><span id="gTime"></span><span id="gMatch"></span></div><canvas id="gcv"></canvas><div id="gWarn"></div><div class="grot"><button id="gRotL">⟲ 左に回す</button><button id="gRotR">右に回す ⟳</button></div><button class="gab ten" id="gDone"><b>仕上げる</b></button></section>
 <section id="forge" class="scr"><div class="gh"><b id="fgTitle"></b><small id="fgSub"></small></div><div class="gst"><span id="fgInfo"></span></div><canvas id="fgcv"></canvas><div id="fgBar" class="fgbar"></div><button class="gab ten" id="fgDone"><b>仕上げる</b></button></section>
+<section id="rank" class="scr"><div class="hd"><button class="rkback" onclick="openHome()" aria-label="ホームへ">‹</button><h2>ランキング</h2></div><div id="rkBody"></div></section>
 <section id="practice" class="scr"><div id="prBody"></div></section>
 <section id="zukan" class="scr"><div class="hd"><h2>図鑑</h2></div><div id="zkBody"></div></section>
 <nav id="tabs">
@@ -1175,7 +1198,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.7.5';
+const VERSION='1.7.6';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -4648,7 +4671,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -5229,7 +5252,65 @@ fHurt=function(v,src){const D=FD;if(!D)return v;const A=D.atk,V=D.v2||{};
     for(let i=-3;i<=3;i++){const x=p.x+i*p.r*.26,y=p.y+sg*(o*.6+6);g.beginPath();g.moveTo(x-5,y);g.lineTo(x,y-sg*13);g.lineTo(x+5,y);g.fill()}g.fillStyle='#efe0c0'})}}
  g.restore()}}
 
-const BUILD='11/15 01:49';
+/* =====================================================================
+   ランキング（無限の塔の攻略回数）
+   ・名前はサイコロ版マイスターの塔と同じく「前・中・後」の3つの単語を組み合わせる。後ろに識別ID の末尾4けたを付ける
+   ・識別ID はこの端末で1回だけ作る（12バイトの乱数）。セーブに入るので、引っ越しても同じ ID
+   ・いまはランキングは準備中。名前の登録だけできる
+   ・単語の並びは保存とサーバーに使うので、並べかえずに後ろへ足していくこと
+   ===================================================================== */
+const mFloor=()=>towerFloor('meister');
+const ownN=()=>ownedAll().length;
+/* [単語, 条件の説明, 条件]（条件なし＝最初から使える） */
+const RW=[[
+ ['燃える'],['静かなる'],['熱血'],['気まぐれ'],['青き'],['光る'],['陽気な'],['腹ぺこ'],['全力'],['はじまりの'],['さすらいの'],['夜ふかしの'],
+ ['挑む','塔の5Fに到達',()=>mFloor()>=5],['錆びない','塔の10Fに到達',()=>mFloor()>=10],['伝説の','塔の20Fをクリア',()=>!!G.flags.ch1],['真・','塔の20Fをクリア',()=>!!G.flags.ch1],
+ ['白黒の','審判の塔の10Fに到達',()=>towerFloor('judge')>=10],['審判の','審判の塔の20Fをクリア',()=>!!G.flags.tw_judge],['無限の','無限の塔に挑む（ver2.0.0から）',()=>!!G.flags.tw_inf],
+ ['仲間思いの','仲間を5人にする',()=>ownN()>=5],['にぎやかな','仲間を10人にする',()=>ownN()>=10]],
+[
+ ['歯車'],['ネジ'],['ボルト'],['ナット'],['スパナ'],['ハンマー'],['ペンチ'],['定規'],['電池'],['回路'],['鉄くず'],['火花'],
+ ['錆','塔の3Fに到達',()=>mFloor()>=3],['塔','塔の10Fに到達',()=>mFloor()>=10],['匠','塔の20Fをクリア',()=>!!G.flags.ch1],['旋盤','工具を6つ集める',()=>(G.tools||[]).length>=6],['溶接','工具を10こ集める',()=>(G.tools||[]).length>=10],
+ ['天秤','審判の塔の3Fに到達',()=>towerFloor('judge')>=3],['木槌','審判の塔の20Fをクリア',()=>!!G.flags.tw_judge],['バグ','無限の塔に挑む（ver2.0.0から）',()=>!!G.flags.tw_inf]],
+[
+ ['職人'],['見習い'],['使い'],['探検家'],['旅人'],['研究者'],['選手'],['先輩'],['後輩'],['相棒'],
+ ['番人','塔の3Fに到達',()=>mFloor()>=3],['隊長','塔の5Fに到達',()=>mFloor()>=5],['博士','塔の9Fに到達',()=>mFloor()>=9],['塔の主','塔の10Fに到達',()=>mFloor()>=10],['王','塔の18Fに到達',()=>mFloor()>=18],['マイスター','塔の20Fをクリア',()=>!!G.flags.ch1],
+ ['証人','審判の塔に挑む',()=>towerFloor('judge')>=1],['裁判官','審判の塔の20Fをクリア',()=>!!G.flags.tw_judge],['デバッガー','無限の塔に挑む（ver2.0.0から）',()=>!!G.flags.tw_inf]]];
+const RW_PART=['前','中','後'];
+const rwOk=(p,i)=>{const w=RW[p][i];return !!w&&(!w[2]||w[2]())};
+const rHex=n=>{const a=new Uint8Array(n);crypto.getRandomValues(a);return [...a].map(x=>x.toString(16).padStart(2,'0')).join('')};
+const rTag=id=>id.slice(-4).toUpperCase();
+const rName=w=>(w||[]).map((n,p)=>RW[p][n]?RW[p][n][0]:'？').join('');
+function rRand(){return [0,1,2].map(p=>{const ok=RW[p].map((_,i)=>i).filter(i=>rwOk(p,i));return ok[Math.floor(Math.random()*ok.length)]})}
+function rProf(){if(!G.prof||typeof G.prof!=='object'||!/^[0-9a-f]{24}$/.test(G.prof.id||''))G.prof={id:rHex(12),w:rRand(),reg:false};
+ const p=G.prof;if(!Array.isArray(p.w)||p.w.length!==3)p.w=rRand();p.w=p.w.map((n,i)=>rwOk(i,n)?n:RW[i].findIndex((_,k)=>rwOk(i,k)));return p}
+const rIdTxt=id=>id.toUpperCase().match(/.{4}/g).join('-');
+
+let rEdit=false,rDraft=null;
+function openRank(){show('rank');rEdit=false;rDraft=null;renderRank()}
+function renderRank(){const p=rProf(),el=$('rkBody');
+ const card=!rEdit&&p.reg?`<div class="rkcard"><div class="rkh">プレイヤー</div><div class="rkname">${rName(p.w)}<small>#${rTag(p.id)}</small></div>
+   <div class="rkid">識別ID　${rIdTxt(p.id)}</div><button class="btn ghost" id="rkEd">名前を変える</button></div>`:rEditHTML(p);
+ el.innerHTML=card+`<div class="rkcard rkboard"><div class="rkh">無限の塔　攻略回数ランキング</div>
+  <div class="rksoon"><b>準備中</b><span>無限の塔（ver2.0.0）で、攻略した回数を全国のプレイヤーと競えるようになります。<br>いまのうちに名前を登録しておこう。</span></div>
+  <div class="note">ランキングに出るのは、この名前と識別IDの末尾4けた（#${rTag(p.id)}）と記録だけです。本名は使わないでね。</div></div>`;
+ if(!rEdit&&p.reg){$('rkEd').onclick=()=>{rEdit=true;rDraft=[...p.w];renderRank()};return}
+ const d=rDraft||(rDraft=[...p.w]);
+ el.querySelectorAll('select[data-rp]').forEach(s=>s.onchange=()=>{d[+s.dataset.rp]=+s.value;$('rkPrev').innerHTML=`${rName(d)}<small>#${rTag(p.id)}</small>`});
+ $('rkRand').onclick=()=>{rDraft=rRand();renderRank()};
+ $('rkOk').onclick=()=>{if(d.some((n,i)=>!rwOk(i,n))){say('使えない単語が入っている',1000);return}p.w=[...d];p.reg=true;p.at=Date.now();rEdit=false;rDraft=null;save();tone(880,.15,'triangle',.08,1320);say(`名前を登録した！<br><b>${rName(p.w)}</b> #${rTag(p.id)}`,1500);renderRank()};
+ const c=$('rkNo');if(c)c.onclick=()=>{rEdit=false;rDraft=null;renderRank()}}
+function rEditHTML(p){const d=rDraft||(rDraft=[...p.w]);
+ const sel=pi=>{const free=[],lock=[];RW[pi].forEach((w,i)=>(rwOk(pi,i)?free:lock).push(i));
+  return `<label class="rksel"><span>${RW_PART[pi]}</span><select data-rp="${pi}">${free.map(i=>`<option value="${i}" ${d[pi]===i?'selected':''}>${RW[pi][i][0]}</option>`).join('')}${lock.length?`<optgroup label="まだ使えない">${lock.map(i=>`<option disabled>🔒${RW[pi][i][0]}（${RW[pi][i][1]}）</option>`).join('')}</optgroup>`:''}</select></label>`};
+ const n=RW.reduce((s,l,pi)=>s+l.filter((_,i)=>rwOk(pi,i)).length,0),all=RW.reduce((s,l)=>s+l.length,0);
+ return `<div class="rkcard"><div class="rkh">${p.reg?'名前を変える':'名前の登録'}</div>
+  <div class="rkname" id="rkPrev">${rName(d)}<small>#${rTag(p.id)}</small></div>
+  <div class="note">名前は「前・中・後」の3つの単語を組み合わせて作る。塔を登ると、使える単語が増える（いま ${n}/${all}）。</div>
+  <div class="rksels">${sel(0)}${sel(1)}${sel(2)}</div>
+  <div class="rkid">識別ID　${rIdTxt(p.id)}<small>（自動でつく。名前が同じ人と見分けるための番号）</small></div>
+  <div class="rkbtns"><button class="btn ghost" id="rkRand">🎲 ランダム</button><button class="btn gold" id="rkOk">${p.reg?'保存する':'登録する'}</button>${p.reg?'<button class="btn ghost" id="rkNo">やめる</button>':''}</div></div>`}
+
+const BUILD='11/15 01:58';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
