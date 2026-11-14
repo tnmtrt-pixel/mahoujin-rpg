@@ -1051,6 +1051,8 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 #wmap{background:#0b0f1e;z-index:120}
 .wsgh.vol{background:#1a2238;border-left-color:var(--gold,#e8c35a)}.wsgh.vol b{color:var(--gold,#e8c35a)}
 .wsgb.vb{padding-left:10px}.wsgh.sub{min-height:42px;margin-top:4px}
+#hBanner.news .nx{background:#e8c35a;color:#1a1200}
+#hBanner.news .nm{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
 </style>
 </head>
@@ -1173,7 +1175,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.7.3';
+const VERSION='1.7.4';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -4643,7 +4645,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+  <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
   <b>ver 1.7.0</b><ul><li>審判の塔に階のルールを3種類：白黒の床（2・3・8F）、鏡（5・13F）、雷鳴（18F）</li></ul>
@@ -4676,7 +4679,7 @@ function openNews(){$('sheetT').textContent='お知らせ';
   <li>ポーズ画面で、いまの技と能力を確認できる</li>
   <li>世界地図。章が進むと霧が晴れる</li>
   <li>チャット（仲間どうしの掛け合い）39本</li></ul>
-  <b>次の予定</b><ul><li>ver2.0.0　第2章「審判の塔」</li></ul></div><button class="btn ghost" id="nsX">閉じる</button>`;
+  <b>次の予定</b><ul><li>ver2.0.0　第2章「審判の塔」と「無限の塔」</li></ul></div><button class="btn ghost" id="nsX">閉じる</button>`;
  $('nsX').onclick=closeSheet;$('sheet').classList.add('on')}
 
 /* ---------- ボスの宝箱を取らずに階段へ行ったら、先に宝箱をあける ---------- */
@@ -4695,6 +4698,14 @@ function openNews(){$('sheetT').textContent='お知らせ';
 
 /* 錆の大波：画面を錆色にそめる */
 {const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);if(!D.wave||D.boss)return;g.save();g.setTransform(1,0,0,1,0,0);g.globalAlpha=.18+.1*Math.sin(D.t*6);g.fillStyle='#b4461a';g.fillRect(0,0,g.canvas.width,g.canvas.height);g.restore()}}
+/* ホームの帯：まだ読んでいない新しいお知らせがあれば「NEWS」、読んだらいつもの NEXT */
+const NEWS_SRC=openNews.toString();
+const newsHead=()=>{const m=NEWS_SRC.match(/<li>(.*?)<\/li>/);return m?m[1].replace(/<[^>]+>/g,''):''};
+{const _on=openNews;openNews=function(){const r=_on.apply(this,arguments);if(OPT.newsSeen!==VERSION){OPT.newsSeen=VERSION;saveOpt()}const b=$('hBanner');if(b&&onScr('home'))renderNewsBand();return r}}
+function renderNewsBand(){const b=$('hBanner');if(!b||!G)return;b.classList.remove('news');
+ if(OPT.newsSeen===VERSION){if(typeof openHome==='function'&&b.dataset.nb){delete b.dataset.nb;const g=nextGoal();b.innerHTML=`<span class="nx">NEXT</span><span class="nm">${g.m}</span><span class="na">→</span>`;b.onclick=()=>g.go==='go'?openSortie():goTab(g.go)}return}
+ b.dataset.nb=1;b.classList.add('news');b.innerHTML=`<span class="nx">NEWS</span><span class="nm">ver ${VERSION}　${newsHead()}</span><span class="na">→</span>`;b.onclick=()=>openNews()}
+{const _oh3=openHome;openHome=function(){const r=_oh3.apply(this,arguments);renderNewsBand();return r}}
 
 /* ================= セーブの守り（マイスターの塔 Ver 2.20 を参考） =================
  * ・ファイルに保存：引っ越しコード入りの .txt をダウンロード（iPhone は「ファイル」→「ダウンロード」）
@@ -5010,7 +5021,7 @@ function fDrawRuleFloor(g,D,cx0,cy0,z){if(ruleOf()!=='wb')return;const T=WB_TILE
  for(const q of D.thunder){g.save();if(q.t<q.warn){const k=q.t/q.warn;g.globalAlpha=.25+.35*k;g.fillStyle='rgba(255,230,120,.45)';g.beginPath();g.arc(q.x,q.y,q.r*k,0,TAU);g.fill();g.strokeStyle='#ffe680';g.lineWidth=4;g.setLineDash([10,8]);g.beginPath();g.arc(q.x,q.y,q.r,0,TAU);g.stroke()}
   else{g.globalAlpha=1-(q.t-q.warn)/18;g.strokeStyle='#fff';g.lineWidth=6;g.beginPath();g.moveTo(q.x+20,q.y-600);g.lineTo(q.x-10,q.y-300);g.lineTo(q.x+15,q.y-150);g.lineTo(q.x,q.y);g.stroke();g.fillStyle='rgba(220,190,255,.6)';g.beginPath();g.arc(q.x,q.y,q.r,0,TAU);g.fill()}g.restore()}}}
 
-const BUILD='11/15 00:01';
+const BUILD='11/15 00:38';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
