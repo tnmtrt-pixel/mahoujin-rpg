@@ -1023,6 +1023,9 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .logr b{font-size:12px;color:var(--gold,#e8c35a)}.logr p{margin:1px 0 0;font-size:14px;line-height:1.6;white-space:pre-wrap}
 .logr.nar p{color:#c8cede;font-style:normal}
 .chr.stl .stf{flex:none;min-width:34px;font:700 12px ui-monospace,Menlo,monospace;color:var(--so,#ff8a3d)}
+.lvs .lvw{display:inline-flex;align-items:center;gap:4px;font:inherit;font-size:12px;color:inherit;background:#ffffff0d;border:1px solid var(--sl,#33406e);padding:2px 6px;min-height:28px}
+.lvs .lvw i{font-style:normal;font-size:11px;font-weight:800;color:var(--so,#ff8a3d)}
+.lvs .lvw img,.lvs .lvw .ic{width:18px!important;height:18px!important}
 
 </style>
 </head>
@@ -1145,7 +1148,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.3.0';
+const VERSION='1.3.1';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3077,7 +3080,8 @@ let partySel=null,pickSlot=null,pickSel=null;
 function leadFirst(){const i=G.party.findIndex(x=>x.id===G.lead);if(i>0)G.party.unshift(G.party.splice(i,1)[0]);if(G.party[0])G.lead=G.party[0].id}
 function canGrow(m){if(m.lv>=GROW_MAX)return false;return (G.coin|0)>=growCost(m.lv).coin}
 function openParty(){show('party');pickSlot=null;pickSel=null;if(!partySel||!owned(partySel))partySel=G.lead;renderParty()}
-function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:partySel;const inP=G.party.some(x=>x.id===showId),m=owned(showId)||G.party[0],hasW=RECIPE_ORDER.some(r=>RECIPES[r].who===m.id),c=CHARS[m.id],A=ATK[m.id],ab=ABIL[m.id]||[],cost=growCost(m.lv),max=m.lv>=GROW_MAX;
+let partyShow=null;
+function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:partySel;partyShow=showId;const inP=G.party.some(x=>x.id===showId),m=owned(showId)||G.party[0],hasW=RECIPE_ORDER.some(r=>RECIPES[r].who===m.id),c=CHARS[m.id],A=ATK[m.id],ab=ABIL[m.id]||[],cost=growCost(m.lv),max=m.lv>=GROW_MAX;
  const w=m.weapon,rank=w&&w.rank?w.rank:'C';
  $('partyList').innerHTML=`
  <div class="pstat"><div class="pst pw"><span>攻撃</span><b>${teamPow()}</b></div><div class="pst ar"><span>体力</span><b>${teamHp()}</b></div></div>
@@ -3090,7 +3094,7 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
    
    ${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
   <div class="lvcard"><div class="lvh">Lv <b>${m.lv}</b><small>/${GROW_MAX}</small></div>
-   <div class="lvs"><span>攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)).toFixed(2)}</span><span>武器 ×${wMul(m)}</span></div>
+   <div class="lvs"><span>攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)).toFixed(2)}</span><button class="lvw" id="pW">${WPIC(m.id,18,w&&w.rid&&RECIPES[w.rid]?RECIPES[w.rid].tier:0)}武器 ×${wMul(m)} <i>変える</i></button></div>
    ${max?'<div class="note" style="text-align:center">レベル最大</div>':`<div class="lvc ${(G.coin|0)<cost.coin?'lack':''}">${coinIc(22)}<b>${G.coin|0}</b>/${cost.coin}</div>`}
    <button class="lvup" id="pUp" ${max||!canGrow(m)?'disabled':''}>レベルアップ</button></div></div>
  <div class="prow slots">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x&&x.id===m.id?'on':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img class="pface" src="${FACE(x.id)}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
@@ -3105,6 +3109,7 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
  $('partyList').querySelectorAll('[data-gs]').forEach(b=>b.onclick=()=>openGenPick(+b.dataset.gs));
  $('partyList').querySelectorAll('[data-es]').forEach(b=>b.onclick=()=>openEqPick('w'));
  $('partyList').querySelectorAll('[data-as]').forEach(b=>b.onclick=()=>openEqPick('a',b.dataset.as));
+ $('pW').onclick=()=>openEqPick('w');
  $('pUp').onclick=()=>{if(!canGrow(m))return;const k=growCost(m.lv);G.coin-=k.coin;m.lv++;save();tone(880,.15,'triangle',.1,1320);
   renderParty();say(`${c.name} Lv${m.lv}！<br><span style="font-size:14px">基礎攻撃が上がった</span>`,800)}}
 
@@ -3387,10 +3392,12 @@ function genGet(pc){G.gen=G.gen||{};G.gen[pc.rid]={rank:pc.rank,mul:pc.mul,attr:
 {const _ab=teamAb;teamAb=function(){const a=_ab();genEqList().forEach(r=>{const at=G.gen[r].attr;const k=at&&{thunder:'xp',steel:'cut',wind:'wspd'}[at.k];if(k)a[k]=(a[k]||0)+at.v});return a}}
 
 /* ---------- 編成画面：装備の列（汎用2・防具3） ---------- */
-function equipRowHTML(){const L=findOwn(G.lead),wr=L&&L.weapon&&L.weapon.rid;
+/* 専用武器の枠は、上で選んでいる仲間のもの（リーダー以外も入れかえられる） */
+const eqWho=()=>(typeof partyShow!=='undefined'&&partyShow&&findOwn(partyShow))||findOwn(G.lead);
+function equipRowHTML(){const L=eqWho(),wr=L&&L.weapon&&L.weapon.rid;
  const gs=[0,1].map(i=>{const r=(G.genEq||[])[i],g=r&&G.gen[r];return `<button class="eqs ${g?'':'empty'} ${g&&genClash(r)?'ng':''}" data-gs="${i}">${g?RIC(r,30)+RKIC(g.rank,18):'<span class="pplus">＋</span>'}</button>`}).join('');
  const as=['head','body','feet'].map(s=>{const p=G.arm[s];return `<button class="eqs arm ${p?'':'empty'}" data-as="${s}">${p?RIC(p.rid,30)+RKIC(p.rank,18):MIC(s,24)}</button>`}).join('');
- return `<div class="peq"><span class="pel">専用</span><button class="eqs" data-es="1">${WPIC(G.lead,30,wr?RECIPES[wr].tier:0)}${wr?RKIC(L.weapon.rank,18):''}</button><span class="pel">汎用</span>${gs}<span class="pel">防具</span>${as}</div>`}
+ return `<div class="peq"><span class="pel">専用</span><button class="eqs" data-es="1" aria-label="${CHARS[L.id].name}の専用武器">${WPIC(L.id,30,wr?RECIPES[wr].tier:0)}${wr?RKIC(L.weapon.rank,18):''}</button><span class="pel">汎用</span>${gs}<span class="pel">防具</span>${as}</div>`}
 function openGenPick(i){const own=Object.keys(G.gen||{}).filter(r=>RECIPES[r]);const cur=(G.genEq||[])[i];
  const other=(G.genEq||[])[1-i];
  const rows=own.map(r=>{const R=RECIPES[r],g=G.gen[r],A=ATK[R.impl],clash=genClash(r),dup=other&&other!==r&&RECIPES[other].impl===R.impl,on=r===cur;
@@ -3469,7 +3476,7 @@ const RANK_ORDER=['D','C','B','A','S','SS'];
 /* 顔アイコン（ウルフは表情つきの絵） */
 const FACE=id=>id==='wolf'?'img/face/wolf_smile.webp':['fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker'].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
 /* 専用武器・防具の入れかえ */
-function openEqPick(kind,slot){const L=findOwn(G.lead);let rows='',head='';
+function openEqPick(kind,slot){const L=eqWho();let rows='',head='';
  if(kind==='w'){head=`${CHARS[L.id].name}の専用武器`;const cur=L.weapon;
   const list=invW().map((x,i)=>[x,i]).filter(([x])=>x.who===L.id);
   rows=`<button class="gpk on" disabled>${WPIC(L.id,38,cur&&cur.rid?RECIPES[cur.rid].tier:0)}<span class="gpn"><b>${cur&&cur.rid?RECIPES[cur.rid].n+' '+RKIC(cur.rank,18):baseWeapon(L.id)}</b><small>${cur&&cur.rid?`威力×${cur.mul}${cur.attr?'　'+attrTxt(cur.attr):''}`:'はじめの武器'}</small></span><i>装備中</i></button>`+
@@ -4590,7 +4597,8 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.3.0　会話のふりかえり</b><ul><li>会話中に「◀ もどる」でひとつ前のセリフへ、「ログ」でここまでのセリフを一覧できる</li><li>メニューとチャット画面に「ストーリーをふりかえる」。見た場面をもう一度見られる（前のセーブで見た場面も出てくる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.3.1</b><ul><li>編成画面で仲間を選ぶと、下の「専用」の枠がその仲間の武器になり、リーダー以外の専用武器も入れかえられるようにした</li></ul>
+  <b>ver 1.3.0　会話のふりかえり</b><ul><li>会話中に「◀ もどる」でひとつ前のセリフへ、「ログ」でここまでのセリフを一覧できる</li><li>メニューとチャット画面に「ストーリーをふりかえる」。見た場面をもう一度見られる（前のセーブで見た場面も出てくる）</li></ul>
   <b>ver 1.2.5</b><ul><li>20Fのボス戦の前と、たおしたあとの場面に挿絵を追加</li></ul>
   <b>ver 1.2.4</b><ul><li>ボスをたおしたあと、残った敵にやられてHPが0になってもゲームが終わらない不具合を直した（ボスをたおすと残りの敵も消え、その階の時間も止まる）</li></ul>
   <b>ver 1.2.3</b><ul><li>見直し：資材の箱にコインが入っていたときも受け取れるように。ホームで会話中は、保存・引き継ぎの案内を出さないように</li></ul>
@@ -4810,7 +4818,7 @@ function openStory(){const S=storyScenes();
  $('gpBody').querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await S[+b.dataset.st].run();openStory()});
  $('genPick').classList.add('on')}
 
-const BUILD='11/14 07:18';
+const BUILD='11/14 11:15';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
