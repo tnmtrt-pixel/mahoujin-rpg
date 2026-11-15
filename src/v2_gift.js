@@ -2,12 +2,13 @@
    プレゼントコード（メニュー →「プレゼントコード」）
    ・コードそのものはここに書かず、ハッシュだけを置く（src/make_gift.py で作る）。リポジトリは公開なので
    ・1つのコードは、同じ端末で1回だけ（セーブを消しても残る記録＋セーブの中の記録）
-   ・ごほうび：coins（コイン）、ch（特別なキャラ）＋st（★の数）。持っているキャラなら★を上げる
+   ・ごほうび：coins（コイン）、ch（特別なキャラ）＋st（★の数。持っていれば★を上げる）、bp（図面のIDの配列）
    ・サイコロ版とは別のコード（ハッシュの前につける文字がちがう）
    ===================================================================== */
 const GIFTS2=[
  /* {h:'ハッシュ',coins:0,ch:'キャラID',st:1}  ← 作った日とコードの用途をコメントで残す（コードは書かない） */
  {h:'99a6eef7bddb106da110bdf6517b4c070dd1cb6e1f37c73085917280064b6658',coins:0,ch:'soul',st:5}/* 2026-11-15 ソウル★5（配り方は先生が決める。コードは公開しない） */,
+ {h:'54b68eb2b340810f0018c99af73701c6b010396bc0107d3601c645865c0fe852',coins:0,bp:['soul_up']}/* 2026-11-15 ソウルの強化版の図面「蒼炎刀・鬼火丸」（コードは公開しない） */,
 ];
 const GIFT_KEY='mmrpg2_gifts';
 const giftNorm=c=>String(c||'').normalize('NFKC').trim().toUpperCase().replace(/[\s\-ー－]/g,'');
@@ -30,6 +31,7 @@ function openGift(){$('sheetT').textContent='プレゼントコード';
    if(giftUsed2().includes(h)||(G.gifts||[]).includes(h)){say('このコードはもう使っています',1400);return}
    const msg=[];if(g.coins){G.coin=(G.coin|0)+g.coins;msg.push(`${g.coins}コインをもらった！`)}
    if(g.ch){const t=giftChar(g.ch,g.st||1);if(t)msg.push(t)}
+   (g.bp||[]).forEach(b=>{if(!RECIPES[b])return;if(!(G.bps||[]).includes(b)){G.bps=[...(G.bps||[]),b];msg.push(`図面「${RECIPES[b].n}」を手に入れた！<br><span style="font-size:13px">工房でつくれる</span>`)}else msg.push(`図面「${RECIPES[b].n}」はもう持っている`)});
    giftMark2(h);save();tone(880,.2,'triangle',.08,1320);closeSheet();
    say(`🎁 プレゼント<br>${msg.join('<br>')||'受け取りました'}`,2400);if($('home').classList.contains('on'))openHome()}
   finally{giftBusy2=false}};
