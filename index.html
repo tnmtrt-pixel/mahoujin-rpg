@@ -1221,7 +1221,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.10.5';
+const VERSION='1.10.6';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3565,7 +3565,7 @@ function invStore(pc,who){const R=RECIPES[pc.rid];
  if(R.kind==='armor')invPut({rid:pc.rid,rank:pc.rank,mul:pc.mul},R.slot);else invW().push({who:who.id,w:weaponObj(R,pc,who)})}
 const RANK_ORDER=['D','C','B','A','S','SS'];
 /* 顔アイコン（ウルフは表情つきの絵） */
-const FACE=id=>['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker',...VOL2,'soul','fairy','shadow'].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
+const FACE=id=>['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker',...VOL2,'soul','fairy','shadow','kura'].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
 /* 専用武器・防具の入れかえ */
 function openEqPick(kind,slot){const L=eqWho();let rows='',head='';
  if(kind==='w'){head=`${CHARS[L.id].name}の専用武器`;const cur=L.weapon;
@@ -4700,7 +4700,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -5482,6 +5482,7 @@ const GIFTS2=[
  {h:'54b68eb2b340810f0018c99af73701c6b010396bc0107d3601c645865c0fe852',coins:0,bp:['soul_up']}/* 2026-11-15 ソウルの強化版の図面「蒼炎刀・鬼火丸」（コードは公開しない） */,
  {h:'a177ce2afaa88fbd8868225b480ce3c3b79ab5ec446d8a528f14618b0d062861',coins:0,ch:'fairy',st:5}/* 2026-11-15 フェアリー★5（コードは公開しない） */,
  {h:'423d883d4cf9c545f530647bb7306aa62afcac8a97e018f73839ac285151c5f8',coins:0,ch:'shadow',st:5}/* 2026-11-15 シャドー★5（コードは公開しない） */,
+ {h:'dec87a10055c6c798459c5ea3ec76fd591a99cc406af0215fdf781afa20b8450',coins:0,ch:'kura',st:5}/* 2026-11-15 クーラ★5（コードは公開しない） */,
 ];
 const GIFT_KEY='mmrpg2_gifts';
 const giftNorm=c=>String(c||'').normalize('NFKC').trim().toUpperCase().replace(/[\s\-ー－]/g,'');
@@ -5665,6 +5666,45 @@ function shadowAttack(f){const D=FD,A=D.atk;if(!A.shadow)return;const V=D.sd||(D
 {const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(FD){FD.sd=null;if(FD.cd)FD.cd.shadowB=null}return r}}
 /* ボスへのダメージアップ */
 {const _fd=fDamage;fDamage=function(e,d,kx,ky){if(e&&e.boss&&FD&&FD.ab&&FD.ab.bossDmg)d*=1+FD.ab.bossDmg;return _fd(e,d,kx,ky)}}
+
+/* =====================================================================
+   特別なキャラ「クーラ」（プレゼントコード限定・★5）
+   ・設定：工場の切削液（クーラント）のタンクから生まれた、味方の緑のスライム。
+     切削液は刃物と金属を冷やし、錆も防ぐ → 錆が大きらい。元気で人なつっこい。語尾「〜ぷる！」
+   ・技「クーラント連射」：向いている方向へ、緑の液体を連射する。Lv5 は当たった所に水たまり（敵が遅くなる）
+   ・ガチャ・図鑑には出ない（SECRET_CH）。武器は「錆止めのしずく」（工具ではない）
+   ===================================================================== */
+SECRET_CH.push('kura');
+CHARS.kura={name:'クーラ',img:'img/kura.webp',job:'senban',pass:{n:'錆止めの体',d:'',k:''},sp:{n:'',d:'',shape:'mizu'},art:'img/kura.webp',secret:true,
+ lines:['クーラだぷる！ 錆はきらいぷる。ぜーんぶ、ぴかぴかに流してやるぷる！']};
+TYPE_IC['液']='w_kura';
+ATK.kura={n:'クーラント連射',type:'液',ic:'pen',d:['向いている方向へ、緑の液体をビュビュッと連射する','弾が2つずつになる','つらぬく','連射が速くなる','当たった所に水たまりが残り、敵が遅くなる']};
+ABIL.kura=ab4(['cut',.08],['regen',1],['eslow',.06],['rustRes',.3]);
+WNAME.kura='しずく';BASEW.kura='錆止めのしずく';
+function kuraDir(D){if(D.mva!=null)return D.mva;return {down:Math.PI/2,up:-Math.PI/2,left:Math.PI,right:0}[D.face]??-Math.PI/2}
+function kuraAttack(f){const D=FD,A=D.atk;if(!A.kura)return;const V=D.ku||(D.ku={b:[],p:[]}),L=A.kura,c=D.cd;
+ c.kura=(c.kura||0)-f;
+ if(c.kura<=0){const a=kuraDir(D),n=L>=2?2:1,dmg=7*(L>=3?1.3:1)*fPow('kura');
+  for(let i=0;i<n;i++){const aa=a+(Math.random()-.5)*.14,off=(n>1?(i-.5)*12:0);
+   V.b.push({x:D.x+Math.cos(a+Math.PI/2)*off,y:D.y-12+Math.sin(a+Math.PI/2)*off,vx:Math.cos(aa)*9,vy:Math.sin(aa)*9,life:55,dmg,pierce:L>=3?2:1,hit:new Set(),r:5+Math.random()*2})}
+  if(Math.random()<.4)tone(700+Math.random()*200,.03,'sine',.025,350);c.kura=(L>=4?7:10)*fCd()}
+ for(const s of V.b){s.x+=s.vx*f;s.y+=s.vy*f;s.life-=f;
+  for(const e of D.foes){if(e.hp<=0||s.hit.has(e.id)||s.pierce<=0)continue;if((e.x-s.x)**2+(e.y-s.y)**2<(e.r+s.r+2)**2){s.hit.add(e.id);s.pierce--;fDamage(e,s.dmg,s.vx*.25,s.vy*.25);
+    if(L>=5&&V.p.length<24)V.p.push({x:e.x,y:e.y+6,t:0,life:150});if(s.pierce<=0)s.life=0}}}
+ V.b=V.b.filter(s=>s.life>0);
+ for(const p of V.p){p.t+=f;for(const e of D.foes)if((e.x-p.x)**2+(e.y-p.y)**2<(e.r+26)**2)e.trap=Math.max(e.trap||0,2)}
+ V.p=V.p.filter(p=>p.t<p.life)}
+{const _fa=fAttacks;fAttacks=function(f){_fa(f);kuraAttack(f)}}
+{const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);const V=D.ku;if(!V)return;g.save();
+ for(const p of V.p){const k=Math.min(1,(p.life-p.t)/30);g.globalAlpha=.45*k;g.fillStyle='#9ee03a';g.beginPath();g.ellipse(p.x,p.y,28,11,0,0,TAU);g.fill();
+  g.globalAlpha=.6*k;g.fillStyle='#e8ffb0';g.beginPath();g.ellipse(p.x-8,p.y-3,7,2.5,0,0,TAU);g.fill()}
+ g.globalAlpha=1;
+ for(const s of V.b){const a=Math.atan2(s.vy,s.vx);g.save();g.translate(s.x,s.y);g.rotate(a);
+  g.fillStyle='#5f9e10';g.beginPath();g.ellipse(-4,0,s.r+5,s.r*.75,0,0,TAU);g.fill();
+  g.fillStyle='#b8f03c';g.beginPath();g.ellipse(-3,0,s.r+3,s.r*.6,0,0,TAU);g.fill();
+  g.fillStyle='#f0ffd0';g.beginPath();g.ellipse(0,-s.r*.25,2.2,1.4,0,0,TAU);g.fill();g.restore()}
+ g.restore()}}
+{const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(FD)FD.ku=null;return r}}
 
 /* =====================================================================
    第2章「審判の塔」の会話（台本は 2026-11-15 に先生と決めたもの）
@@ -5921,7 +5961,7 @@ async function updCheck(){if(updShown||location.protocol==='file:'||Date.now()-u
 setTimeout(updCheck,2500);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')updCheck()});
 
-const BUILD='11/15 20:59';
+const BUILD='11/15 21:36';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
