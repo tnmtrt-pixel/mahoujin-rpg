@@ -1221,7 +1221,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.9.5';
+const VERSION='1.9.6';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3238,7 +3238,7 @@ function _oldZukan(){show('zukan');
   return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R):LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}</div>
  <div class="zkh">工具 ${G.tools.length}/${TOOL_ORDER.length}</div><div class="zkg">${TOOL_ORDER.map(t=>{const has=G.tools.includes(t);return `<div class="zki ${has?'':'no'}">${MIC(t,40)}<b>${TOOLS[t].n}</b><small>${has?'持っている':TOOLS[t].price?'工房で買える':TOOLS[t].where}</small></div>`}).join('')}</div>
  <div class="zkh">素材</div><div class="zkg">${MAT_ORDER.map(k=>{const fl=Object.keys(FLOOR_MATS).filter(f=>floorMats(+f).includes(k));return `<div class="zki">${MIC(k,40)}<b>${MATS[k].n}</b><small>×${G.mats[k]}</small><small class="zkf">${fl.length?fl.join('・')+'F':''}</small></div>`}).join('')}</div>`}
-function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();setTimeout(openNews,50)">お知らせ</button><button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openStory()">ストーリーをふりかえる</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openSaveGuard()">セーブの守り</button><button class="btn ghost" onclick="closeSheet();setTimeout(openGift,50)">🎁 プレゼントコード</button><button class="btn ghost" onclick="closeSheet();setTimeout(openBug,50)">バグを報告</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button><div class="note" style="text-align:center;margin-top:6px">更新日時：${typeof BUILD!=='undefined'?BUILD:'-'}</div>`;$('sheet').classList.add('on')}
+function openMenu(){$('sheetT').textContent='メニュー';$('sheetB').innerHTML=`<button class="btn ghost" onclick="closeSheet();setTimeout(openNews,50)">お知らせ</button><button class="btn ghost" onclick="closeSheet();openHelp()">あそびかた</button><button class="btn ghost" onclick="closeSheet();openStory()">ストーリーをふりかえる</button><button class="btn ghost" onclick="closeSheet();openItems()">持ちもの</button><button class="btn ghost" onclick="closeSheet();openPractice()">加工の練習（道場）</button><button class="btn ghost" onclick="closeSheet();openSaveGuard()">セーブの守り</button><button class="btn ghost" onclick="closeSheet();setTimeout(openGift,50)">プレゼントコード</button><button class="btn ghost" onclick="closeSheet();setTimeout(openBug,50)">バグを報告</button><button class="btn ghost" onclick="closeSheet();show('title')">タイトルへ</button><div class="note" style="text-align:center;margin-top:6px">更新日時：${typeof BUILD!=='undefined'?BUILD:'-'}</div>`;$('sheet').classList.add('on')}
 
 /* 鍛え直し：鉄くずを使って属性を付け直す */
 function reforge(id){const m=owned(id),w=m&&m.weapon;if(!w||!w.attr)return;if(G.mats.scrap<REFORGE_COST){say('鉄くずが足りない',900);return}
@@ -4694,7 +4694,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「🎁 プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -5496,7 +5496,7 @@ function openGift(){$('sheetT').textContent='プレゼントコード';
    if(g.ch){const t=giftChar(g.ch,g.st||1);if(t)msg.push(t)}
    (g.bp||[]).forEach(b=>{if(!RECIPES[b])return;if(!(G.bps||[]).includes(b)){G.bps=[...(G.bps||[]),b];msg.push(`図面「${RECIPES[b].n}」を手に入れた！<br><span style="font-size:13px">工房でつくれる</span>`)}else msg.push(`図面「${RECIPES[b].n}」はもう持っている`)});
    giftMark2(h);save();tone(880,.2,'triangle',.08,1320);closeSheet();
-   say(`🎁 プレゼント<br>${msg.join('<br>')||'受け取りました'}`,2400);if($('home').classList.contains('on'))openHome()}
+   say(`プレゼント<br>${msg.join('<br>')||'受け取りました'}`,2400);if($('home').classList.contains('on'))openHome()}
   finally{giftBusy2=false}};
  $('sheet').classList.add('on');setTimeout(()=>inp.focus(),200)}
 
@@ -5562,7 +5562,7 @@ async function updCheck(){if(updShown||location.protocol==='file:'||Date.now()-u
 setTimeout(updCheck,2500);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')updCheck()});
 
-const BUILD='11/15 13:30';
+const BUILD='11/15 13:32';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 

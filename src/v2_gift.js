@@ -33,6 +33,6 @@ function openGift(){$('sheetT').textContent='プレゼントコード';
    if(g.ch){const t=giftChar(g.ch,g.st||1);if(t)msg.push(t)}
    (g.bp||[]).forEach(b=>{if(!RECIPES[b])return;if(!(G.bps||[]).includes(b)){G.bps=[...(G.bps||[]),b];msg.push(`図面「${RECIPES[b].n}」を手に入れた！<br><span style="font-size:13px">工房でつくれる</span>`)}else msg.push(`図面「${RECIPES[b].n}」はもう持っている`)});
    giftMark2(h);save();tone(880,.2,'triangle',.08,1320);closeSheet();
-   say(`🎁 プレゼント<br>${msg.join('<br>')||'受け取りました'}`,2400);if($('home').classList.contains('on'))openHome()}
+   say(`プレゼント<br>${msg.join('<br>')||'受け取りました'}`,2400);if($('home').classList.contains('on'))openHome()}
   finally{giftBusy2=false}};
  $('sheet').classList.add('on');setTimeout(()=>inp.focus(),200)}
