@@ -10,7 +10,7 @@ const BUG_KIND=[['stop','動かない・進めない'],['wrong','おかしな動
 function bugInfo(){const s=[...document.querySelectorAll('.scr.on')].map(x=>x.id).join(',');
  return {v:VERSION,build:typeof BUILD!=='undefined'?BUILD:'',ua:navigator.userAgent.slice(0,200),scr:`${innerWidth}x${innerHeight}@${devicePixelRatio||1}`,
   at:s,tw:G?towerAt():'',fl:G?G.floor|0:0,fl2:G&&G.tw?Object.fromEntries(Object.entries(G.tw).map(([k,v])=>[k,v&&v.floor|0])):{},
-  lead:G?G.lead||'':'',lv:G&&G.party?G.party.map(m=>m.id+':'+m.lv).join(' '):'',err:BUGLOG.slice()}}
+  lead:G?G.lead||'':'',lv:G&&G.party?G.party.map(m=>m.id+':'+m.lv).join(' '):'',err:BUGLOG.slice(),fd:(typeof FD!=='undefined'&&FD)?{p:!!FD.paused,r:!!FD.run,c:!!FD.climbing,f:FD.floor,stk:FIN.id}:null,on:[...document.querySelectorAll('.on')].map(e=>e.id||e.className).slice(0,8)}}
 let bugLast=0;
 function openBug(){const P=G&&G.prof&&G.prof.reg?G.prof:null;
  $('sheetT').textContent='バグを報告';
