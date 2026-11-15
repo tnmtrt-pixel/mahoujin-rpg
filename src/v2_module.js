@@ -535,7 +535,7 @@ async function fStairs(){const D=FD;if(!D||D.climbing)return;D.climbing=true;D.p
   if(FLR.boss){
    if(first&&BOSS_WIN[k])await talk(storyFit(BOSS_WIN[k],null,['onmyo','sora','takumi']),BOSS_EV[k]&&BOSS_EV[k][1]);
    if(fl===10&&!G.flags.ch1&&towerAt()==='meister'){fEnd('ending');return}
-   if(fl>=TOP_FLOOR){if(towerAt()!=='meister'){G.flags['tw_'+towerAt()]=1;save();fEnd('home');return}fEnd('ending2');return}
+   if(fl>=TOP_FLOOR){if(towerAt()!=='meister'){const tw=towerAt(),firstTw=!G.flags['tw_'+tw];G.flags['tw_'+tw]=1;save();if(firstTw&&typeof TW_END!=='undefined'&&TW_END[tw])await TW_END[tw]();fEnd('home');return}fEnd('ending2');return}
    if(!await fChoice(fl)){fEnd('home');return}}
   if(fl>=TOP_FLOOR){fEnd('home');return}
   await fAdvance(fl+1)}

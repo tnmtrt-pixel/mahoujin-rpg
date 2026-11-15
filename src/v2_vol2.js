@@ -8,7 +8,7 @@ const V2_OPEN=J_TEST;
 Object.assign(CHARS,{
  nero:    {name:'ネロ',        img:'img/nero.webp',    job:'sekkei',pass:{n:'甘い誓い',d:'',k:''},sp:{n:'',d:'',shape:'yami'},lines:['……甘いもの、持ってる？ ないなら、一緒に行く。']},
  okajun:  {name:'オカジュン',  img:'img/okajun.webp',  job:'kaji',  pass:{n:'工業魂',d:'',k:''},sp:{n:'',d:'',shape:'ch'},lines:['っしゃあ！ 拳で語るのが工業のやり方だろ！']},
- hayate:  {name:'ハヤテ',      img:'img/hayate.webp',  job:'senban',pass:{n:'一番風',d:'',k:''},sp:{n:'',d:'',shape:'ma'},lines:['……先に行く。遅れるなよ。']},
+ hayate:  {name:'ハヤテ',      img:'img/hayate.webp',  job:'senban',pass:{n:'一番風',d:'',k:''},sp:{n:'',d:'',shape:'ma'},lines:['僕が先に行きます。遅れないでくださいね。']},
  kurogane:{name:'クロガネ',    img:'img/kurogane.webp',job:'hozen', pass:{n:'九つの命',d:'',k:''},sp:{n:'',d:'',shape:'me'},lines:['ニャハッ！ ニャボ隊、出動ニャ！']},
  lionex:  {name:'ライオネクス',img:'img/lionex.webp',  job:'denki', pass:{n:'獅子王',d:'',k:''},sp:{n:'',d:'',shape:'de'},lines:['……我が雷、しかと見届けよ。']},
  seraph:  {name:'セラフ',      img:'img/seraph.webp',  job:'hozen', pass:{n:'祝福',d:'',k:''},sp:{n:'',d:'',shape:'hikari'},lines:['光は、まだ消えていないよ。']},

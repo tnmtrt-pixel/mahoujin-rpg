@@ -43,7 +43,7 @@ function storyScenes(){const S=[],fl=G.floor|0,f=G.flags||{},K=['onmyo','sora','
 function openStory(){const S=storyScenes();
  $('gpBody').innerHTML=`<div class="gph">ストーリーをふりかえる <small style="font-weight:600;color:var(--sm)">${S.length}場面</small></div>
   <div class="note" style="margin-bottom:6px">これまでに見た場面を、もう一度見られます。会話の中の「ログ」で、読み飛ばしたセリフも一覧できます。</div>
-  <div class="chl">${S.map((s,i)=>`<button class="chr stl" data-st="${i}"><span class="stf">${s.n<1?'序':Math.floor(s.n)+'F'}</span><b>${s.t}</b></button>`).join('')||'<div class="note">まだ見た場面はありません</div>'}</div>
+  <div class="chl">${S.map((s,i)=>`<button class="chr stl" data-st="${i}"><span class="stf">${s.lb||(s.n<1?'序':Math.floor(s.n)+'F')}</span><b>${s.t}</b></button>`).join('')||'<div class="note">まだ見た場面はありません</div>'}</div>
   <div class="gpf"><button class="btn" id="stChat">チャットを見る</button><button class="btn" id="gpClose">とじる</button></div>`;
  $('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};
  $('stChat').onclick=()=>openChats();

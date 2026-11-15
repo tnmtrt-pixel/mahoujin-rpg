@@ -94,7 +94,7 @@ function procGuide(pr){return new Promise(res=>{const st=PROC_GUIDE[pr];if(!st){
 
 /* ---------- 世界観に合わせた台本の書きかえ（塔は昔から街に立つ／地下はない／10Fは前編の終わり） ---------- */
 /* 仲間のセリフは、そのキャラが今のパーティにいるときだけ出す。だれもいなければ fb を足す */
-function storyFit(L,fb,keep){const sp=l=>l[0]?String(l[0]).split(':')[0]:null,inP=id=>id===G.hero||(keep||[]).includes(id)||G.party.some(m=>m.id===id)||!!(typeof FD!=='undefined'&&FD&&FD.helperMs&&FD.helperMs[id]);
+function storyFit(L,fb,keep){const sp=l=>l[0]?String(l[0]).split(':')[0]:null,inP=id=>(typeof towerAt==='function'&&towerAt()!=='meister')||id===G.hero||(keep||[]).includes(id)||G.party.some(m=>m.id===id)||!!(typeof FD!=='undefined'&&FD&&FD.helperMs&&FD.helperMs[id]);
  const out=L.map(l=>!sp(l)||inP(sp(l))?l.slice(0,3):l[3]?[null,'',l[3]]:null).filter(Boolean);
  if(fb&&!out.some(l=>sp(l)&&sp(l)!==G.hero))out.splice(Math.max(1,out.length-3),0,...fb);
  return out}
