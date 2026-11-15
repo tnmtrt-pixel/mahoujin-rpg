@@ -1221,7 +1221,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.10.7';
+const VERSION='1.10.8';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3565,7 +3565,7 @@ function invStore(pc,who){const R=RECIPES[pc.rid];
  if(R.kind==='armor')invPut({rid:pc.rid,rank:pc.rank,mul:pc.mul},R.slot);else invW().push({who:who.id,w:weaponObj(R,pc,who)})}
 const RANK_ORDER=['D','C','B','A','S','SS'];
 /* 顔アイコン（ウルフは表情つきの絵） */
-const FACE=id=>['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker',...VOL2,'soul','fairy','shadow','kura'].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
+const FACE=id=>['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker',...VOL2,'soul','fairy','shadow','kura','tako'].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
 /* 専用武器・防具の入れかえ */
 function openEqPick(kind,slot){const L=eqWho();let rows='',head='';
  if(kind==='w'){head=`${CHARS[L.id].name}の専用武器`;const cur=L.weapon;
@@ -4700,7 +4700,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.10.7</b><ul><li>特別な仲間の顔アイコンと武器アイコンを新しい絵に変更</li></ul></div><div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.10.8</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.7</b><ul><li>特別な仲間の顔アイコンと武器アイコンを新しい絵に変更</li></ul></div><div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -5483,6 +5483,7 @@ const GIFTS2=[
  {h:'a177ce2afaa88fbd8868225b480ce3c3b79ab5ec446d8a528f14618b0d062861',coins:0,ch:'fairy',st:5}/* 2026-11-15 フェアリー★5（コードは公開しない） */,
  {h:'423d883d4cf9c545f530647bb7306aa62afcac8a97e018f73839ac285151c5f8',coins:0,ch:'shadow',st:5}/* 2026-11-15 シャドー★5（コードは公開しない） */,
  {h:'dec87a10055c6c798459c5ea3ec76fd591a99cc406af0215fdf781afa20b8450',coins:0,ch:'kura',st:5}/* 2026-11-15 クーラ★5（コードは公開しない） */,
+ {h:'6440c9f538fdfa6ce179d2a83a6d61f3f72b3efca65866c1795b0f00f9b84bb4',coins:0,ch:'tako',st:5}/* 2026-11-16 タコナイン★5（コードは公開しない） */,
 ];
 const GIFT_KEY='mmrpg2_gifts';
 const giftNorm=c=>String(c||'').normalize('NFKC').trim().toUpperCase().replace(/[\s\-ー－]/g,'');
@@ -5705,6 +5706,68 @@ function kuraAttack(f){const D=FD,A=D.atk;if(!A.kura)return;const V=D.ku||(D.ku=
   g.fillStyle='#f0ffd0';g.beginPath();g.ellipse(0,-s.r*.25,2.2,1.4,0,0,TAU);g.fill();g.restore()}
  g.restore()}}
 {const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(FD)FD.ku=null;return r}}
+
+/* =====================================================================
+   特別なキャラ「タコナイン」（プレゼントコード限定・★5）
+   ・設定：王冠のリーダーと8匹の子分、9匹そろって1人の仲間。隊列を組んで戦う
+   ・技「タコ隊列」：リーダーのまわりに子分が並び、それぞれの武器で近くの敵を攻撃
+     数はレベルで増える（2→4→5→6→8匹）。体力が減ると目を回して抜ける（最低2匹）。回復すると戻る
+     数が減ると残ったタコの攻撃が速くなる（半分でも強さ約7割）
+   ・武器は剣・弓・槍・斧・刀・杖・墨鉄砲・墨玉（工具は使わない）
+   ・ガチャ・図鑑には出ない（SECRET_CH）。専用武器「タコナインの武器セット」
+   ===================================================================== */
+SECRET_CH.push('tako');
+CHARS.tako={name:'タコナイン',img:'img/tako.webp',job:'kaji',pass:{n:'九匹の隊列',d:'',k:''},sp:{n:'',d:'',shape:'mizu'},art:'img/tako.webp',secret:true,
+ lines:['タコナイン、ここに参上！ 九匹そろえば錆なんかこわくないタコ！ 全員、隊列を組めー！']};
+TYPE_IC['隊列']='w_tako';
+ATK.tako={n:'タコ隊列',type:'隊列',ic:'pen',d:['リーダーのまわりに子分のタコが並び、それぞれの武器で攻撃する（2匹）。体力が減ると目を回して抜ける','子分が4匹になる','子分が5匹になり、威力アップ','子分が6匹になり、威力アップ','子分が8匹そろい、威力アップ']};
+ABD.fullAtk=v=>`体力が満タンのとき攻撃+${Math.round(v*100)}%`;
+ABIL.tako=ab4(['teamAtk',.08],['cut',.08],['hp',.08],['fullAtk',.15]);
+WNAME.tako='武器セット';BASEW.tako='タコナインの武器セット';
+/* 子分：1剣 2弓 3槍 4斧 5刀 6杖 7墨鉄砲 8墨玉。加わる順番 */
+const TAKO_JOIN=[1,2,3,6,4,7,5,8],TAKO_N=[2,4,5,6,8];
+const TAKO_W={1:{m:1,cd:50,d:11},2:{m:0,cd:56,d:9,sp:9,c:'#c08040'},3:{m:1,cd:58,d:13,reach:86},4:{m:1,cd:70,d:17},5:{m:1,cd:46,d:10},6:{m:0,cd:64,d:12,sp:6,c:'#4ac8ff'},7:{m:0,cd:42,d:6,sp:8,c:'#2a1838',slow:1},8:{m:0,cd:90,d:14,sp:5,c:'#1a1220',boom:1}};
+function takoAttack(f){const D=FD,A=D.atk;if(!A.tako)return;const L=A.tako;
+ const V=D.tko||(D.tko={m:[],b:[],fx:[],ink:[],n:0});
+ const full=TAKO_N[Math.min(5,L)-1],ratio=Math.max(0,D.hp/D.maxhp),n=Math.max(Math.min(2,full),Math.min(full,Math.ceil(full*ratio-1e-6)));
+ while(V.m.length<full){const id=TAKO_JOIN[V.m.length];V.m.push({id,cd:20+V.m.length*7,on:true,pop:0,sw:0})}
+ const pw=fPow('tako')*(L>=5?1.5:L>=4?1.35:L>=3?1.2:1),spd=Math.sqrt(n/full);
+ V.m.forEach((m,i)=>{const a=-Math.PI/2+i*TAU/full,want=i<n;m.x=D.x+Math.cos(a)*50;m.y=D.y-8+Math.sin(a)*40;
+  if(m.on&&!want){m.on=false;V.fx.push({x:m.x,y:m.y,vx:Math.cos(a)*2.2,vy:Math.sin(a)*1.6-1.5,t:0});tone(500,.12,'triangle',.04,180)}
+  if(!m.on&&want){m.on=true;m.pop=14;tone(660,.06,'sine',.04,990)}
+  if(m.pop>0)m.pop-=f;if(m.sw>0)m.sw-=f;
+  if(!m.on)return;m.cd-=f;if(m.cd>0)return;const W=TAKO_W[m.id];
+  const t=nearestFoes(1,m.x,m.y,W.m?(W.reach||70):260)[0];if(!t){m.cd=10;return}
+  const ang=Math.atan2(t.y-m.y,t.x-m.x);m.ang=ang;m.sw=10;
+  if(W.m){fDamage(t,W.d*pw,Math.cos(ang)*2.5,Math.sin(ang)*2.5);if(m.id===4)for(const e of D.foes)if(e!==t&&e.hp>0&&(e.x-t.x)**2+(e.y-t.y)**2<45*45)fDamage(e,W.d*pw*.6,0,0);
+   V.fx.push({sl:1,x:t.x,y:t.y,a:ang,t:0,c:m.id===5?'#e8f0ff':'#ffffff'})}
+  else V.b.push({x:m.x,y:m.y,vx:Math.cos(ang)*W.sp,vy:Math.sin(ang)*W.sp,life:70,dmg:W.d*pw,id:m.id,tx:t.x,ty:t.y,c:W.c});
+  m.cd=W.cd*spd*fCd()});
+ for(const s of V.b){s.x+=s.vx*f;s.y+=s.vy*f;s.life-=f;const W=TAKO_W[s.id];
+  if(W.boom){if((s.x-s.tx)**2+(s.y-s.ty)**2<14*14||s.life<=0){for(const e of D.foes)if(e.hp>0&&(e.x-s.x)**2+(e.y-s.y)**2<(e.r+42)**2)fDamage(e,s.dmg,0,0);V.ink.push({x:s.x,y:s.y,t:0});s.life=0}continue}
+  for(const e of D.foes){if(e.hp<=0)continue;if((e.x-s.x)**2+(e.y-s.y)**2<(e.r+6)**2){fDamage(e,s.dmg,s.vx*.2,s.vy*.2);if(W.slow)e.trap=Math.max(e.trap||0,40);s.life=0;break}}}
+ V.b=V.b.filter(s=>s.life>0);
+ for(const p of V.ink){p.t+=f;for(const e of D.foes)if((e.x-p.x)**2+(e.y-p.y)**2<(e.r+30)**2)e.trap=Math.max(e.trap||0,2)}
+ V.ink=V.ink.filter(p=>p.t<120);V.fx.forEach(x=>{x.t+=f;if(!x.sl){x.x+=x.vx*f;x.y+=x.vy*f;x.vy+=.12*f}});V.fx=V.fx.filter(x=>x.t<(x.sl?10:50))}
+{const _fa=fAttacks;fAttacks=function(f){_fa(f);takoAttack(f)}}
+{const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);const V=D.tko;if(!V)return;const t=D.t||0;g.save();
+ for(const p of V.ink){const k=Math.min(1,(120-p.t)/30);g.globalAlpha=.55*k;g.fillStyle='#24152e';g.beginPath();g.ellipse(p.x,p.y+6,32,13,0,0,TAU);g.fill()}
+ g.globalAlpha=1;
+ for(const s of V.b){g.save();g.translate(s.x,s.y);g.rotate(Math.atan2(s.vy,s.vx));
+  if(s.id===2){g.strokeStyle='#8a5a2a';g.lineWidth=2;g.beginPath();g.moveTo(-10,0);g.lineTo(8,0);g.stroke();g.fillStyle='#ddd';g.beginPath();g.moveTo(12,0);g.lineTo(6,-3);g.lineTo(6,3);g.fill()}
+  else if(s.id===6){g.fillStyle='#4ac8ff';g.shadowColor='#4ac8ff';g.shadowBlur=10;g.beginPath();g.arc(0,0,5,0,TAU);g.fill()}
+  else{g.fillStyle=s.c;g.beginPath();g.arc(0,0,s.id===8?7:4,0,TAU);g.fill();g.fillStyle='rgba(255,255,255,.5)';g.beginPath();g.arc(-1.5,-1.5,1.5,0,TAU);g.fill()}
+  g.restore()}
+ V.m.forEach((m,i)=>{if(!m.on||m.x==null)return;const sp=fspr('img/ui/tk_'+m.id+'.webp',30);const sc=m.pop>0?1+.4*Math.sin(m.pop/14*Math.PI):1,h=30*sc,bob=Math.sin(t*10+i)*1.5;
+  g.save();g.translate(m.x,m.y+bob);if(m.sw>0&&m.ang!=null)g.translate(Math.cos(m.ang)*m.sw*.6,Math.sin(m.ang)*m.sw*.6);
+  if(sp){const w=h*sp.width/sp.height;g.drawImage(sp,-w/2,-h/2,w,h)}else{g.fillStyle='#ff4a4a';g.beginPath();g.arc(0,0,10,0,TAU);g.fill()}g.restore()});
+ for(const x of V.fx){if(x.sl){const k=1-x.t/10;g.save();g.translate(x.x,x.y);g.rotate(x.a);g.globalAlpha=k;g.strokeStyle=x.c;g.lineWidth=3;g.beginPath();g.arc(0,0,16,-1.1,1.1);g.stroke();g.restore();continue}
+  const sp=fspr('img/ui/tk_dz.webp',30),k=1-Math.max(0,x.t-35)/15;g.save();g.globalAlpha=k;g.translate(x.x,x.y);g.rotate(x.t*.25);
+  if(sp){const w=30*sp.width/sp.height;g.drawImage(sp,-w/2,-15,w,30)}g.restore()}
+ g.restore()}}
+{const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(FD)FD.tko=null;return r}}
+/* 体力が満タンのとき攻撃アップ */
+{const _fd=fDamage;fDamage=function(e,d,kx,ky){if(FD&&FD.ab&&FD.ab.fullAtk&&FD.hp>=FD.maxhp)d*=1+FD.ab.fullAtk;return _fd(e,d,kx,ky)}}
 
 /* =====================================================================
    第2章「審判の塔」の会話（台本は 2026-11-15 に先生と決めたもの）
@@ -5961,7 +6024,7 @@ async function updCheck(){if(updShown||location.protocol==='file:'||Date.now()-u
 setTimeout(updCheck,2500);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')updCheck()});
 
-const BUILD='11/16 00:17';
+const BUILD='11/16 00:53';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
