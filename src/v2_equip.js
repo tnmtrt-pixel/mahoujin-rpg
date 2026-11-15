@@ -82,7 +82,7 @@ function wsListHTML(tab){const dec=tab==='dec';
   <button class="wssort" data-wss="${nx}">並び：<b>${WS_SORT.find(x=>x[0]===WS.sort)[1]}</b> ⇅</button></div>`;
  if(!dec)h+=`<button class="prgo" onclick="openPractice()">${UIMG('u_dojo',22)} 加工ミニゲーム道場で練習する　→</button>`+(ownedAll().some(m=>m.weapon&&m.weapon.attr)?`<button class="prgo rfgo" onclick="openReforge()">${MIC('scrap',20)} 武器の鍛え直し（属性をつけ直す）　→</button>`:'');
  if(!dec&&(G.bpRaw||[]).length)h+=`<button class="bpgo" data-t="dec">${MIC('bp',20)} 未解読の図面が ${G.bpRaw.length}枚　→ 解読へ</button>`;
- if(dec)h+=`<div class="wshint">図面をタップすると三面図の解読が始まる。正しい立体を選ぶと、つくれるようになる</div>`;
+ if(dec)h+=`<div class="wshint">${V2_OPEN?'図面をタップすると解読が始まる。vol.1 の図面は三面図、vol.2 の図面は展開図。正しく答えると、つくれるようになる':'図面をタップすると三面図の解読が始まる。正しい立体を選ぶと、つくれるようになる'}</div>`;
  
  /* 行をグループに分け、見出しで開け閉めする。専用武器はキャラごと */
  const ord=[...G.party.map(m=>m.id),...(G.bench||[]).map(m=>m.id)];
