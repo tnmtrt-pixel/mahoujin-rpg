@@ -241,12 +241,12 @@ function groundTmp(k,keep){const A=FAREA[k],c=document.createElement('canvas');c
 /* ---------- 入力：どこでもスティック ---------- */
 const FIN={id:null,ox:0,oy:0,dx:0,dy:0,R:46};const FKEY={};
 (function(){const c=$('fcv'),st=$('fstick'),kn=st.firstElementChild;
- c.addEventListener('pointerdown',e=>{if(FIN.id!==null||!FD||FD.paused)return;e.preventDefault();FIN.id=e.pointerId;FIN.ox=e.clientX;FIN.oy=e.clientY;FIN.dx=FIN.dy=0;
+ c.addEventListener('pointerdown',e=>{if(!FD)return;if(FD.paused){/* 画面に何も出ていないのに止まったまま → 0.8秒あけて2回さわったら再開（動けなくなる不具合の保険） */const now=performance.now();if(FD.run&&!FD.climbing&&!FD.ending){if(FIN.stuck&&now-FIN.stuck>800&&now-FIN.stuck<6000){FIN.stuck=0;FD.paused=false;fLast=0;if(!fRaf)fRaf=requestAnimationFrame(fLoop);if(typeof BUGLOG!=='undefined'){BUGLOG.push('stuck-resume f'+FD.floor);if(BUGLOG.length>5)BUGLOG.shift()}}else{FIN.stuck=now;return}}else return}if(FIN.id!==null&&FIN.id!==e.pointerId){FIN.id=null}/* 前の指が離れた知らせが来ていなくても、新しい指で動かせる */if(FIN.id!==null)return;e.preventDefault();FIN.id=e.pointerId;FIN.ox=e.clientX;FIN.oy=e.clientY;FIN.dx=FIN.dy=0;
   st.style.left=e.clientX+'px';st.style.top=e.clientY+'px';kn.style.transform='';st.classList.add('on');try{c.setPointerCapture(e.pointerId)}catch(_){}});
  c.addEventListener('pointermove',e=>{if(e.pointerId!==FIN.id)return;let dx=e.clientX-FIN.ox,dy=e.clientY-FIN.oy;const d=Math.hypot(dx,dy);if(d>FIN.R){dx*=FIN.R/d;dy*=FIN.R/d}
   kn.style.transform=`translate(${dx}px,${dy}px)`;FIN.dx=d<8?0:dx/FIN.R;FIN.dy=d<8?0:dy/FIN.R});
  const end=e=>{if(e.pointerId!==FIN.id)return;FIN.id=null;FIN.dx=FIN.dy=0;st.classList.remove('on')};
- c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end)})();
+ c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);c.addEventListener('lostpointercapture',end)})();
 function fReleaseStick(){FIN.id=null;FIN.dx=FIN.dy=0;$('fstick').classList.remove('on')}
 addEventListener('keydown',e=>{if(FD&&onScr('field'))FKEY[e.key]=1});addEventListener('keyup',e=>{FKEY[e.key]=0});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&FD&&FD.run&&!FD.paused&&onScr('field'))fPause()});
