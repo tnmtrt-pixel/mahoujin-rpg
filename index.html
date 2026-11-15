@@ -1221,7 +1221,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.10.1';
+const VERSION='1.10.2';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3620,7 +3620,7 @@ function renderZukan(){const t=ZK.tab,so=ZK.sort[t],S=ZK_SORTS[t],nx=S[(S.findIn
  if(t==='char'){let ids=CHAR_ALL();if(ZK.own)ids=ids.filter(owned);const no=id=>CHAR_ALL().indexOf(id);
   const key={no:id=>no(id),star:id=>-((owned(id)||{}).star||0),lv:id=>-((owned(id)||{}).lv||0),type:id=>ATK[id].type.charCodeAt(0)}[so];ids.sort((a,b)=>key(a)-key(b)||no(a)-no(b));
   h+=ids.map(id=>{const m=owned(id),c=CHARS[id];return `<button class="zkc ${m?'':'no'}" data-zc="${id}"><img src="${c.img}" alt=""><span class="hft">${TIC(ATK[id].type,18)}</span><span class="zkno">No.${String(no(id)+1).padStart(2,'0')}</span><span class="hfb"><b>${c.name}</b><small>${m?`Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i>`:'まだいない'}</small></span></button>`}).join('')}
- else if(t==='bp'){let ids=RECIPE_ORDER.filter(id=>(V2_OPEN||!/^j/.test(RECIPES[id].area||''))&&(!RECIPES[id].secret||(G.bps||[]).includes(id)));if(ZK.own)ids=ids.filter(id=>G.bps.includes(id));const fl={alley:1,factory:2,under:3};
+ else if(t==='bp'){let ids=RECIPE_ORDER.filter(id=>(V2_OPEN||(!/^j/.test(RECIPES[id].area||'')&&(RECIPES[id].vol||1)<2))&&(!RECIPES[id].secret||(G.bps||[]).includes(id)));if(ZK.own)ids=ids.filter(id=>G.bps.includes(id));const fl={alley:1,factory:2,under:3};
   const key={kind:id=>['weapon','gen','armor'].indexOf(RECIPES[id].kind),proc:id=>PROC_ORDER.indexOf(procOf(RECIPES[id])),floor:id=>fl[RECIPES[id].area]||RECIPES[id].tier}[so];ids.sort((a,b)=>key(a)-key(b)||RECIPES[a].tier-RECIPES[b].tier);
   h+=ids.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R)+'・'+PROC_LBL[procOf(R)]:R.limited?'図面ガチャ（限定）':LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}
  else if(t==='tool'){let ids=TOOL_ORDER.slice();if(ZK.own)ids=ids.filter(k=>G.tools.includes(k));const key={price:k=>TOOLS[k].price||0,have:k=>G.tools.includes(k)?0:1}[so];ids.sort((a,b)=>key(a)-key(b)||TOOL_ORDER.indexOf(a)-TOOL_ORDER.indexOf(b));
@@ -3718,30 +3718,34 @@ let gaType='char';
 const TOOL_G={cost:30,cost11:300,lim:.03,pity:30},BP_G={cost:40,cost11:400,lim:.03,pity:30};
 const TOOL_POOL=()=>TOOL_ORDER.filter(t=>!TOOLS[t].limited&&t!=='file');
 const BP_POOL=()=>RECIPE_ORDER.filter(id=>{const R=RECIPES[id];return !R.limited&&!R.secret&&R.area!=='gift'&&(V2_OPEN||!/^j/.test(R.area||''))&&(R.kind!=='weapon'||ownChar(R.who))&&(R.tier<4||(G.floor|0)>=10)});
-const BP_LIM=()=>RECIPE_ORDER.filter(id=>RECIPES[id].limited);
+const BP_LIM=(v=1)=>RECIPE_ORDER.filter(id=>RECIPES[id].limited&&(RECIPES[id].vol||1)===v);
+/* vol.2 以降は章ごとの限定（V2_OPEN の間だけ開く） */
+const gaVolI={tool:1,bp:1};const gaVolOpen=v=>v===1||(v===2&&typeof V2_OPEN!=='undefined'&&V2_OPEN);
+const gaLims=(type,v)=>type==='tool'?(v===2?(typeof LIM_TOOLS2!=='undefined'?LIM_TOOLS2:[]):LIM_TOOLS):BP_LIM(v);
+const pityKey=(type,v)=>type+(v>1?v:'');
 function gaHead(){return `<div class="gacoin">${coinIc(22)}<b>${G.coin}</b><small>コイン</small></div>
  <div class="gatype">${[['char','キャラ'],['tool','工具'],['bp','図面']].map(([k,n])=>`<button class="${gaType===k?'on':''}" data-gt="${k}">${UIMG('g_'+k,26)}${n}</button>`).join('')}</div>`}
 function gaBind(){$('gaBody').querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gaType=b.dataset.gt;renderGacha()})}
 function renderGacha(){if(gaType==='char'){renderCharGacha();return}
- const tool=gaType==='tool',C=tool?TOOL_G:BP_G,pity=((G.pity||{})[gaType])||0,lims=tool?LIM_TOOLS:BP_LIM();
+ const tool=gaType==='tool',C=tool?TOOL_G:BP_G,gv=gaVolOpen(gaVolI[gaType])?gaVolI[gaType]:1,pity=((G.pity||{})[pityKey(gaType,gv)])||0,lims=gaLims(gaType,gv);
  const icons=lims.map(k=>tool?MIC(k,44):RIC(k,44)).join('');
- $('gaBody').innerHTML=gaHead()+`<div class="gavol"><button class="on">vol.1</button><button class="soon">vol.2</button><button class="soon">vol.3</button></div>
- <div class="gaban gaimg"><img src="img/${tool?'gacha-tool':'gacha-bp'}.webp" alt=""><div class="gcb"><small>${tool?'TOOL':'BLUEPRINT'} GACHA</small><b>${tool?'工具ガチャ':'図面ガチャ'}</b><em class="${tool?'':'bp'}">${UIMG('u_limited',16)}限定${tool?'工具':'装備の図面'} ${Math.round(C.lim*100)}%</em></div><div class="gci">${icons}</div></div>
+ $('gaBody').innerHTML=gaHead()+`<div class="gavol">${[1,2,3].map(v=>`<button class="${v===gv?'on':''} ${gaVolOpen(v)?'':'soon'}" data-giv="${v}">vol.${v}</button>`).join('')}</div>
+ <div class="gaban gaimg"><img src="img/${tool?'gacha-tool':'gacha-bp'}.webp" alt=""><div class="gcb"><small>${tool?'TOOL':'BLUEPRINT'} GACHA</small><b>${tool?'工具ガチャ':'図面ガチャ'}${gv>1?' vol.'+gv:''}</b><em class="${tool?'':'bp'}">${UIMG('u_limited',16)}限定${tool?'工具':'装備の図面'} ${Math.round(C.lim*100)}%</em></div><div class="gci">${icons}</div></div>
  <div class="gapity">${UIMG('u_pity',20)} 限定まで あと <b>${C.pity-pity}</b> 回（${C.pity}回で必ず出る）</div>
  <div class="galink"><button data-ga="rate">提供割合</button><button data-ga="list">${tool?'工具':'図面'}の一覧（図鑑）</button></div>
  <div class="gabtns"><button class="gab" data-gp="1" ${G.coin<C.cost?'disabled':''}><b>1回</b><small>${coinIc(16)} ${C.cost}</small></button><button class="gab ten" data-gp="11" ${G.coin<C.cost11?'disabled':''}><b>11回</b><small>${coinIc(16)} ${C.cost11}</small></button></div>`;
- gaBind();
+ gaBind();$('gaBody').querySelectorAll('[data-giv]').forEach(b=>b.onclick=()=>{const v=+b.dataset.giv;if(!gaVolOpen(v))return;gaVolI[gaType]=v;renderGacha()});
  $('gaBody').querySelectorAll('[data-gp]').forEach(b=>b.onclick=()=>pullItems(gaType,+b.dataset.gp));
  $('gaBody').querySelector('[data-ga=list]').onclick=()=>{ZK.tab=tool?'tool':'bp';goTab('zukan')};
- $('gaBody').querySelector('[data-ga=rate]').onclick=()=>{$('gpBody').innerHTML=`<div class="gph">提供割合　${tool?'工具':'図面'}ガチャ vol.1</div><div class="rdt">
+ $('gaBody').querySelector('[data-ga=rate]').onclick=()=>{$('gpBody').innerHTML=`<div class="gph">提供割合　${tool?'工具':'図面'}ガチャ vol.${gv}</div><div class="rdt">
   <div><span>限定</span><p>${Math.round(C.lim*100)}%：${lims.map(k=>tool?TOOLS[k].n:RECIPES[k].n).join('・')}</p></div>
   <div><span>ふつう</span><p>${100-Math.round(C.lim*100)}%：${tool?'工房で売っている工具（やすり以外）':'塔で見つかる図面（仲間の専用武器は、持っているキャラのぶんだけ）'}</p></div>
   <div><span>天井</span><p>${C.pity}回引くと限定が必ず出る（限定が出たら数えなおし）</p></div>
   <div><span>被ったら</span><p>${tool?'工具の練度が大きく上がる（+40）。練度Lv5のあとは基本素材になる':'改良図面：その装備の威力+3%（最大+3回）。そのあとは基本素材になる'}</p></div>
   <div><span>11回</span><p>10回分の値段で11回</p></div></div><div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;$('gpClose').onclick=()=>$('genPick').classList.remove('on');$('genPick').classList.add('on')}}
-function pullItems(type,n){const tool=type==='tool',C=tool?TOOL_G:BP_G,cost=n>1?C.cost11:C.cost;if(G.coin<cost){say('コインが足りない',1000);return}
+function pullItems(type,n){const tool=type==='tool',C=tool?TOOL_G:BP_G,cost=n>1?C.cost11:C.cost,gv=gaVolOpen(gaVolI[type])?gaVolI[type]:1,pk=pityKey(type,gv),LIMS=gaLims(type,gv);if(G.coin<cost){say('コインが足りない',1000);return}
  G.coin-=cost;G.pity=G.pity||{};G.bpPlus=G.bpPlus||{};const res=[];
- for(let i=0;i<n;i++){G.pity[type]=(G.pity[type]||0)+1;let lim=Math.random()<C.lim||G.pity[type]>=C.pity;const pool=lim?(tool?LIM_TOOLS:BP_LIM()):(tool?TOOL_POOL():BP_POOL());if(lim)G.pity[type]=0;
+ for(let i=0;i<n;i++){G.pity[pk]=(G.pity[pk]||0)+1;let lim=Math.random()<C.lim||G.pity[pk]>=C.pity;const pool=lim?LIMS:(tool?TOOL_POOL():BP_POOL());if(lim)G.pity[pk]=0;
   const k=pick(pool);res.push(tool?getTool(k,lim):getBp(k,lim))}
  save();showItemResult(res);renderGacha()}
 function getTool(t,lim){if(!G.tools.includes(t)){G.tools.push(t);return{ic:MIC(t,56),n:TOOLS[t].n,lim,tag:'NEW',cls:'new'}}
@@ -4696,7 +4700,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -5052,7 +5056,9 @@ const WB_TILE=260;
 const ruleOf=()=>FD&&FD.run&&FLOORS[FD.floor]&&FLOORS[FD.floor].rule;
 const wbWhite=(x,y)=>((Math.floor(x/WB_TILE)+Math.floor(y/WB_TILE))&1)===0;
 function ruleAtk(){return ruleOf()==='wb'&&wbWhite(FD.x,FD.y)?1.25:1}
-function ruleCut(){return ruleOf()==='wb'&&!wbWhite(FD.x,FD.y)?1.2:1}
+function ruleCut(){return ruleOf()==='wb'&&!wbWhite(FD.x,FD.y)?1+.2*jRuleRes():1}
+/* 階のルールで受けるダメージの倍率（黒の法衣で −30%） */
+let jRuleRes=()=>1;
 function fDrawRuleFloor(g,D,cx0,cy0,z){if(ruleOf()!=='wb')return;const T=WB_TILE,x0=Math.floor((cx0-20)/T),y0=Math.floor((cy0-20)/T),nx=Math.ceil((fW/z+40)/T)+1,ny=Math.ceil((fH/z+40)/T)+1;
  g.save();for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const X=x0+i,Y=y0+j,w=((X+Y)&1)===0;g.fillStyle=w?'rgba(255,250,235,.38)':'rgba(8,0,18,.58)';g.fillRect(X*T,Y*T,T,T)}
  g.strokeStyle='rgba(240,200,110,.7)';g.lineWidth=4;for(let i=0;i<=nx;i++){g.beginPath();g.moveTo((x0+i)*T,y0*T);g.lineTo((x0+i)*T,(y0+ny)*T);g.stroke()}for(let j=0;j<=ny;j++){g.beginPath();g.moveTo(x0*T,(y0+j)*T);g.lineTo((x0+nx)*T,(y0+j)*T);g.stroke()}g.restore()}
@@ -5065,7 +5071,7 @@ function fDrawRuleFloor(g,D,cx0,cy0,z){if(ruleOf()!=='wb')return;const T=WB_TILE
   if(D.thT>=210){D.thT=0;const pts=[[D.x+(Math.random()-.5)*60,D.y+(Math.random()-.5)*60]];for(let i=0;i<2;i++){const a=Math.random()*TAU,d=120+Math.random()*160;pts.push([D.x+Math.cos(a)*d,D.y+Math.sin(a)*d])}
    pts.forEach(([x,y])=>D.thunder.push({x,y,t:0,warn:80,r:70}));tone(300,.06,'triangle',.03)}
   for(const q of D.thunder){q.t+=f;if(!q.hit&&q.t>=q.warn){q.hit=1;D.shake=Math.max(D.shake||0,6);tone(70,.25,'sawtooth',.08,40);
-    if(D.inv<=0&&(D.x-q.x)**2+(D.y-q.y)**2<q.r*q.r){D.hp-=fHurt(D.maxhp*.12*fCut(),null);D.inv=Math.max(D.inv,20);renderFHud()}
+    if(D.inv<=0&&(D.x-q.x)**2+(D.y-q.y)**2<q.r*q.r){D.hp-=fHurt(D.maxhp*.12*fCut()*jRuleRes(),null);D.inv=Math.max(D.inv,20);renderFHud()}
     for(const e of D.foes)if(!e.boss&&(e.x-q.x)**2+(e.y-q.y)**2<q.r*q.r)e.hp-=(e.max||60)*.35}}
   D.thunder=D.thunder.filter(q=>q.t<q.warn+18)}}}
 {const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);if(!D.thunder||!D.thunder.length)return;
@@ -5762,6 +5768,61 @@ var TW_END={judge:async()=>{await talk(J_ENDING);const r=giftChar('takumi',3);sa
  return S.sort((a,b)=>a.n-b.n)}}
 
 /* =====================================================================
+   第2章の装備：審判の塔の素材3種・段階5（伍）の審判シリーズ防具・ガチャ vol.2 の限定
+   ・白の防具（3つ）＝審判の塔で図面が見つかる。黒の防具（3つ）＝図面ガチャ vol.2 の限定（強さは同じ＋追加の効果）
+   ・同じ色を3か所そろえるとセット効果。白＝回復と守り、黒＝攻撃
+   ・工具ガチャ vol.2 の限定＝中級工具の上位版4つ（持っていると元の工具のかわりに使い、その加工の点数+5）
+   ・すべて V2_OPEN の間だけ見える（審判の塔とガチャ vol.2 が開いているときだけ手に入る）
+   ===================================================================== */
+/* ---------- 素材 ---------- */
+Object.assign(MATS,{
+ obsid: {n:'黒曜石',d:'黒く光る火山のガラス。審判の塔の下の層（開廷・天秤）に多い。段階5の装備に使う'},
+ silver:{n:'銀',    d:'白く光るさびにくい金属。審判の塔の中の層（黙秘・陪審）に多い。段階5の装備に使う'},
+ scale: {n:'うろこ',d:'天秤の番人たちが落とす硬いうろこ。審判の塔の上の層（書庫・雷鳴・玉座）に多い。段階5の装備に使う'}});
+MAT_ORDER.splice(MAT_ORDER.indexOf('core'),0,'obsid','silver','scale');
+Object.assign(MAT_ATTR,{obsid:'fire',silver:'steel',scale:'wind'});
+Object.assign(UI_IC,{obsid:'m_obsid',silver:'m_silver',scale:'m_scale'});
+[['jk','obsid'],['jt','obsid'],['jm','silver'],['jb','silver'],['js','scale'],['jr','scale'],['jg','scale']].forEach(([k,m])=>{if(FAREA[k])FAREA[k].drop={...FAREA[k].drop,[m]:.009}});
+{const FM=TW_TABLE.judge.FLOOR_MATS;for(let f=1;f<=20;f++){const m=f<=6?'obsid':f<=13?'silver':'scale';FM[f]=[m,(FM[f]||[])[0]||'titan']}}
+/* 公開版で、審判の塔の素材を一覧に出さない */
+if(!V2_OPEN)['obsid','silver','scale'].forEach(k=>{const i=MAT_ORDER.indexOf(k);if(i>=0)MAT_ORDER.splice(i,1)});
+
+/* ---------- 段階5（伍） ---------- */
+TIER_MUL[5]=3.4;KANJI_TIER[5]='伍';
+const JD_ARM=[ // [id, 名前, 部位, 図面のエリア／限定, 加工, 材料]
+ ['jw_head','白天秤の冠','head','jm',['hit','weld'],{obsid:3,silver:3,core:3}],
+ ['jw_body','白の法衣','body','js',['cut','wire'],{obsid:2,silver:3,scale:2,core:3}],
+ ['jw_feet','白翼のブーツ','feet','jr',['trace','weld'],{silver:2,scale:3,core:3}],
+ ['jb_head','黒天秤の冠','head',null,['hit','weld'],{obsid:4,silver:3,core:3}],
+ ['jb_body','黒の法衣','body',null,['cut','wire'],{obsid:3,silver:2,scale:3,core:3}],
+ ['jb_feet','黒翼のブーツ','feet',null,['trace','weld'],{obsid:2,scale:3,core:3}]];
+JD_ARM.forEach(([id,n,slot,area,ps,mats])=>{RECIPES[id]={n,kind:'armor',slot,tier:5,mats,shape:'ch',proc:ps[0],procs:ps,tools:[...new Set(ps.flatMap(p=>PROC_MAIN[p]))],
+ area:area||'gacha2',...(area?{}:{limited:true,vol:2})};RECIPE_ORDER.push(id)});
+Object.assign(ARMOR_IC,{jw_head:'ar_jdcrown',jw_body:'ar_jdrobe',jw_feet:'ar_jdboots',jb_head:'ar_jdcrown_b',jb_body:'ar_jdrobe_b',jb_feet:'ar_jdboots_b'});
+/* 黒の追加効果（説明） */
+const JB_FX={jb_head:'ボスに与えるダメージ+10%',jb_body:'審判の塔の階のルール（黒い床・雷）で受けるダメージ−30%',jb_feet:'移動の速さ+8%'};
+{const _rf=recipeFx;recipeFx=function(R){const o=_rf(R);const id=Object.keys(RECIPES).find(k=>RECIPES[k]===R);
+ if(JB_FX[id])o.push(['黒の効果',JB_FX[id]]);if(/^j[wb]_/.test(id||''))o.push(['セット',`${id[1]==='w'?'白':'黒'}の3つ（冠・法衣・ブーツ）をそろえると：${id[1]==='w'?'10秒ごとの回復+2・受けるダメージ−5%':'チームの攻撃+10%'}`]);return o}}
+const armId=s=>G.arm&&G.arm[s]&&G.arm[s].rid;
+const armSet=c=>['head','body','feet'].every(s=>(armId(s)||'').startsWith('j'+c+'_'));
+/* 効き目 */
+{const _ab=teamAb;teamAb=function(){const a=_ab();if(armId('feet')==='jb_feet')a.wspd=(a.wspd||0)+.08;
+ if(armSet('w')){a.regen=(a.regen||0)+2;a.cut=(a.cut||0)+.05}if(armSet('b'))a.teamAtk=(a.teamAtk||0)+.1;return a}}
+jRuleRes=()=>armId('body')==='jb_body'?.7:1;
+{const _fd=fDamage;fDamage=function(e,d,kx,ky){if(e&&e.boss&&armId('head')==='jb_head')d*=1.1;return _fd(e,d,kx,ky)}}
+
+/* ---------- 工具ガチャ vol.2：中級工具の上位版（限定） ---------- */
+Object.assign(TOOLS,{
+ tsolder:{n:'温調はんだごて',d:'限定。はんだごての上位版。配線の点数+5',limited:true,up:'solder',vol:2},
+ radial: {n:'ラジアルボール盤',d:'限定。ボール盤の上位版。穴あけの点数+5',limited:true,up:'drill',vol:2},
+ hcrimp: {n:'油圧圧着工具',d:'限定。電工ペンチの上位版。配線の点数+5',limited:true,up:'pliers',vol:2},
+ sgrind: {n:'平面研削盤',d:'限定。グラインダーの上位版。削るの点数+5',limited:true,up:'grinder',vol:2}});
+const LIM_TOOLS2=['tsolder','radial','hcrimp','sgrind'];
+Object.assign(UI_IC,{tsolder:'t_tsolder',radial:'t_radial',hcrimp:'t_hcrimp',sgrind:'t_sgrind'});
+LIM_TOOLS2.forEach(k=>{UPG[TOOLS[k].up]=k;if(V2_OPEN&&!TOOL_ORDER.includes(k))TOOL_ORDER.push(k)});
+{const _tb=toolBonus;toolBonus=R=>{const pr=procOf(R);return _tb(R)+((pr==='wire'&&(hasLim('tsolder')||hasLim('hcrimp')))||(pr==='drill'&&hasLim('radial'))||(pr==='grind'&&hasLim('sgrind'))?5:0)}}
+
+/* =====================================================================
    新しいバージョンの知らせ
    ・GitHub Pages はページを最大10分ほど覚えておく（キャッシュ）ので、更新してもすぐに新しい版にならないことがある
    ・起動したときと、アプリにもどってきたときに、公開中の index.html の VERSION を「覚えていない状態」で読みに行く
@@ -5779,7 +5840,7 @@ async function updCheck(){if(updShown||location.protocol==='file:'||Date.now()-u
 setTimeout(updCheck,2500);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')updCheck()});
 
-const BUILD='11/15 15:05';
+const BUILD='11/15 15:32';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
