@@ -1214,7 +1214,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.8.2';
+const VERSION='1.8.3';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -4687,7 +4687,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -5312,7 +5312,8 @@ function wCond(c){if(c==null)return{ok:()=>true,t:''};
  if(c==='tw:judge')return{ok:()=>!!G.flags.tw_judge,t:'審判の塔の20Fをクリア'};
  return null}
 const RW_C=RW.map(l=>l.map(w=>wCond(w[1])));
-const rwOk=(p,i)=>{if(!RW[p]||!RW[p][i])return false;const P=G.prof;if(P&&P.dw&&P.dw.includes(p+':'+i))return true;const c=RW_C[p][i];return !!(c&&c.ok())};
+const rwV2=(p,i)=>{const c=String(RW[p][i][1]||'');const m=/^[cu]:(\w+)/.exec(c);return !!(m&&VOL2.includes(m[1]))};
+const rwOk=(p,i)=>{if(!RW[p]||!RW[p][i])return false;if(!V2_OPEN&&rwV2(p,i))return false;const P=G.prof;if(P&&P.dw&&P.dw.includes(p+':'+i))return true;const c=RW_C[p][i];return !!(c&&c.ok())};
 const rwTxt=(p,i)=>{const w=RW[p]&&RW[p][i];if(!w)return'？';let t=w[0];if(t.includes('{c}'))t=t.replace('{c}',cnm(String(w[1]).split(':')[1]));return t};
 const rwLock=(p,i)=>{const c=RW_C[p][i];return c?c.t:'サイコロ版で解放'};
 const rtOk=i=>{if(!RT[i])return false;const P=G.prof;if(P&&P.dt&&P.dt.includes(i))return true;return !!(RT_OK[i]&&RT_OK[i]())};
@@ -5396,15 +5397,15 @@ function renderRank(){const p=rProf(),el=$('rkBody'),ds=diceLocal(),dp=diceProf(
  on('rkNo',()=>{rEdit=false;rDraft=null;renderRank()})}
 function rEditHTML(p){const d=rDraft||(rDraft={w:[...p.w],title:p.title|0,icon:p.icon});
  const sel=pi=>{const free=[],lock=[];RW[pi].forEach((w,i)=>(rwOk(pi,i)?free:lock).push(i));
-  return `<label class="rksel"><span>${['前','中','後'][pi]}</span><select data-rp="${pi}">${free.map(i=>`<option value="${i}" ${d.w[pi]===i?'selected':''}>${rwTxt(pi,i)}</option>`).join('')}${lock.length?`<optgroup label="まだ使えない">${lock.map(i=>`<option disabled>🔒${rwTxt(pi,i)}（${rwLock(pi,i)}）</option>`).join('')}</optgroup>`:''}</select></label>`};
+  return `<label class="rksel"><span>${['前','中','後'][pi]}</span><select data-rp="${pi}">${free.map(i=>`<option value="${i}" ${d.w[pi]===i?'selected':''}>${rwTxt(pi,i)}</option>`).join('')}</select></label>`};
  const n=RW.reduce((s,l,pi)=>s+l.filter((_,i)=>rwOk(pi,i)).length,0),all=RW.reduce((s,l)=>s+l.length,0);
  const tF=RT.map((_,i)=>i).filter(rtOk),tL=RT.map((_,i)=>i).filter(i=>!rtOk(i));
  const icons=ownedAll().map(m=>m.id).filter(id=>CHARS[id]);
  return `<div class="rkcard"><div class="rkh">${p.reg?'プロフィールを変える':'名前の登録'}</div>
   <div class="rkme"><span id="rkPI">${rFace(d.icon,56)}</span><div><div class="rkname" id="rkPrev">${rName(d.w)}<small>#${rTag(p.id)}</small></div><div class="rkttl" id="rkPT">${RT[d.title]}</div></div></div>
-  <div class="note">名前は「前・中・後」の3つの単語を組み合わせて作る（サイコロ版と同じ単語）。塔を登ったり仲間を育てたりすると、使える単語が増える（いま ${n}/${all}）。</div>
+  <div class="note">名前は「前・中・後」の3つの単語を組み合わせて作る（サイコロ版と同じ単語）。塔を登ったり仲間を育てたりすると、使える単語や称号が増える（いま使える単語 ${n}個）。</div>
   <div class="rksels">${sel(0)}${sel(1)}${sel(2)}
-   <label class="rksel"><span>称</span><select id="rkTtl">${tF.map(i=>`<option value="${i}" ${d.title===i?'selected':''}>${RT[i]}</option>`).join('')}${tL.length?`<optgroup label="まだ使えない">${tL.map(i=>`<option disabled>🔒${RT[i]}（${RT_TXT[i]}）</option>`).join('')}</optgroup>`:''}</select></label></div>
+   <label class="rksel"><span>称</span><select id="rkTtl">${tF.map(i=>`<option value="${i}" ${d.title===i?'selected':''}>${RT[i]}</option>`).join('')}</select></label></div>
   <div class="rkh" style="margin-top:6px">アイコン（持っているキャラから）</div>
   <div class="rkics">${icons.map(id=>`<button type="button" data-ric="${id}" class="${d.icon===id?'on':''}" aria-label="${CHARS[id].name}">${rFace(id,46)}</button>`).join('')}</div>
   <div class="rkid">識別ID　${rIdTxt(p.id)}<small>（自動でつく。名前が同じ人と見分けるための番号）</small></div>
@@ -5453,7 +5454,7 @@ function openBug(){const P=G&&G.prof&&G.prof.reg?G.prof:null;
   b.disabled=false;b.textContent='送る'};
  $('sheet').classList.add('on')}
 
-const BUILD='11/15 10:19';
+const BUILD='11/15 10:36';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
