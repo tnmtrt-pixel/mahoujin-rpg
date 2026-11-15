@@ -6,13 +6,13 @@ HERE=os.path.dirname(os.path.abspath(__file__))
 os.chdir(HERE)
 import re
 s=open('src_beta.html').read()
-mod=open('v2_module.js').read()+'\n'+open('v2_ui.js').read()+'\n'+open('v2_gacha.js').read()+'\n'+open('v2_grind.js').read()+'\n'+open('v2_equip.js').read()+'\n'+open('v2_forge.js').read()+'\n'+open('v2_story.js').read()+'\n'+open('v2_chat.js').read()+'\n'+open('v2_upper.js').read()+'\n'+open('v2_save.js').read()+'\n'+open('v2_log.js').read()+'\n'+open('v2_judge.js').read()+'\n'+open('v2_vol2.js').read()+'\n'+open('v2_words.js').read()+'\n'+open('v2_rank.js').read()+'\n'+open('v2_bug.js').read()+'\n'+open('v2_gift.js').read()+'\n'+open('v2_soul.js').read()
+mod=open('v2_module.js').read()+'\n'+open('v2_ui.js').read()+'\n'+open('v2_gacha.js').read()+'\n'+open('v2_grind.js').read()+'\n'+open('v2_equip.js').read()+'\n'+open('v2_forge.js').read()+'\n'+open('v2_story.js').read()+'\n'+open('v2_chat.js').read()+'\n'+open('v2_upper.js').read()+'\n'+open('v2_save.js').read()+'\n'+open('v2_log.js').read()+'\n'+open('v2_judge.js').read()+'\n'+open('v2_vol2.js').read()+'\n'+open('v2_words.js').read()+'\n'+open('v2_rank.js').read()+'\n'+open('v2_bug.js').read()+'\n'+open('v2_gift.js').read()+'\n'+open('v2_soul.js').read()+'\n'+open('v2_update.js').read()
 def R(a,b,cnt=1):
     global s
     n=s.count(a)
     assert n==cnt,(n,a[:80])
     s=s.replace(a,b)
-R("const VERSION='0.1.0'","const VERSION='1.9.1'")
+R("const VERSION='0.1.0'","const VERSION='1.9.2'")
 R("const KEY='mmrpg1',OPT_KEY='mmrpg1_opt',BROKEN_KEY='mmrpg1_broken'","const KEY='mmrpg2',OPT_KEY='mmrpg2_opt',BROKEN_KEY='mmrpg2_broken'")
 R("$('tVer').textContent=`β版 ver ${VERSION}`;$('tNote').textContent=loadNote;","$('tVer').textContent=`ver ${VERSION}`;$('tNote').textContent=loadNote;saveGuardBoot();")
 R('<button class="btn ghost" id="opX">閉じる</button>','<button class="btn" id="opSG">💾 セーブの守り（保存・引っ越し）</button><button class="btn ghost" id="opX">閉じる</button>')

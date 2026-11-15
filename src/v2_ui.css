@@ -835,3 +835,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 
 .gift input{width:100%;box-sizing:border-box;margin:10px 0;padding:12px;border-radius:10px;background:#0f131c;color:#fff;border:1px solid #ffffff2e;font:800 20px/1.2 inherit;letter-spacing:.12em;text-align:center;text-transform:uppercase}
 .gift .btn.gold{width:100%}
+
+#updBar{position:fixed;left:8px;right:8px;top:calc(env(safe-area-inset-top) + 8px);z-index:9999;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#1d2433f2;border:1px solid #ff8a3d;box-shadow:0 6px 20px #0008;color:#fff;font-size:14px;font-weight:700}
+#updBar span{flex:1}
+#updBar button{flex:none;padding:8px 14px;border-radius:10px;border:0;background:#ff8a3d;color:#1a1208;font-weight:900;font-size:14px}
