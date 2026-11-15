@@ -220,7 +220,7 @@ const armMul=s=>G.arm&&G.arm[s]?+G.arm[s].mul:0;
 /* ===================== 町の外（サバイバー） ===================== */
 let FD=null,fRaf=0,fLast=0,fW=0,fH=0,fDPR=1,fZ=1;
 const fcv=()=>$('fcv');
-function resizeField(){const c=fcv();fDPR=Math.min(2,devicePixelRatio||1);fW=innerWidth;fH=innerHeight;c.width=Math.round(fW*fDPR);c.height=Math.round(fH*fDPR);fZ=clamp(Math.min(fW,fH)/400,.8,1.25)}
+function resizeField(){const c=fcv();fDPR=Math.min(2,devicePixelRatio||1);fW=innerWidth;fH=innerHeight;c.width=Math.round(fW*fDPR);c.height=Math.round(fH*fDPR);fZ=clamp(Math.min(fW,fH)/400,.8,1.25);fZ=Math.max(fZ,Math.hypot(fW,fH)/2/700)/* 大きな画面（PC・ブラウザの縮小表示）でも、見える範囲を広げすぎない：広すぎると敵が遠くに湧いてすぐ消える */}
 addEventListener('resize',()=>{if(FD&&onScr('field'))resizeField()});
 /* 画像は小さく描き直して軽くする */
 const FSPR={};
