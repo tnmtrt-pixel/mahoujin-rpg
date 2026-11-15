@@ -112,7 +112,9 @@ const WB_TILE=260;
 const ruleOf=()=>FD&&FD.run&&FLOORS[FD.floor]&&FLOORS[FD.floor].rule;
 const wbWhite=(x,y)=>((Math.floor(x/WB_TILE)+Math.floor(y/WB_TILE))&1)===0;
 function ruleAtk(){return ruleOf()==='wb'&&wbWhite(FD.x,FD.y)?1.25:1}
-function ruleCut(){return ruleOf()==='wb'&&!wbWhite(FD.x,FD.y)?1.2:1}
+function ruleCut(){return ruleOf()==='wb'&&!wbWhite(FD.x,FD.y)?1+.2*jRuleRes():1}
+/* 階のルールで受けるダメージの倍率（黒の法衣で −30%） */
+let jRuleRes=()=>1;
 function fDrawRuleFloor(g,D,cx0,cy0,z){if(ruleOf()!=='wb')return;const T=WB_TILE,x0=Math.floor((cx0-20)/T),y0=Math.floor((cy0-20)/T),nx=Math.ceil((fW/z+40)/T)+1,ny=Math.ceil((fH/z+40)/T)+1;
  g.save();for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const X=x0+i,Y=y0+j,w=((X+Y)&1)===0;g.fillStyle=w?'rgba(255,250,235,.38)':'rgba(8,0,18,.58)';g.fillRect(X*T,Y*T,T,T)}
  g.strokeStyle='rgba(240,200,110,.7)';g.lineWidth=4;for(let i=0;i<=nx;i++){g.beginPath();g.moveTo((x0+i)*T,y0*T);g.lineTo((x0+i)*T,(y0+ny)*T);g.stroke()}for(let j=0;j<=ny;j++){g.beginPath();g.moveTo(x0*T,(y0+j)*T);g.lineTo((x0+nx)*T,(y0+j)*T);g.stroke()}g.restore()}
@@ -125,7 +127,7 @@ function fDrawRuleFloor(g,D,cx0,cy0,z){if(ruleOf()!=='wb')return;const T=WB_TILE
   if(D.thT>=210){D.thT=0;const pts=[[D.x+(Math.random()-.5)*60,D.y+(Math.random()-.5)*60]];for(let i=0;i<2;i++){const a=Math.random()*TAU,d=120+Math.random()*160;pts.push([D.x+Math.cos(a)*d,D.y+Math.sin(a)*d])}
    pts.forEach(([x,y])=>D.thunder.push({x,y,t:0,warn:80,r:70}));tone(300,.06,'triangle',.03)}
   for(const q of D.thunder){q.t+=f;if(!q.hit&&q.t>=q.warn){q.hit=1;D.shake=Math.max(D.shake||0,6);tone(70,.25,'sawtooth',.08,40);
-    if(D.inv<=0&&(D.x-q.x)**2+(D.y-q.y)**2<q.r*q.r){D.hp-=fHurt(D.maxhp*.12*fCut(),null);D.inv=Math.max(D.inv,20);renderFHud()}
+    if(D.inv<=0&&(D.x-q.x)**2+(D.y-q.y)**2<q.r*q.r){D.hp-=fHurt(D.maxhp*.12*fCut()*jRuleRes(),null);D.inv=Math.max(D.inv,20);renderFHud()}
     for(const e of D.foes)if(!e.boss&&(e.x-q.x)**2+(e.y-q.y)**2<q.r*q.r)e.hp-=(e.max||60)*.35}}
   D.thunder=D.thunder.filter(q=>q.t<q.warn+18)}}}
 {const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);if(!D.thunder||!D.thunder.length)return;

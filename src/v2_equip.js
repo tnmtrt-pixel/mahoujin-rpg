@@ -183,7 +183,7 @@ function renderZukan(){const t=ZK.tab,so=ZK.sort[t],S=ZK_SORTS[t],nx=S[(S.findIn
  if(t==='char'){let ids=CHAR_ALL();if(ZK.own)ids=ids.filter(owned);const no=id=>CHAR_ALL().indexOf(id);
   const key={no:id=>no(id),star:id=>-((owned(id)||{}).star||0),lv:id=>-((owned(id)||{}).lv||0),type:id=>ATK[id].type.charCodeAt(0)}[so];ids.sort((a,b)=>key(a)-key(b)||no(a)-no(b));
   h+=ids.map(id=>{const m=owned(id),c=CHARS[id];return `<button class="zkc ${m?'':'no'}" data-zc="${id}"><img src="${c.img}" alt=""><span class="hft">${TIC(ATK[id].type,18)}</span><span class="zkno">No.${String(no(id)+1).padStart(2,'0')}</span><span class="hfb"><b>${c.name}</b><small>${m?`Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i>`:'まだいない'}</small></span></button>`}).join('')}
- else if(t==='bp'){let ids=RECIPE_ORDER.filter(id=>(V2_OPEN||!/^j/.test(RECIPES[id].area||''))&&(!RECIPES[id].secret||(G.bps||[]).includes(id)));if(ZK.own)ids=ids.filter(id=>G.bps.includes(id));const fl={alley:1,factory:2,under:3};
+ else if(t==='bp'){let ids=RECIPE_ORDER.filter(id=>(V2_OPEN||(!/^j/.test(RECIPES[id].area||'')&&(RECIPES[id].vol||1)<2))&&(!RECIPES[id].secret||(G.bps||[]).includes(id)));if(ZK.own)ids=ids.filter(id=>G.bps.includes(id));const fl={alley:1,factory:2,under:3};
   const key={kind:id=>['weapon','gen','armor'].indexOf(RECIPES[id].kind),proc:id=>PROC_ORDER.indexOf(procOf(RECIPES[id])),floor:id=>fl[RECIPES[id].area]||RECIPES[id].tier}[so];ids.sort((a,b)=>key(a)-key(b)||RECIPES[a].tier-RECIPES[b].tier);
   h+=ids.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R)+'・'+PROC_LBL[procOf(R)]:R.limited?'図面ガチャ（限定）':LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}
  else if(t==='tool'){let ids=TOOL_ORDER.slice();if(ZK.own)ids=ids.filter(k=>G.tools.includes(k));const key={price:k=>TOOLS[k].price||0,have:k=>G.tools.includes(k)?0:1}[so];ids.sort((a,b)=>key(a)-key(b)||TOOL_ORDER.indexOf(a)-TOOL_ORDER.indexOf(b));
@@ -281,30 +281,34 @@ let gaType='char';
 const TOOL_G={cost:30,cost11:300,lim:.03,pity:30},BP_G={cost:40,cost11:400,lim:.03,pity:30};
 const TOOL_POOL=()=>TOOL_ORDER.filter(t=>!TOOLS[t].limited&&t!=='file');
 const BP_POOL=()=>RECIPE_ORDER.filter(id=>{const R=RECIPES[id];return !R.limited&&!R.secret&&R.area!=='gift'&&(V2_OPEN||!/^j/.test(R.area||''))&&(R.kind!=='weapon'||ownChar(R.who))&&(R.tier<4||(G.floor|0)>=10)});
-const BP_LIM=()=>RECIPE_ORDER.filter(id=>RECIPES[id].limited);
+const BP_LIM=(v=1)=>RECIPE_ORDER.filter(id=>RECIPES[id].limited&&(RECIPES[id].vol||1)===v);
+/* vol.2 以降は章ごとの限定（V2_OPEN の間だけ開く） */
+const gaVolI={tool:1,bp:1};const gaVolOpen=v=>v===1||(v===2&&typeof V2_OPEN!=='undefined'&&V2_OPEN);
+const gaLims=(type,v)=>type==='tool'?(v===2?(typeof LIM_TOOLS2!=='undefined'?LIM_TOOLS2:[]):LIM_TOOLS):BP_LIM(v);
+const pityKey=(type,v)=>type+(v>1?v:'');
 function gaHead(){return `<div class="gacoin">${coinIc(22)}<b>${G.coin}</b><small>コイン</small></div>
  <div class="gatype">${[['char','キャラ'],['tool','工具'],['bp','図面']].map(([k,n])=>`<button class="${gaType===k?'on':''}" data-gt="${k}">${UIMG('g_'+k,26)}${n}</button>`).join('')}</div>`}
 function gaBind(){$('gaBody').querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gaType=b.dataset.gt;renderGacha()})}
 function renderGacha(){if(gaType==='char'){renderCharGacha();return}
- const tool=gaType==='tool',C=tool?TOOL_G:BP_G,pity=((G.pity||{})[gaType])||0,lims=tool?LIM_TOOLS:BP_LIM();
+ const tool=gaType==='tool',C=tool?TOOL_G:BP_G,gv=gaVolOpen(gaVolI[gaType])?gaVolI[gaType]:1,pity=((G.pity||{})[pityKey(gaType,gv)])||0,lims=gaLims(gaType,gv);
  const icons=lims.map(k=>tool?MIC(k,44):RIC(k,44)).join('');
- $('gaBody').innerHTML=gaHead()+`<div class="gavol"><button class="on">vol.1</button><button class="soon">vol.2</button><button class="soon">vol.3</button></div>
- <div class="gaban gaimg"><img src="img/${tool?'gacha-tool':'gacha-bp'}.webp" alt=""><div class="gcb"><small>${tool?'TOOL':'BLUEPRINT'} GACHA</small><b>${tool?'工具ガチャ':'図面ガチャ'}</b><em class="${tool?'':'bp'}">${UIMG('u_limited',16)}限定${tool?'工具':'装備の図面'} ${Math.round(C.lim*100)}%</em></div><div class="gci">${icons}</div></div>
+ $('gaBody').innerHTML=gaHead()+`<div class="gavol">${[1,2,3].map(v=>`<button class="${v===gv?'on':''} ${gaVolOpen(v)?'':'soon'}" data-giv="${v}">vol.${v}</button>`).join('')}</div>
+ <div class="gaban gaimg"><img src="img/${tool?'gacha-tool':'gacha-bp'}.webp" alt=""><div class="gcb"><small>${tool?'TOOL':'BLUEPRINT'} GACHA</small><b>${tool?'工具ガチャ':'図面ガチャ'}${gv>1?' vol.'+gv:''}</b><em class="${tool?'':'bp'}">${UIMG('u_limited',16)}限定${tool?'工具':'装備の図面'} ${Math.round(C.lim*100)}%</em></div><div class="gci">${icons}</div></div>
  <div class="gapity">${UIMG('u_pity',20)} 限定まで あと <b>${C.pity-pity}</b> 回（${C.pity}回で必ず出る）</div>
  <div class="galink"><button data-ga="rate">提供割合</button><button data-ga="list">${tool?'工具':'図面'}の一覧（図鑑）</button></div>
  <div class="gabtns"><button class="gab" data-gp="1" ${G.coin<C.cost?'disabled':''}><b>1回</b><small>${coinIc(16)} ${C.cost}</small></button><button class="gab ten" data-gp="11" ${G.coin<C.cost11?'disabled':''}><b>11回</b><small>${coinIc(16)} ${C.cost11}</small></button></div>`;
- gaBind();
+ gaBind();$('gaBody').querySelectorAll('[data-giv]').forEach(b=>b.onclick=()=>{const v=+b.dataset.giv;if(!gaVolOpen(v))return;gaVolI[gaType]=v;renderGacha()});
  $('gaBody').querySelectorAll('[data-gp]').forEach(b=>b.onclick=()=>pullItems(gaType,+b.dataset.gp));
  $('gaBody').querySelector('[data-ga=list]').onclick=()=>{ZK.tab=tool?'tool':'bp';goTab('zukan')};
- $('gaBody').querySelector('[data-ga=rate]').onclick=()=>{$('gpBody').innerHTML=`<div class="gph">提供割合　${tool?'工具':'図面'}ガチャ vol.1</div><div class="rdt">
+ $('gaBody').querySelector('[data-ga=rate]').onclick=()=>{$('gpBody').innerHTML=`<div class="gph">提供割合　${tool?'工具':'図面'}ガチャ vol.${gv}</div><div class="rdt">
   <div><span>限定</span><p>${Math.round(C.lim*100)}%：${lims.map(k=>tool?TOOLS[k].n:RECIPES[k].n).join('・')}</p></div>
   <div><span>ふつう</span><p>${100-Math.round(C.lim*100)}%：${tool?'工房で売っている工具（やすり以外）':'塔で見つかる図面（仲間の専用武器は、持っているキャラのぶんだけ）'}</p></div>
   <div><span>天井</span><p>${C.pity}回引くと限定が必ず出る（限定が出たら数えなおし）</p></div>
   <div><span>被ったら</span><p>${tool?'工具の練度が大きく上がる（+40）。練度Lv5のあとは基本素材になる':'改良図面：その装備の威力+3%（最大+3回）。そのあとは基本素材になる'}</p></div>
   <div><span>11回</span><p>10回分の値段で11回</p></div></div><div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;$('gpClose').onclick=()=>$('genPick').classList.remove('on');$('genPick').classList.add('on')}}
-function pullItems(type,n){const tool=type==='tool',C=tool?TOOL_G:BP_G,cost=n>1?C.cost11:C.cost;if(G.coin<cost){say('コインが足りない',1000);return}
+function pullItems(type,n){const tool=type==='tool',C=tool?TOOL_G:BP_G,cost=n>1?C.cost11:C.cost,gv=gaVolOpen(gaVolI[type])?gaVolI[type]:1,pk=pityKey(type,gv),LIMS=gaLims(type,gv);if(G.coin<cost){say('コインが足りない',1000);return}
  G.coin-=cost;G.pity=G.pity||{};G.bpPlus=G.bpPlus||{};const res=[];
- for(let i=0;i<n;i++){G.pity[type]=(G.pity[type]||0)+1;let lim=Math.random()<C.lim||G.pity[type]>=C.pity;const pool=lim?(tool?LIM_TOOLS:BP_LIM()):(tool?TOOL_POOL():BP_POOL());if(lim)G.pity[type]=0;
+ for(let i=0;i<n;i++){G.pity[pk]=(G.pity[pk]||0)+1;let lim=Math.random()<C.lim||G.pity[pk]>=C.pity;const pool=lim?LIMS:(tool?TOOL_POOL():BP_POOL());if(lim)G.pity[pk]=0;
   const k=pick(pool);res.push(tool?getTool(k,lim):getBp(k,lim))}
  save();showItemResult(res);renderGacha()}
 function getTool(t,lim){if(!G.tools.includes(t)){G.tools.push(t);return{ic:MIC(t,56),n:TOOLS[t].n,lim,tag:'NEW',cls:'new'}}
