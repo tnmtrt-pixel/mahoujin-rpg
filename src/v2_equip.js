@@ -280,7 +280,7 @@ LIM_TOOLS.forEach(k=>{if(!TOOL_ORDER.includes(k))TOOL_ORDER.push(k)});
 let gaType='char';
 const TOOL_G={cost:30,cost11:300,lim:.03,pity:30},BP_G={cost:40,cost11:400,lim:.03,pity:30};
 const TOOL_POOL=()=>TOOL_ORDER.filter(t=>!TOOLS[t].limited&&t!=='file');
-const BP_POOL=()=>RECIPE_ORDER.filter(id=>{const R=RECIPES[id];return !R.limited&&(R.kind!=='weapon'||ownChar(R.who))&&(R.tier<4||(G.floor|0)>=10)});
+const BP_POOL=()=>RECIPE_ORDER.filter(id=>{const R=RECIPES[id];return !R.limited&&!R.secret&&R.area!=='gift'&&(V2_OPEN||!/^j/.test(R.area||''))&&(R.kind!=='weapon'||ownChar(R.who))&&(R.tier<4||(G.floor|0)>=10)});
 const BP_LIM=()=>RECIPE_ORDER.filter(id=>RECIPES[id].limited);
 function gaHead(){return `<div class="gacoin">${coinIc(22)}<b>${G.coin}</b><small>コイン</small></div>
  <div class="gatype">${[['char','キャラ'],['tool','工具'],['bp','図面']].map(([k,n])=>`<button class="${gaType===k?'on':''}" data-gt="${k}">${UIMG('g_'+k,26)}${n}</button>`).join('')}</div>`}
