@@ -128,7 +128,7 @@ function invStore(pc,who){const R=RECIPES[pc.rid];
  if(R.kind==='armor')invPut({rid:pc.rid,rank:pc.rank,mul:pc.mul},R.slot);else invW().push({who:who.id,w:weaponObj(R,pc,who)})}
 const RANK_ORDER=['D','C','B','A','S','SS'];
 /* 顔アイコン（ウルフは表情つきの絵） */
-const FACE=id=>['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker',...VOL2,'soul'].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
+const FACE=id=>['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker',...VOL2,'soul','fairy'].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
 /* 専用武器・防具の入れかえ */
 function openEqPick(kind,slot){const L=eqWho();let rows='',head='';
  if(kind==='w'){head=`${CHARS[L.id].name}の専用武器`;const cur=L.weapon;
