@@ -104,12 +104,12 @@ function wsListHTML(tab){const dec=tab==='dec';
  const ghtml=(g,sub)=>{const op=one||WS.open.has(g.k),w=g.k.startsWith('w:')?g.k.slice(2):null,nOk=dec?0:g.ids.filter(ok).length,away=g.k.startsWith('g:まだ仲間にいない');
   return (one?'':`<button class="wsgh ${sub?'sub':''} ${op?'op':''} ${away?'away':''}" data-wsg="${g.k}">${w?`<img src="${FACE(w)}" alt="">`:''}<b>${gname(g.k)}</b>${w?'<span class="sp">専用</span>':''}<small>${g.ids.length}</small>${away?'':nOk?`<i class="okn">加工できる ${nOk}</i>`:''}<em>${op?'▾':'▸'}</em></button>`)+(op?`<div class="wsgb">${g.ids.map(row).join('')}</div>`:'')};
  /* 専用武器は「ガチャの巻（vol1・vol2…）」→ キャラ の2段 */
- const volOf=k=>{const id=k.startsWith('w:')?k.slice(2):k.startsWith('g:まだ仲間にいない')?k.split('|')[1]:null;if(!id)return 0;const b=GACHA_BANNERS.find(x=>x.pool&&x.pool.includes(id));return b?b.vol:1};
+ const volOf=k=>{const id=k.startsWith('w:')?k.slice(2):k.startsWith('g:まだ仲間にいない')?k.split('|')[1]:null;if(!id)return 0;if(SECRET_CH.includes(id))return 'sp';const b=GACHA_BANNERS.find(x=>x.pool&&x.pool.includes(id));return b?b.vol:1};
  const done=new Set();
  h+=groups.map(g=>{if(done.has(g.k))return '';const v=one?0:volOf(g.k);if(!v)return ghtml(g);
   const mem=groups.filter(x=>volOf(x.k)===v);mem.forEach(x=>done.add(x.k));const vk='v:'+v,op=WS.open.has(vk),n=mem.reduce((a,x)=>a+x.ids.length,0),nOk=dec?0:mem.reduce((a,x)=>a+x.ids.filter(ok).length,0);
   const bn=GACHA_BANNERS.find(x=>x.vol===v);
-  return `<button class="wsgh vol ${op?'op':''}" data-wsg="${vk}"><b>専用武器 vol${v}</b><span class="sp">${bn&&!bn.soon?bn.n:''}</span><small>${n}</small>${nOk?`<i class="okn">加工できる ${nOk}</i>`:''}<em>${op?'▾':'▸'}</em></button>`+(op?`<div class="wsgb vb">${mem.map(x=>ghtml(x,1)).join('')}</div>`:'')}).join('');
+  return `<button class="wsgh vol ${op?'op':''}" data-wsg="${vk}"><b>${v==='sp'?'特別な仲間の専用武器':'専用武器 vol'+v}</b><span class="sp">${bn&&!bn.soon?bn.n:''}</span><small>${n}</small>${nOk?`<i class="okn">加工できる ${nOk}</i>`:''}<em>${op?'▾':'▸'}</em></button>`+(op?`<div class="wsgb vb">${mem.map(x=>ghtml(x,1)).join('')}</div>`:'')}).join('');
  if(!ids.length)h+=`<div class="note" style="text-align:center;margin:24px 0">${MIC('bp',28)}<br>${dec?'未解読の図面はない。強敵や資材の箱から図面が見つかる':'この種類の図面はまだない'}</div>`;
  if(!dec){const unk=RECIPE_ORDER.length-G.bps.length-(G.bpRaw||[]).length;if(unk>0)h+=`<div class="wshint" style="text-align:center">まだ見つけていない図面：あと ${unk}</div>`}
  return h}
@@ -183,7 +183,7 @@ function renderZukan(){const t=ZK.tab,so=ZK.sort[t],S=ZK_SORTS[t],nx=S[(S.findIn
  if(t==='char'){let ids=CHAR_ALL();if(ZK.own)ids=ids.filter(owned);const no=id=>CHAR_ALL().indexOf(id);
   const key={no:id=>no(id),star:id=>-((owned(id)||{}).star||0),lv:id=>-((owned(id)||{}).lv||0),type:id=>ATK[id].type.charCodeAt(0)}[so];ids.sort((a,b)=>key(a)-key(b)||no(a)-no(b));
   h+=ids.map(id=>{const m=owned(id),c=CHARS[id];return `<button class="zkc ${m?'':'no'}" data-zc="${id}"><img src="${c.img}" alt=""><span class="hft">${TIC(ATK[id].type,18)}</span><span class="zkno">No.${String(no(id)+1).padStart(2,'0')}</span><span class="hfb"><b>${c.name}</b><small>${m?`Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i>`:'まだいない'}</small></span></button>`}).join('')}
- else if(t==='bp'){let ids=RECIPE_ORDER.filter(id=>V2_OPEN||!/^j/.test(RECIPES[id].area||''));if(ZK.own)ids=ids.filter(id=>G.bps.includes(id));const fl={alley:1,factory:2,under:3};
+ else if(t==='bp'){let ids=RECIPE_ORDER.filter(id=>(V2_OPEN||!/^j/.test(RECIPES[id].area||''))&&(!RECIPES[id].secret||(G.bps||[]).includes(id)));if(ZK.own)ids=ids.filter(id=>G.bps.includes(id));const fl={alley:1,factory:2,under:3};
   const key={kind:id=>['weapon','gen','armor'].indexOf(RECIPES[id].kind),proc:id=>PROC_ORDER.indexOf(procOf(RECIPES[id])),floor:id=>fl[RECIPES[id].area]||RECIPES[id].tier}[so];ids.sort((a,b)=>key(a)-key(b)||RECIPES[a].tier-RECIPES[b].tier);
   h+=ids.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R)+'・'+PROC_LBL[procOf(R)]:R.limited?'図面ガチャ（限定）':LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}
  else if(t==='tool'){let ids=TOOL_ORDER.slice();if(ZK.own)ids=ids.filter(k=>G.tools.includes(k));const key={price:k=>TOOLS[k].price||0,have:k=>G.tools.includes(k)?0:1}[so];ids.sort((a,b)=>key(a)-key(b)||TOOL_ORDER.indexOf(a)-TOOL_ORDER.indexOf(b));

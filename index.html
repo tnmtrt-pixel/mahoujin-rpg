@@ -1221,7 +1221,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.9.3';
+const VERSION='1.9.4';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3539,12 +3539,12 @@ function wsListHTML(tab){const dec=tab==='dec';
  const ghtml=(g,sub)=>{const op=one||WS.open.has(g.k),w=g.k.startsWith('w:')?g.k.slice(2):null,nOk=dec?0:g.ids.filter(ok).length,away=g.k.startsWith('g:まだ仲間にいない');
   return (one?'':`<button class="wsgh ${sub?'sub':''} ${op?'op':''} ${away?'away':''}" data-wsg="${g.k}">${w?`<img src="${FACE(w)}" alt="">`:''}<b>${gname(g.k)}</b>${w?'<span class="sp">専用</span>':''}<small>${g.ids.length}</small>${away?'':nOk?`<i class="okn">加工できる ${nOk}</i>`:''}<em>${op?'▾':'▸'}</em></button>`)+(op?`<div class="wsgb">${g.ids.map(row).join('')}</div>`:'')};
  /* 専用武器は「ガチャの巻（vol1・vol2…）」→ キャラ の2段 */
- const volOf=k=>{const id=k.startsWith('w:')?k.slice(2):k.startsWith('g:まだ仲間にいない')?k.split('|')[1]:null;if(!id)return 0;const b=GACHA_BANNERS.find(x=>x.pool&&x.pool.includes(id));return b?b.vol:1};
+ const volOf=k=>{const id=k.startsWith('w:')?k.slice(2):k.startsWith('g:まだ仲間にいない')?k.split('|')[1]:null;if(!id)return 0;if(SECRET_CH.includes(id))return 'sp';const b=GACHA_BANNERS.find(x=>x.pool&&x.pool.includes(id));return b?b.vol:1};
  const done=new Set();
  h+=groups.map(g=>{if(done.has(g.k))return '';const v=one?0:volOf(g.k);if(!v)return ghtml(g);
   const mem=groups.filter(x=>volOf(x.k)===v);mem.forEach(x=>done.add(x.k));const vk='v:'+v,op=WS.open.has(vk),n=mem.reduce((a,x)=>a+x.ids.length,0),nOk=dec?0:mem.reduce((a,x)=>a+x.ids.filter(ok).length,0);
   const bn=GACHA_BANNERS.find(x=>x.vol===v);
-  return `<button class="wsgh vol ${op?'op':''}" data-wsg="${vk}"><b>専用武器 vol${v}</b><span class="sp">${bn&&!bn.soon?bn.n:''}</span><small>${n}</small>${nOk?`<i class="okn">加工できる ${nOk}</i>`:''}<em>${op?'▾':'▸'}</em></button>`+(op?`<div class="wsgb vb">${mem.map(x=>ghtml(x,1)).join('')}</div>`:'')}).join('');
+  return `<button class="wsgh vol ${op?'op':''}" data-wsg="${vk}"><b>${v==='sp'?'特別な仲間の専用武器':'専用武器 vol'+v}</b><span class="sp">${bn&&!bn.soon?bn.n:''}</span><small>${n}</small>${nOk?`<i class="okn">加工できる ${nOk}</i>`:''}<em>${op?'▾':'▸'}</em></button>`+(op?`<div class="wsgb vb">${mem.map(x=>ghtml(x,1)).join('')}</div>`:'')}).join('');
  if(!ids.length)h+=`<div class="note" style="text-align:center;margin:24px 0">${MIC('bp',28)}<br>${dec?'未解読の図面はない。強敵や資材の箱から図面が見つかる':'この種類の図面はまだない'}</div>`;
  if(!dec){const unk=RECIPE_ORDER.length-G.bps.length-(G.bpRaw||[]).length;if(unk>0)h+=`<div class="wshint" style="text-align:center">まだ見つけていない図面：あと ${unk}</div>`}
  return h}
@@ -3618,7 +3618,7 @@ function renderZukan(){const t=ZK.tab,so=ZK.sort[t],S=ZK_SORTS[t],nx=S[(S.findIn
  if(t==='char'){let ids=CHAR_ALL();if(ZK.own)ids=ids.filter(owned);const no=id=>CHAR_ALL().indexOf(id);
   const key={no:id=>no(id),star:id=>-((owned(id)||{}).star||0),lv:id=>-((owned(id)||{}).lv||0),type:id=>ATK[id].type.charCodeAt(0)}[so];ids.sort((a,b)=>key(a)-key(b)||no(a)-no(b));
   h+=ids.map(id=>{const m=owned(id),c=CHARS[id];return `<button class="zkc ${m?'':'no'}" data-zc="${id}"><img src="${c.img}" alt=""><span class="hft">${TIC(ATK[id].type,18)}</span><span class="zkno">No.${String(no(id)+1).padStart(2,'0')}</span><span class="hfb"><b>${c.name}</b><small>${m?`Lv${m.lv}　<i>${'★'.repeat(m.star||1)}</i>`:'まだいない'}</small></span></button>`}).join('')}
- else if(t==='bp'){let ids=RECIPE_ORDER.filter(id=>V2_OPEN||!/^j/.test(RECIPES[id].area||''));if(ZK.own)ids=ids.filter(id=>G.bps.includes(id));const fl={alley:1,factory:2,under:3};
+ else if(t==='bp'){let ids=RECIPE_ORDER.filter(id=>(V2_OPEN||!/^j/.test(RECIPES[id].area||''))&&(!RECIPES[id].secret||(G.bps||[]).includes(id)));if(ZK.own)ids=ids.filter(id=>G.bps.includes(id));const fl={alley:1,factory:2,under:3};
   const key={kind:id=>['weapon','gen','armor'].indexOf(RECIPES[id].kind),proc:id=>PROC_ORDER.indexOf(procOf(RECIPES[id])),floor:id=>fl[RECIPES[id].area]||RECIPES[id].tier}[so];ids.sort((a,b)=>key(a)-key(b)||RECIPES[a].tier-RECIPES[b].tier);
   h+=ids.map(id=>{const R=RECIPES[id],has=G.bps.includes(id);return `<div class="zki ${has?'':'no'}">${has?RIC(id,40):MIC('bp',40)}<b>${has?R.n:'？？？'}</b><small>${has?recTag(R)+'・'+PROC_LBL[procOf(R)]:R.limited?'図面ガチャ（限定）':LAYER_NAME[R.area]?'塔の'+LAYER_NAME[R.area]+'で見つかる':''}</small></div>`}).join('')}
  else if(t==='tool'){let ids=TOOL_ORDER.slice();if(ZK.own)ids=ids.filter(k=>G.tools.includes(k));const key={price:k=>TOOLS[k].price||0,have:k=>G.tools.includes(k)?0:1}[so];ids.sort((a,b)=>key(a)-key(b)||TOOL_ORDER.indexOf(a)-TOOL_ORDER.indexOf(b));
@@ -4694,7 +4694,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「🎁 プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「🎁 プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -5465,12 +5465,13 @@ function openBug(){const P=G&&G.prof&&G.prof.reg?G.prof:null;
    プレゼントコード（メニュー →「プレゼントコード」）
    ・コードそのものはここに書かず、ハッシュだけを置く（src/make_gift.py で作る）。リポジトリは公開なので
    ・1つのコードは、同じ端末で1回だけ（セーブを消しても残る記録＋セーブの中の記録）
-   ・ごほうび：coins（コイン）、ch（特別なキャラ）＋st（★の数）。持っているキャラなら★を上げる
+   ・ごほうび：coins（コイン）、ch（特別なキャラ）＋st（★の数。持っていれば★を上げる）、bp（図面のIDの配列）
    ・サイコロ版とは別のコード（ハッシュの前につける文字がちがう）
    ===================================================================== */
 const GIFTS2=[
  /* {h:'ハッシュ',coins:0,ch:'キャラID',st:1}  ← 作った日とコードの用途をコメントで残す（コードは書かない） */
  {h:'99a6eef7bddb106da110bdf6517b4c070dd1cb6e1f37c73085917280064b6658',coins:0,ch:'soul',st:5}/* 2026-11-15 ソウル★5（配り方は先生が決める。コードは公開しない） */,
+ {h:'54b68eb2b340810f0018c99af73701c6b010396bc0107d3601c645865c0fe852',coins:0,bp:['soul_up']}/* 2026-11-15 ソウルの強化版の図面「蒼炎刀・鬼火丸」（コードは公開しない） */,
 ];
 const GIFT_KEY='mmrpg2_gifts';
 const giftNorm=c=>String(c||'').normalize('NFKC').trim().toUpperCase().replace(/[\s\-ー－]/g,'');
@@ -5493,6 +5494,7 @@ function openGift(){$('sheetT').textContent='プレゼントコード';
    if(giftUsed2().includes(h)||(G.gifts||[]).includes(h)){say('このコードはもう使っています',1400);return}
    const msg=[];if(g.coins){G.coin=(G.coin|0)+g.coins;msg.push(`${g.coins}コインをもらった！`)}
    if(g.ch){const t=giftChar(g.ch,g.st||1);if(t)msg.push(t)}
+   (g.bp||[]).forEach(b=>{if(!RECIPES[b])return;if(!(G.bps||[]).includes(b)){G.bps=[...(G.bps||[]),b];msg.push(`図面「${RECIPES[b].n}」を手に入れた！<br><span style="font-size:13px">工房でつくれる</span>`)}else msg.push(`図面「${RECIPES[b].n}」はもう持っている`)});
    giftMark2(h);save();tone(880,.2,'triangle',.08,1320);closeSheet();
    say(`🎁 プレゼント<br>${msg.join('<br>')||'受け取りました'}`,2400);if($('home').classList.contains('on'))openHome()}
   finally{giftBusy2=false}};
@@ -5538,6 +5540,10 @@ function soulAttack(f){const D=FD,A=D.atk;if(!A.soul)return;const V=D.sl||(D.sl=
  g.restore()}}
 {const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(FD)FD.sl=null;return r}}
 
+/* 強化版の専用武器（図面はプレゼントコードだけで手に入る。塔では出ない＝area:'gift'。図鑑には持ってから出る） */
+RECIPES.soul_up={n:'蒼炎刀・鬼火丸',kind:'weapon',who:'soul',tier:4,mats:{titan:3,carbon:2,core:2},area:'gift',shape:'yami',proc:'hit',procs:['hit','grind'],tools:['anvil','grinder'],secret:true};
+RECIPE_ORDER.push('soul_up');
+
 /* =====================================================================
    新しいバージョンの知らせ
    ・GitHub Pages はページを最大10分ほど覚えておく（キャッシュ）ので、更新してもすぐに新しい版にならないことがある
@@ -5556,7 +5562,7 @@ async function updCheck(){if(updShown||location.protocol==='file:'||Date.now()-u
 setTimeout(updCheck,2500);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')updCheck()});
 
-const BUILD='11/15 12:48';
+const BUILD='11/15 12:52';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 

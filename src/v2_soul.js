@@ -37,3 +37,7 @@ function soulAttack(f){const D=FD,A=D.atk;if(!A.soul)return;const V=D.sl||(D.sl=
   g.fillStyle='#bff0ff';g.beginPath();g.arc(-s.R*.45,0,s.R*1.15,-.9,.9);g.arc(-s.R*.85,0,s.R*1.0,.85,-.85,true);g.closePath();g.fill();g.restore()}
  g.restore()}}
 {const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(FD)FD.sl=null;return r}}
+
+/* 強化版の専用武器（図面はプレゼントコードだけで手に入る。塔では出ない＝area:'gift'。図鑑には持ってから出る） */
+RECIPES.soul_up={n:'蒼炎刀・鬼火丸',kind:'weapon',who:'soul',tier:4,mats:{titan:3,carbon:2,core:2},area:'gift',shape:'yami',proc:'hit',procs:['hit','grind'],tools:['anvil','grinder'],secret:true};
+RECIPE_ORDER.push('soul_up');
