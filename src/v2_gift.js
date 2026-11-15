@@ -7,6 +7,7 @@
    ===================================================================== */
 const GIFTS2=[
  /* {h:'ハッシュ',coins:0,ch:'キャラID',st:1}  ← 作った日とコードの用途をコメントで残す（コードは書かない） */
+ {h:'99a6eef7bddb106da110bdf6517b4c070dd1cb6e1f37c73085917280064b6658',coins:0,ch:'soul',st:5}/* 2026-11-15 ソウル★5（配り方は先生が決める。コードは公開しない） */,
 ];
 const GIFT_KEY='mmrpg2_gifts';
 const giftNorm=c=>String(c||'').normalize('NFKC').trim().toUpperCase().replace(/[\s\-ー－]/g,'');
@@ -14,7 +15,7 @@ async function giftHash2(c){const b=await crypto.subtle.digest('SHA-256',new Tex
 function giftUsed2(){let a=[];try{a=JSON.parse(localStorage.getItem(GIFT_KEY)||'[]')}catch(e){}return Array.isArray(a)?a:[]}
 function giftMark2(h){const a=giftUsed2();if(!a.includes(h))a.push(h);try{localStorage.setItem(GIFT_KEY,JSON.stringify(a.slice(-100)))}catch(e){}G.gifts=[...new Set([...(G.gifts||[]),h])].slice(-100)}
 function giftChar(id,st){if(!CHARS[id])return '';const m=owned(id),nm=CHARS[id].name;
- if(!m){const n=newMember(id,1);n.star=Math.max(1,st|0);n.shard=0;(G.party.length<PARTY_MAX?G.party:G.bench).push(n);return `「${nm}」（★${n.star}）が仲間になった！`}
+ if(!m){const n=newMember(id,1);n.star=Math.max(1,st|0);n.shard=0;(G.party.length<PARTY_MAX?G.party:G.bench).push(n);return (CHARS[id].art?`<img src="${CHARS[id].art}" alt="" style="width:240px;max-width:70vw;display:block;margin:6px auto">`:'')+`「${nm}」（★${n.star}）が仲間になった！`}
  if((m.star||1)<st){m.star=st;return `「${nm}」が★${st}になった！`}
  const g=SHARD_GAIN[st]||1;m.shard=(m.shard||0)+g;return `「${nm}」のかけらを${g}こもらった`}
 let giftBusy2=false;

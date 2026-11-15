@@ -128,7 +128,7 @@ function invStore(pc,who){const R=RECIPES[pc.rid];
  if(R.kind==='armor')invPut({rid:pc.rid,rank:pc.rank,mul:pc.mul},R.slot);else invW().push({who:who.id,w:weaponObj(R,pc,who)})}
 const RANK_ORDER=['D','C','B','A','S','SS'];
 /* 顔アイコン（ウルフは表情つきの絵） */
-const FACE=id=>['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker',...VOL2].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
+const FACE=id=>['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker',...VOL2,'soul'].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
 /* 専用武器・防具の入れかえ */
 function openEqPick(kind,slot){const L=eqWho();let rows='',head='';
  if(kind==='w'){head=`${CHARS[L.id].name}の専用武器`;const cur=L.weapon;
@@ -174,7 +174,7 @@ function openRecipe(id){const R=RECIPES[id],c=canMake(id),pr=procOf(R);
 const ZK={tab:'char',sort:{char:'no',bp:'kind',tool:'price',mat:'floor'},own:false};
 const ZK_TABS=[['char','キャラ'],['bp','図面'],['tool','工具'],['mat','素材']];
 const ZK_SORTS={char:[['no','番号'],['star','★'],['lv','Lv'],['type','技']],bp:[['kind','種類'],['proc','加工'],['floor','階']],tool:[['price','値段'],['have','持っている']],mat:[['floor','階'],['num','数']]};
-const CHAR_ALL=()=>[...new Set([...GACHA_POOL,...Object.keys(CHARS).filter(k=>ATK[k])])].filter(k=>V2_OPEN||!VOL2.includes(k));
+const CHAR_ALL=()=>[...new Set([...GACHA_POOL,...Object.keys(CHARS).filter(k=>ATK[k])])].filter(k=>(V2_OPEN||!VOL2.includes(k))&&!SECRET_CH.includes(k));
 function openZukan(){show('zukan');renderZukan()}
 function renderZukan(){const t=ZK.tab,so=ZK.sort[t],S=ZK_SORTS[t],nx=S[(S.findIndex(x=>x[0]===so)+1)%S.length][0];
  const cnt={char:[CHAR_ALL().filter(owned).length,CHAR_ALL().length],bp:[G.bps.length,RECIPE_ORDER.length],tool:[G.tools.length,TOOL_ORDER.length],mat:[MAT_ORDER.filter(k=>G.mats[k]>0).length,MAT_ORDER.length]};

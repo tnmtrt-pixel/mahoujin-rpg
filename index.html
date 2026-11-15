@@ -1217,7 +1217,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.9.0';
+const VERSION='1.9.1';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -2800,7 +2800,7 @@ function fUpdate(f){const D=FD;D.t+=f/60;
  if(D.join&&!D.join.shown&&D.t>=FT.JOIN){const a=Math.random()*TAU;Object.assign(D.join,{shown:true,x:D.x+Math.cos(a)*230,y:D.y+Math.sin(a)*230});fBanner(`だれかの気配がする…（${CHARS[D.join.id].name}）`,180,'n_join')}
  if(FLOORS[D.floor].boss&&!D.boss&&!D.bossDone&&!D.bossCalled&&D.t>=FT.BOSS){fBossCome();return}
  if(D.stairs&&!D.stairShown&&D.t>=FT.HINT){D.stairShown=true;fBanner(D.stairs.open?'階段の気配がする！ 矢印の方へ':'階段に鍵がかかっている。強敵が鍵を持っているらしい',170,D.stairs.open?'n_floor':'n_join')}
- D.tt+=f/60;if(D.bossDone&&D.hp<1)D.hp=1;if(!D.boss&&!D.bossDone){D.st+=f/60;if(D.st>=FLOOR_MAX-60&&!D.waveWarn){D.waveWarn=1;fBanner('錆の大波が近づいている…… あと1分でこの階は錆にのまれる',200,'n_time')}if(D.st>=FLOOR_MAX-10&&D.waveWarn<2){D.waveWarn=2;fBanner('あと10秒！ 階段へ急げ',150,'n_time')}if(D.st>=FLOOR_MAX&&!D.bossDone){if(!D.wave){D.wave=1;fBanner('錆の大波！ この階はもう持たない',220,'n_time')}D.hp-=D.maxhp*(.05+.03*(D.st-FLOOR_MAX))*f/60;D.shake=Math.max(D.shake||0,3);if((D.wt=(D.wt||0)+f)>=30){D.wt=0;renderFHud()}}if(D.st>=FT.RUST&&!D.rustMsg){D.rustMsg=1;fBanner('錆が濃くなってきた…… 長居すると敵がどんどん強くなる',170,'n_time')}{const rl=rustLv();if(rl>=2&&rl>(D.rustLvMsg||1)){D.rustLvMsg=rl;fBanner(rl>=5?`錆Lv${rl}！ 敵がとても強い。早く階段へ`:`錆Lv${rl}　敵が強くなった`,150,'n_time')}}}
+ D.tt+=f/60;if(D.bossDone&&D.hp<1)D.hp=1;if(!D.boss&&!D.bossDone){D.st+=f/60;if(D.st>=FLOOR_MAX-60&&!D.waveWarn){D.waveWarn=1;fBanner('錆の大波が近づいている…… あと1分でこの階は錆にのまれる',200,'n_time')}if(D.st>=FLOOR_MAX-10&&D.waveWarn<2){D.waveWarn=2;fBanner('あと10秒！ 階段へ急げ',150,'n_time')}if(D.st>=FLOOR_MAX&&!D.bossDone){if(!D.wave){D.wave=1;fBanner('錆の大波！ この階はもう持たない',220,'n_time')}D.hp-=D.maxhp*(.05+.03*(D.st-FLOOR_MAX))*f/60*(1-Math.min(.8,D.ab.rustRes||0));D.shake=Math.max(D.shake||0,3);if((D.wt=(D.wt||0)+f)>=30){D.wt=0;renderFHud()}}if(D.st>=FT.RUST&&!D.rustMsg){D.rustMsg=1;fBanner('錆が濃くなってきた…… 長居すると敵がどんどん強くなる',170,'n_time')}{const rl=rustLv();if(rl>=2&&rl>(D.rustLvMsg||1)){D.rustLvMsg=rl;fBanner(rl>=5?`錆Lv${rl}！ 敵がとても強い。早く階段へ`:`錆Lv${rl}　敵が強くなった`,150,'n_time')}}}
  // 攻撃
  fAttacks(f);
  for(const s of D.shots){s.x+=s.vx*f;s.y+=s.vy*f;s.life-=f;s.rot+=.35*f;
@@ -3559,7 +3559,7 @@ function invStore(pc,who){const R=RECIPES[pc.rid];
  if(R.kind==='armor')invPut({rid:pc.rid,rank:pc.rank,mul:pc.mul},R.slot);else invW().push({who:who.id,w:weaponObj(R,pc,who)})}
 const RANK_ORDER=['D','C','B','A','S','SS'];
 /* 顔アイコン（ウルフは表情つきの絵） */
-const FACE=id=>['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker',...VOL2].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
+const FACE=id=>['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker',...VOL2,'soul'].includes(id)?`img/face/f_${id}.webp`:CHARS[id].img;
 /* 専用武器・防具の入れかえ */
 function openEqPick(kind,slot){const L=eqWho();let rows='',head='';
  if(kind==='w'){head=`${CHARS[L.id].name}の専用武器`;const cur=L.weapon;
@@ -3605,7 +3605,7 @@ function openRecipe(id){const R=RECIPES[id],c=canMake(id),pr=procOf(R);
 const ZK={tab:'char',sort:{char:'no',bp:'kind',tool:'price',mat:'floor'},own:false};
 const ZK_TABS=[['char','キャラ'],['bp','図面'],['tool','工具'],['mat','素材']];
 const ZK_SORTS={char:[['no','番号'],['star','★'],['lv','Lv'],['type','技']],bp:[['kind','種類'],['proc','加工'],['floor','階']],tool:[['price','値段'],['have','持っている']],mat:[['floor','階'],['num','数']]};
-const CHAR_ALL=()=>[...new Set([...GACHA_POOL,...Object.keys(CHARS).filter(k=>ATK[k])])].filter(k=>V2_OPEN||!VOL2.includes(k));
+const CHAR_ALL=()=>[...new Set([...GACHA_POOL,...Object.keys(CHARS).filter(k=>ATK[k])])].filter(k=>(V2_OPEN||!VOL2.includes(k))&&!SECRET_CH.includes(k));
 function openZukan(){show('zukan');renderZukan()}
 function renderZukan(){const t=ZK.tab,so=ZK.sort[t],S=ZK_SORTS[t],nx=S[(S.findIndex(x=>x[0]===so)+1)%S.length][0];
  const cnt={char:[CHAR_ALL().filter(owned).length,CHAR_ALL().length],bp:[G.bps.length,RECIPE_ORDER.length],tool:[G.tools.length,TOOL_ORDER.length],mat:[MAT_ORDER.filter(k=>G.mats[k]>0).length,MAT_ORDER.length]};
@@ -4690,7 +4690,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.9.0</b><ul><li>メニューに「🎁 プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「🎁 プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -5466,6 +5466,7 @@ function openBug(){const P=G&&G.prof&&G.prof.reg?G.prof:null;
    ===================================================================== */
 const GIFTS2=[
  /* {h:'ハッシュ',coins:0,ch:'キャラID',st:1}  ← 作った日とコードの用途をコメントで残す（コードは書かない） */
+ {h:'99a6eef7bddb106da110bdf6517b4c070dd1cb6e1f37c73085917280064b6658',coins:0,ch:'soul',st:5}/* 2026-11-15 ソウル★5（配り方は先生が決める。コードは公開しない） */,
 ];
 const GIFT_KEY='mmrpg2_gifts';
 const giftNorm=c=>String(c||'').normalize('NFKC').trim().toUpperCase().replace(/[\s\-ー－]/g,'');
@@ -5473,7 +5474,7 @@ async function giftHash2(c){const b=await crypto.subtle.digest('SHA-256',new Tex
 function giftUsed2(){let a=[];try{a=JSON.parse(localStorage.getItem(GIFT_KEY)||'[]')}catch(e){}return Array.isArray(a)?a:[]}
 function giftMark2(h){const a=giftUsed2();if(!a.includes(h))a.push(h);try{localStorage.setItem(GIFT_KEY,JSON.stringify(a.slice(-100)))}catch(e){}G.gifts=[...new Set([...(G.gifts||[]),h])].slice(-100)}
 function giftChar(id,st){if(!CHARS[id])return '';const m=owned(id),nm=CHARS[id].name;
- if(!m){const n=newMember(id,1);n.star=Math.max(1,st|0);n.shard=0;(G.party.length<PARTY_MAX?G.party:G.bench).push(n);return `「${nm}」（★${n.star}）が仲間になった！`}
+ if(!m){const n=newMember(id,1);n.star=Math.max(1,st|0);n.shard=0;(G.party.length<PARTY_MAX?G.party:G.bench).push(n);return (CHARS[id].art?`<img src="${CHARS[id].art}" alt="" style="width:240px;max-width:70vw;display:block;margin:6px auto">`:'')+`「${nm}」（★${n.star}）が仲間になった！`}
  if((m.star||1)<st){m.star=st;return `「${nm}」が★${st}になった！`}
  const g=SHARD_GAIN[st]||1;m.shard=(m.shard||0)+g;return `「${nm}」のかけらを${g}こもらった`}
 let giftBusy2=false;
@@ -5493,7 +5494,47 @@ function openGift(){$('sheetT').textContent='プレゼントコード';
   finally{giftBusy2=false}};
  $('sheet').classList.add('on');setTimeout(()=>inp.focus(),200)}
 
-const BUILD='11/15 12:05';
+/* =====================================================================
+   特別なキャラ「ソウル」（プレゼントコード限定・★5）
+   ・設定：塔ができる前からいる幽霊。錆が効かない。青い鬼火と、飛ぶ斬撃で戦う。いたずら好きで、よく笑う
+   ・ガチャに出ない・図鑑に出ない（SECRET_CH）。工房でつくる武器もない（はじめから持っている「幽霊の刀」だけ）
+   ・刀は工具ではないので、「工具を武器にしない」ルールにはふれない
+   ===================================================================== */
+const SECRET_CH=['soul'];
+CHARS.soul={name:'ソウル',img:'img/soul.webp',job:'sekkei',pass:{n:'錆の効かない体',d:'',k:''},sp:{n:'',d:'',shape:'yami'},art:'img/soul_act1.webp',secret:true,
+ lines:['ケケッ、錆？ そんなの効かないよ。だってボク、もう幽霊だもん。']};
+TYPE_IC['斬撃']='w_soul';
+ATK.soul={n:'蒼炎斬',type:'斬撃',ic:'pen',d:['青い炎の斬撃を飛ばす。遠くまで飛び、当たった敵をすべて斬る','2本同時に飛ばす','威力アップ','飛ばす間隔が短くなる','3本になり、斬撃が大きく、通った跡に鬼火が残る']};
+ABD.rustRes=v=>`錆の大波のダメージ−${Math.round(v*100)}%`;
+ABIL.soul=ab4(['teamAtk',.08],['cut',.08],['regen',1],['rustRes',.5]);
+WNAME.soul='刀';BASEW.soul='幽霊の刀';
+
+/* 技：飛ぶ斬撃（青い炎の三日月）。Lv5 は通った跡に鬼火が残る */
+function soulAttack(f){const D=FD,A=D.atk;if(!A.soul)return;const V=D.sl||(D.sl={cuts:[],fires:[]}),L=A.soul,c=D.cd;
+ c.soul=(c.soul||0)-f;
+ if(c.soul<=0){const t=nearestFoes(1,D.x,D.y,560)[0];const a=t?Math.atan2(t.y-D.y,t.x-D.x):(D.mva!=null?D.mva:-Math.PI/2);
+  const n=L>=5?3:L>=2?2:1,R=L>=5?38:28,dmg=16*(L>=3?1.4:1)*fPow('soul');
+  for(let i=0;i<n;i++){const aa=a+(n>1?(i-(n-1)/2)*.2:0);V.cuts.push({x:D.x,y:D.y-14,vx:Math.cos(aa)*8,vy:Math.sin(aa)*8,a:aa,life:95,R,dmg,hit:new Set(),tr:0})}
+  tone(520,.08,'sawtooth',.04,260);c.soul=(L>=4?42:58)*fCd()}
+ for(const s of V.cuts){s.x+=s.vx*f;s.y+=s.vy*f;s.life-=f;
+  for(const e of D.foes){if(e.hp<=0||s.hit.has(e.id))continue;if((e.x-s.x)**2+(e.y-s.y)**2<(e.r+s.R)**2){s.hit.add(e.id);fDamage(e,s.dmg,s.vx*.5,s.vy*.5)}}
+  if(L>=5){s.tr+=f;if(s.tr>=9){s.tr=0;V.fires.push({x:s.x,y:s.y,t:0,life:100,dmg:s.dmg*.12})}}}
+ V.cuts=V.cuts.filter(s=>s.life>0);
+ for(const p of V.fires){const tick=Math.floor((p.t+f)/20)!==Math.floor(p.t/20);p.t+=f;if(tick)for(const e of D.foes)if((e.x-p.x)**2+(e.y-p.y)**2<(e.r+20)**2)fDamage(e,p.dmg,0,0)}
+ V.fires=V.fires.filter(p=>p.t<p.life);if(V.fires.length>60)V.fires.splice(0,V.fires.length-60)}
+{const _fa=fAttacks;fAttacks=function(f){_fa(f);soulAttack(f)}}
+{const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);const V=D.sl;if(!V)return;const t=D.t;g.save();
+ for(const p of V.fires){const k=1-p.t/p.life;g.globalAlpha=.75*k;const r=10+6*Math.sin(t*12+p.x);
+  const gr=g.createRadialGradient(p.x,p.y-4,1,p.x,p.y,r+8);gr.addColorStop(0,'#e8fbff');gr.addColorStop(.4,'#5ac8ff');gr.addColorStop(1,'#1a4aff00');g.fillStyle=gr;
+  g.beginPath();g.ellipse(p.x,p.y-6,r*.7,r+6,0,0,TAU);g.fill()}
+ for(const s of V.cuts){const k=Math.min(1,s.life/20);g.save();g.translate(s.x,s.y);g.rotate(s.a);g.globalAlpha=k;
+  g.shadowColor='#3aa8ff';g.shadowBlur=14;
+  g.fillStyle='#2f6bff';g.beginPath();g.arc(-s.R*.55,0,s.R*1.25,-1.15,1.15);g.arc(-s.R*1.15,0,s.R*1.05,1.05,-1.05,true);g.closePath();g.fill();
+  g.fillStyle='#bff0ff';g.beginPath();g.arc(-s.R*.45,0,s.R*1.15,-.9,.9);g.arc(-s.R*.85,0,s.R*1.0,.85,-.85,true);g.closePath();g.fill();g.restore()}
+ g.restore()}}
+{const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(FD)FD.sl=null;return r}}
+
+const BUILD='11/15 12:12';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
