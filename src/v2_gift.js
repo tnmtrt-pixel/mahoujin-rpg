@@ -12,6 +12,7 @@ const GIFTS2=[
  {h:'a177ce2afaa88fbd8868225b480ce3c3b79ab5ec446d8a528f14618b0d062861',coins:0,ch:'fairy',st:5}/* 2026-11-15 フェアリー★5（コードは公開しない） */,
  {h:'423d883d4cf9c545f530647bb7306aa62afcac8a97e018f73839ac285151c5f8',coins:0,ch:'shadow',st:5}/* 2026-11-15 シャドー★5（コードは公開しない） */,
  {h:'dec87a10055c6c798459c5ea3ec76fd591a99cc406af0215fdf781afa20b8450',coins:0,ch:'kura',st:5}/* 2026-11-15 クーラ★5（コードは公開しない） */,
+ {h:'6440c9f538fdfa6ce179d2a83a6d61f3f72b3efca65866c1795b0f00f9b84bb4',coins:0,ch:'tako',st:5}/* 2026-11-16 タコナイン★5（コードは公開しない） */,
 ];
 const GIFT_KEY='mmrpg2_gifts';
 const giftNorm=c=>String(c||'').normalize('NFKC').trim().toUpperCase().replace(/[\s\-ー－]/g,'');
