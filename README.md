@@ -16,11 +16,26 @@ iPhone の Safari 向けのブラウザRPG。マイスターの塔のキャラ�
 
 ## ファイル
 
-- `index.html` … ゲーム本体（HTML・CSS・JavaScript を1ファイルにまとめたもの）
+- `index.html` … ゲーム本体（HTML・CSS・JavaScript を1ファイルにまとめたもの）。**直接は書きかえない**。`src/` から組み立てる
+- `src/` … 元のソースコード
+  - `src_beta.html` … 土台（第1章の試作版。古い部分は組み立てのときに取りのぞく）
+  - `v2_*.js` … 仕組みごとの部品（下の順番でつながる）
+    - `v2_module.js` 塔の戦闘・工房の土台／`v2_ui.js` ホーム・編成／`v2_gacha.js` ガチャ／`v2_grind.js` `v2_forge.js` 加工ミニゲーム／`v2_equip.js` 工房・図鑑・装備／`v2_story.js` `v2_chat.js` 会話・チャット／`v2_upper.js` 上層・お知らせ・世界地図／`v2_save.js` セーブの守り・サイコロ版からの引き継ぎ／`v2_log.js` 会話の戻る・ログ／`v2_judge.js` 審判の塔／`v2_vol2.js` ガチャvol.2の10人／`v2_words.js` 名前の単語（サイコロ版の写し）／`v2_rank.js` ランキング・プロフィール／`v2_bug.js` バグ報告
+  - `v2_ui.css` `v2_ui.html` … 画面の見た目と部品
+  - `build.py` … 組み立て用（バージョンの数字もここ）。`strip.py` … 使わなくなった古いコードを取りのぞく
 - `img/` … 画像（キャラ・敵・床・UIアイコンなど）
   - `img/ui/` … アイコン（素材・工具・武器・防具・攻撃の種類・属性・お知らせ・タブ・ランク）
   - `img/floor/` … 塔の床（下層・中層・上層）
 
 ## 更新のしかた
 
-`index.html` と `img/` を差しかえて、`VERSION` の数字を上げてから main に入れる。GitHub Pages が自動で公開しなおす（1〜2分）。
+1. `src/` の中のファイルを直す（画像は `img/` に入れる）
+2. `src/build.py` の `const VERSION` の数字を上げ、`src/v2_upper.js` のお知らせ（openNews）に書く
+3. `python3 src/build.py` を実行する → リポジトリ直下の `index.html` ができる
+4. `src/`・`index.html`・`img/` をいっしょに main に入れる。GitHub Pages が自動で公開しなおす（1〜2分）
+
+## 大切にしていること
+
+- 工具を武器にしない（技・専用武器・汎用武器にも工具を使わない）
+- 第2章（審判の塔・ガチャvol.2）は URL に `?judge` を付けたときだけ遊べる（`V2_OPEN` / `J_TEST`）。ver2.0.0 で公開
+- サーバーはサイコロ版マイスターの塔と同じ Cloudflare（リポジトリ tnmtrt-pixel/meister-tower の `server/src/mt2.js`）

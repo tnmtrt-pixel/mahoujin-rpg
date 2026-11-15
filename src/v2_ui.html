@@ -1,0 +1,32 @@
+<section id="home" class="scr">
+ <div class="gbg" aria-hidden="true"></div>
+ <div class="sart" id="hArt"></div>
+ <div class="gtop"><span class="gch" id="hName"></span><div class="gres" id="hRes"></div></div>
+ <button class="gnext" id="hBanner"></button>
+ <nav class="gmenu">
+  <button class="ggo" onclick="openSortie()"><b>出撃</b><small id="hGoT"></small></button>
+  <button class="gb" onclick="goTab('shop')"><img src="img/ui/icon0.webp" alt=""><b>工房</b></button>
+  <button class="gb" onclick="goTab('party')"><img src="img/ui/icon1.webp" alt=""><b>編成</b></button>
+  <button class="gb" onclick="goTab('zukan')"><img src="img/ui/icon3.webp" alt=""><b>図鑑</b></button>
+  <button class="gb gga" onclick="goTab('gacha')"><img src="img/ui/icon_gacha.webp" alt=""><b>ガチャ</b></button>
+  <button class="gb" onclick="openRank()"><img src="img/ui/icon_rank.webp" alt=""><b>ランキング</b></button>
+  <button class="gb" onclick="openMenu()"><img src="img/ui/icon5.webp" alt=""><b>メニュー</b></button>
+ </nav>
+ <div class="gfoot"><span class="slead" id="hLead"></span><span class="sprog"><span id="hRank"></span><span class="sbar"><i id="hRankI"></i></span></span></div>
+</section>
+<section id="gacha" class="scr"><div class="hd"><h2>ガチャ</h2></div><div id="gaBody"></div></section>
+<div id="gres" onclick="if(event.target===this)closeGacha()"><div class="grin"><div id="grCards"></div><button class="gab ok" onclick="closeGacha()"><b>OK</b></button></div></div>
+<section id="grind" class="scr"><div class="gh"><b id="gTitle"></b><small id="gSub"></small></div><div class="gst"><span id="gTime"></span><span id="gMatch"></span></div><canvas id="gcv"></canvas><div id="gWarn"></div><div class="grot"><button id="gRotL">⟲ 左に回す</button><button id="gRotR">右に回す ⟳</button></div><button class="gab ten" id="gDone"><b>仕上げる</b></button></section>
+<section id="forge" class="scr"><div class="gh"><b id="fgTitle"></b><small id="fgSub"></small></div><div class="gst"><span id="fgInfo"></span></div><canvas id="fgcv"></canvas><div id="fgBar" class="fgbar"></div><button class="gab ten" id="fgDone"><b>仕上げる</b></button></section>
+<section id="rank" class="scr"><div class="hd"><button class="rkback" onclick="openHome()" aria-label="ホームへ">‹</button><h2>ランキング</h2></div><div id="rkBody"></div></section>
+<section id="practice" class="scr"><div id="prBody"></div></section>
+<section id="zukan" class="scr"><div class="hd"><h2>図鑑</h2></div><div id="zkBody"></div></section>
+<nav id="tabs">
+ <button class="tab" data-s="shop" onclick="goTab('shop')"><img class="tic" src="img/ui/tab_shop.webp" alt=""><span>工房</span></button>
+ <button class="tab" data-s="party" onclick="goTab('party')"><img class="tic" src="img/ui/tab_party.webp" alt=""><span>編成</span></button>
+ <button class="tab mid" data-s="home" onclick="goTab('home')"><img class="tic" src="img/ui/tab_home.webp" alt=""><span>ホーム</span></button>
+ <button class="tab" data-s="gacha" onclick="goTab('gacha')"><img class="tic" src="img/ui/tab_gacha.webp" alt=""><span>ガチャ</span></button>
+ <button class="tab" data-s="zukan" onclick="goTab('zukan')"><img class="tic" src="img/ui/tab_zukan.webp" alt=""><span>図鑑</span></button>
+</nav>
+
+<div id="genPick" class="gpov"><div id="gpBody" class="gpbox"></div></div>
