@@ -1,0 +1,35 @@
+/* =====================================================================
+   プレゼントコード（メニュー →「プレゼントコード」）
+   ・コードそのものはここに書かず、ハッシュだけを置く（src/make_gift.py で作る）。リポジトリは公開なので
+   ・1つのコードは、同じ端末で1回だけ（セーブを消しても残る記録＋セーブの中の記録）
+   ・ごほうび：coins（コイン）、ch（特別なキャラ）＋st（★の数）。持っているキャラなら★を上げる
+   ・サイコロ版とは別のコード（ハッシュの前につける文字がちがう）
+   ===================================================================== */
+const GIFTS2=[
+ /* {h:'ハッシュ',coins:0,ch:'キャラID',st:1}  ← 作った日とコードの用途をコメントで残す（コードは書かない） */
+];
+const GIFT_KEY='mmrpg2_gifts';
+const giftNorm=c=>String(c||'').normalize('NFKC').trim().toUpperCase().replace(/[\s\-ー－]/g,'');
+async function giftHash2(c){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('meister-tower2:'+c));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function giftUsed2(){let a=[];try{a=JSON.parse(localStorage.getItem(GIFT_KEY)||'[]')}catch(e){}return Array.isArray(a)?a:[]}
+function giftMark2(h){const a=giftUsed2();if(!a.includes(h))a.push(h);try{localStorage.setItem(GIFT_KEY,JSON.stringify(a.slice(-100)))}catch(e){}G.gifts=[...new Set([...(G.gifts||[]),h])].slice(-100)}
+function giftChar(id,st){if(!CHARS[id])return '';const m=owned(id),nm=CHARS[id].name;
+ if(!m){const n=newMember(id,1);n.star=Math.max(1,st|0);n.shard=0;(G.party.length<PARTY_MAX?G.party:G.bench).push(n);return `「${nm}」（★${n.star}）が仲間になった！`}
+ if((m.star||1)<st){m.star=st;return `「${nm}」が★${st}になった！`}
+ const g=SHARD_GAIN[st]||1;m.shard=(m.shard||0)+g;return `「${nm}」のかけらを${g}こもらった`}
+let giftBusy2=false;
+function openGift(){$('sheetT').textContent='プレゼントコード';
+ $('sheetB').innerHTML=`<div class="gift"><div class="note">運営からもらったコードを入れると、プレゼントが受け取れます。1つのコードは1回だけ使えます。</div>
+  <input id="giftIn" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="コードを入力">
+  <button class="btn gold" id="giftGo">受け取る</button></div>`;
+ const inp=$('giftIn');
+ $('giftGo').onclick=async()=>{if(giftBusy2)return;const c=giftNorm(inp.value);if(c.length<4){say('コードを入れてください',1000);return}
+  giftBusy2=true;try{const h=await giftHash2(c),g=GIFTS2.find(x=>x.h===h);
+   if(!g){tone(180,.15,'square',.05);say('コードがちがうようです',1300);return}
+   if(giftUsed2().includes(h)||(G.gifts||[]).includes(h)){say('このコードはもう使っています',1400);return}
+   const msg=[];if(g.coins){G.coin=(G.coin|0)+g.coins;msg.push(`${g.coins}コインをもらった！`)}
+   if(g.ch){const t=giftChar(g.ch,g.st||1);if(t)msg.push(t)}
+   giftMark2(h);save();tone(880,.2,'triangle',.08,1320);closeSheet();
+   say(`🎁 プレゼント<br>${msg.join('<br>')||'受け取りました'}`,2400);if($('home').classList.contains('on'))openHome()}
+  finally{giftBusy2=false}};
+ $('sheet').classList.add('on');setTimeout(()=>inp.focus(),200)}
