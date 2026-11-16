@@ -15,3 +15,11 @@ async function updCheck(){if(updShown||location.protocol==='file:'||Date.now()-u
   document.body.appendChild(d)}catch(e){}}
 setTimeout(updCheck,2500);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')updCheck()});
+/* 画像の読みこみに失敗したまま（丸の仮の絵のまま）にならないように：失敗した画像は2秒あけて読み直す（最大5回）。
+   出撃前に、リーダーの歩く絵を先に読みこんでおく（2.0.6） */
+{const _img=img;img=function(src){let i=imgCache[src];
+ if(i&&i.complete&&!i.naturalWidth&&(i._n||0)<5){const now=performance.now();if(!i._t||now-i._t>2000){const n=new Image();n._n=(i._n||0)+1;n._t=now;n.src=src+(src.includes('?')?'&':'?')+'r'+n._n+'='+Math.floor(Date.now()/1000);imgCache[src]=n;i=n}}
+ return _img(src)}}
+function preloadLead(){try{if(!G||!G.lead)return;['down','left','right','up'].forEach(d=>img(`img/walk/${G.lead}_${d}.webp`));img(FACE(G.lead))}catch(_){}}
+{const _oh=openHome;openHome=function(){const r=_oh.apply(this,arguments);preloadLead();return r}}
+{const _s=startFloor;startFloor=function(fl){preloadLead();return _s(fl)}}
