@@ -3,13 +3,22 @@
  * ・ストーリーのふりかえり：見た場面を、セーブの印（flags・到達階）から組み立てて、もう一度再生できる
  *   （会話の中身はセーブに入れない。今のパーティで再生される）
  * チャットは前から、チャット画面で読み返せる */
-talk=function(list,bg){if(!list||!list.length)return Promise.resolve();return new Promise(res=>{let i=0;const T=$('talk');
+/* 会話に出る名前だけのボス → 敵の絵 */
+const TALK_FOE={};
+talk=function(list,bg){if(!list||!list.length)return Promise.resolve();try{list.forEach(l=>{const[id,ex]=String(l&&l[0]||'').split(':');if(id&&CHARS[id])img(ex&&(FACES[id]||[]).includes(ex)?`img/face/${id}_${ex}.webp`:(!PORTRAIT[id]&&FACE(id).includes('/face/f_')?FACE(id):CHARS[id].img))})}catch(_){}return new Promise(res=>{let i=0;const T=$('talk');
  T.classList.toggle('ev',!!bg);T.style.backgroundImage=bg?`url(img/ev/${bg}.webp)`:'';T.classList.add('on');document.body.classList.add('talking');
  let bar=$('tBar');if(!bar){bar=document.createElement('div');bar.id='tBar';bar.className='tbar';T.querySelector('.nx').before(bar)}
  bar.innerHTML=`<button id="tBack" aria-label="ひとつ前へ">◀ もどる</button><button id="tLog">ログ</button>`;
  const sh=()=>{const[rid,who,txt]=list[i];const[id,ex]=(rid||'').split(':');const c=id&&CHARS[id];const fb=$('tImg').parentNode,im=$('tImg');
-  const src=!hasFace(id)?'':c?(ex&&(FACES[id]||[]).includes(ex)?`img/face/${id}_${ex}.webp`:c.img):`img/${id}.webp`;
-  fb.style.display=src?'block':'none';if(src){im.onerror=()=>{fb.style.display='none'};im.src=src;if(src.includes('/face/'))im.style.cssText='width:118%;margin-left:-9%;margin-top:0';else portrait(im,id)}$('tWho').textContent=who||'';$('tTxt').textContent=txt;$('tTxt').scrollTop=0;
+  let src=!hasFace(id)?'':c?(ex&&(FACES[id]||[]).includes(ex)?`img/face/${id}_${ex}.webp`:c.img):`img/${id}.webp`,mode=src.includes('/face/')?'ex':'pt';
+  /* 2.0.7：顔の切り抜きがないキャラは、立ち絵の代わりに顔アイコンを使う（ずれ防止）。名前だけのボスは敵の絵を出す */
+  if(c&&mode==='pt'&&!PORTRAIT[id]){const f=FACE(id);if(f.includes('/face/f_')){src=f;mode='ic'}}
+  if(!id&&who&&TALK_FOE[who]){src=`img/foe/${TALK_FOE[who]}.webp`;mode='foe'}
+  fb.style.display=src?'block':'none';
+  if(src){const css=mode==='ex'?'width:118%;margin-left:-9%;margin-top:0':mode==='ic'?'width:100%;margin:0':mode==='foe'?'width:100%;height:100%;object-fit:contain;margin:0':null;
+   const apply=()=>{if(css!=null)im.style.cssText=css;else portrait(im,id);im.style.visibility='visible'};
+   im.onerror=()=>{fb.style.display='none'};
+   if(im.getAttribute('src')===src&&im.complete){apply()}else{im.style.visibility='hidden';im.onload=()=>{if(im.getAttribute('src')===src)apply()};im.src=src;if(im.complete&&im.naturalWidth)apply()}}$('tWho').textContent=who||'';$('tTxt').textContent=txt;$('tTxt').scrollTop=0;
   $('tBack').disabled=i===0};
  const stop=e=>{e.stopPropagation();e.preventDefault()};
  $('tBack').onclick=e=>{stop(e);if(i>0){i--;sh()}};
