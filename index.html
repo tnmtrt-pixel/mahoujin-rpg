@@ -1221,7 +1221,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='1.11.1';
+const VERSION='2.0.0';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -4662,7 +4662,7 @@ Object.assign(GEN_IC,{g_star:'wg_star',g_ring:'wg_ring'});
 
 /* ===================== 世界地図：行ったことのない場所は霧。章が進むと晴れる ===================== */
 /* 塔ごとの出撃先。ready=遊べる。進みぐあいは G.tw[塔].floor（マイスターの塔は今までどおり G.floor） */
-const TOWERS={meister:{n:'マイスターの塔',ready:true,go:()=>openDest()},judge:{n:'審判の塔',ready:false,soon:'ver2.0.0　第2章で公開'}};
+const TOWERS={meister:{n:'マイスターの塔',ready:true,go:()=>openDest()},judge:{n:'審判の塔',ready:false,soon:'11/17（火）0:00 公開'}};
 const towerFloor=k=>k==='meister'?G.floor|0:(G.tw&&G.tw[k]&&G.tw[k].floor)|0;
 const WMAP={img:'img/worldmap.webp',places:[
  {k:'tetto',tw:'meister', x:.43,y:.77,r:.25,n:'鉄灯の街',  t:'マイスターの塔',d:'夜の工業の街。塔の灯りが、街の名前のもとになった。塔には、錆を元の道具にもどす「再生の陣」が刻まれている。',open:()=>true},
@@ -4702,7 +4702,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 1.11.1</b><ul><li>やすりがけをやさしく：バリの高さのばらつきを小さく、高い所から削れて平らになりやすく、線ぴったりの許す幅を少し広く</li></ul></div><div class="news"><b>ver 1.11.0</b><ul><li>加工ミニゲーム道場で「三面図の解読」を練習できるように</li><li>（準備）vol.2 の図面は、立方体の展開図の問題で解読するように</li></ul></div><div class="news"><b>ver 1.10.10</b><ul><li>PCの大きな画面やブラウザの縮小表示で、敵が出てこなくなる不具合を修正</li></ul></div><div class="news"><b>ver 1.10.9</b><ul><li>出撃中に、まれにスティックが出ず動けなくなることがある不具合への対策</li><li>動けなくなったときは、画面を2回さわると再開できるように</li></ul></div><div class="news"><b>ver 1.10.8</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.7</b><ul><li>特別な仲間の顔アイコンと武器アイコンを新しい絵に変更</li></ul></div><div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 2.0.0</b><ul><li>第2章「審判の塔」公開（11/17 0:00から。第1章をクリアすると地図に出る）</li><li>審判の仲間ガチャ（vol.2）・お助けの仲間・段階5の装備・限定工具</li><li>vol.2 の図面は展開図で解読。道場で展開図の練習も</li></ul></div><div class="news"><b>ver 1.11.1</b><ul><li>やすりがけをやさしく：バリの高さのばらつきを小さく、高い所から削れて平らになりやすく、線ぴったりの許す幅を少し広く</li></ul></div><div class="news"><b>ver 1.11.0</b><ul><li>加工ミニゲーム道場で「三面図の解読」を練習できるように</li><li>（準備）vol.2 の図面は、立方体の展開図の問題で解読するように</li></ul></div><div class="news"><b>ver 1.10.10</b><ul><li>PCの大きな画面やブラウザの縮小表示で、敵が出てこなくなる不具合を修正</li></ul></div><div class="news"><b>ver 1.10.9</b><ul><li>出撃中に、まれにスティックが出ず動けなくなることがある不具合への対策</li><li>動けなくなったときは、画面を2回さわると再開できるように</li></ul></div><div class="news"><b>ver 1.10.8</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.7</b><ul><li>特別な仲間の顔アイコンと武器アイコンを新しい絵に変更</li></ul></div><div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -4948,8 +4948,10 @@ function openStory(){const S=storyScenes();
  * 塔を切りかえるとき、階ごとの表（FLOORS・素材・ボスの体力・推奨攻撃・お助け・ひとこと・出撃Lv）と
  * G.floor（到達階）をその塔のものに入れかえる。ホームにもどるとマイスターの塔にもどす。
  * セーブ中に審判の塔のままでも、読みこみ時（fixV2）にマイスターの塔へもどす。
- * 今は試し遊び用：URLに ?judge をつけたときだけ出撃できる。お話・お助け・階のルールはこれから */
+ * 2026-11-17 0:00 に公開（J_OPEN_AT）。それまでは URL に ?judge をつけたときだけ出撃できる */
 const J_TEST=/[?&]judge\b/.test(location.search);
+/* 第2章の公開：2026-11-17（火）0:00（日本時間）。それまでは ?judge のテスト版だけ */
+const J_OPEN_AT=Date.UTC(2026,10,16,15,0,0),J_LIVE=J_TEST||Date.now()>=J_OPEN_AT;
 const JFLOORS=[null,
  {n:'開廷の間',area:'jk',step:0,stair:1500},
  {n:'白の証言台',area:'jk',step:1,stair:1600,rule:'wb'},
@@ -5027,10 +5029,11 @@ const TW_TABLE={
   FLOORS:JFLOORS,
   FLOOR_MATS:{1:['titan','scrap'],2:['cell','scrap'],3:['carbon','titan'],4:['titan','cell'],5:['cell','carbon'],6:['carbon','titan'],7:['titan','cell'],8:['cell','carbon'],9:['carbon','titan'],10:['titan','core'],11:['cell','carbon'],12:['carbon','titan'],13:['titan','cell'],14:['cell','carbon'],15:['carbon','titan'],16:['titan','cell'],17:['cell','carbon'],18:['carbon','titan'],19:['titan','cell'],20:['core','carbon']},
   BOSS_HP:{3:3.4,6:3.6,10:4,13:4.2,16:4.4,19:4.6,20:5},
-  REC_POW:Object.fromEntries(Array.from({length:20},(_,i)=>[i+1,2300+i*70])),
+  /* 推奨の強さ：敵の体力の上がり方に合わせる（1F≒2150、10F≒3500、20F≒5350）。強いパーティ（全力7000級）にも手ごたえが残るように */
+  REC_POW:Object.fromEntries(Array.from({length:20},(_,i)=>{const h=FSCALE(18+(i+1)*1.5).hp/FSCALE(20).hp;return[i+1,Math.round(2200*h/50)*50]})),
   HELPER_FL:{},FLOOR_LINES:{},
   START_LV:{1:14,4:16,7:18,11:20,14:22,17:24},
-  feff:f=>18+(f||1)*.8}};
+  feff:f=>18+(f||1)*1.5}};  /* 2.0.0：上がり方を .8→1.5 に（20Fで第1章頂上の体力2.4倍・攻撃2.2倍） */
 const TW_SAVED={};
 function twTables(){return{FLOORS,FLOOR_MATS,BOSS_HP,REC_POW,HELPER_FL,FLOOR_LINES,START_LV}}
 const towerAt=()=>G&&G.towerAt||'meister';
@@ -5045,7 +5048,7 @@ function enterTower(k){if(!G)return;const cur=towerAt();if(cur===k)return;
  G.tw[k]=G.tw[k]||{};G.floor=G.tw[k].floor|0;G.towerAt=k}
 /* ホームにもどったら、いつもマイスターの塔 */
 {const _oh=openHome;openHome=function(){enterTower('meister');return _oh.apply(this,arguments)}}
-TOWERS.judge.ready=J_TEST;TOWERS.judge.go=()=>{enterTower('judge');openDest()};
+TOWERS.judge.ready=J_LIVE;TOWERS.judge.go=()=>{enterTower('judge');openDest()};
 if(J_TEST){const p=WMAP.places.find(q=>q.k==='judge');const o=p.open;p.open=()=>true}
 {const _od=openDest;openDest=function(){const r=_od.apply(this,arguments);const t=$('destTw');if(t)t.textContent=(TOWERS[towerAt()]||TOWERS.meister).n;return r}}
 
@@ -5086,7 +5089,7 @@ function fDrawRuleFloor(g,D,cx0,cy0,z){if(ruleOf()!=='wb')return;const T=WB_TILE
    ・V2_OPEN が false の間は、ガチャ・図鑑に出さない（いまは ?judge のテスト版だけ）
    ===================================================================== */
 const VOL2=['nero','okajun','hayate','kurogane','lionex','seraph','hakurou','guardian','libra','spino'];
-const V2_OPEN=J_TEST;
+const V2_OPEN=J_LIVE;  /* 公開日になったら vol.2 も開く */
 Object.assign(CHARS,{
  nero:    {name:'ネロ',        img:'img/nero.webp',    job:'sekkei',pass:{n:'甘い誓い',d:'',k:''},sp:{n:'',d:'',shape:'yami'},lines:['……甘いもの、持ってる？ ないなら、一緒に行く。']},
  okajun:  {name:'オカジュン',  img:'img/okajun.webp',  job:'kaji',  pass:{n:'工業魂',d:'',k:''},sp:{n:'',d:'',shape:'ch'},lines:['っしゃあ！ 拳で語るのが工業のやり方だろ！']},
@@ -6134,7 +6137,7 @@ async function updCheck(){if(updShown||location.protocol==='file:'||Date.now()-u
 setTimeout(updCheck,2500);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')updCheck()});
 
-const BUILD='11/16 22:32';
+const BUILD='11/16 22:54';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 

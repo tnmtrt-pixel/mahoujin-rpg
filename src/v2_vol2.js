@@ -4,7 +4,7 @@
    ・V2_OPEN が false の間は、ガチャ・図鑑に出さない（いまは ?judge のテスト版だけ）
    ===================================================================== */
 const VOL2=['nero','okajun','hayate','kurogane','lionex','seraph','hakurou','guardian','libra','spino'];
-const V2_OPEN=J_TEST;
+const V2_OPEN=J_LIVE;  /* 公開日になったら vol.2 も開く */
 Object.assign(CHARS,{
  nero:    {name:'ネロ',        img:'img/nero.webp',    job:'sekkei',pass:{n:'甘い誓い',d:'',k:''},sp:{n:'',d:'',shape:'yami'},lines:['……甘いもの、持ってる？ ないなら、一緒に行く。']},
  okajun:  {name:'オカジュン',  img:'img/okajun.webp',  job:'kaji',  pass:{n:'工業魂',d:'',k:''},sp:{n:'',d:'',shape:'ch'},lines:['っしゃあ！ 拳で語るのが工業のやり方だろ！']},
