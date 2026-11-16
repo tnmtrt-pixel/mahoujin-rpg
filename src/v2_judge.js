@@ -150,3 +150,6 @@ function jGavel(){tone(150,.08,'square',.12,70);setTimeout(()=>tone(150,.08,'squ
  if(!D.paused){D.gvT=(D.gvT||0)+1;if(D.gvT>=120){D.gvT=0;jGavel()}}}}
 /* 出撃先の説明も、審判の塔では審判の言葉に */
 {const _o=openDest;openDest=function(){const r=_o.apply(this,arguments);if(towerAt()==='judge'){const n=document.querySelector('#destList .note');if(n)n.innerHTML=n.innerHTML.replace('錆が濃くなり','法廷がざわめき').replace(/錆Lv/g,'ざわめきLv').replace(/「錆の大波」/g,'「判決の時」').replace(/錆の大波/g,'判決の時')}return r}}
+
+/* 会話でボスが話すとき、敵の絵を出す（2.0.7） */
+Object.keys(FOES).filter(k=>k.startsWith('j_')&&FFOE[k]&&FFOE[k].boss).forEach(k=>{TALK_FOE[FOES[k].n]=k});
