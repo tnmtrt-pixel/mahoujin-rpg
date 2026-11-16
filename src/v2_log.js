@@ -5,14 +5,14 @@
  * チャットは前から、チャット画面で読み返せる */
 /* 会話に出る名前だけのボス → 敵の絵 */
 const TALK_FOE={};
-talk=function(list,bg){if(!list||!list.length)return Promise.resolve();try{list.forEach(l=>{const[id,ex]=String(l&&l[0]||'').split(':');if(id&&CHARS[id])img(ex&&(FACES[id]||[]).includes(ex)?`img/face/${id}_${ex}.webp`:(!PORTRAIT[id]&&FACE(id).includes('/face/f_')?FACE(id):CHARS[id].img))})}catch(_){}return new Promise(res=>{let i=0;const T=$('talk');
+talk=function(list,bg){if(!list||!list.length)return Promise.resolve();try{list.forEach(l=>{const[id,ex]=String(l&&l[0]||'').split(':');if(id&&CHARS[id])img(ex&&(FACES[id]||[]).includes(ex)?`img/face/${id}_${ex}.webp`:!PORTRAIT[id]&&(FACES[id]||[]).includes('serious')?`img/face/${id}_serious.webp`:(!PORTRAIT[id]&&FACE(id).includes('/face/f_')?FACE(id):CHARS[id].img))})}catch(_){}return new Promise(res=>{let i=0;const T=$('talk');
  T.classList.toggle('ev',!!bg);T.style.backgroundImage=bg?`url(img/ev/${bg}.webp)`:'';T.classList.add('on');document.body.classList.add('talking');
  let bar=$('tBar');if(!bar){bar=document.createElement('div');bar.id='tBar';bar.className='tbar';T.querySelector('.nx').before(bar)}
  bar.innerHTML=`<button id="tBack" aria-label="ひとつ前へ">◀ もどる</button><button id="tLog">ログ</button>`;
  const sh=()=>{const[rid,who,txt]=list[i];const[id,ex]=(rid||'').split(':');const c=id&&CHARS[id];const fb=$('tImg').parentNode,im=$('tImg');
   let src=!hasFace(id)?'':c?(ex&&(FACES[id]||[]).includes(ex)?`img/face/${id}_${ex}.webp`:c.img):`img/${id}.webp`,mode=src.includes('/face/')?'ex':'pt';
   /* 2.0.7：顔の切り抜きがないキャラは、立ち絵の代わりに顔アイコンを使う（ずれ防止）。名前だけのボスは敵の絵を出す */
-  if(c&&mode==='pt'&&!PORTRAIT[id]){const f=FACE(id);if(f.includes('/face/f_')){src=f;mode='ic'}}
+  if(c&&mode==='pt'&&!PORTRAIT[id]){if((FACES[id]||[]).includes('serious')){src=`img/face/${id}_serious.webp`;mode='ex'}else{const f=FACE(id);if(f.includes('/face/f_')){src=f;mode='ic'}}}  /* 表情の指定がなければ、会話用の表情（真剣）を使う */
   if(!id&&who&&TALK_FOE[who]){src=`img/foe/${TALK_FOE[who]}.webp`;mode='foe'}
   fb.style.display=src?'block':'none';
   if(src){const css=mode==='ex'?'width:118%;margin-left:-9%;margin-top:0':mode==='ic'?'width:100%;margin:0':mode==='foe'?'width:100%;height:100%;object-fit:contain;margin:0':null;
