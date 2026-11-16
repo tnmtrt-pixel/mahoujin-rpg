@@ -2,8 +2,10 @@
  * 塔を切りかえるとき、階ごとの表（FLOORS・素材・ボスの体力・推奨攻撃・お助け・ひとこと・出撃Lv）と
  * G.floor（到達階）をその塔のものに入れかえる。ホームにもどるとマイスターの塔にもどす。
  * セーブ中に審判の塔のままでも、読みこみ時（fixV2）にマイスターの塔へもどす。
- * 今は試し遊び用：URLに ?judge をつけたときだけ出撃できる。お話・お助け・階のルールはこれから */
+ * 2026-11-17 0:00 に公開（J_OPEN_AT）。それまでは URL に ?judge をつけたときだけ出撃できる */
 const J_TEST=/[?&]judge\b/.test(location.search);
+/* 第2章の公開：2026-11-17（火）0:00（日本時間）。それまでは ?judge のテスト版だけ */
+const J_OPEN_AT=Date.UTC(2026,10,16,15,0,0),J_LIVE=J_TEST||Date.now()>=J_OPEN_AT;
 const JFLOORS=[null,
  {n:'開廷の間',area:'jk',step:0,stair:1500},
  {n:'白の証言台',area:'jk',step:1,stair:1600,rule:'wb'},
@@ -81,10 +83,11 @@ const TW_TABLE={
   FLOORS:JFLOORS,
   FLOOR_MATS:{1:['titan','scrap'],2:['cell','scrap'],3:['carbon','titan'],4:['titan','cell'],5:['cell','carbon'],6:['carbon','titan'],7:['titan','cell'],8:['cell','carbon'],9:['carbon','titan'],10:['titan','core'],11:['cell','carbon'],12:['carbon','titan'],13:['titan','cell'],14:['cell','carbon'],15:['carbon','titan'],16:['titan','cell'],17:['cell','carbon'],18:['carbon','titan'],19:['titan','cell'],20:['core','carbon']},
   BOSS_HP:{3:3.4,6:3.6,10:4,13:4.2,16:4.4,19:4.6,20:5},
-  REC_POW:Object.fromEntries(Array.from({length:20},(_,i)=>[i+1,2300+i*70])),
+  /* 推奨の強さ：敵の体力の上がり方に合わせる（1F≒2150、10F≒3500、20F≒5350）。強いパーティ（全力7000級）にも手ごたえが残るように */
+  REC_POW:Object.fromEntries(Array.from({length:20},(_,i)=>{const h=FSCALE(18+(i+1)*1.5).hp/FSCALE(20).hp;return[i+1,Math.round(2200*h/50)*50]})),
   HELPER_FL:{},FLOOR_LINES:{},
   START_LV:{1:14,4:16,7:18,11:20,14:22,17:24},
-  feff:f=>18+(f||1)*.8}};
+  feff:f=>18+(f||1)*1.5}};  /* 2.0.0：上がり方を .8→1.5 に（20Fで第1章頂上の体力2.4倍・攻撃2.2倍） */
 const TW_SAVED={};
 function twTables(){return{FLOORS,FLOOR_MATS,BOSS_HP,REC_POW,HELPER_FL,FLOOR_LINES,START_LV}}
 const towerAt=()=>G&&G.towerAt||'meister';
@@ -99,7 +102,7 @@ function enterTower(k){if(!G)return;const cur=towerAt();if(cur===k)return;
  G.tw[k]=G.tw[k]||{};G.floor=G.tw[k].floor|0;G.towerAt=k}
 /* ホームにもどったら、いつもマイスターの塔 */
 {const _oh=openHome;openHome=function(){enterTower('meister');return _oh.apply(this,arguments)}}
-TOWERS.judge.ready=J_TEST;TOWERS.judge.go=()=>{enterTower('judge');openDest()};
+TOWERS.judge.ready=J_LIVE;TOWERS.judge.go=()=>{enterTower('judge');openDest()};
 if(J_TEST){const p=WMAP.places.find(q=>q.k==='judge');const o=p.open;p.open=()=>true}
 {const _od=openDest;openDest=function(){const r=_od.apply(this,arguments);const t=$('destTw');if(t)t.textContent=(TOWERS[towerAt()]||TOWERS.meister).n;return r}}
 
