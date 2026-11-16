@@ -221,15 +221,17 @@ function runFile(o){return new Promise(res=>{
  const tier=o.tier||1,M=FILE_SEG[tier],AM=assistMul(o);
  const {cv,g,W,H}=forgeOpen(o.title||'やすりがけ','左右に大きくこすってバリを取る。まっすぐ・同じ速さで。削りすぎると線より下がる','t_file');
  const x0=W*.1,x1=W*.9,top=H*.42,unit=H*.06;
- const b=Array.from({length:M},(_,i)=>.85+Math.random()*.3+(i%6===0?.25:0));     /* バリの高さ（1＝unit） */
+ const b=Array.from({length:M},(_,i)=>.9+Math.random()*.2+(i%6===0?.15:0));     /* バリの高さ（1＝unit）。1.11.1でばらつきを小さく（もとは .85〜1.15＋高い所 .25） */
  let pid=null,pts=[],done=false,raf=0,last=0,strokes=0,msg='',msgT=0,fx=-1,fy=-1,parts=[];
  const segAt=x=>Math.floor((x-x0)/(x1-x0)*M);
- const segQ=v=>v>=0?Math.max(0,1-v/(.55*AM)):Math.max(0,1-(-v)/(.35*AM));
+ const segQ=v=>{const a=Math.abs(v)-.03;if(a<=0)return 1;return v>0?Math.max(0,1-a/(.55*AM)):Math.max(0,1-a/(.38*AM))};  /* 線の±0.03は満点 */
  const score=()=>Math.round(b.reduce((s,v)=>s+segQ(v),0)/M*100);
  function stroke(){if(pts.length<4)return;const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]),L=Math.max(...xs)-Math.min(...xs);
   const t=(pts[pts.length-1][2]-pts[0][2])/1000||.01,v=L/t,ym=ys.reduce((a,c)=>a+c,0)/ys.length,dev=Math.max(...ys.map(y=>Math.abs(y-ym)));
   const lq=Math.min(1,L/((x1-x0)*.45)),sq=Math.max(.2,1-dev/(28*AM)),vq=v<180?Math.max(.3,v/180):v>1000?Math.max(.3,1-(v-1000)/1000):1,q=lq*sq*vq;
-  const a=Math.max(0,segAt(Math.min(...xs))),z=Math.min(M-1,segAt(Math.max(...xs)));for(let i=a;i<=z;i++)b[i]-=(.05+.13*q)*(tier===1?1.15:1);
+  const FH=W*.12,a=Math.max(0,segAt(Math.min(...xs)-FH)),z=Math.min(M-1,segAt(Math.max(...xs)+FH));  /* やすりには長さがあるので、指の動いた幅より少し広く当たる *//* やすりは高い所から当たる：まわりより高いバリほど多く削れる（だんだん平らになる） */
+  let m=0,cn=0;for(let i=a;i<=z;i++){m+=Math.max(0,b[i]);cn++}m=Math.max(.05,m/Math.max(1,cn));
+  for(let i=a;i<=z;i++)b[i]-=(.05+.13*q)*(tier===1?1.15:1)*(b[i]>0?Math.max(.6,Math.min(1.4,b[i]/m))*Math.max(.18,Math.min(1,b[i]/.35)):.18);  /* 線に近づくと少しずつしか削れない（仕上げ） */
   strokes++;msg=q>.8?'いいストローク！':lq<.6?'もっと大きく':sq<.6?'まっすぐに':vq<.7?(v<180?'もう少し速く':'速すぎ'):'もう少し';msgT=1;tone(220+q*200,.05,'sawtooth',.04,160);
   $('fgInfo').textContent=`仕上がり ${score()}点　ストローク ${strokes}`}
  function finish(){if(done)return;done=true;cancelAnimationFrame(raf);cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;$('fgDone').onclick=null;res({score:score(),reach:1})}
