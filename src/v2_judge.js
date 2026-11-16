@@ -148,3 +148,5 @@ function jGavel(){tone(150,.08,'square',.12,70);setTimeout(()=>tone(150,.08,'squ
 {const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);if(!D.wave||D.boss||towerAt()!=='judge')return;
  const ph=Math.floor(D.t*1.5)%2;g.save();g.setTransform(1,0,0,1,0,0);g.globalAlpha=.16+.08*Math.sin(D.t*6);g.fillStyle=ph?'#f4f0ff':'#0a0614';g.fillRect(0,0,g.canvas.width,g.canvas.height);g.restore();
  if(!D.paused){D.gvT=(D.gvT||0)+1;if(D.gvT>=120){D.gvT=0;jGavel()}}}}
+/* 出撃先の説明も、審判の塔では審判の言葉に */
+{const _o=openDest;openDest=function(){const r=_o.apply(this,arguments);if(towerAt()==='judge'){const n=document.querySelector('#destList .note');if(n)n.innerHTML=n.innerHTML.replace('錆が濃くなり','法廷がざわめき').replace(/錆Lv/g,'ざわめきLv').replace(/「錆の大波」/g,'「判決の時」').replace(/錆の大波/g,'判決の時')}return r}}
