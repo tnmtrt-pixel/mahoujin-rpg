@@ -140,7 +140,9 @@ function fDrawRuleFloor(g,D,cx0,cy0,z){if(ruleOf()!=='wb')return;const T=WB_TILE
 /* 審判の塔の「長居の上限」＝判決の時（2.0.0）。削れ方は第1章の錆の大波と同じ。名前と演出だけ変える */
 const J_BANNER={'錆の大波が近づいている…… あと1分でこの階は錆にのまれる':'判決の時が近づいている…… あと1分で判決が下る',
  '錆の大波！ この階はもう持たない':'判決の時！ 木槌が鳴りひびく'};
-{const _b=fBanner;fBanner=function(t,...a){if(towerAt()==='judge'&&J_BANNER[t]){t=J_BANNER[t];if(/判決の時！/.test(t))jGavel()}return _b(t,...a)}}
+J_BANNER['錆が濃くなってきた…… 長居すると敵がどんどん強くなる']='法廷がざわめいてきた…… 長居すると敵がどんどん強くなる';
+{const _b=fBanner;fBanner=function(t,...a){if(towerAt()==='judge'){if(J_BANNER[t]){t=J_BANNER[t];if(/判決の時！/.test(t))jGavel()}else t=String(t).replace(/錆Lv/g,'ざわめきLv')}return _b(t,...a)}}
+
 function jGavel(){tone(150,.08,'square',.12,70);setTimeout(()=>tone(150,.08,'square',.12,70),160)}
 /* 画面が白と黒に点滅し、2秒ごとに木槌の音 */
 {const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);if(!D.wave||D.boss||towerAt()!=='judge')return;
