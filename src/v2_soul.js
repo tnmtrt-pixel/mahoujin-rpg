@@ -9,7 +9,7 @@ CHARS.soul={name:'ソウル',img:'img/soul.webp',job:'sekkei',pass:{n:'錆の効
  lines:['ケケッ、錆？ そんなの効かないよ。だってボク、もう幽霊だもん。']};
 TYPE_IC['斬撃']='w_soul';
 ATK.soul={n:'蒼炎斬',type:'斬撃',ic:'pen',d:['青い炎の斬撃を飛ばす。遠くまで飛び、当たった敵をすべて斬る','2本同時に飛ばす','威力アップ','飛ばす間隔が短くなる','3本になり、斬撃が大きく、通った跡に鬼火が残る']};
-ABD.rustRes=v=>`錆の大波のダメージ−${Math.round(v*100)}%`;
+ABD.rustRes=v=>`錆の大波・判決の時のダメージ−${Math.round(v*100)}%`;
 ABIL.soul=ab4(['teamAtk',.08],['cut',.08],['regen',1],['rustRes',.5]);
 WNAME.soul='刀';BASEW.soul='幽霊の刀';
 
