@@ -368,3 +368,8 @@ async function runPractice(k,tt,back){const t=tt||prTier,st='練習・';let r;
  const rank=craftRank(r.score,r.reach==null?1:r.reach),B=prBest(),key=k+t,best=B[key]==null||r.score>B[key];if(best){B[key]=r.score;prSave(B)}
  await say(`${PROC_LBL[k]}（${KANJI_TIER[t]}）<br><span class="big">${r.score}</span> 点　${RKIC(rank,40)}${best?'<br><span style="font-size:14px;color:#ffd060">ベスト更新！</span>':''}`,1600);(back||openPractice)()}
 if(/practice/.test(location.search+location.hash))addEventListener('load',()=>setTimeout(openPractice,80));
+/* 汎用武器は種類ごとに1本。今より低いランクができたときは、換金所の値段ぶんのコインに替える（2.0.4） */
+{const _s=showCraftResult;showCraftResult=function(pc){_s(pc);const R=pc&&RECIPES[pc.rid];if(!R||R.kind!=='gen')return;const old=G.gen&&G.gen[pc.rid];
+ if(!old||RANK_ORDER.indexOf(pc.rank)>=RANK_ORDER.indexOf(old.rank))return;const pr=sellPrice(pc.rid,pc.rank);
+ $('resP').insertAdjacentHTML('beforeend',`<div class="note" style="text-align:center;margin-top:6px;color:var(--gold)">すでに ${RKIC(old.rank,18)} を持っているので、${UIMG('coin',18)} <b>${pr}</b> コインに替える（換金所の値段）</div>`);
+ $('resBtns').innerHTML='';addBtn(`${pr}コインを受け取る`,()=>{if(!G.pendCraft)return;delete G.pendCraft;G.coin=(G.coin|0)+pr;save();tone(880,.15,'triangle',.1,1320);openShop()},'gold')}}
