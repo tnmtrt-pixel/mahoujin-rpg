@@ -30,3 +30,5 @@ function takumiAttack(f){const D=FD,A=D.atk;if(!A.takumi)return;const V=D.tk||(D
   g.fillStyle='#ffd25a';[[l.x1,l.y1],[mx,my]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,5,0,TAU);g.fill()})}
  g.restore()}}
 {const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(FD)FD.tk=null;return r}}
+
+FACES.takumi=['smile','worry','serious'];
