@@ -370,6 +370,11 @@ async function runPractice(k,tt,back){const t=tt||prTier,st='練習・';let r;
 if(/practice/.test(location.search+location.hash))addEventListener('load',()=>setTimeout(openPractice,80));
 /* 汎用武器は種類ごとに1本。今より低いランクができたときは、換金所の値段ぶんのコインに替える（2.0.4） */
 {const _s=showCraftResult;showCraftResult=function(pc){_s(pc);const R=pc&&RECIPES[pc.rid];if(!R||R.kind!=='gen')return;const old=G.gen&&G.gen[pc.rid];
- if(!old||RANK_ORDER.indexOf(pc.rank)>=RANK_ORDER.indexOf(old.rank))return;const pr=sellPrice(pc.rid,pc.rank);
+ if(!old||RANK_ORDER.indexOf(pc.rank)>RANK_ORDER.indexOf(old.rank))return;const pr=sellPrice(pc.rid,pc.rank);
+ /* 同じランク：今と新しいのを並べて、どちらかを選ぶ。残さないほうはコインに替える（2.0.10） */
+ if(pc.rank===old.rank){const row=(t,w)=>`<div class="note" style="margin:4px 0"><b>${t}</b>：${RKIC(w.rank,16)} 威力×${(+w.mul||1).toFixed(2)}　${w.attr?attrTxt(w.attr):'属性なし'}</div>`;
+  $('resP').insertAdjacentHTML('beforeend',`<div style="margin-top:8px;text-align:left">${row('今の武器',old)}${row('新しい武器',pc)}</div><div class="note" style="text-align:center;color:var(--gold)">汎用武器は種類ごとに1本。残さないほうは ${UIMG('coin',16)} <b>${pr}</b> コインに替える</div>`);
+  const fin=keepNew=>{if(!G.pendCraft)return;delete G.pendCraft;if(keepNew)genGet(pc);G.coin=(G.coin|0)+pr;save();tone(880,.15,'triangle',.1,1320);openShop()};
+  $('resBtns').innerHTML='';addBtn('新しいほうにする',()=>fin(true),'gold');addBtn(`今のままにする（${pr}コイン）`,()=>fin(false));return}
  $('resP').insertAdjacentHTML('beforeend',`<div class="note" style="text-align:center;margin-top:6px;color:var(--gold)">すでに ${RKIC(old.rank,18)} を持っているので、${UIMG('coin',18)} <b>${pr}</b> コインに替える（換金所の値段）</div>`);
  $('resBtns').innerHTML='';addBtn(`${pr}コインを受け取る`,()=>{if(!G.pendCraft)return;delete G.pendCraft;G.coin=(G.coin|0)+pr;save();tone(880,.15,'triangle',.1,1320);openShop()},'gold')}}
