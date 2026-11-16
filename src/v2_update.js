@@ -23,3 +23,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 function preloadLead(){try{if(!G||!G.lead)return;['down','left','right','up'].forEach(d=>img(`img/walk/${G.lead}_${d}.webp`));img(FACE(G.lead))}catch(_){}}
 {const _oh=openHome;openHome=function(){const r=_oh.apply(this,arguments);preloadLead();return r}}
 {const _s=startFloor;startFloor=function(fl){preloadLead();return _s(fl)}}
+/* 出撃の前に、その層の敵・強敵・ボスの絵を先に読みこむ（ボスが丸で出ないように）（2.0.9） */
+function preloadFoes(fl){try{const F=FLOORS[fl],A=F&&FAREA[F.area];if(!A)return;const ks=new Set();(A.mix||[]).forEach(m=>(m[1]||[]).forEach(k=>ks.add(k)));if(A.elite)ks.add(A.elite);if(A.boss)ks.add(A.boss);const ab=AREAS[F.area]&&AREAS[F.area].boss;if(ab)ks.add(ab);
+ ks.forEach(k=>{const D=FFOE[k];if(!D)return;img('img/foe/'+k+'.webp');if(D.base)img('img/foe/'+D.base+'.webp');if(D.src)img(D.src)})}catch(_){}}
+{const _s=startFloor;startFloor=function(fl){preloadFoes(fl);const nb=FLOORS[(fl|0)+1];if(nb)preloadFoes((fl|0)+1);return _s(fl)}}
