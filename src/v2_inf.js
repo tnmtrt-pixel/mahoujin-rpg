@@ -79,6 +79,8 @@ function infSnap(){const D=FD;if(!D||towerAt()!=='inf')return;const R=G.infRun||
   if(G.infResume&&R&&R.fl===fl){const D=FD;D.lv=R.lv||1;D.xp=R.xp||0;D.need=R.need||D.need;if(R.atk)Object.assign(D.atk,R.atk);if(R.ps)Object.assign(D.ps,R.ps);D.hp=Math.max(1,Math.round(D.maxhp*(R.hp||1)));D.kills=R.kills|0;D.pendingLv=R.pend|0;D.startFl=R.startFl||1;renderFHud()}
   G.infResume=false;FD.infStart=(infRun()&&infRun().startFl)||1;infSnap()}return r}}
 {const _a=fAdvance;fAdvance=async function(nf){const r=await _a.apply(this,arguments);if(towerAt()==='inf')infSnap();return r}}
+/* アプリを閉じる・ほかのアプリへ切りかえるときも、いまの体力とレベルを残す */
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&FD&&FD.run&&!FD.ending&&towerAt()==='inf'&&G.infRun)try{infSnap()}catch(_){}});
 /* 階をクリアしたら結晶。ランキング用の最高記録も */
 function infGain(fl){const n=(fl>50?2:1)+(fl%10===0?5:0);G.mats.mcrys=(G.mats.mcrys|0)+n;if(G.infRun)G.infRun.got=(G.infRun.got|0)+n;if(FD)FD.infGot=(FD.infGot|0)+n;if(fl>(G.infBest|0)){G.infBest=fl;if(G.prof)G.prof.dirty=1}
  if(FD)FD.pops.push({x:FD.x,y:FD.y-60,v:`記憶の結晶 +${n}`,t:0});return n}
@@ -87,11 +89,12 @@ function infGain(fl){const n=(fl>50?2:1)+(fl%10===0?5:0);G.mats.mcrys=(G.mats.mc
  const fl=D.floor,FLR=FLOORS[fl],k=D.area;const first=commitFloor(fl);infGain(fl);sfx.win&&sfx.win();
  try{if(FLR.boss){if(first&&BOSS_WIN[k])await talk(storyFit(BOSS_WIN[k],null,['onmyo','takumi','mouse','robot']));
    if(fl>=50&&!G.flags.inf50){G.flags.inf50=1;save();await talk(storyFit(INF_50,null,['onmyo','takumi','mouse','robot']),'ev_inf_50')}
-   if(!await fChoice(fl)){infSnap();Object.assign(G.infRun,{fl:fl+1,hp:Math.min(1,(D.hp+D.maxhp*.2)/D.maxhp)});save();fEnd('home');return}}
+   if(!await fChoice(fl)){infSnap();D.infKept=1;Object.assign(G.infRun,{fl:fl+1,hp:Math.min(1,(D.hp+D.maxhp*.2)/D.maxhp)});save();fEnd('home');return}}
   await fAdvance(fl+1)}
  finally{if(FD===D&&D.run)D.climbing=false}}}
 /* 終わり：倒れたら挑戦はおしまい。帰っただけなら続きから */
-{const _e=fEnd;fEnd=function(why){const D0=FD||{},inf=towerAt()==='inf'&&FD&&!FD.ending;if(inf&&why==='dead'){G.infLast=G.infRun?{fl:FD.floor,got:G.infRun.got|0}:null;G.infRun=null;save()}
+{const _e=fEnd;fEnd=function(why){const D0=FD||{},inf=towerAt()==='inf'&&FD&&!FD.ending;if(inf&&why!=='dead'&&!FD.infKept&&G.infRun)infSnap();  /* 帰る・とちゅうで帰る：いまの体力とレベルのまま残す（2.1.1） */
+ if(inf&&why==='dead'){G.infLast=G.infRun?{fl:FD.floor,got:G.infRun.got|0}:null;G.infRun=null;save()}
  const r=_e.apply(this,arguments);
  if(inf){const R=infRun(),b=$('resBtns'),gz=document.querySelector('#resP .rzg'),gn=D0.infGot|0;
   if(gz&&gn){if(!gz.querySelector('.rzt'))gz.innerHTML='';gz.insertAdjacentHTML('beforeend',`<div class="rzt">${MIC('mcrys',34)}<b>×${gn}</b><i>記憶の結晶</i></div>`)}if(b){b.innerHTML='';addBtn(R?`続きから（${R.fl}階）`:'1階から挑戦',()=>{$('result').classList.remove('fres');enterTower('inf');infGo(!!R)},'gold');addBtn('ホームへ',afterField)}
