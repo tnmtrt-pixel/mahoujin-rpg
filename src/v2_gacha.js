@@ -18,11 +18,11 @@ Object.assign(ATK,{
  tsukiyo:{n:'流れ星',     type:'降下',ic:'pen',    d:['敵の上に星が落ちる','星が増える','威力アップ','星が増える','落ちる範囲が広がる']},
  onmyo:  {n:'式神',       type:'追尾',ic:'pen',    d:['敵を追いかける札を飛ばす','札が増える','威力アップ','つらぬく','札が増える']},
  rocker: {n:'ギター音波', type:'波動',ic:'hammer', d:['広がる音の輪で敵を押し返す','威力アップ','輪が大きくなる','間隔が短くなる','強く押し返す']}});
-const ABD={teamAtk:v=>`チームの攻撃が+${Math.round(v*100)}%`,hp:v=>`チームの最大体力+${v}`,cut:v=>`受けるダメージ−${Math.round(v*100)}%`,regen:v=>`10秒ごとに体力を${v}回復`,pick:v=>`吸い寄せる範囲+${Math.round(v*100)}%`,revive:v=>`1回だけ、力つきても体力${Math.round(v*100)}%で立ち上がる`,xp:v=>`経験値+${Math.round(v*100)}%`,lvSpd:v=>`レベルアップごとに移動速度が上昇（最大${Math.round(v*100)}%）`};
+const ABD={teamAtk:v=>`チームの攻撃が+${Math.round(v*100)}%`,hp:v=>`チームの最大体力+${v}`,cut:v=>`受けるダメージ−${Math.round(v*100)}%`,regen:v=>`10秒ごとに体力を${v}回復`,pick:v=>`吸い寄せる範囲+${Math.round(v*100)}%`,revive:v=>`力つきても体力${Math.round(v*100)}%で立ち上がる（全員で1回。持つ仲間の分だけ足される）`,xp:v=>`経験値+${Math.round(v*100)}%`,lvSpd:v=>`レベルアップごとに移動速度が上昇（最大${Math.round(v*100)}%）`};
 const ab4=(...a)=>a.map(([k,v])=>({k,v,d:ABD[k](v)}));
 Object.assign(ABIL,{
  gorilla:ab4(['teamAtk',.05],['hp',10],['teamAtk',.08],['cut',.05]),
- mouse:  ab4(['regen',1],['pick',.1],['hp',10],['revive',.3]),
+ mouse:  ab4(['regen',1],['pick',.1],['hp',10],['revive',.25]),
  robot:  ab4(['cut',.05],['hp',15],['teamAtk',.06],['cut',.08]),
  tsukiyo:ab4(['xp',.05],['pick',.1],['xp',.1],['lvSpd',.08]),
  onmyo:  ab4(['teamAtk',.05],['cut',.05],['xp',.05],['teamAtk',.1]),

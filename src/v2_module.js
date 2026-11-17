@@ -435,7 +435,7 @@ function fUpdate(f){const D=FD;D.t+=f/60;
  D.pops.forEach(p=>p.t+=f);D.pops=D.pops.filter(p=>p.t<30);D.fx.forEach(p=>p.t+=f);D.fx=D.fx.filter(p=>p.t<16);
  D.shake=Math.max(0,D.shake-f);D.warn=Math.max(0,D.warn-f);
  if(D.ab.regen){D.rg=(D.rg||0)+f;if(D.rg>=600){D.rg=0;D.hp=Math.min(D.maxhp,D.hp+D.ab.regen);renderFHud()}}
- if(D.hp<=0&&D.ab.revive&&!D.revived&&!D.bossDone){D.revived=true;D.hp=D.maxhp*D.ab.revive;D.inv=120;fBanner('ギアフォックスの応急修理！ 立ち上がった！',160)}
+ if(D.hp<=0&&D.ab.revive&&!D.revived&&!D.bossDone){D.revived=true;const rv=Math.min(1,D.ab.revive);D.hp=D.maxhp*rv;D.inv=120;fBanner(`仲間の力で立ち上がった！ 体力${Math.round(rv*100)}%`,160)}
  if(D.hp<=0&&!D.bossDone)fEnd('dead')}
 
 /* ---------- 描く ---------- */
