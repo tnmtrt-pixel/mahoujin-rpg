@@ -68,15 +68,28 @@ const infRun=()=>G&&G.infRun&&G.infRun.fl>0?G.infRun:null;
  $('destList').innerHTML=`<div class="note" style="margin-bottom:6px">終わりのない塔。毎回<b>1階から、Lv1から</b>登る。階段で上へ進み続け、倒れたら挑戦はおしまい。とちゅうで帰ったりアプリを閉じたりしても、次は同じ挑戦の続きから。長くいると「ノイズLv」が上がって敵が強くなり、5分をこえると「陣のゆがみ」でHPがけずれ続ける。</div>`+
   (R?`<button class="flr next" id="infCont"><span class="fn">${R.fl}F</span><span class="ft"><b>続きから（${R.fl}階）</b><small>Lv${R.lv}　体力 ${Math.round((R.hp||1)*100)}%　この挑戦で ${R.got|0} 個の記憶の結晶</small><span class="drec ${teamPow()>=REC_POW[R.fl]?'ok':'ng'}">推奨戦力 ${REC_POW[R.fl]}　いま ${teamPow()}</span></span><span class="fs">${UIMG('n_floor',26)}再開</span></button>`:'')+
   `<button class="flr ${R?'':'next'}" id="infNew"><span class="fn">1F</span><span class="ft"><b>${R?'はじめから（1階）':'1階から挑戦'}</b><small>${R?'いまの挑戦はおしまいになる':'Lv1 から登る'}</small><span class="drec ok">推奨戦力 ${REC_POW[1]}〜　いま ${teamPow()}</span></span><span class="fs">${UIMG('n_unlock',26)}出撃</span></button>`+
-  `<div class="note" style="text-align:center;margin-top:8px">この塔での最高：${best}F　／　記憶の結晶 ${G.mats.mcrys|0} 個</div>`;
+  infPartyHTML(R)+`<div class="note" style="text-align:center;margin-top:8px">この塔での最高：${best}F　／　記憶の結晶 ${G.mats.mcrys|0} 個</div>`;
  const c=$('infCont');if(c)c.onclick=()=>infGo(true);
+ const pe=$('infParty');if(pe)pe.onclick=()=>{partySel=G.lead;openParty()};
  $('infNew').onclick=()=>{if(infRun()&&!confirm('いまの挑戦をやめて、1階からやり直しますか？'))return;infGo(false)}}}
+/* 出撃先に出す：いまの編成と、続きの挑戦で覚えている技 */
+function infAtkNow(){const a={[G.lead]:1};G.party.forEach(m=>a[m.id]=1);genImpls().forEach(k=>a[k]=1);return a}
+function infPartyHTML(R){const ids=[G.lead,...G.party.map(m=>m.id).filter(id=>id!==G.lead)],gn={};genEqList().forEach(r=>{const x=RECIPES[r];if(x&&x.impl)gn[x.impl]=x.n});
+ const face=(id,s)=>`<img src="${FACE(id)}" alt="" style="width:${s}px;height:${s}px;border-radius:8px;object-fit:cover;background:#1c2233;vertical-align:middle">`;
+ let h=`<div class="note" style="margin-top:10px"><b>いまの編成</b>　チーム戦力 ${teamPow()}<div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0">`+
+  ids.map(id=>`<span style="display:inline-flex;flex-direction:column;align-items:center;width:58px;font-size:10px;line-height:1.2">${face(id,44)}<span>${id===G.lead?'★':''}${cnm(id)}</span></span>`).join('')+
+  `</div><button class="btn small" id="infParty">編成を変える</button></div>`;
+ if(R&&R.atk){const now=infAtkNow(),ks=Object.keys(R.atk).filter(k=>(R.atk[k]|0)>0);
+  if(ks.length)h+=`<div class="note" style="margin-top:6px"><b>この挑戦で覚えている技</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0">`+
+   ks.map(k=>{const lost=!now[k];return `<span style="display:inline-flex;flex-direction:column;align-items:center;width:58px;font-size:10px;line-height:1.2;${lost?'opacity:.45':''}">${face(k,36)}<span>${gn[k]&&!G.party.some(m=>m.id===k)&&k!==G.lead?gn[k]:cnm(k)}</span><b style="color:${lost?'#ff8a8a':'#9be39b'}">${lost?'消える':'Lv'+R.atk[k]}</b></span>`}).join('')+
+   `</div>${ks.some(k=>!now[k])?'<small style="color:#ff8a8a">編成から外した仲間の技は、続きから始めると消える（新しく入れた仲間の技は1から）</small>':'<small>編成を変えると、外した仲間の技は消え、新しく入れた仲間の技は1から始まる。レベルと体力はそのまま</small>'}</div>`}
+ return h}
 async function infGo(cont){const R=cont?infRun():null;if(!R){G.infRun={fl:1,lv:1,got:0,t0:Date.now()};save()}G.infResume=!!R;await goFloor(R?R.fl:1)}
 /* 階に入ったら挑戦の続きを残す。再開のときはレベル・技・体力を戻す */
 function infSnap(){const D=FD;if(!D||towerAt()!=='inf')return;const R=G.infRun||(G.infRun={got:0,t0:Date.now()});
- Object.assign(R,{fl:D.floor,lv:D.lv,xp:D.xp,need:D.need,atk:{...D.atk},ps:{...D.ps},hp:D.maxhp?D.hp/D.maxhp:1,kills:D.kills|0,pend:D.pendingLv|0});save()}
+ Object.assign(R,{fl:D.floor,lv:D.lv,xp:D.xp,need:D.need,atk:{...D.atk},ps:{...D.ps},hp:D.maxhp?D.hp/D.maxhp:1,kills:D.kills|0,pend:D.pendingLv|0,rev:D.revived?1:0});save()}
 {const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(towerAt()==='inf'&&FD){const R=infRun();
-  if(G.infResume&&R&&R.fl===fl){const D=FD;D.lv=R.lv||1;D.xp=R.xp||0;D.need=R.need||D.need;if(R.atk)Object.assign(D.atk,R.atk);if(R.ps)Object.assign(D.ps,R.ps);D.hp=Math.max(1,Math.round(D.maxhp*(R.hp||1)));D.kills=R.kills|0;D.pendingLv=R.pend|0;D.startFl=R.startFl||1;renderFHud()}
+  if(G.infResume&&R&&R.fl===fl){const D=FD;D.lv=R.lv||1;D.xp=R.xp||0;D.need=R.need||D.need;if(R.atk)Object.keys(D.atk).forEach(k=>{if(k in R.atk)D.atk[k]=Math.max(D.atk[k],R.atk[k]|0)});  /* 技は今いる仲間（と汎用武器）の分だけ戻す。外した仲間の技は消える（2.1.3） */if(R.ps)Object.assign(D.ps,R.ps);D.hp=Math.max(1,Math.round(D.maxhp*(R.hp||1)));D.kills=R.kills|0;D.pendingLv=R.pend|0;D.revived=!!R.rev;  /* 復活は1回の挑戦で1回だけ（帰っても、編成を変えても戻らない） */D.startFl=R.startFl||1;renderFHud()}
   G.infResume=false;FD.infStart=(infRun()&&infRun().startFl)||1;infSnap()}return r}}
 {const _a=fAdvance;fAdvance=async function(nf){const r=await _a.apply(this,arguments);if(towerAt()==='inf')infSnap();return r}}
 /* アプリを閉じる・ほかのアプリへ切りかえるときも、いまの体力とレベルを残す */
