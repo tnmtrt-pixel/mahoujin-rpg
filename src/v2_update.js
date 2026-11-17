@@ -27,3 +27,7 @@ function preloadLead(){try{if(!G||!G.lead)return;['down','left','right','up'].fo
 function preloadFoes(fl){try{const F=FLOORS[fl],A=F&&FAREA[F.area];if(!A)return;const ks=new Set();(A.mix||[]).forEach(m=>(m[1]||[]).forEach(k=>ks.add(k)));if(A.elite)ks.add(A.elite);if(A.boss)ks.add(A.boss);const ab=AREAS[F.area]&&AREAS[F.area].boss;if(ab)ks.add(ab);
  ks.forEach(k=>{const D=FFOE[k];if(!D)return;img('img/foe/'+k+'.webp');if(D.base)img('img/foe/'+D.base+'.webp');if(D.src)img(D.src)})}catch(_){}}
 {const _s=startFloor;startFloor=function(fl){preloadFoes(fl);const nb=FLOORS[(fl|0)+1];if(nb)preloadFoes((fl|0)+1);return _s(fl)}}
+/* 画面が切りかわった直後のタップは少しだけ無視する（読みこみ中に押したタップが、次の画面のボタンに入らないように）（2.0.11）
+   出撃のフィールドは止めない。連打が続くと、そのぶん少しのびる（lockInput のしくみ） */
+{const _sh=show;show=function(id){const cur=document.querySelector('.scr.on');const r=_sh.apply(this,arguments);if(id!=='field'&&(!cur||cur.id!==id))lockInput(300);return r}}
+{const sh=document.getElementById('sheet');if(sh&&window.MutationObserver)new MutationObserver(()=>{if(sh.classList.contains('on')&&!sh._on){sh._on=1;lockInput(250)}else if(!sh.classList.contains('on'))sh._on=0}).observe(sh,{attributes:true,attributeFilter:['class']})}
