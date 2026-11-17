@@ -13,12 +13,12 @@ const abOpen=(m,i)=>((m&&m.star)||1)>=ABIL_RANK[i][1];
 const abBoost=m=>((m&&m.star)||1)>=5?1.5:1;
 const ABIL={
  wolf:[{k:'teamAtk',v:.10,d:'チームの攻撃が+10%'},{k:'crit',v:.15,d:'牙刃連射が15%で会心（2倍）'},{k:'rage',v:.3,d:'体力が半分以下のとき、攻撃+30%'},{k:'startLv',v:1,d:'出撃したとき、ウルフの攻撃Lvが+1'}],
- fox: [{k:'pick',v:.2,d:'素材・経験値を吸い寄せる範囲+20%'},{k:'regen',v:2,d:'10秒ごとに体力を2回復'},{k:'orb',v:1,d:'まわる輪刃が1つ増える'},{k:'revive',v:.5,d:'1回だけ、力つきても体力50%で立ち上がる'}],
+ fox: [{k:'pick',v:.2,d:'素材・経験値を吸い寄せる範囲+20%'},{k:'regen',v:2,d:'10秒ごとに体力を2回復'},{k:'orb',v:1,d:'まわる輪刃が1つ増える'},{k:'revive',v:.25,d:'力つきても体力25%で立ち上がる（全員で1回。持つ仲間の分だけ足される）'}],
  dodo:[{k:'hp',v:15,d:'チームの最大体力+15'},{k:'cut',v:.1,d:'受けるダメージ−10%'},{k:'kb',v:1,d:'衝撃波で大きくふっとばす'},{k:'hamCd',v:.25,d:'衝撃波の間隔−25%'}],
  owl: [{k:'xp',v:.1,d:'経験値が+10%'},{k:'slow',v:1,d:'魔法陣の足止めが強くなる'},{k:'zone',v:1,d:'魔法陣が1つ増える'},{k:'lvSpd',v:.12,d:'レベルアップごとに移動速度が上昇（最大12%）'}]};
 const RANK_COL={R:'#3fae5a',SR:'#2f7fd0',UR:'#8a3fd0',LR:'#c9962a'};
 /* チーム全員の開いている能力を合計する（メダサバのチーム効果と同じ考え方） */
-function teamAb(){const a={};G.party.forEach(m=>{(ABIL[m.id]||[]).forEach((ab,i)=>{if(abOpen(m,i))a[ab.k]=(a[ab.k]||0)+ab.v*abBoost(m)});const at=m.weapon&&m.weapon.attr;if(at){const k={thunder:'xp',steel:'cut',wind:'wspd'}[at.k];if(k)a[k]=(a[k]||0)+at.v}});return a}
+function teamAb(){const a={};G.party.forEach(m=>{(ABIL[m.id]||[]).forEach((ab,i)=>{if(abOpen(m,i))a[ab.k]=(a[ab.k]||0)+ab.v*(ab.k==='revive'?1:abBoost(m))});const at=m.weapon&&m.weapon.attr;if(at){const k={thunder:'xp',steel:'cut',wind:'wspd'}[at.k];if(k)a[k]=(a[k]||0)+at.v}});return a}
 const lvMul=m=>1+.05*((m&&m.lv||1)-1);
 const memPow=m=>Math.round(100*starMul(m)*wMul(m)*lvMul(m)*genSup(m.id));
 function teamPow(){const a=teamAb();return Math.round(G.party.reduce((s,m)=>s+memPow(m),0)*(1+(a.teamAtk||0)))}
@@ -80,7 +80,7 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
  <div class="pcards">
   <div class="abcard">
    
-   ${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
+   ${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1&&x.k!=='revive'?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
   <div class="lvcard"><div class="lvh">Lv <b>${m.lv}</b><small>/${GROW_MAX}</small></div>
    <div class="lvs"><span>攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)*genSup(m.id)).toFixed(2)}${genSup(m.id)>1?'<small class="supt">支援込み</small>':''}</span>${hasW?`<button class="lvw" onclick="goTab('shop')">${UIMG('u_weapon',16)}工房でつくる ›</button>`:''}</div>
    ${max?'<div class="note" style="text-align:center">レベル最大</div>':`<div class="lvc ${(G.coin|0)<cost.coin?'lack':''}">${coinIc(22)}<b>${G.coin|0}</b>/${cost.coin}</div>`}
@@ -117,7 +117,7 @@ function renderPartyPick(m,inP){const c=CHARS[m.id],A=ATK[m.id],ab=ABIL[m.id]||[
   <div class="pcl">Lv <b>${m.lv}</b>　攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)).toFixed(2)}</div>
   <div class="pcl">${TIC(A.type,18)} ${A.n}（${A.type}）</div>
   <div class="pcl">${WPIC(m.id,18,w&&w.rid?RECIPES[w.rid].tier:0)} ${w&&w.rid?RECIPES[w.rid].n+' '+RKIC(rank,18):baseWeapon(m.id)}${w&&w.attr?'　'+attrTxt(w.attr):''}</div></div></div>
- <div class="pcab">${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
+ <div class="pcab">${ab.map((x,i)=>{const [r,need]=ABIL_RANK[i],open=abOpen(m,i);return `<div class="abrow ${open?'':'lock'}"><span class="abtag" style="background:${RANK_COL[r]}">${r}</span><span class="abd">${open?'':`<i>★${need}で開く</i>`}${x.d}${open&&abBoost(m)>1&&x.k!=='revive'?' <b class="awk">×1.5</b>':''}</span></div>`}).join('')}</div>
  <div class="prow slots sm">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img class="pface" src="${FACE(x.id)}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
  ${pickerHTML()}`;
  bindPartyPick()}
