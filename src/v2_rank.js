@@ -78,8 +78,9 @@ function rLink(ds){const pr=diceProf(ds);if(!pr)return false;const sn=dSnap(ds);
 /* ---------- サーバーへ送る（失敗したら次に開いたとき送りなおす） ---------- */
 let rBusy=false;
 async function rSync(){const p=G&&G.prof;if(!p||!p.reg||!p.dirty||rBusy)return;if(G.flags&&G.flags.tamper)return;  /* 書きかえのあったセーブはランキングに送らない（2.0.12） */rBusy=true;
- try{const r=await fetch(MT_API+'/api/mt2/profile',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:p.id,sec:p.sec,w:p.w,icon:p.icon,title:p.title|0,v:VERSION,inf:G.infBest|0})});
-  const j=await r.json().catch(()=>({}));if(r.ok&&j.ok){p.dirty=0;p.authNg=0;p.syncAt=Date.now();save()}else if(j.err==='auth'){p.authNg=1;save()}}catch(e){}finally{rBusy=false}}
+ try{const r=await fetch(MT_API+'/api/mt2/profile',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:p.id,sec:p.sec,w:p.w,icon:p.icon,title:p.title|0,v:VERSION,inf:G.infBest|0,infR:p.infR|0,nm:(rName(p.w)+'／'+(RT[p.title|0]||'')).slice(0,40)})});
+  const j=await r.json().catch(()=>({}));if(r.ok&&j.ok){p.dirty=0;p.authNg=0;p.syncAt=Date.now();if((j.infR|0)>(p.infR|0)){p.infR=j.infR|0;G.infBest=0}  /* 運営が無限の塔の記録を0にした（2.1.2） */
+   save()}else if(j.err==='auth'){p.authNg=1;save()}}catch(e){}finally{rBusy=false}}
 
 let rEdit=false,rDraft=null,rImp=false;
 function openRank(){show('rank');rEdit=false;rDraft=null;rImp=false;renderRank();rSync().then(rBoardLoad)}
