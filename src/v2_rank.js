@@ -5,7 +5,7 @@
    ・名前・称号・アイコンは塔2だけのもの（サイコロ版とは別）。はじめて引き継ぐときだけ、サイコロ版の値を写す
    ・名前の単語と称号の一覧はサイコロ版の写し（v2_words.js）。番号はサイコロ版と同じ。塔2だけの単語・称号は後ろに足す
    ・サイコロ版で解放ずみの単語・称号は、引き継いだときの分を持ち越す（G.prof.dw / dt）
-   ・ランキングの表示は準備中。名前の登録とサーバーへの送信はする
+   ・ランキング：無限の塔で1回の挑戦で着いたいちばん高い階（G.infBest）を送り、上位50人と自分の順位を出す（2.1.0）
    ===================================================================== */
 const MT_API='https://meister-tower-online.tnmtrt.workers.dev';
 const mFloor=()=>towerFloor('meister');
@@ -78,11 +78,25 @@ function rLink(ds){const pr=diceProf(ds);if(!pr)return false;const sn=dSnap(ds);
 /* ---------- サーバーへ送る（失敗したら次に開いたとき送りなおす） ---------- */
 let rBusy=false;
 async function rSync(){const p=G&&G.prof;if(!p||!p.reg||!p.dirty||rBusy)return;if(G.flags&&G.flags.tamper)return;  /* 書きかえのあったセーブはランキングに送らない（2.0.12） */rBusy=true;
- try{const r=await fetch(MT_API+'/api/mt2/profile',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:p.id,sec:p.sec,w:p.w,icon:p.icon,title:p.title|0,v:VERSION})});
+ try{const r=await fetch(MT_API+'/api/mt2/profile',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:p.id,sec:p.sec,w:p.w,icon:p.icon,title:p.title|0,v:VERSION,inf:G.infBest|0})});
   const j=await r.json().catch(()=>({}));if(r.ok&&j.ok){p.dirty=0;p.authNg=0;p.syncAt=Date.now();save()}else if(j.err==='auth'){p.authNg=1;save()}}catch(e){}finally{rBusy=false}}
 
 let rEdit=false,rDraft=null,rImp=false;
-function openRank(){show('rank');rEdit=false;rDraft=null;rImp=false;renderRank();rSync()}
+function openRank(){show('rank');rEdit=false;rDraft=null;rImp=false;renderRank();rSync().then(rBoardLoad)}
+/* ---------- ランキングの表（30秒ごとに読みなおす） ---------- */
+const RKB={at:0,d:null,err:0,busy:0};
+async function rBoardLoad(force){if(typeof INF_LIVE==='undefined'||!INF_LIVE||RKB.busy)return;if(!force&&RKB.d&&Date.now()-RKB.at<30000)return;RKB.busy=1;
+ try{const p=G.prof||{},r=await fetch(MT_API+'/api/mt2/rank',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:p.reg?p.id:undefined})});
+  const j=await r.json();if(!r.ok||!Array.isArray(j.list))throw 0;RKB.d=j;RKB.at=Date.now();RKB.err=0}catch(e){RKB.err=1}finally{RKB.busy=0}
+ if(onScr('rank')&&!rEdit&&!rImp)renderRank()}
+function rRow(x){const ic=CHARS[x.icon]?x.icon:'wolf',n=x.n|0;
+ return `<div class="rkrow ${x.me?'me':''}"><span class="rkn ${n<=3?'t'+n:''}">${n}</span>${rFace(ic,36)}<div class="rkrn"><b>${rName(x.w)}<small>#${String(x.tag||'').toUpperCase().replace(/[^0-9A-F]/g,'')}</small></b><i>${RT[x.title|0]||''}</i></div><span class="rkf">${x.inf|0}<small>F</small></span></div>`}
+function rBoardHTML(p){if(typeof INF_LIVE==='undefined'||!INF_LIVE)return `<div class="rksoon"><b>準備中</b><span>無限の塔（ver2.1.0）で、何階まで登ったか（攻略階数）を全国のプレイヤーと競えるようになります。<br>いまのうちに名前を登録しておこう。</span></div>`;
+ const d=RKB.d,mine=`<div class="note" style="margin-bottom:6px">あなたの最高：<b>${G.infBest|0}F</b>${G.flags&&G.flags.tamper?'（このセーブはランキングに出ません）':!p.reg?'（名前を登録するとランキングに出ます）':''}</div>`;
+ if(!d)return mine+`<div class="rksoon"><span>${RKB.err?'ランキングを読みこめませんでした。通信を確かめてね。':'読みこみ中……'}</span></div>`;
+ if(!d.list.length)return mine+`<div class="rksoon"><span>まだ記録がありません。最初の記録をつくろう！</span></div>`;
+ const inTop=d.list.some(x=>x.me);
+ return mine+`<div class="rklist">${d.list.map(rRow).join('')}${d.me&&!inTop?'<div class="rkgap">…</div>'+rRow({...d.me,me:true}):''}</div><div class="note" style="text-align:center">参加 ${d.total|0} 人　同じ階なら、先に着いた人が上</div>`}
 function renderRank(){const p=rProf(),el=$('rkBody'),ds=diceLocal(),dp=diceProf(ds),linked=p.from==='dice';
  let h='';
  if(rImp)h=rImpHTML();
@@ -96,7 +110,7 @@ function renderRank(){const p=rProf(),el=$('rkBody'),ds=diceLocal(),dp=diceProf(
    :`<div class="note">サイコロ版マイスターの塔のIDと、解放した単語・称号を引き継げます。ホーム画面のアイコンから遊んでいる人は、サイコロ版のセーブコード（OKS2. で始まる）を貼り付けてください。</div>`}
    <button class="btn ghost" id="rkImp">コードを貼って引き継ぐ</button></div>`;
  h+=`<div class="rkcard rkboard"><div class="rkh">無限の塔　攻略階数ランキング</div>
-  <div class="rksoon"><b>準備中</b><span>無限の塔（ver2.0.0）で、何階まで登ったか（攻略階数）を全国のプレイヤーと競えるようになります。<br>いまのうちに名前を登録しておこう。</span></div>
+  ${rBoardHTML(p)}
   <div class="note">ランキングに出るのは、名前・称号・アイコンと、識別IDの末尾4けた（#${rTag(p.id)}）と記録だけです。本名は使わないでね。</div></div>`;
  el.innerHTML=h;
  const on=(id,f)=>{const b=$(id);if(b)b.onclick=f};
