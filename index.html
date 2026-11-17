@@ -1073,6 +1073,13 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .rksel select{flex:1;min-width:0;font-size:17px;padding:9px 10px;border-radius:10px;background:#0f131c;color:#fff;border:1px solid #ffffff2e}
 .rkbtns{display:flex;gap:8px;flex-wrap:wrap}.rkbtns .btn{flex:1;min-width:30%}
 .rksoon{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:18px 6px;border:1px dashed #ffffff30;border-radius:12px;margin-bottom:8px}
+.rklist{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.rkrow{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:#ffffff08}
+.rkrow.me{background:#ff8a3d26;border:1px solid #ff8a3d88}
+.rkn{width:28px;text-align:center;font-weight:900;font-size:16px;color:#c9d2e3}.rkn.t1{color:#ffd24a}.rkn.t2{color:#d8dde8}.rkn.t3{color:#e0a070}
+.rkrn{flex:1;min-width:0;display:flex;flex-direction:column}.rkrn b{font-size:14px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rkrn b small{font-size:10px;color:#9aa6bd;margin-left:4px}.rkrn i{font-style:normal;font-size:11px;color:#ffb36a}
+.rkf{font-size:20px;font-weight:900;color:#7fe0ff}.rkf small{font-size:11px;margin-left:1px}
+.rkgap{text-align:center;color:#9aa6bd;line-height:1}
 .rksoon b{font-size:22px;color:#ffc94a}.rksoon span{font-size:13px;color:#c9d2e3;line-height:1.6}
 
 .rkme{display:flex;align-items:center;gap:12px;margin:2px 0 6px}
@@ -1221,7 +1228,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='2.0.15';
+const VERSION='2.0.16';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -2881,7 +2888,7 @@ function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDP
  fDrawExtra(g,D);
  g.restore();
  // 上の帯
- const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+`<span class="ffl">${D.floor}F</span><span class="ftm ${!D.boss&&D.st>=FLOOR_MAX-60?'warn':''}">${D.boss?'ボス戦':!D.boss&&D.st>=FLOOR_MAX-60?'残り'+Math.max(0,FLOOR_MAX-lf)+'秒':Math.floor(lf/60)+':'+String(lf%60).padStart(2,'0')}</span>${rusty?`<span class="frl">${typeof towerAt==='function'&&towerAt()==='judge'?'ざわめき':'錆'}Lv${rustLv()}</span>`:''}`+`<span class="fmats">${matIcons(D.floor,18)}</span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
+ const lf=Math.floor(D.st),rusty=!D.boss&&D.st>=FT.RUST;{const h=(D.boss?UIMG('n_boss',22):UIMG(rusty?'n_time':'n_floor',22))+`<span class="ffl">${D.floor}F</span><span class="ftm ${!D.boss&&D.st>=FLOOR_MAX-60?'warn':''}">${D.boss?'ボス戦':!D.boss&&D.st>=FLOOR_MAX-60?'残り'+Math.max(0,FLOOR_MAX-lf)+'秒':Math.floor(lf/60)+':'+String(lf%60).padStart(2,'0')}</span>${rusty?`<span class="frl">${typeof towerAt==='function'&&towerAt()==='judge'?'ざわめき':towerAt()==='inf'?'ノイズ':'錆'}Lv${rustLv()}</span>`:''}`+`<span class="fmats">${matIcons(D.floor,18)}</span>`;const te=$('fTime');if(te._h!==h){te.innerHTML=h;te._h=h}}$('fTime').classList.toggle('warn',rusty);
  $('fHpI').style.width=Math.max(0,100*D.hp/D.maxhp)+'%';$('fXpI').style.width=100*D.xp/D.need+'%';$('fLv').textContent='Lv'+D.lv;
  if(D.boss){$('fBoss').style.display='block';$('fBossI').style.width=Math.max(0,100*D.boss.hp/D.boss.max)+'%';$('fBossN').textContent=FOES[D.boss.k]?FOES[D.boss.k].n:'ボス'}else $('fBoss').style.display='none';
  const wn=$('fWarn');if(D.warn>0){{const h=(D.warnIc?UIMG(D.warnIc,30)+' ':'')+D.warnTxt;if(wn._h!==h){wn.innerHTML=h;wn._h=h}}wn.style.opacity=Math.min(1,D.warn/30)}else wn.style.opacity=0}
@@ -4712,7 +4719,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 2.0.15</b><ul><li>特別な仲間の紹介のセリフを見直し</li></ul></div><div class="news"><b>ver 2.0.14</b><ul><li>SS がとりにくかった加工を見直し：打つ（輪がほぼ重なれば満点）・けがき（数点のずれは満点）・配線のはんだ付け（緑の帯の中なら満点）・穴あけ（押しはじめて緑に届くまでは減点しない）</li></ul></div><div class="news"><b>ver 2.0.13</b><ul><li>溶接（つなぐ）で SS がとれるように：線の近くは満点、当てた瞬間の速さの減点と、線に当てる前のはみ出しの減点をなくした</li></ul></div><div class="news"><b>ver 2.0.12</b><ul><li>セーブのコードとファイルを新しい形（MT2T.）に。書きかえたコードは読みこめないように</li><li>前の形のコード（MT2S.）は11月30日まで読めます。それまでに「セーブの守り」で新しいコードやファイルを取り直してください</li></ul></div><div class="news"><b>ver 2.0.11</b><ul><li>画面が切りかわる途中でタップすると、次の画面のボタンが勝手に押されることがあったのを修正（切りかわった直後の少しの間はタップを受けつけない）</li></ul></div><div class="news"><b>ver 2.0.10</b><ul><li>汎用武器で同じランクができたときは、今のと新しいのを並べて、どちらかを選べるように（残さないほうはコインに替える）</li></ul></div><div class="news"><b>ver 2.0.9</b><ul><li>ボスや敵の絵が読みこめず、丸で表示されることがあったのを修正（出撃の前に先に読みこむ）</li></ul></div><div class="news"><b>ver 2.0.8</b><ul><li>会話で表情の指定がないセリフも、審判の塔の仲間と匠は会話用の表情の絵を出すように</li></ul></div><div class="news"><b>ver 2.0.7</b><ul><li>会話の顔の絵がずれて見えるキャラが多かったのを修正（顔アイコンを使う）</li><li>会話で、前の人の顔が残って見えることがあったのを修正（絵が読みこめてから出す）</li><li>審判の塔のボスが話すとき、ボスの絵を出すように</li></ul></div><div class="news"><b>ver 2.0.6</b><ul><li>キャラの絵の読みこみに失敗すると、丸のまま表示され続けることがある不具合を修正（失敗したら読み直す）</li></ul></div><div class="news"><b>ver 2.0.5</b><ul><li>審判の塔の出撃先の説明を、審判の塔の言葉（ざわめきLv・判決の時）に</li></ul></div><div class="news"><b>ver 2.0.4</b><ul><li>汎用武器は種類ごとに1本。今より低いランクができたときは、換金所の値段ぶんのコインに替えるように（前は素材だけが減っていた）</li></ul></div><div class="news"><b>ver 2.0.3</b><ul><li>匠の顔アイコン・会話の表情・専用武器のアイコンを新しい絵に</li></ul></div><div class="news"><b>ver 2.0.2</b><ul><li>審判の塔では、長居で敵が強くなる段階を「ざわめきLv」に（知らせの文も審判の塔に合わせた）</li></ul></div><div class="news"><b>ver 2.0.1</b><ul><li>審判の塔では、1つの階に長くいると「判決の時」（第1章の錆の大波と同じ削れ方。画面が白黒に点滅し、木槌が鳴る）</li></ul></div><div class="news"><b>ver 2.0.0</b><ul><li>第2章「審判の塔」公開（11/17 0:00から。第1章をクリアすると地図に出る）</li><li>審判の仲間ガチャ（vol.2）・お助けの仲間・段階5の装備・限定工具</li><li>vol.2 の図面は展開図で解読。道場で展開図の練習も</li></ul></div><div class="news"><b>ver 1.11.1</b><ul><li>やすりがけをやさしく：バリの高さのばらつきを小さく、高い所から削れて平らになりやすく、線ぴったりの許す幅を少し広く</li></ul></div><div class="news"><b>ver 1.11.0</b><ul><li>加工ミニゲーム道場で「三面図の解読」を練習できるように</li><li>（準備）vol.2 の図面は、立方体の展開図の問題で解読するように</li></ul></div><div class="news"><b>ver 1.10.10</b><ul><li>PCの大きな画面やブラウザの縮小表示で、敵が出てこなくなる不具合を修正</li></ul></div><div class="news"><b>ver 1.10.9</b><ul><li>出撃中に、まれにスティックが出ず動けなくなることがある不具合への対策</li><li>動けなくなったときは、画面を2回さわると再開できるように</li></ul></div><div class="news"><b>ver 1.10.8</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.7</b><ul><li>特別な仲間の顔アイコンと武器アイコンを新しい絵に変更</li></ul></div><div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 2.0.16</b><ul><li>（準備）無限の塔とランキングを試験中。公開は ver2.1.0 から。審判の塔の20階をクリアすると、地図の雲海に塔の名前が出る</li></ul></div><div class="news"><b>ver 2.0.15</b><ul><li>特別な仲間の紹介のセリフを見直し</li></ul></div><div class="news"><b>ver 2.0.14</b><ul><li>SS がとりにくかった加工を見直し：打つ（輪がほぼ重なれば満点）・けがき（数点のずれは満点）・配線のはんだ付け（緑の帯の中なら満点）・穴あけ（押しはじめて緑に届くまでは減点しない）</li></ul></div><div class="news"><b>ver 2.0.13</b><ul><li>溶接（つなぐ）で SS がとれるように：線の近くは満点、当てた瞬間の速さの減点と、線に当てる前のはみ出しの減点をなくした</li></ul></div><div class="news"><b>ver 2.0.12</b><ul><li>セーブのコードとファイルを新しい形（MT2T.）に。書きかえたコードは読みこめないように</li><li>前の形のコード（MT2S.）は11月30日まで読めます。それまでに「セーブの守り」で新しいコードやファイルを取り直してください</li></ul></div><div class="news"><b>ver 2.0.11</b><ul><li>画面が切りかわる途中でタップすると、次の画面のボタンが勝手に押されることがあったのを修正（切りかわった直後の少しの間はタップを受けつけない）</li></ul></div><div class="news"><b>ver 2.0.10</b><ul><li>汎用武器で同じランクができたときは、今のと新しいのを並べて、どちらかを選べるように（残さないほうはコインに替える）</li></ul></div><div class="news"><b>ver 2.0.9</b><ul><li>ボスや敵の絵が読みこめず、丸で表示されることがあったのを修正（出撃の前に先に読みこむ）</li></ul></div><div class="news"><b>ver 2.0.8</b><ul><li>会話で表情の指定がないセリフも、審判の塔の仲間と匠は会話用の表情の絵を出すように</li></ul></div><div class="news"><b>ver 2.0.7</b><ul><li>会話の顔の絵がずれて見えるキャラが多かったのを修正（顔アイコンを使う）</li><li>会話で、前の人の顔が残って見えることがあったのを修正（絵が読みこめてから出す）</li><li>審判の塔のボスが話すとき、ボスの絵を出すように</li></ul></div><div class="news"><b>ver 2.0.6</b><ul><li>キャラの絵の読みこみに失敗すると、丸のまま表示され続けることがある不具合を修正（失敗したら読み直す）</li></ul></div><div class="news"><b>ver 2.0.5</b><ul><li>審判の塔の出撃先の説明を、審判の塔の言葉（ざわめきLv・判決の時）に</li></ul></div><div class="news"><b>ver 2.0.4</b><ul><li>汎用武器は種類ごとに1本。今より低いランクができたときは、換金所の値段ぶんのコインに替えるように（前は素材だけが減っていた）</li></ul></div><div class="news"><b>ver 2.0.3</b><ul><li>匠の顔アイコン・会話の表情・専用武器のアイコンを新しい絵に</li></ul></div><div class="news"><b>ver 2.0.2</b><ul><li>審判の塔では、長居で敵が強くなる段階を「ざわめきLv」に（知らせの文も審判の塔に合わせた）</li></ul></div><div class="news"><b>ver 2.0.1</b><ul><li>審判の塔では、1つの階に長くいると「判決の時」（第1章の錆の大波と同じ削れ方。画面が白黒に点滅し、木槌が鳴る）</li></ul></div><div class="news"><b>ver 2.0.0</b><ul><li>第2章「審判の塔」公開（11/17 0:00から。第1章をクリアすると地図に出る）</li><li>審判の仲間ガチャ（vol.2）・お助けの仲間・段階5の装備・限定工具</li><li>vol.2 の図面は展開図で解読。道場で展開図の練習も</li></ul></div><div class="news"><b>ver 1.11.1</b><ul><li>やすりがけをやさしく：バリの高さのばらつきを小さく、高い所から削れて平らになりやすく、線ぴったりの許す幅を少し広く</li></ul></div><div class="news"><b>ver 1.11.0</b><ul><li>加工ミニゲーム道場で「三面図の解読」を練習できるように</li><li>（準備）vol.2 の図面は、立方体の展開図の問題で解読するように</li></ul></div><div class="news"><b>ver 1.10.10</b><ul><li>PCの大きな画面やブラウザの縮小表示で、敵が出てこなくなる不具合を修正</li></ul></div><div class="news"><b>ver 1.10.9</b><ul><li>出撃中に、まれにスティックが出ず動けなくなることがある不具合への対策</li><li>動けなくなったときは、画面を2回さわると再開できるように</li></ul></div><div class="news"><b>ver 1.10.8</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.7</b><ul><li>特別な仲間の顔アイコンと武器アイコンを新しい絵に変更</li></ul></div><div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -5362,7 +5369,7 @@ const DTITLES=["見習い","塔の挑戦者","塔の主を倒した者","真・�
    ・名前・称号・アイコンは塔2だけのもの（サイコロ版とは別）。はじめて引き継ぐときだけ、サイコロ版の値を写す
    ・名前の単語と称号の一覧はサイコロ版の写し（v2_words.js）。番号はサイコロ版と同じ。塔2だけの単語・称号は後ろに足す
    ・サイコロ版で解放ずみの単語・称号は、引き継いだときの分を持ち越す（G.prof.dw / dt）
-   ・ランキングの表示は準備中。名前の登録とサーバーへの送信はする
+   ・ランキング：無限の塔で1回の挑戦で着いたいちばん高い階（G.infBest）を送り、上位50人と自分の順位を出す（2.1.0）
    ===================================================================== */
 const MT_API='https://meister-tower-online.tnmtrt.workers.dev';
 const mFloor=()=>towerFloor('meister');
@@ -5435,11 +5442,25 @@ function rLink(ds){const pr=diceProf(ds);if(!pr)return false;const sn=dSnap(ds);
 /* ---------- サーバーへ送る（失敗したら次に開いたとき送りなおす） ---------- */
 let rBusy=false;
 async function rSync(){const p=G&&G.prof;if(!p||!p.reg||!p.dirty||rBusy)return;if(G.flags&&G.flags.tamper)return;  /* 書きかえのあったセーブはランキングに送らない（2.0.12） */rBusy=true;
- try{const r=await fetch(MT_API+'/api/mt2/profile',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:p.id,sec:p.sec,w:p.w,icon:p.icon,title:p.title|0,v:VERSION})});
+ try{const r=await fetch(MT_API+'/api/mt2/profile',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:p.id,sec:p.sec,w:p.w,icon:p.icon,title:p.title|0,v:VERSION,inf:G.infBest|0})});
   const j=await r.json().catch(()=>({}));if(r.ok&&j.ok){p.dirty=0;p.authNg=0;p.syncAt=Date.now();save()}else if(j.err==='auth'){p.authNg=1;save()}}catch(e){}finally{rBusy=false}}
 
 let rEdit=false,rDraft=null,rImp=false;
-function openRank(){show('rank');rEdit=false;rDraft=null;rImp=false;renderRank();rSync()}
+function openRank(){show('rank');rEdit=false;rDraft=null;rImp=false;renderRank();rSync().then(rBoardLoad)}
+/* ---------- ランキングの表（30秒ごとに読みなおす） ---------- */
+const RKB={at:0,d:null,err:0,busy:0};
+async function rBoardLoad(force){if(typeof INF_LIVE==='undefined'||!INF_LIVE||RKB.busy)return;if(!force&&RKB.d&&Date.now()-RKB.at<30000)return;RKB.busy=1;
+ try{const p=G.prof||{},r=await fetch(MT_API+'/api/mt2/rank',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id:p.reg?p.id:undefined})});
+  const j=await r.json();if(!r.ok||!Array.isArray(j.list))throw 0;RKB.d=j;RKB.at=Date.now();RKB.err=0}catch(e){RKB.err=1}finally{RKB.busy=0}
+ if(onScr('rank')&&!rEdit&&!rImp)renderRank()}
+function rRow(x){const ic=CHARS[x.icon]?x.icon:'wolf',n=x.n|0;
+ return `<div class="rkrow ${x.me?'me':''}"><span class="rkn ${n<=3?'t'+n:''}">${n}</span>${rFace(ic,36)}<div class="rkrn"><b>${rName(x.w)}<small>#${String(x.tag||'').toUpperCase().replace(/[^0-9A-F]/g,'')}</small></b><i>${RT[x.title|0]||''}</i></div><span class="rkf">${x.inf|0}<small>F</small></span></div>`}
+function rBoardHTML(p){if(typeof INF_LIVE==='undefined'||!INF_LIVE)return `<div class="rksoon"><b>準備中</b><span>無限の塔（ver2.1.0）で、何階まで登ったか（攻略階数）を全国のプレイヤーと競えるようになります。<br>いまのうちに名前を登録しておこう。</span></div>`;
+ const d=RKB.d,mine=`<div class="note" style="margin-bottom:6px">あなたの最高：<b>${G.infBest|0}F</b>${G.flags&&G.flags.tamper?'（このセーブはランキングに出ません）':!p.reg?'（名前を登録するとランキングに出ます）':''}</div>`;
+ if(!d)return mine+`<div class="rksoon"><span>${RKB.err?'ランキングを読みこめませんでした。通信を確かめてね。':'読みこみ中……'}</span></div>`;
+ if(!d.list.length)return mine+`<div class="rksoon"><span>まだ記録がありません。最初の記録をつくろう！</span></div>`;
+ const inTop=d.list.some(x=>x.me);
+ return mine+`<div class="rklist">${d.list.map(rRow).join('')}${d.me&&!inTop?'<div class="rkgap">…</div>'+rRow({...d.me,me:true}):''}</div><div class="note" style="text-align:center">参加 ${d.total|0} 人　同じ階なら、先に着いた人が上</div>`}
 function renderRank(){const p=rProf(),el=$('rkBody'),ds=diceLocal(),dp=diceProf(ds),linked=p.from==='dice';
  let h='';
  if(rImp)h=rImpHTML();
@@ -5453,7 +5474,7 @@ function renderRank(){const p=rProf(),el=$('rkBody'),ds=diceLocal(),dp=diceProf(
    :`<div class="note">サイコロ版マイスターの塔のIDと、解放した単語・称号を引き継げます。ホーム画面のアイコンから遊んでいる人は、サイコロ版のセーブコード（OKS2. で始まる）を貼り付けてください。</div>`}
    <button class="btn ghost" id="rkImp">コードを貼って引き継ぐ</button></div>`;
  h+=`<div class="rkcard rkboard"><div class="rkh">無限の塔　攻略階数ランキング</div>
-  <div class="rksoon"><b>準備中</b><span>無限の塔（ver2.0.0）で、何階まで登ったか（攻略階数）を全国のプレイヤーと競えるようになります。<br>いまのうちに名前を登録しておこう。</span></div>
+  ${rBoardHTML(p)}
   <div class="note">ランキングに出るのは、名前・称号・アイコンと、識別IDの末尾4けた（#${rTag(p.id)}）と記録だけです。本名は使わないでね。</div></div>`;
  el.innerHTML=h;
  const on=(id,f)=>{const b=$(id);if(b)b.onclick=f};
@@ -6184,6 +6205,168 @@ Object.assign(UI_IC,{tsolder:'t_tsolder',radial:'t_radial',hcrimp:'t_hcrimp',sgr
 LIM_TOOLS2.forEach(k=>{UPG[TOOLS[k].up]=k;if(V2_OPEN&&!TOOL_ORDER.includes(k))TOOL_ORDER.push(k)});
 {const _tb=toolBonus;toolBonus=R=>{const pr=procOf(R);return _tb(R)+((pr==='wire'&&(hasLim('tsolder')||hasLim('hcrimp')))||(pr==='drill'&&hasLim('radial'))||(pr==='grind'&&hasLim('sgrind'))?5:0)}}
 
+/* ===================== 無限の塔（ver2.1.0 予定）：終わりのない塔 =====================
+ * ・審判の塔の20Fをクリアすると、地図の奥（雲海）に開く。今は URL に ?inf をつけたテスト版だけ
+ * ・毎回1階から。レベルもLv1から。階段で上へ登り続ける。倒れたら次は1階から
+ * ・中断できる：階に入るたびに挑戦の続き（G.infRun）を残す。帰っても、アプリを閉じても、次は同じ挑戦の続きから
+ * ・敵：第1章・第2章の敵の「バグ版」（色ずれ・横線のノイズ・ちらつき）。10階ごとのボスは、塔を建てた時代のマイスターを
+ *   写しそこなったバグ（10 クーラ、20 タコナイン、30 フェアリー、40 シャドー、50 ソウル。そのあとは同じ順でくり返す）
+ * ・強さ：1F は第1章の中ごろ、20F で審判の塔の頂上、50F で審判の塔の頂上の約2倍。その先も1階ごとに強くなり続ける
+ * ・長くいると「ノイズLv」（錆Lv と同じしくみ）、5分で「陣のゆがみ」（錆の大波と同じ削れ方）
+ * ・ごほうび：ふつうのコインと素材、ノイズの欠片（第3章で使う）、記憶の結晶（1階で1個、ボスで+5、50Fより上は1階で2個。第3章で使う）
+ * ・ランキング：1回の挑戦で着いたいちばん高い階（G.infBest）をサーバーへ送る */
+const INF_TEST=/[?&]inf\b/.test(location.search),INF_LIVE=INF_TEST;
+const INF_N=999,INF_BOSS=['x_kura','x_tako','x_fairy','x_shadow','x_soul'];
+const infLayer=f=>Math.floor(((f|0)-1)/10)%5;              /* 0〜4：10階ごとに次の層 */
+const infArea=f=>'i'+(infLayer(f)+1);
+const INF_FN=['ゆらぐ回廊','欠けた階段','くり返す広間','文字化けの間','ずれた床','ほどけた通路','写しの間','ノイズの吹きぬけ','記録の残骸'];
+const IFLOORS=[null];for(let f=1;f<=INF_N;f++){const b=f%10===0;IFLOORS.push({n:b?'写しの玉座':INF_FN[(f*7)%INF_FN.length],area:infArea(f),step:Math.min(3,Math.floor(((f-1)%10)/3)),stair:1400+((f-1)%10)*40,boss:b})}
+Object.assign(LAYER_NAME,{i1:'記憶の層',i2:'隊列の層',i3:'光の層',i4:'残響の層',i5:'蒼炎の層'});
+Object.assign(AREAS,{
+ i1:{n:'記憶の層',need:null,lv:'',bossLv:0,tier:4,boss:'x_kura',bg:'#0c1a1c'},
+ i2:{n:'隊列の層',need:null,lv:'',bossLv:0,tier:4,boss:'x_tako',bg:'#1c0c14'},
+ i3:{n:'光の層',  need:null,lv:'',bossLv:0,tier:4,boss:'x_fairy',bg:'#0c1222'},
+ i4:{n:'残響の層',need:null,lv:'',bossLv:0,tier:4,boss:'x_shadow',bg:'#16101c'},
+ i5:{n:'蒼炎の層',need:null,lv:'',bossLv:0,tier:4,boss:'x_soul',bg:'#0a1024'}});
+/* 写しそこないのボス（本人の絵にノイズ。名前は文字化け） */
+Object.assign(FFOE,{
+ x_kura:  {hp:1000,spd:.85,dmg:30,xp:150,r:54,big:1,boss:1,src:'img/kura.webp',ring:140,noflip:1},
+ x_tako:  {hp:1000,spd:.8, dmg:32,xp:160,r:56,big:1,boss:1,src:'img/tako.webp',call:380,ring:150,noflip:1},
+ x_fairy: {hp:1000,spd:1.0,dmg:32,xp:170,r:54,big:1,boss:1,fly:1,src:'img/fairy.webp',ring:120,noflip:1},
+ x_shadow:{hp:1000,spd:1.0,dmg:34,xp:180,r:56,big:1,boss:1,src:'img/shadow.webp',ring:100,noflip:1},
+ x_soul:  {hp:1000,spd:1.1,dmg:36,xp:200,r:56,big:1,boss:1,fly:1,src:'img/soul.webp',ring:95,call:420,noflip:1}});
+Object.assign(FOES,{x_kura:{n:'■ー■',col:'#9ee03a'},x_tako:{n:'タ■■■ン',col:'#ff4a4a'},x_fairy:{n:'■ェ■■ー',col:'#7fb0ff'},x_shadow:{n:'シ■■ー',col:'#c0c4d0'},x_soul:{n:'■ウ■',col:'#4a8aff'}});
+/* ふつうの敵と強敵：第1章・第2章の層から集めて、バグ版として出す */
+const INF_POOL=(()=>{const s=new Set(),el=new Set();['alley','factory','under','upper','sky','jk','jt','jm','jb','js','jr','jg'].forEach(k=>{const A=FAREA[k];if(!A)return;(A.mix||[]).forEach(m=>(m[1]||[]).forEach(x=>{if(FFOE[x]&&!FFOE[x].boss)s.add(x)}));if(A.elite)el.add(A.elite)});
+ Object.keys(FAREA).forEach(k=>{const A=FAREA[k];if(A&&A.mix&&!/^i\d$/.test(k))A.mix.forEach(m=>(m[1]||[]).forEach(x=>{if(FFOE[x]&&!FFOE[x].boss&&!FFOE[x].big)s.add(x)}));if(A&&A.elite&&FFOE[A.elite])el.add(A.elite)});
+ return{foes:[...s].filter(x=>!FFOE[x].big),elites:[...el]}})();
+{let sd=11;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647,pk=(a,n)=>{const c=a.slice(),o=[];while(o.length<n&&c.length)o.push(c.splice(Math.floor(rnd()*c.length),1)[0]);return o};
+ const ID={scrap:.02,titan:.008,cell:.008,carbon:.008,core:.006,noise:.012};
+ ['i1','i2','i3','i4','i5'].forEach((k,i)=>{const P=pk(INF_POOL.foes,8);
+  FAREA[k]={mix:[[0,P.slice(0,2),1.5],[25,P.slice(1,4),2.2],[70,P.slice(3,6),3],[130,P.slice(4,7),3.7],[200,[P[7],P[0],P[5]].filter(Boolean),4.6]],
+   elite:INF_POOL.elites[i%INF_POOL.elites.length]||'j_scale',boss:INF_BOSS[i],drop:ID,chestTool:null,ground:['#0a1418','90,220,230']}})}
+Object.assign(FLOOR_TINT,{i1:['storm','rgba(0,40,40,.35)'],i2:['court','rgba(40,0,20,.40)'],i3:['library','rgba(0,20,60,.38)'],i4:['storm','rgba(20,0,40,.40)'],i5:['court','rgba(0,10,50,.45)']});
+/* ノイズの欠片・記憶の結晶（どちらも今は使えない。第3章で使う） */
+Object.assign(MATS,{noise:{n:'ノイズの欠片',d:'無限の塔で拾える、ノイズのかたまり。今の技では扱えない（第3章で使えるようになる）'},
+ mcrys:{n:'記憶の結晶',d:'無限の塔の陣に残っていた記憶のかけらが固まったもの。ノイズが混じっていて、今の技では扱えない（第3章で使えるようになる）'}});
+MAT_ORDER.splice(MAT_ORDER.indexOf('core')+1,0,'noise','mcrys');
+Object.assign(SVG_IC,{
+ noise:'<rect x="5" y="7" width="22" height="18" rx="2" fill="#142024" stroke="#5ae6e6" stroke-width="1.5"/><path d="M7 11h9M18 11h7M7 15h4M13 15h12M7 19h11M20 19h5M7 23h6" stroke="#ff4ad8" stroke-width="1.6"/><path d="M8 13h6M17 17h7" stroke="#5ae6e6" stroke-width="1.2"/>',
+ mcrys:'<polygon points="16,3 25,12 21,29 11,29 7,12" fill="#3a6ad8" stroke="#bfe0ff" stroke-width="1.5"/><polygon points="16,3 19,12 16,29 13,12" fill="#8ac4ff" opacity=".8"/><path d="M8 18h3M21 15h3" stroke="#ff4ad8" stroke-width="1.4"/>'});
+/* 強さ：1F＝第1章の中ごろ（eff 10）→ 20F＝審判の塔の頂上（eff 48）→ そのあと1階ごとに +0.95 */
+const infEff=f=>(f||1)<=20?8+(f||1)*2:48+((f||1)-20)*.95;
+TW_TABLE.inf={
+ FLOORS:IFLOORS,
+ FLOOR_MATS:Object.fromEntries(Array.from({length:INF_N},(_,i)=>[i+1,[['titan','cell','carbon'][i%3],'noise']])),
+ BOSS_HP:Object.fromEntries(Array.from({length:INF_N/10|0},(_,i)=>{const f=(i+1)*10;return[f,+FSCALE(infEff(f)).hp.toFixed(2)]})),
+ REC_POW:Object.fromEntries(Array.from({length:INF_N},(_,i)=>{const h=FSCALE(infEff(i+1)).hp/FSCALE(20).hp;return[i+1,Math.round(2200*h/50)*50]})),
+ HELPER_FL:{},FLOOR_LINES:{},START_LV:{},
+ feff:infEff};
+TOWERS.inf={n:'無限の塔',ready:INF_LIVE,soon:'ver2.1.0 で公開',go:()=>{enterTower('inf');openDest()}};
+{const p=WMAP.places.find(q=>q.k==='inf');if(p)Object.assign(p,{tw:'inf',n:'雲海',t:'無限の塔',d:'すべての塔のもとになった「始原の陣」の塔。陣は今も伸び続け、伸びたところからバグが生まれている。てっぺんは見えない。',
+ open:()=>INF_TEST||!!(G.flags&&G.flags.tw_judge),hint:'雲の上に、てっぺんの見えない塔の影がある……'})}
+
+/* ---------- 出撃先：毎回1階から。中断した挑戦があれば続きから ---------- */
+const infRun=()=>G&&G.infRun&&G.infRun.fl>0?G.infRun:null;
+{const _od=openDest;openDest=function(){if(towerAt()!=='inf')return _od.apply(this,arguments);show('dest');const R=infRun(),best=G.infBest|0;
+ const t=$('destTw');if(t)t.textContent='無限の塔';
+ $('destList').innerHTML=`<div class="note" style="margin-bottom:6px">終わりのない塔。毎回<b>1階から、Lv1から</b>登る。階段で上へ進み続け、倒れたら挑戦はおしまい。とちゅうで帰ったりアプリを閉じたりしても、次は同じ挑戦の続きから。長くいると「ノイズLv」が上がって敵が強くなり、5分をこえると「陣のゆがみ」でHPがけずれ続ける。</div>`+
+  (R?`<button class="flr next" id="infCont"><span class="fn">${R.fl}F</span><span class="ft"><b>続きから（${R.fl}階）</b><small>Lv${R.lv}　体力 ${Math.round((R.hp||1)*100)}%　この挑戦で ${R.got|0} 個の記憶の結晶</small><span class="drec ${teamPow()>=REC_POW[R.fl]?'ok':'ng'}">推奨戦力 ${REC_POW[R.fl]}　いま ${teamPow()}</span></span><span class="fs">${UIMG('n_floor',26)}再開</span></button>`:'')+
+  `<button class="flr ${R?'':'next'}" id="infNew"><span class="fn">1F</span><span class="ft"><b>${R?'はじめから（1階）':'1階から挑戦'}</b><small>${R?'いまの挑戦はおしまいになる':'Lv1 から登る'}</small><span class="drec ok">推奨戦力 ${REC_POW[1]}〜　いま ${teamPow()}</span></span><span class="fs">${UIMG('n_unlock',26)}出撃</span></button>`+
+  `<div class="note" style="text-align:center;margin-top:8px">この塔での最高：${best}F　／　記憶の結晶 ${G.mats.mcrys|0} 個</div>`;
+ const c=$('infCont');if(c)c.onclick=()=>infGo(true);
+ $('infNew').onclick=()=>{if(infRun()&&!confirm('いまの挑戦をやめて、1階からやり直しますか？'))return;infGo(false)}}}
+async function infGo(cont){const R=cont?infRun():null;if(!R){G.infRun={fl:1,lv:1,got:0,t0:Date.now()};save()}G.infResume=!!R;await goFloor(R?R.fl:1)}
+/* 階に入ったら挑戦の続きを残す。再開のときはレベル・技・体力を戻す */
+function infSnap(){const D=FD;if(!D||towerAt()!=='inf')return;const R=G.infRun||(G.infRun={got:0,t0:Date.now()});
+ Object.assign(R,{fl:D.floor,lv:D.lv,xp:D.xp,need:D.need,atk:{...D.atk},ps:{...D.ps},hp:D.maxhp?D.hp/D.maxhp:1,kills:D.kills|0,pend:D.pendingLv|0});save()}
+{const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(towerAt()==='inf'&&FD){const R=infRun();
+  if(G.infResume&&R&&R.fl===fl){const D=FD;D.lv=R.lv||1;D.xp=R.xp||0;D.need=R.need||D.need;if(R.atk)Object.assign(D.atk,R.atk);if(R.ps)Object.assign(D.ps,R.ps);D.hp=Math.max(1,Math.round(D.maxhp*(R.hp||1)));D.kills=R.kills|0;D.pendingLv=R.pend|0;D.startFl=R.startFl||1;renderFHud()}
+  G.infResume=false;FD.infStart=(infRun()&&infRun().startFl)||1;infSnap()}return r}}
+{const _a=fAdvance;fAdvance=async function(nf){const r=await _a.apply(this,arguments);if(towerAt()==='inf')infSnap();return r}}
+/* 階をクリアしたら結晶。ランキング用の最高記録も */
+function infGain(fl){const n=(fl>50?2:1)+(fl%10===0?5:0);G.mats.mcrys=(G.mats.mcrys|0)+n;if(G.infRun)G.infRun.got=(G.infRun.got|0)+n;if(FD)FD.infGot=(FD.infGot|0)+n;if(fl>(G.infBest|0)){G.infBest=fl;if(G.prof)G.prof.dirty=1}
+ if(FD)FD.pops.push({x:FD.x,y:FD.y-60,v:`記憶の結晶 +${n}`,t:0});return n}
+/* 終わりのない階段：頂上の判定をせず、ボスのあとは「続ける／中断して帰る」 */
+{const _fs=fStairs;fStairs=async function(){if(towerAt()!=='inf')return _fs.apply(this,arguments);const D=FD;if(!D||D.climbing)return;D.climbing=true;D.paused=true;fReleaseStick();
+ const fl=D.floor,FLR=FLOORS[fl],k=D.area;const first=commitFloor(fl);infGain(fl);sfx.win&&sfx.win();
+ try{if(FLR.boss){if(first&&BOSS_WIN[k])await talk(storyFit(BOSS_WIN[k],null,['onmyo','takumi','mouse','robot']));
+   if(fl>=50&&!G.flags.inf50){G.flags.inf50=1;save();await talk(storyFit(INF_50,null,['onmyo','takumi','mouse','robot']))}
+   if(!await fChoice(fl)){infSnap();Object.assign(G.infRun,{fl:fl+1,hp:Math.min(1,(D.hp+D.maxhp*.2)/D.maxhp)});save();fEnd('home');return}}
+  await fAdvance(fl+1)}
+ finally{if(FD===D&&D.run)D.climbing=false}}}
+/* 終わり：倒れたら挑戦はおしまい。帰っただけなら続きから */
+{const _e=fEnd;fEnd=function(why){const D0=FD||{},inf=towerAt()==='inf'&&FD&&!FD.ending;if(inf&&why==='dead'){G.infLast=G.infRun?{fl:FD.floor,got:G.infRun.got|0}:null;G.infRun=null;save()}
+ const r=_e.apply(this,arguments);
+ if(inf){const R=infRun(),b=$('resBtns'),gz=document.querySelector('#resP .rzg'),gn=D0.infGot|0;
+  if(gz&&gn){if(!gz.querySelector('.rzt'))gz.innerHTML='';gz.insertAdjacentHTML('beforeend',`<div class="rzt">${MIC('mcrys',34)}<b>×${gn}</b><i>記憶の結晶</i></div>`)}if(b){b.innerHTML='';addBtn(R?`続きから（${R.fl}階）`:'1階から挑戦',()=>{$('result').classList.remove('fres');enterTower('inf');infGo(!!R)},'gold');addBtn('ホームへ',afterField)}
+  let nx=document.querySelector('#resP .rznx');if(!nx){const rz=document.querySelector('#resP .rz');if(rz){nx=document.createElement('div');nx.className='rznx';rz.appendChild(nx)}}if(nx)nx.innerHTML=`${UIMG('n_floor',26)}<span>${R?`次は <b>${R.fl}階</b> から続きを登れる`:'挑戦はおしまい。次は1階から'}</span>　<em>最高 ${G.infBest|0}F</em>`}
+ return r}}
+{const _fc=fChoice;fChoice=function(fl){const p=_fc(fl);if(towerAt()==='inf'){const h=$('fnHome');if(h)h.innerHTML='中断して帰る<small class="bsm">次は '+(fl+1)+'階から続きを登れる</small>'}return p}}
+
+/* ---------- ことば：錆 → ノイズ、錆の大波 → 陣のゆがみ ---------- */
+const I_BANNER={'錆の大波が近づいている…… あと1分でこの階は錆にのまれる':'陣のゆがみが近づいている…… あと1分でこの階がゆがむ',
+ '錆の大波！ この階はもう持たない':'陣のゆがみ！ 床がほどけていく','錆が濃くなってきた…… 長居すると敵がどんどん強くなる':'ノイズが濃くなってきた…… 長居すると敵がどんどん強くなる'};
+{const _b=fBanner;fBanner=function(t,...a){if(towerAt()==='inf'){if(I_BANNER[t])t=I_BANNER[t];else t=String(t).replace(/錆Lv/g,'ノイズLv')}return _b(t,...a)}}
+/* 陣のゆがみ：画面にノイズの帯が走る */
+{const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);if(towerAt()!=='inf')return;const W=g.canvas.width,H=g.canvas.height;g.save();g.setTransform(1,0,0,1,0,0);
+ const k=D.wave&&!D.boss?1:.25;for(let i=0;i<(D.wave?7:2);i++){if(Math.random()>.5*k)continue;const y=Math.random()*H,h=2+Math.random()*(D.wave?14:5);g.globalAlpha=.10+.2*k;g.fillStyle=Math.random()<.5?'#5ae6e6':'#ff4ad8';g.fillRect(0,y,W,h)}
+ if(D.wave&&!D.boss){g.globalAlpha=.12+.06*Math.sin(D.t*9);g.fillStyle='#08262c';g.fillRect(0,0,W,H)}g.restore()}}
+
+/* ---------- バグ版の絵：色ずれ（赤と青）・横線のぬけ。ボスは影のように暗く ---------- */
+const GLITCH={};
+function glitchOf(base,key,dark){const ks=key+(dark?'#d':'#g');if(GLITCH[ks])return GLITCH[ks];const W=base.width,H=base.height,out=[];
+ for(let v=0;v<3;v++){const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),off=Math.max(2,Math.round(W*.03))*(v===1?-1:1);
+  g.globalCompositeOperation='source-over';g.globalAlpha=.65;g.drawImage(base,off,0);g.globalCompositeOperation='source-atop';g.fillStyle='#ff2a6a';g.fillRect(0,0,W,H);
+  g.globalCompositeOperation='destination-over';g.globalAlpha=.65;const c2=document.createElement('canvas');c2.width=W;c2.height=H;const g2=c2.getContext('2d');g2.drawImage(base,-off,0);g2.globalCompositeOperation='source-atop';g2.fillStyle='#2ae6ff';g2.fillRect(0,0,W,H);g.drawImage(c2,0,0);
+  g.globalCompositeOperation='source-over';g.globalAlpha=1;g.drawImage(base,0,0);
+  if(dark){g.globalCompositeOperation='source-atop';g.globalAlpha=.62;g.fillStyle='#0a0418';g.fillRect(0,0,W,H);g.globalAlpha=1}
+  g.globalCompositeOperation='destination-out';let s=(v+1)*977;const r=()=>(s=(s*16807)%2147483647)/2147483647;for(let i=0;i<(dark?9:5);i++){const y=r()*H;g.fillRect(0,y,W,1+r()*Math.max(2,H*.025))}
+  g.globalCompositeOperation='source-over';for(let i=0;i<3;i++){const y=r()*H,h=2+r()*H*.05,dx=(r()-.5)*W*.12;g.drawImage(base,0,y,W,h,dx,y,W,h)}
+  out.push(c)}
+ return GLITCH[ks]=out}
+{const _f=fspr;fspr=function(src,size){const s=_f(src,size);if(!s||typeof towerAt!=='function'||towerAt()!=='inf'||!/^img\/foe\//.test(src))return s;
+ const m=/^img\/foe\/(\w+)\.webp$/.exec(src),k=m&&m[1],dark=k&&k.startsWith('x_');const v=glitchOf(s,src+'@'+size,dark);const t=performance.now();
+ /* ほとんどは1枚目。ときどきちらつく */
+ const i=(Math.floor(t/90)+(size*7))%23<3?1+((Math.floor(t/60))%2):0;return v[i]}}
+
+/* ---------- 物語：はじまり・10階ごとのボス・50階 ---------- */
+const MO='mouse',MN='チュータ',RB='robot',RN='メカロボ',IW='wolf',IWN='ウルフ',IT='takumi',ITN='匠';
+const INF_OPEN=[N_('霧が晴れた地図の奥。雲をつきぬけて、どこまでも高い塔が立っていた。'),
+ [MO,MN,'ここが、無限の塔……。てっぺんが見えないチュー。'],[IW,IWN,'創技の塔へ行く前に、敵がどんなもんか見ておこうぜ。'],
+ [RB,RN,'ピ……塔ノ陣ヲ、読ミトリ中……。'],[MO,MN,'待って、ロボ。この陣、今も伸びてる……！ 伸びたところから、バグが生まれてるチュー。'],
+ [IT+':serious',ITN,'やはり、今は直しきれない。……でも、伸びる先のバグなら、倒して止められる。'],
+ [RB,RN,'ピピ……陣ノ奥ニ、知ラナイ記録ガ、アリマス。'],[MO,MN,'ボクとロボで、少しずつ読んでみるチュー。登れば、きっと何か分かるチュー！'],
+ [IW,IWN,'よし。行けるところまで、行ってみようぜ。']];
+Object.assign(BOSS_TALK,{
+ i1:[[null,'■ー■','ピ……ギギ……さ、び……キラ……ぷ……る……']],
+ i2:[[null,'タ■■■ン','ゼン……イン……タイレ、ツ……ヲ……■■■'],N_('八つの影が、ばらばらの向きで襲ってくる。')],
+ i3:[[null,'■ェ■■ー','コ……ン……ニチ……ハ……ちょう……たち、も……■■'],N_('ノイズの中を、青い蝶がちらちらと舞う。')],
+ i4:[[null,'シ■■ー','キ……コエ、ヌ……オト、ハ……ナ、イ……■■■■'],N_('耳ざわりな爆音が、ひびいては途切れる。')],
+ i5:[[null,'■ウ■','ケ……ケッ……サ、ビ……キカ、ナ……■■■'],N_('青い炎の斬撃が、ノイズを裂いて飛んでくる。')]});
+Object.assign(BOSS_WIN,{
+ i1:[[MO,MN,'ことばの終わりが「ぷる」……。だれかのまねをしてるみたいだったチュー。'],[RB,RN,'ピ……記録ヲ一部、読ミトリ。「この塔は、わたしたちが建てた」']],
+ i2:[[IW,IWN,'さっきの、まるで隊列を組もうとして、組めなかったみたいだったな。'],[RB,RN,'ピ……記録。「ひとりでは、建てられなかった」']],
+ i3:[[MO,MN,'青い蝶……。こわれてるのに、きれいだったチュー。'],[RB,RN,'ピ……記録。「わたしたちの技を、陣に刻んだ」']],
+ i4:[[IT+':serious',ITN,'……あの音、ひびの場所を探していた。腕のいい職人の耳だ。'],[RB,RN,'ピ……記録。「陣は、止まらずに伸びていく」']],
+ i5:[[MO,MN,'ロボ、今までの記録を、全部つなげてみるチュー！'],
+  [RB,RN,'ピ……ピ……「この塔は、わたしたちが建てた。ひとりでは、建てられなかった。わたしたちの技を、陣に刻んだ。陣は、止まらずに伸びていく。——未来の職人へ、続きをたのむ。初代マイスター」']]});
+const INF_50=[[IW,IWN,'……続きを、たのむ、か。'],[IT+':serious',ITN,'ボスたちは、この人たちを写しそこなったものなんだ。……今の技じゃ、それ以上は読めない。'],
+ [MO,MN,'新しい技を身につけたら、きっと全部読めるチュー。創技の塔へ、行かなきゃ！'],N_('それでも塔は、雲の上へ伸び続けている。\n\n（50階より上は、どこまで登れるかの勝負。ランキングで競おう）')];
+/* 層に入るとき（10階ごと） */
+Object.assign(AREA_INTRO,{
+ i1:[N_('記憶の層。床も壁も、ときどき文字化けしたようにゆらぐ。')],
+ i2:[N_('隊列の層。どこかで、そろわない足音がひびいている。')],
+ i3:[N_('光の層。ノイズの向こうで、青い光がちらちらと舞う。')],
+ i4:[N_('残響の層。遠くで、途切れ途切れの爆音が鳴っている。')],
+ i5:[N_('蒼炎の層。ノイズの中に、青い炎が見えかくれする。')]});
+/* はじめて入るとき */
+{const _g=goFloor;goFloor=async function(f){if(towerAt()==='inf'&&!G.flags.infOpen){G.flags.infOpen=1;save();await talk(storyFit(INF_OPEN,null,['mouse','robot','takumi','wolf']))}return _g.apply(this,arguments)}}
+/* 会話で写しそこないが話すとき、暗くノイズのかかった本人の絵 */
+Object.keys(FOES).filter(k=>k.startsWith('x_')).forEach(k=>{TALK_FOE[FOES[k].n]=k});
+/* セーブの補い */
+{const _fx=fixV2;fixV2=function(g){const r=_fx.apply(this,arguments);if(g){g.infBest=g.infBest|0;if(g.mats){g.mats.noise=g.mats.noise|0;g.mats.mcrys=g.mats.mcrys|0}}return r}}
+
 /* =====================================================================
    新しいバージョンの知らせ
    ・GitHub Pages はページを最大10分ほど覚えておく（キャッシュ）ので、更新してもすぐに新しい版にならないことがある
@@ -6218,7 +6401,7 @@ function preloadFoes(fl){try{const F=FLOORS[fl],A=F&&FAREA[F.area];if(!A)return;
 {const _sh=show;show=function(id){const cur=document.querySelector('.scr.on');const r=_sh.apply(this,arguments);if(id!=='field'&&(!cur||cur.id!==id))lockInput(300);return r}}
 {const sh=document.getElementById('sheet');if(sh&&window.MutationObserver)new MutationObserver(()=>{if(sh.classList.contains('on')&&!sh._on){sh._on=1;lockInput(250)}else if(!sh.classList.contains('on'))sh._on=0}).observe(sh,{attributes:true,attributeFilter:['class']})}
 
-const BUILD='11/17 22:33';
+const BUILD='11/17 23:18';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 

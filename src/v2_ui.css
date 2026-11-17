@@ -815,6 +815,13 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .rksel select{flex:1;min-width:0;font-size:17px;padding:9px 10px;border-radius:10px;background:#0f131c;color:#fff;border:1px solid #ffffff2e}
 .rkbtns{display:flex;gap:8px;flex-wrap:wrap}.rkbtns .btn{flex:1;min-width:30%}
 .rksoon{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:18px 6px;border:1px dashed #ffffff30;border-radius:12px;margin-bottom:8px}
+.rklist{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.rkrow{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:#ffffff08}
+.rkrow.me{background:#ff8a3d26;border:1px solid #ff8a3d88}
+.rkn{width:28px;text-align:center;font-weight:900;font-size:16px;color:#c9d2e3}.rkn.t1{color:#ffd24a}.rkn.t2{color:#d8dde8}.rkn.t3{color:#e0a070}
+.rkrn{flex:1;min-width:0;display:flex;flex-direction:column}.rkrn b{font-size:14px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rkrn b small{font-size:10px;color:#9aa6bd;margin-left:4px}.rkrn i{font-style:normal;font-size:11px;color:#ffb36a}
+.rkf{font-size:20px;font-weight:900;color:#7fe0ff}.rkf small{font-size:11px;margin-left:1px}
+.rkgap{text-align:center;color:#9aa6bd;line-height:1}
 .rksoon b{font-size:22px;color:#ffc94a}.rksoon span{font-size:13px;color:#c9d2e3;line-height:1.6}
 
 .rkme{display:flex;align-items:center;gap:12px;margin:2px 0 6px}
