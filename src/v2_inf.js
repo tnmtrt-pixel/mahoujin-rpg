@@ -38,10 +38,12 @@ const INF_POOL=(()=>{const s=new Set(),el=new Set();['alley','factory','under','
  ['i1','i2','i3','i4','i5'].forEach((k,i)=>{const P=pk(INF_POOL.foes,8);
   FAREA[k]={mix:[[0,P.slice(0,2),1.5],[25,P.slice(1,4),2.2],[70,P.slice(3,6),3],[130,P.slice(4,7),3.7],[200,[P[7],P[0],P[5]].filter(Boolean),4.6]],
    elite:INF_POOL.elites[i%INF_POOL.elites.length]||'j_scale',boss:INF_BOSS[i],drop:ID,chestTool:null,ground:['#0a1418','90,220,230']}})}
-Object.assign(FLOOR_TINT,{i1:['storm','rgba(0,40,40,.35)'],i2:['court','rgba(40,0,20,.40)'],i3:['library','rgba(0,20,60,.38)'],i4:['storm','rgba(20,0,40,.40)'],i5:['court','rgba(0,10,50,.45)']});
+FLOOR_IMG.inf='img/floor/inf.webp';
+Object.assign(FLOOR_TINT,{i1:['inf','rgba(0,0,0,.05)'],i2:['inf','rgba(80,0,40,.18)'],i3:['inf','rgba(0,40,120,.18)'],i4:['inf','rgba(40,0,80,.22)'],i5:['inf','rgba(0,10,60,.30)']});
 /* ノイズの欠片・記憶の結晶（どちらも今は使えない。第3章で使う） */
 Object.assign(MATS,{noise:{n:'ノイズの欠片',d:'無限の塔で拾える、ノイズのかたまり。今の技では扱えない（第3章で使えるようになる）'},
  mcrys:{n:'記憶の結晶',d:'無限の塔の陣に残っていた記憶のかけらが固まったもの。ノイズが混じっていて、今の技では扱えない（第3章で使えるようになる）'}});
+Object.assign(UI_IC,{noise:'m_noise',mcrys:'m_mcrys'});
 MAT_ORDER.splice(MAT_ORDER.indexOf('core')+1,0,'noise','mcrys');
 Object.assign(SVG_IC,{
  noise:'<rect x="5" y="7" width="22" height="18" rx="2" fill="#142024" stroke="#5ae6e6" stroke-width="1.5"/><path d="M7 11h9M18 11h7M7 15h4M13 15h12M7 19h11M20 19h5M7 23h6" stroke="#ff4ad8" stroke-width="1.6"/><path d="M8 13h6M17 17h7" stroke="#5ae6e6" stroke-width="1.2"/>',
@@ -84,7 +86,7 @@ function infGain(fl){const n=(fl>50?2:1)+(fl%10===0?5:0);G.mats.mcrys=(G.mats.mc
 {const _fs=fStairs;fStairs=async function(){if(towerAt()!=='inf')return _fs.apply(this,arguments);const D=FD;if(!D||D.climbing)return;D.climbing=true;D.paused=true;fReleaseStick();
  const fl=D.floor,FLR=FLOORS[fl],k=D.area;const first=commitFloor(fl);infGain(fl);sfx.win&&sfx.win();
  try{if(FLR.boss){if(first&&BOSS_WIN[k])await talk(storyFit(BOSS_WIN[k],null,['onmyo','takumi','mouse','robot']));
-   if(fl>=50&&!G.flags.inf50){G.flags.inf50=1;save();await talk(storyFit(INF_50,null,['onmyo','takumi','mouse','robot']))}
+   if(fl>=50&&!G.flags.inf50){G.flags.inf50=1;save();await talk(storyFit(INF_50,null,['onmyo','takumi','mouse','robot']),'ev_inf_50')}
    if(!await fChoice(fl)){infSnap();Object.assign(G.infRun,{fl:fl+1,hp:Math.min(1,(D.hp+D.maxhp*.2)/D.maxhp)});save();fEnd('home');return}}
   await fAdvance(fl+1)}
  finally{if(FD===D&&D.run)D.climbing=false}}}
@@ -154,8 +156,14 @@ Object.assign(AREA_INTRO,{
  i4:[N_('残響の層。遠くで、途切れ途切れの爆音が鳴っている。')],
  i5:[N_('蒼炎の層。ノイズの中に、青い炎が見えかくれする。')]});
 /* はじめて入るとき */
-{const _g=goFloor;goFloor=async function(f){if(towerAt()==='inf'&&!G.flags.infOpen){G.flags.infOpen=1;save();await talk(storyFit(INF_OPEN,null,['mouse','robot','takumi','wolf']))}return _g.apply(this,arguments)}}
+{const _g=goFloor;goFloor=async function(f){if(towerAt()==='inf'&&!G.flags.infOpen){G.flags.infOpen=1;save();await talk(storyFit(INF_OPEN,null,['mouse','robot','takumi','wolf']),'ev_inf_open')}return _g.apply(this,arguments)}}
 /* 会話で写しそこないが話すとき、暗くノイズのかかった本人の絵 */
 Object.keys(FOES).filter(k=>k.startsWith('x_')).forEach(k=>{TALK_FOE[FOES[k].n]=k});
 /* セーブの補い */
 {const _fx=fixV2;fixV2=function(g){const r=_fx.apply(this,arguments);if(g){g.infBest=g.infBest|0;if(g.mats){g.mats.noise=g.mats.noise|0;g.mats.mcrys=g.mats.mcrys|0}}return r}}
+/* ストーリーをふりかえる：無限の塔（ラベルは「無○F」） */
+{const _ss=storyScenes;storyScenes=function(){const S=_ss(),f=G.flags||{};
+ if(f.infOpen)S.push({n:300,lb:'無',t:'無限の塔　はじまり',run:()=>talk(storyFit(INF_OPEN,null,['mouse','robot','takumi','wolf']),'ev_inf_open')});
+ ['i1','i2','i3','i4','i5'].forEach((k,i)=>{const fl=(i+1)*10;if(G.cleared.includes(INF_BOSS[i]))S.push({n:300+fl+.5,lb:'無'+fl+'F',t:'写しをたおした',run:()=>talk(storyFit(BOSS_WIN[k],null,['onmyo','takumi','mouse','robot']))})});
+ if(f.inf50)S.push({n:351,lb:'無50F',t:'初代マイスターの記録',run:()=>talk(storyFit(INF_50,null,['onmyo','takumi','mouse','robot']),'ev_inf_50')});
+ return S.sort((a,b)=>a.n-b.n)}}
