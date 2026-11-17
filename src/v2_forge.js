@@ -19,7 +19,7 @@ function runHit(o){return new Promise(res=>{
  let k=0,t=0,last=0,raf=0,done=false,scores=[],hammer=0,sparks=[],shake=0,msg='',msgT=0;
  const R0=26,RMAX=96;
  const ringR=()=>RMAX-(RMAX-R0*.2)*((t%P)/P);
- function strike(){if(done||k>=N)return;const r=ringR(),q=Math.max(0,1-Math.abs(r-R0)/(R0*.8*AM));scores.push(q);
+ function strike(){if(done||k>=N)return;const r=ringR(),q=Math.max(0,1-Math.max(0,Math.abs(r-R0)-R0*.15*AM)/(R0*.7*AM));  /* 2.0.14：金色の円にほぼ重なっていれば満点 */scores.push(q);
   /* その場所の鉄をのばす：ぴったりなら目標の厚みに、ずれるほど厚いまま */
   const x=pts[k],span=(ax1-ax0)/N*.75;for(let i=0;i<=M;i++){const xi=ax0+(ax1-ax0)*i/M,d=Math.abs(xi-x)/span;if(d<1){const w=Math.cos(d*Math.PI/2),goal=tgtT+(startT-tgtT)*(1-q)*.85;th[i]=th[i]+(Math.min(th[i],goal)-th[i])*w}}
   hammer=1;shake=6;for(let i=0;i<14+q*16;i++){const a=-Math.PI*Math.random();sparks.push({x,y:ay-th[Math.round((x-ax0)/(ax1-ax0)*M)],vx:Math.cos(a)*(2+Math.random()*4),vy:Math.sin(a)*(2+Math.random()*5),l:1})}
@@ -157,8 +157,8 @@ function runScribe(o){return new Promise(res=>{
  bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{const t=b.dataset.tl;if(t==='u'){drawn.pop();draw();return}tool=t;bar.querySelectorAll('[data-tl]').forEach(x=>x.classList.toggle('on',x.dataset.tl===t))});
  const AM=assistMul(o),snapP=p=>{if(!snapOn)return p;let best=p,bd=12*AM*SN;pts.forEach(q=>{const d=Math.hypot(q[0]-p[0],q[1]-p[1]);if(d<bd){bd=d;best=q}});return best};
  function match(f){let best=0;drawn.forEach(d=>{if(d.t!==f.t)return;let q;
-  if(f.t==='l'){const e1=Math.hypot(d.a[0]-f.a[0],d.a[1]-f.a[1])+Math.hypot(d.b[0]-f.b[0],d.b[1]-f.b[1]),e2=Math.hypot(d.a[0]-f.b[0],d.a[1]-f.b[1])+Math.hypot(d.b[0]-f.a[0],d.b[1]-f.a[1]);q=1-Math.min(e1,e2)/(40*AM)}
-  else q=1-(Math.hypot(d.c[0]-f.c[0],d.c[1]-f.c[1])+Math.abs(d.r-f.r)*1.2)/(26*AM);best=Math.max(best,q)});return Math.max(0,best)}
+  if(f.t==='l'){const e1=Math.hypot(d.a[0]-f.a[0],d.a[1]-f.a[1])+Math.hypot(d.b[0]-f.b[0],d.b[1]-f.b[1]),e2=Math.hypot(d.a[0]-f.b[0],d.a[1]-f.b[1])+Math.hypot(d.b[0]-f.a[0],d.b[1]-f.a[1]);q=1-Math.max(0,Math.min(e1,e2)-6)/(40*AM)}
+  else q=1-Math.max(0,Math.hypot(d.c[0]-f.c[0],d.c[1]-f.c[1])+Math.abs(d.r-f.r)*1.2-4)/(26*AM);  /* 2.0.14：数点のずれは満点 */best=Math.max(best,q)});return Math.max(0,best)}
  function result(){const qs=F.map(match),hit=qs.filter(q=>q>.3).length,extra=Math.max(0,drawn.length-F.length);return{score:Math.max(0,Math.round(qs.reduce((a,b)=>a+b,0)/F.length*100-extra*3)),reach:hit/F.length}}
  function finish(){if(done)return;done=true;cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;$('fgDone').onclick=null;bar.style.display='none';bar.innerHTML='';res(result())}
  function draw(){g.clearRect(0,0,W,H);g.fillStyle='#4a5670';g.fillRect(W*.05,H*.05,W*.9,H*.9);
@@ -203,7 +203,7 @@ function runWire(o){return new Promise(res=>{
   $('fgInfo').textContent=phase==='wire'?`つないだ ${paths.filter((_,k)=>joined(k)).length} / ${K}`:phase==='solder'?`はんだ付け ${sold.length} / ${K}　緑のところでタップ`:'できた！'}
  function loop(ts){const dt=last?Math.min(.05,(ts-last)/1000):0;last=ts;if(phase==='solder'){gauge+=gdir*dt*(.8+.15*tier);if(gauge>1){gauge=1;gdir=-1}if(gauge<0){gauge=0;gdir=1}}draw();if(!done)raf=requestAnimationFrame(loop)}
  function toSolder(){if(paths.every((_,k)=>joined(k))){phase='solder';sk=0;gauge=0;tone(880,.15,'triangle',.08,1320)}}
- cv.onpointerdown=e=>{e.preventDefault();if(phase==='solder'){const q=Math.max(0,1-Math.abs(gauge-.69)/(.2*assistMul(o)));sold.push(q);tone(q>.7?1200:500,.08,'square',.05,q>.7?900:300);sk++;if(sk>=K){phase='done';setTimeout(finish,500)}return}
+ cv.onpointerdown=e=>{e.preventDefault();if(phase==='solder'){const q=Math.max(0,1-Math.max(0,Math.abs(gauge-.69)-.04*assistMul(o))/(.18*assistMul(o)));  /* 2.0.14：緑の帯の中なら満点 */sold.push(q);tone(q>.7?1200:500,.08,'square',.05,q>.7?900:300);sk++;if(sk>=K){phase='done';setTimeout(finish,500)}return}
   if(phase!=='wire')return;const c=cellAt(e);if(c<0)return;pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}
   if(term.has(c)){drag=term.get(c);paths[drag]=[c]}else{const k=owner(c);if(k<0)return;drag=k;paths[k]=paths[k].slice(0,paths[k].indexOf(c)+1)}draw()};
  cv.onpointermove=e=>{if(e.pointerId!==pid||drag<0)return;const c=cellAt(e);if(c<0)return;const p=paths[drag],lastC=p[p.length-1];if(c===lastC)return;
@@ -287,7 +287,7 @@ function runDrill(o){return new Promise(res=>{
   g.fillStyle='#9aa6c4';g.font='600 12px sans-serif';g.textAlign='center';g.fillText(hold?'押している：刃が下がる':'画面を長押しする',W*.45,H*.95)}
  function loop(ts){const dt=last?Math.min(.05,(ts-last)/1000):0;last=ts;msgT=Math.max(0,msgT-dt);
   if(k<N&&!done){const h=holes[k];p=hold?Math.min(1,p+dt*(.55+.1*tier)):Math.max(0,p-dt*.9);spin+=p*40*dt*10;
-   if(p>.05){h.d+=p*dt*.55/(1+.2*(tier-1));h.q.push(p>=Z0&&p<=Z1?1:p<Z0?Math.max(.3,p/Z0):Math.max(0,1-(p-Z1)/.12));if(Math.random()<p)parts.push({x:h.x+(Math.random()*30-15),y:H*.62,vx:Math.random()*3-1.5,vy:-Math.random()*3,l:1});if(Math.random()<.08)tone(120+p*200,.03,'sawtooth',.02,100)}
+   if(p>.05){h.d+=p*dt*.55/(1+.2*(tier-1));if(p>=Z0)h.ok=1;h.q.push(p>=Z0&&p<=Z1?1:p<Z0?(h.ok?Math.max(.3,p/Z0):1):Math.max(0,1-(p-Z1)/.12));  /* 2.0.14：押しはじめて緑に届くまでは減点しない */if(Math.random()<p)parts.push({x:h.x+(Math.random()*30-15),y:H*.62,vx:Math.random()*3-1.5,vy:-Math.random()*3,l:1});if(Math.random()<.08)tone(120+p*200,.03,'sawtooth',.02,100)}
    over=p>.92?over+dt:Math.max(0,over-dt);
    if(over>.35){h.broke=true;msg='刃が折れた！ 押しすぎ';msgT=1.4;tone(80,.3,'square',.08,40);next()}
    else if(h.d>=1){h.d=1;const q=h.q.reduce((a,b)=>a+b,0)/h.q.length;msg=q>.85?'きれいな穴！':q>.5?'まあまあ':'ガタガタ…';msgT=1;tone(880,.1,'triangle',.06,1200);next()}}
