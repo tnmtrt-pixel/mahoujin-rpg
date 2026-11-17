@@ -63,15 +63,15 @@ function runWeld(o){return new Promise(res=>{
  const tier=o.tier||1,AM=assistMul(o),TOL=WELD_TOL[tier]*AM,TG=o.lim&&o.lim.tig?1.3:1,VMIN=WELD_V[tier][0]/AM/TG,VMAX=WELD_V[tier][1]*AM*TG;
  const {cv,g,W,H}=forgeOpen(o.title||'溶接機でつなぐ','指でトーチを動かして、つなぎ目をなぞる。速すぎると細く、遅すぎると焼けすぎる','t_welder');
  const P=weldPath(o.shape||'ch',W,H),n=P.length-1,q=new Float32Array(n).fill(-1),heat=new Float32Array(n);
- let pid=null,tx=W*.5,ty=H*.85,lx=0,ly=0,lt=0,v=0,last=0,raf=0,done=false,spat=0,sparks=[],on=false;
+ let pid=null,tx=W*.5,ty=H*.85,lx=0,ly=0,lt=0,v=0,last=0,raf=0,done=false,spat=0,sparks=[],on=false,started=false;
  const OFF=46;   /* トーチの先は指より少し上（指でかくれないように） */
  function nearest(x,y){let bi=-1,bd=1e9;for(let i=0;i<n;i++){const[a,b]=P[i],[c,d]=P[i+1],dx=c-a,dy=d-b,L=dx*dx+dy*dy,u=Math.max(0,Math.min(1,((x-a)*dx+(y-b)*dy)/L)),px=a+dx*u,py=b+dy*u,dd=Math.hypot(x-px,y-py);if(dd<bd){bd=dd;bi=i}}return[bi,bd]}
  const cover=()=>{let c=0;for(const v of q)if(v>=0)c++;return c/n};
  function score(){let s=0;for(const v of q)s+=Math.max(0,v);return Math.max(0,Math.round(s/n*100-spat*.5))}
  function finish(){if(done)return;done=true;cancelAnimationFrame(raf);cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;$('fgDone').onclick=null;res({score:score(),reach:cover()})}
  function speedQ(v){if(v<VMIN)return Math.max(.35,v/VMIN);if(v>VMAX)return Math.max(.25,1-(v-VMAX)/VMAX);return 1}
- function weldAt(x,y,dt){const[i,d]=nearest(x,y);if(d>TOL){spat+=dt*10;return false}
-  heat[i]+=dt;const over=heat[i]>.9?Math.max(.4,1-(heat[i]-.9)):1;const sq=speedQ(v)*over*(1-.35*d/TOL);
+ function weldAt(x,y,dt){const[i,d]=nearest(x,y);if(d>TOL){if(started&&d>TOL*1.3)spat+=dt*6;return false}started=true;  /* 2.0.13：まだ一度も線に当てていない間は、はみ出しにしない */
+  heat[i]+=dt;const over=heat[i]>.9?Math.max(.4,1-(heat[i]-.9)):1;const sq=speedQ(v)*over*(d<=TOL*.5?1:1-.3*(d-TOL*.5)/(TOL*.5));  /* 2.0.13：許す幅の半分までは満点 */
   q[i]=q[i]<0?sq:Math.min(q[i],sq)*.5+Math.max(q[i],sq)*.5;if(i>0&&q[i-1]<0&&d<TOL)q[i-1]=sq*.9;return true}
  function draw(){g.clearRect(0,0,W,H);
   /* 鉄板2枚 */
@@ -95,7 +95,7 @@ function runWeld(o){return new Promise(res=>{
   if(c>=1&&pid==null){finish();return}
   if(!done)raf=requestAnimationFrame(loop)}
  const pos=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
- cv.onpointerdown=e=>{if(done)return;e.preventDefault();pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}const[x,y]=pos(e);tx=x;ty=y-OFF;lx=tx;ly=ty;lt=performance.now();on=true;v=0};
+ cv.onpointerdown=e=>{if(done)return;e.preventDefault();pid=e.pointerId;try{cv.setPointerCapture(pid)}catch(_){}const[x,y]=pos(e);tx=x;ty=y-OFF;lx=tx;ly=ty;lt=performance.now();on=true;v=(VMIN+VMAX)/2};  /* 当てた瞬間は「ちょうどいい速さ」から始める */
  cv.onpointermove=e=>{if(e.pointerId!==pid||done)return;const[x,y]=pos(e),now=performance.now();tx=x;ty=y-OFF;const dt=Math.max(.001,(now-lt)/1000);const iv=Math.hypot(tx-lx,ty-ly)/dt;v=v*.8+iv*.2;lx=tx;ly=ty;lt=now};
  cv.onpointerup=cv.onpointercancel=e=>{if(e.pointerId===pid){pid=null;on=false}};
  $('fgDone').style.display='';$('fgDone').onclick=()=>finish();raf=requestAnimationFrame(loop)})}
