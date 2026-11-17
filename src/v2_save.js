@@ -7,14 +7,38 @@
  * サーバーに預ける機能は、塔2にサーバーがないので入れていない */
 const GEN_KEY='mmrpg2_gen',PREV_KEY='mmrpg2_prev',CODE_HEAD='MT2S.';
 const sgYmd=t=>new Date(t+9*3600e3).toISOString().slice(0,10);
-function saveCode(raw){const b=new TextEncoder().encode(raw);let s='';b.forEach(x=>s+=String.fromCharCode(x));return CODE_HEAD+btoa(s)}
-/* コードを読んで、migrate を通った生の文字列を返す（読めなければ例外） */
-function readCode(c){c=String(c||'').replace(/\s+/g,'');const i=c.indexOf(CODE_HEAD);if(i<0)throw new Error('head');
- const raw=new TextDecoder().decode(Uint8Array.from(atob(c.slice(i+CODE_HEAD.length)),x=>x.charCodeAt(0)));
+/* ---- 改ざん防止（2.0.12） ----
+ * ・コードは MT2T.<中身>.<印>。中身は読めない形にまぜ、印（ハッシュ）が合わないと読みこまない
+ * ・前の形 MT2S. は 2026-11-30 まで読める（バックアップの取り直し期間）
+ * ・端末の中のセーブにも印（mmrpg2_sig）をつけ、起動時に合わなければ「書きかえあり」として、ランキングに載せない
+ * ブラウザのゲームなので完全には防げない。数字を書きかえるくらいのズルを止めるためのもの */
+const CODE_HEAD2='MT2T.',SIG_KEY='mmrpg2_sig',OLD_CODE_UNTIL=Date.UTC(2026,10,30,15,0,0);
+const _SALT='kobe-koka:meister-tower2:'+[77,84,50].map(x=>String.fromCharCode(x)).join('');
+function sgHash(str){str=_SALT+str;let h1=0xdeadbeef^str.length,h2=0x41c6ce57^str.length;for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
+ h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+ return (h2>>>0).toString(16).padStart(8,'0')+(h1>>>0).toString(16).padStart(8,'0')}
+function sgMix(bytes){let k=0x9e3779b9;return bytes.map(b=>{k=Math.imul(k^(k>>>15),2246822519)+0x7f4a7c15|0;return b^(k>>>24)})}
+const oldCodeOk=()=>Date.now()<OLD_CODE_UNTIL;
+function saveCode(raw){const b=sgMix(Array.from(new TextEncoder().encode(raw)));let s='';b.forEach(x=>s+=String.fromCharCode(x));return CODE_HEAD2+btoa(s)+'.'+sgHash(raw)}
+/* コードを読んで、migrate を通った生の文字列を返す（読めなければ例外。印が合わない＝'sig'、古い形の期限切れ＝'old'） */
+function readCode(c){c=String(c||'').replace(/\s+/g,'');let raw;const j=c.indexOf(CODE_HEAD2);
+ if(j>=0){const body=c.slice(j+CODE_HEAD2.length),k=body.lastIndexOf('.');if(k<0)throw new Error('sig');
+  raw=new TextDecoder().decode(Uint8Array.from(sgMix(Array.from(atob(body.slice(0,k)),x=>x.charCodeAt(0)))));if(sgHash(raw)!==body.slice(k+1))throw new Error('sig')}
+ else{const i=c.indexOf(CODE_HEAD);if(i<0)throw new Error('head');if(!oldCodeOk())throw new Error('old');
+  raw=new TextDecoder().decode(Uint8Array.from(atob(c.slice(i+CODE_HEAD.length)),x=>x.charCodeAt(0)))}
  const g=migrate(JSON.parse(raw));if(!g)throw new Error('bad');return JSON.stringify(g)}
+function codeErr(e,file){const m=e&&e.message;if(m==='sig')return 'このコードは書きかえられているか、こわれています。<br>読みこめません';
+ if(m==='old')return '古い形のコード（MT2S.）は11月30日で読めなくなりました';return file?'セーブのファイルではないようです':'コードが途中で切れているようです。<br>全部コピーできているか確かめてください'}
+/* 端末の中のセーブの印 */
+function sgSign(raw){try{if(!raw)return;let c=0;try{c=JSON.parse(raw).coin|0}catch(_){}localStorage.setItem(SIG_KEY,JSON.stringify({h:sgHash(raw),c,t:Date.now()}))}catch(e){}}
+/* 印が合わないとき：古い版のまま開いていた画面が書いた場合もあるので、コインが前の印から大きく増えているときだけ「書きかえあり」にする */
+(function sgBootCheck(){try{if(!SAVE_RAW||!G)return;let sg=null;try{sg=JSON.parse(localStorage.getItem(SIG_KEY))}catch(_){}
+ if(sg&&sg.h&&sg.h!==sgHash(SAVE_RAW)&&(G.coin|0)>(sg.c|0)+3000){G.flags=G.flags||{};G.flags.tamper=1;try{localStorage.setItem(KEY,JSON.stringify(G))}catch(_){}}
+ sgSign(localStorage.getItem(KEY))}catch(e){}})();
+{const _sv=save;save=function(){const r=_sv.apply(this,arguments);if(G&&!saveBlocked)try{const raw=localStorage.getItem(KEY);if(raw===JSON.stringify(G))sgSign(raw)}catch(e){}return r}}  /* 自分で書いたときだけ印をつけなおす */
 function curRaw(){if(G&&!inBattle)save();try{return localStorage.getItem(KEY)}catch(e){return null}}
 /* 生の文字列でセーブを入れかえて読みこみ直す（今のデータは mmrpg2_prev へ） */
-function applyRaw(raw,msg){try{const now=localStorage.getItem(KEY);if(now)localStorage.setItem(PREV_KEY,now);localStorage.setItem(KEY,raw)}
+function applyRaw(raw,msg){try{const now=localStorage.getItem(KEY);if(now){localStorage.setItem(PREV_KEY,now);localStorage.setItem(PREV_KEY+'_s',sgHash(now))}localStorage.setItem(KEY,raw);sgSign(raw)}
  catch(e){say('この端末では書きこめませんでした',1600);return}
  saveBlocked=true;closeSheet();say(msg||'セーブデータを読みこみました',1200).then(()=>location.reload())}
 function sgSummary(raw){try{const g=JSON.parse(raw);const h=g.party&&g.party[0];const fl=g.floor|0;
@@ -29,14 +53,14 @@ function saveFile(){const raw=curRaw();if(!raw){say('まだセーブがありま
  document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);
  OPT.bkF=Date.now();saveOpt();say('セーブをファイルに保存しました<br><span style="font-size:14px">（iPhone は「ファイル」→「ダウンロード」）</span>',2000)}
 function loadFile(){const inp=document.createElement('input');inp.type='file';inp.accept='.txt,text/plain';
- inp.onchange=async()=>{const f=inp.files[0];if(!f)return;let raw;try{raw=readCode(await f.text())}catch(e){say('セーブのファイルではないようです',1600);return}
+ inp.onchange=async()=>{const f=inp.files[0];if(!f)return;let raw;try{raw=readCode(await f.text())}catch(e){say(codeErr(e,1),2200);return}
   sgAsk(`このファイルのセーブ（${sgSummary(raw)}）で<br>今のデータを上書きしますか？<br><span style="font-size:13px;opacity:.8">今のデータは「ひとつ前にもどす」で戻せます</span>`,'上書きして読みこむ',()=>applyRaw(raw))};
  inp.click()}
 function genList(){try{const g=JSON.parse(localStorage.getItem(GEN_KEY)||'[]');return Array.isArray(g)?g.filter(x=>x&&x.d&&typeof x.c==='string'):[]}catch(e){return[]}}
 /* 起動時：読めたセーブだけを1日1回控えに残す。読めなかったときは何も上書きしない */
 function saveGuardBoot(){try{if(OPT.bkF===undefined){OPT.bkF=Date.now();saveOpt()}
  if(!G||!SAVE_RAW)return;const d=sgYmd(Date.now()),g=genList();if(g[0]&&g[0].d===d)return;
- g.unshift({d,c:SAVE_RAW});const out=g.slice(0,3);
+ if(G.flags&&G.flags.tamper)return;g.unshift({d,c:SAVE_RAW,s:sgHash(SAVE_RAW)});const out=g.slice(0,3);
  try{localStorage.setItem(GEN_KEY,JSON.stringify(out))}catch(e){try{localStorage.setItem(GEN_KEY,JSON.stringify(out.slice(0,1)))}catch(_){}}}catch(e){}}
 function openSaveGuard(){const gens=genList();let prev=null;try{prev=localStorage.getItem(PREV_KEY)}catch(e){}
  const last=OPT.bkF&&G?`最後にファイル保存：${sgYmd(OPT.bkF)}`:'';
@@ -52,19 +76,20 @@ function openSaveGuard(){const gens=genList();let prev=null;try{prev=localStorag
   <div class="sgh">別の端末へ引っ越し</div>
   <div class="note">コードを書き出してコピーし、移したい端末の「設定 → セーブの守り」に貼って読み込みます。</div>
   <div class="sgr"><button class="btn" id="sgExp">コードを書き出す</button><button class="btn" id="sgCopy" style="display:none">コピー</button></div>
-  <textarea id="sgCode" class="sgc" placeholder="MT2S. で始まるコードを貼り付けて「読み込む」" aria-label="セーブコード" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+  <textarea id="sgCode" class="sgc" placeholder="MT2T. で始まるコードを貼り付けて「読み込む」" aria-label="セーブコード" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
   <button class="btn" id="sgImp">貼ったコードを読み込む</button>
   </div><button class="btn ghost" id="sgX">閉じる</button>`;
  {const ib=$('sgInh');if(ib)ib.onclick=openInherit}$('sgX').onclick=closeSheet;$('sgFile').onclick=saveFile;$('sgLoad').onclick=loadFile;
  $('sgExp').onclick=()=>{const raw=curRaw();if(!raw){say('まだセーブがありません',1200);return}$('sgCode').value=saveCode(raw);$('sgCopy').style.display=''};
  $('sgCopy').onclick=async()=>{const t=$('sgCode');try{await navigator.clipboard.writeText(t.value);say('コピーしました',900)}catch(e){t.focus();t.select();say('選択しました。長押しでコピーしてください',1500)}};
- $('sgImp').onclick=()=>{const c=$('sgCode').value.replace(/\s+/g,'');if(!c.startsWith(CODE_HEAD)){say('「MT2S.」で始まるコードを貼り付けてください',1600);return}
-  let raw;try{raw=readCode(c)}catch(e){say('コードが途中で切れているようです。<br>全部コピーできているか確かめてください',2000);return}
+ $('sgImp').onclick=()=>{const c=$('sgCode').value.replace(/\s+/g,'');if(!c.startsWith(CODE_HEAD)&&!c.startsWith(CODE_HEAD2)){say('「MT2T.」で始まるコードを貼り付けてください',1600);return}
+  let raw;try{raw=readCode(c)}catch(e){say(codeErr(e),2200);return}
   sgAsk(`このコードのセーブ（${sgSummary(raw)}）で<br>今のデータを上書きしますか？`,'上書きして読みこむ',()=>applyRaw(raw))};
  $('sheetB').querySelectorAll('[data-gen]').forEach(b=>b.onclick=()=>{const x=gens[+b.dataset.gen];
   try{migrate(JSON.parse(x.c))||0}catch(e){say('この控えは読めませんでした',1400);return}
+  if(x.s?x.s!==sgHash(x.c):!oldCodeOk()){say('この控えは書きかえられているため、戻せません',1800);return}
   sgAsk(`${x.d} の控え（${sgSummary(x.c)}）に戻しますか？<br><span style="font-size:13px;opacity:.8">今のデータは「ひとつ前にもどす」で戻せます</span>`,'この日に戻す',()=>applyRaw(x.c,`${x.d} の控えに戻しました`))});
- const pv=$('sgPrev');if(pv)pv.onclick=()=>sgAsk('ひとつ前のデータに戻しますか？','戻す',()=>applyRaw(prev,'ひとつ前のデータに戻しました'));
+ const pv=$('sgPrev');if(pv)pv.onclick=()=>{let ps=null;try{ps=localStorage.getItem(PREV_KEY+'_s')}catch(e){}if(ps?ps!==sgHash(prev):!oldCodeOk()){say('ひとつ前のデータは書きかえられているため、戻せません',1800);return}sgAsk('ひとつ前のデータに戻しますか？','戻す',()=>applyRaw(prev,'ひとつ前のデータに戻しました'))};
  $('sheet').classList.add('on')}
 /* ホームでほかの表示（シート・会話・ポップアップ）が出ていたら案内しない */
 function sgBusy(){const on=id=>{const e=$(id);return e&&e.classList.contains('on')};return on('sheet')||on('talk')||!on('home')||!!document.querySelector('.fov.on,.pop2,.rpop')}
