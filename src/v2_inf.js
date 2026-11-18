@@ -24,10 +24,10 @@ Object.assign(AREAS,{
 /* 写しそこないのボス（本人の絵にノイズ。名前は文字化け） */
 Object.assign(FFOE,{
  x_kura:  {hp:1000,spd:.85,dmg:30,xp:150,r:54,big:1,boss:1,src:'img/kura.webp',ring:140,noflip:1},
- x_tako:  {hp:1000,spd:.8, dmg:32,xp:160,r:56,big:1,boss:1,src:'img/tako.webp',call:380,ring:150,noflip:1},
+ x_tako:  {hp:1000,spd:.8, dmg:32,xp:160,r:56,big:1,boss:1,src:'img/tako.webp',call:380,callMsg:'タ■■■ンが隊列を呼んだ！',ring:150,noflip:1},
  x_fairy: {hp:1000,spd:1.0,dmg:32,xp:170,r:54,big:1,boss:1,fly:1,src:'img/fairy.webp',ring:120,noflip:1},
  x_shadow:{hp:1000,spd:1.0,dmg:34,xp:180,r:56,big:1,boss:1,src:'img/shadow.webp',ring:100,noflip:1},
- x_soul:  {hp:1000,spd:1.1,dmg:36,xp:200,r:56,big:1,boss:1,fly:1,src:'img/soul.webp',ring:95,call:420,noflip:1}});
+ x_soul:  {hp:1000,spd:1.1,dmg:36,xp:200,r:56,big:1,boss:1,fly:1,src:'img/soul.webp',ring:95,call:420,callMsg:'■ウ■がノイズを呼んだ！',noflip:1}});
 Object.assign(FOES,{x_kura:{n:'■ー■',col:'#9ee03a'},x_tako:{n:'タ■■■ン',col:'#ff4a4a'},x_fairy:{n:'■ェ■■ー',col:'#7fb0ff'},x_shadow:{n:'シ■■ー',col:'#c0c4d0'},x_soul:{n:'■ウ■',col:'#4a8aff'}});
 /* ふつうの敵と強敵：第1章・第2章の層から集めて、バグ版として出す */
 const INF_POOL=(()=>{const s=new Set(),el=new Set();['alley','factory','under','upper','sky','jk','jt','jm','jb','js','jr','jg'].forEach(k=>{const A=FAREA[k];if(!A)return;(A.mix||[]).forEach(m=>(m[1]||[]).forEach(x=>{if(FFOE[x]&&!FFOE[x].boss)s.add(x)}));if(A.elite)el.add(A.elite)});
