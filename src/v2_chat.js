@@ -66,4 +66,4 @@ function openBonds(){const face=id=>`<img src="${FACE(id)}" alt="">`,ok=b=>b?'<b
 /* チャット・絆覚醒・ストーリーの上のタブ（2.2.2）。いつも上に出る */
 const CT_TABS=[['chat','チャット'],['bond','絆覚醒'],['story','ストーリー']];
 function ctTabs(a){const nw=chatNew().length;return `<div class="ctt">${CT_TABS.map(([k,n])=>`<button class="${k===a?'on':''}" data-ct="${k}">${n}${k==='chat'&&nw?`<i>${nw}</i>`:''}</button>`).join('')}</div>`}
-function ctBind(){$('gpBody').querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>({chat:openChats,bond:openBonds,story:openStory})[b.dataset.ct]())}
+function ctBind(){const gp=$('genPick');gp.classList.add('full');if(!gp._fullObs){gp._fullObs=new MutationObserver(()=>{if(!gp.classList.contains('on')&&gp.classList.contains('full'))gp.classList.remove('full')});gp._fullObs.observe(gp,{attributes:true,attributeFilter:['class']})}$('gpBody').querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>({chat:openChats,bond:openBonds,story:openStory})[b.dataset.ct]())}
