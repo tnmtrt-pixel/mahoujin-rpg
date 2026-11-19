@@ -36,7 +36,7 @@ async function tutStart(){if(!G)return;G.flags.ai_t0=1;enterTower('tut');await g
 {const _fs=fStairs;fStairs=async function(){if(towerAt()!=='tut')return _fs.apply(this,arguments);const D=FD;if(!D||D.climbing)return;D.climbing=true;tutFinish(false)}}
 /* 結果画面は出さずに、ホームへ。そのあと無料ガチャの案内 */
 async function tutFinish(skip){const D=FD;tutBox().classList.remove('on');if(D&&D.run){D.tut=null;try{fEnd('home')}catch(_){}}
- G.flags.tut=1;G.flags.freeG=1;save();
+ G.flags.tut=1;G.flags.tutNew=1;G.flags.freeG=1;save();
  const r=$('result');if(r&&r.classList.contains('on')){r.classList.remove('on','fres')}
  openHome();await talk([['owl','ホー博士',skip?'ホッホッ、もう分かっておるか。頼もしいのう。':'ホッホッ、上出来じゃ！ これで塔を登る準備はできた。'],['owl','ホー博士','さて、ひとりで登るのは心細かろう。工房の「ガチャ」で、仲間を呼んでみるのじゃ。\nはじめの1回は、わしのおごりじゃよ。'],[null,'','（ガチャは、このあとも毎日1回、無料で引けます）']]);
  goTab('gacha')}
@@ -51,3 +51,15 @@ const freeGacha=()=>!!(G&&(G.flags.freeG||G.freeDay!==jstDay()));
 {const _dg=doGacha;doGacha=function(n){const B=GACHA_BANNERS[gaBan];if(n===1&&freeGacha()&&!(B&&B.soon)){if(G.flags.freeG)G.flags.freeG=0;else G.freeDay=jstDay();G.coin=(G.coin|0)+GACHA_COST}return _dg.apply(this,arguments)}}
 {const _rc=renderCharGacha;renderCharGacha=function(){_rc.apply(this,arguments);if(!freeGacha())return;const b=$('gaBody').querySelector('.gab:not(.ten)'),B=GACHA_BANNERS[gaBan];if(!b||(B&&B.soon))return;
  b.disabled=false;b.classList.add('free');b.innerHTML=`<b>1回</b><small>${G.flags.freeG?'はじめての無料':'今日の無料'}</small>`}}
+
+/* ---------- 編成・工房の、はじめての説明（2.4.1）：その画面を初めて開いたときに一回だけ ---------- */
+const SCR_GUIDE={
+ party:{t:'編成のしかた',ic:FACE('wolf'),st:['パーティは最大5人。上の枠をタップして、下の一覧から入れる仲間を選ぶ','いちばん左がリーダー。リーダーの技は、出撃の最初からLv2で使える','仲間を選ぶと、技・能力・装備が見られる。コインで「強化」すると、レベルが上がって強くなる','武器や防具は工房で作って装備する。武器をSランク以上にすると、出撃中に技を「覚醒」できる','組み合わせの2人を入れると、金色の枠で「絆覚醒」の説明が出る']},
+ shop:{t:'工房の使い方',ic:FACE('fox'),st:['「つくる」：図面と素材で、武器や防具を作る。加工はミニゲームで、うまくできるほどランクが上がる','「解読」：塔で拾った図面は、問題を解いて読み解くと、作れるようになる','「工具」：加工に使う道具。使うほど練度が上がって、その加工が楽になる','「素材」：持っている素材の一覧。足りない素材は、塔で拾える','「換金所」：いらない装備や素材を、コインに替えられる']}};
+function scrGuide(k){const g=SCR_GUIDE[k];if(!g||!G||G.flags['gd_'+k])return;G.flags['gd_'+k]=1;save();
+ setTimeout(()=>{$('gpBody').innerHTML=`<div class="rdh"><img src="${g.ic}" alt="" style="width:52px;height:52px;object-fit:contain"><div><b>${g.t}</b><small>はじめての説明</small></div></div><ol class="pgd">${g.st.map(x=>`<li>${x}</li>`).join('')}</ol><div class="gpf"><button class="btn gold" id="sgOk">わかった！</button></div>`;
+  $('genPick').classList.add('on');$('sgOk').onclick=()=>$('genPick').classList.remove('on')},350)}
+{const _op=openParty;openParty=function(){const r=_op.apply(this,arguments);scrGuide('party');return r}}
+{const _os=openShop;openShop=function(){const r=_os.apply(this,arguments);scrGuide('shop');return r}}
+/* 前からのセーブには出さない */
+{const _fx=fixV2;fixV2=function(g){const r=_fx.apply(this,arguments);if(g&&g.flags&&g.flags.tut===1&&g.flags.gd_party==null&&g.flags.tutNew!==1){g.flags.gd_party=1;g.flags.gd_shop=1}return r}}
