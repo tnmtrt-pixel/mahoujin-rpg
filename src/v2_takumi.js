@@ -32,3 +32,10 @@ function takumiAttack(f){const D=FD,A=D.atk;if(!A.takumi)return;const V=D.tk||(D
 {const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(FD)FD.tk=null;return r}}
 
 FACES.takumi=['smile','worry','serious'];
+
+/* ---------- 匠の★（2.4.2）：クリアした審判の塔の20階のボスを、もう一度倒すたびに「匠のかけら」+5 ---------- */
+const TK_SHARD=5;
+{const _fs=fStairs;fStairs=async function(){const D=FD,rep=D&&!D.climbing&&towerAt()==='judge'&&D.floor===20&&FLOORS[20]&&FLOORS[20].boss&&G.flags.tw_judge&&owned('takumi');
+ if(rep){const m=owned('takumi');m.shard=(m.shard||0)+TK_SHARD;save();fBanner(`匠のかけら +${TK_SHARD}（${m.shard}）`,200,'f_takumi');D.pops.push({x:D.x,y:D.y-60,v:`匠のかけら +${TK_SHARD}`,t:0})}
+ return _fs.apply(this,arguments)}}
+{const _sh=starHTML;starHTML=function(m){const h=_sh.apply(this,arguments);return m&&m.id==='takumi'&&(m.star||1)<STAR_MAX?h+`<div class="note" style="margin-top:4px">匠のかけらは、クリアした審判の塔の20階のボスを、もう一度倒すたびに ${TK_SHARD} 個もらえる</div>`:h}}
