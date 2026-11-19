@@ -887,3 +887,11 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .stt{display:flex;gap:4px;margin-bottom:6px;overflow-x:auto}
 .stt button{flex:none;padding:4px 10px;font-size:12px;font-weight:700;background:transparent;border:1px solid var(--sl);color:var(--sm);border-radius:99px}
 .stt button.on{border-color:#ffc94a;color:#ffe08a;background:#2a1d0a}
+
+/* チャット一覧：題名を左、顔を右に横並び（右詰め）。絆の印は題名の横（2.2.3） */
+.chl .chr{display:flex;flex-direction:row;align-items:center}
+.chl .chr>b{flex:1;min-width:0;display:flex;align-items:center;gap:6px}
+.chl .chr>b .chb{flex:none;font-style:normal;font-size:10px;font-weight:900;padding:1px 5px}
+.chl .chf.chfr{display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-end;flex:none;margin-left:6px}
+.chl .chf.chfr img{margin-right:0;margin-left:-6px}
+.chl .chf.chfr img:first-child{margin-left:0}

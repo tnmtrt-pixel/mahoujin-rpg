@@ -46,7 +46,7 @@ async function playChat(id){const c=CHATS.find(x=>x.id===id);if(!c)return;await 
 function openChats(){const all=CHATS.filter(chatOpen),rd=G.chatRead||[],lock=CHATS.length-all.length;
  const face=id=>`<img src="${FACE(id)}" alt="">`;
  $('gpBody').innerHTML=ctTabs('chat')+`<div class="gph">チャット <small style="font-weight:600;color:var(--sm)">${all.length - all.filter(c=>!rd.includes(c.id)).length}/${CHATS.length}</small></div>
-  <div class="chl">${all.slice().sort((a,b)=>(rd.includes(a.id)?1:0)-(rd.includes(b.id)?1:0)||b.st-a.st).map(c=>`<button class="chr ${rd.includes(c.id)?'':'nw'}" data-ch="${c.id}"><span class="chf">${[...new Set(c.L.map(l=>(l[0]||'').split(':')[0]).filter(Boolean))].slice(0,3).map(face).join('')}</span><b>${chatTitle(c)}</b>${Object.values(BOND_CHAT).includes(c.id)?'<i class="chb">絆</i>':''}${rd.includes(c.id)?'':'<i>NEW</i>'}</button>`).join('')||'<div class="note">まだチャットはない</div>'}</div>
+  <div class="chl">${all.slice().sort((a,b)=>(rd.includes(a.id)?1:0)-(rd.includes(b.id)?1:0)||b.st-a.st).map(c=>`<button class="chr ${rd.includes(c.id)?'':'nw'}" data-ch="${c.id}"><b>${chatTitle(c)}${Object.values(BOND_CHAT).includes(c.id)?'<i class="chb">絆</i>':''}</b>${rd.includes(c.id)?'':'<i>NEW</i>'}<span class="chf chfr">${[...new Set(c.L.map(l=>(l[0]||'').split(':')[0]).filter(Boolean))].slice(0,3).map(face).join('')}</span></button>`).join('')||'<div class="note">まだチャットはない</div>'}</div>
   ${lock?`<div class="note" style="margin-top:6px">まだ見られないチャット：${lock}（塔を登る・仲間を増やすと出てくる）</div>`:''}
   <div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;
  ctBind();
