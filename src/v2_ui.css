@@ -878,3 +878,12 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .bondln{display:flex;gap:8px;align-items:center;padding:6px 8px;background:#2a1d0a;border:1px solid #ffc94a88;font-size:12px;line-height:1.4}
 .bondln.off{background:var(--sk2);border-color:var(--sl);opacity:.75}
 .bondln .chf img{width:28px;height:28px}.bondln b{color:#ffe08a}
+
+/* チャット・絆覚醒・ストーリーのタブ（2.2.2） */
+.ctt{display:flex;gap:4px;margin:-2px 0 8px;position:sticky;top:0;z-index:2;background:inherit}
+.ctt button{flex:1;padding:5px 0;font-size:12px;font-weight:800;background:var(--sk2);border:1px solid var(--sl);color:var(--sm);position:relative}
+.ctt button.on{background:var(--so);border-color:var(--so);color:#1a0a00}
+.ctt button i{position:absolute;top:-6px;right:4px;font-style:normal;font-size:10px;background:#ff3b3b;color:#fff;border-radius:99px;padding:0 5px;line-height:16px}
+.stt{display:flex;gap:4px;margin-bottom:6px;overflow-x:auto}
+.stt button{flex:none;padding:4px 10px;font-size:12px;font-weight:700;background:transparent;border:1px solid var(--sl);color:var(--sm);border-radius:99px}
+.stt button.on{border-color:#ffc94a;color:#ffe08a;background:#2a1d0a}

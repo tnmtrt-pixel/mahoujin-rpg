@@ -45,11 +45,11 @@ const chatNew=()=>CHATS.filter(c=>chatOpen(c)&&!(G.chatRead||[]).includes(c.id))
 async function playChat(id){const c=CHATS.find(x=>x.id===id);if(!c)return;await talk(c.L);{const p=bondOf(id);if(p)await talk([N_(`絆覚醒「${p[2]}」が使えるようになった！\n${cnm(p[0])}と${cnm(p[1])}を同じパーティに入れて、出撃中に2人の技を覚醒させてみよう。`)])}G.chatRead=G.chatRead||[];if(!G.chatRead.includes(id)){G.chatRead.push(id);save()}}
 function openChats(){const all=CHATS.filter(chatOpen),rd=G.chatRead||[],lock=CHATS.length-all.length;
  const face=id=>`<img src="${FACE(id)}" alt="">`;
- $('gpBody').innerHTML=`<div class="gph">チャット <small style="font-weight:600;color:var(--sm)">${all.length - all.filter(c=>!rd.includes(c.id)).length}/${CHATS.length}</small></div>
+ $('gpBody').innerHTML=ctTabs('chat')+`<div class="gph">チャット <small style="font-weight:600;color:var(--sm)">${all.length - all.filter(c=>!rd.includes(c.id)).length}/${CHATS.length}</small></div>
   <div class="chl">${all.slice().sort((a,b)=>(rd.includes(a.id)?1:0)-(rd.includes(b.id)?1:0)||b.st-a.st).map(c=>`<button class="chr ${rd.includes(c.id)?'':'nw'}" data-ch="${c.id}"><span class="chf">${[...new Set(c.L.map(l=>(l[0]||'').split(':')[0]).filter(Boolean))].slice(0,3).map(face).join('')}</span><b>${chatTitle(c)}</b>${Object.values(BOND_CHAT).includes(c.id)?'<i class="chb">絆</i>':''}${rd.includes(c.id)?'':'<i>NEW</i>'}</button>`).join('')||'<div class="note">まだチャットはない</div>'}</div>
   ${lock?`<div class="note" style="margin-top:6px">まだ見られないチャット：${lock}（塔を登る・仲間を増やすと出てくる）</div>`:''}
-  <div class="gpf"><button class="btn" id="chBond">絆覚醒</button><button class="btn" id="chStory">ストーリーをふりかえる</button><button class="btn" id="gpClose">とじる</button></div>`;
- $('chStory').onclick=()=>openStory();$('chBond').onclick=()=>openBonds();
+  <div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;
+ ctBind();
  $('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};
  $('gpBody').querySelectorAll('[data-ch]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await playChat(b.dataset.ch);openChats()});
  $('genPick').classList.add('on')}
@@ -59,6 +59,11 @@ function openBonds(){const face=id=>`<img src="${FACE(id)}" alt="">`,ok=b=>b?'<b
  const rows=EVO.map(p=>{const own=bondOwned(p),aw=own&&p.slice(0,2).every(canAwakenOut),rd=bondRead(p),open=own&&rd;
   return `<div class="bdr ${open?'on':''}"><span class="chf">${face(p[0])}${face(p[1])}</span><div class="bdt"><b>絆覚醒「${p[2]}」</b><small>${p[3]}</small>
    <div class="bdc">${ok(own)}${cnm(p[0])}と${cnm(p[1])}を持っている</div><div class="bdc">${ok(aw||rd)}2人の武器をSランク以上にする（絆のチャットが出る）</div><div class="bdc">${ok(rd)}絆のチャットを読む</div></div></div>`}).join('');
- $('gpBody').innerHTML=`<div class="gph">絆覚醒</div><div class="note" style="margin-bottom:6px">2人の武器をSランク以上にすると、<b>絆のチャット</b>が出る。読んだあと、2人を同じパーティに入れて、出撃中に2人の技を<b>どちらも覚醒</b>させると発動する（覚醒は、技が最大Lvで、武器がSランク以上のとき）。</div>
-  <div class="bdl">${rows}</div><div class="gpf"><button class="btn" id="bdBack">チャットへ</button><button class="btn" id="gpClose">とじる</button></div>`;
- $('bdBack').onclick=()=>openChats();$('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};$('genPick').classList.add('on')}
+ $('gpBody').innerHTML=ctTabs('bond')+`<div class="gph">絆覚醒</div><div class="note" style="margin-bottom:6px">2人の武器をSランク以上にすると、<b>絆のチャット</b>が出る。読んだあと、2人を同じパーティに入れて、出撃中に2人の技を<b>どちらも覚醒</b>させると発動する（覚醒は、技が最大Lvで、武器がSランク以上のとき）。</div>
+  <div class="bdl">${rows}</div><div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;
+ ctBind();$('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};$('genPick').classList.add('on')}
+
+/* チャット・絆覚醒・ストーリーの上のタブ（2.2.2）。いつも上に出る */
+const CT_TABS=[['chat','チャット'],['bond','絆覚醒'],['story','ストーリー']];
+function ctTabs(a){const nw=chatNew().length;return `<div class="ctt">${CT_TABS.map(([k,n])=>`<button class="${k===a?'on':''}" data-ct="${k}">${n}${k==='chat'&&nw?`<i>${nw}</i>`:''}</button>`).join('')}</div>`}
+function ctBind(){$('gpBody').querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>({chat:openChats,bond:openBonds,story:openStory})[b.dataset.ct]())}

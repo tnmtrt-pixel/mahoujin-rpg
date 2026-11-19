@@ -49,12 +49,18 @@ function storyScenes(){const S=[],fl=G.floor|0,f=G.flags||{},K=['onmyo','sora','
  if(f.ch1)add(10.8,'第1章 前編　エンディング',()=>talk(storyFit(ENDING,null,['gorilla']),'ev_ending1'));
  if(f.ch1b)add(20.8,'第1章　エンディング',()=>talk(storyFit(ENDING2,null,['owl','takumi'])));
  return S.sort((a,b)=>a.n-b.n)}
-function openStory(){const S=storyScenes();
- $('gpBody').innerHTML=`<div class="gph">ストーリーをふりかえる <small style="font-weight:600;color:var(--sm)">${S.length}場面</small></div>
-  <div class="note" style="margin-bottom:6px">これまでに見た場面を、もう一度見られます。会話の中の「ログ」で、読み飛ばしたセリフも一覧できます。</div>
-  <div class="chl">${S.map((s,i)=>`<button class="chr stl" data-st="${i}"><span class="stf">${s.lb||(s.n<1?'序':Math.floor(s.n)+'F')}</span><b>${s.t}</b></button>`).join('')||'<div class="note">まだ見た場面はありません</div>'}</div>
-  <div class="gpf"><button class="btn" id="stChat">チャットを見る</button><button class="btn" id="gpClose">とじる</button></div>`;
+/* 塔ごとのタブ（2.2.2）：場面の番号で分ける（0〜：マイスターの塔、200〜：審判の塔、300〜：無限の塔） */
+const STORY_TW=[['meister','マイスターの塔',n=>n<200],['judge','審判の塔',n=>n>=200&&n<300],['inf','無限の塔',n=>n>=300]];let storyTw=null;
+function openStory(){const all=storyScenes(),tws=STORY_TW.filter(t=>all.some(s=>t[2](s.n)));
+ if(!tws.some(t=>t[0]===storyTw))storyTw=tws.length?tws[tws.length-1][0]:'meister';
+ const T=STORY_TW.find(t=>t[0]===storyTw),S=all.filter(s=>T[2](s.n));
+ $('gpBody').innerHTML=ctTabs('story')+`<div class="gph">ストーリー <small style="font-weight:600;color:var(--sm)">${all.length}場面</small></div>
+  ${tws.length>1?`<div class="stt">${tws.map(t=>`<button class="${t[0]===storyTw?'on':''}" data-tw="${t[0]}">${t[1]}</button>`).join('')}</div>`:''}
+  <div class="chl">${S.map((s,i)=>`<button class="chr stl" data-st="${i}"><span class="stf">${(s.lb||(s.n<1?'序':Math.floor(s.n)+'F')).replace(/^[審無]/,'')||'序'}</span><b>${s.t}</b></button>`).join('')||'<div class="note">まだ見た場面はありません</div>'}</div>
+  <div class="note" style="margin-top:6px">これまでに見た場面を、もう一度見られます。会話の中の「ログ」で、読み飛ばしたセリフも一覧できます。</div>
+  <div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;
+ ctBind();
+ $('gpBody').querySelectorAll('[data-tw]').forEach(b=>b.onclick=()=>{storyTw=b.dataset.tw;openStory()});
  $('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};
- $('stChat').onclick=()=>openChats();
  $('gpBody').querySelectorAll('[data-st]').forEach(b=>b.onclick=async()=>{$('genPick').classList.remove('on');await S[+b.dataset.st].run();openStory()});
  $('genPick').classList.add('on')}
