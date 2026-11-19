@@ -38,13 +38,15 @@ return [
  {id:'c_end3',t:'鉄灯の名前',st:3,who:['owl','fox','dodo'],L:[['owl',OW,'「鉄灯」という街の名はな、あの塔の灯りから来ておる。初代マイスターが錆を道具にもどす陣を塔に刻み、その光が夜の工場街を照らしたのじゃ。'],['fox',FX,'じゃあ、灯りが消えてたのって、陣が止まってたってこと？'],['owl',OW,'うむ。そして十年前に灯りを消したのが……わしの古い知り合い、匠じゃ。'],['dodo',DD,'えっ、博士、匠さんと知り合いだったの〜？'],['owl',OW,'若いころ、同じ図面台で線を引いた仲じゃ。あやつは、だれよりも正確な線を引いた。……正確すぎるほどにのう。'],['wolf:serious',W,'だったら、上で会ったら聞いてやる。なんで灯りを消したのかってな。']]}
 ]})();
 const chatStage=()=>{const f=G.floor|0;return f>=20?7:f>=19?6:f>=16?5:f>=13?4:f>=10?3:f>=6?2:f>=3?1:0};
-const chatOpen=c=>c.st<=chatStage()&&c.who.every(id=>id==='wolf'||!!owned(id));
+/* 絆のチャットは、2人とも「覚醒できる状態」（武器がSランク以上）になると出る（2.2.1） */
+const chatOpen=c=>{const p=typeof bondOf==='function'&&bondOf(c.id);if(p)return bondOwned(p)&&p.slice(0,2).every(canAwakenOut);return c.st<=chatStage()&&c.who.every(id=>id==='wolf'||!!owned(id))};
+const chatTitle=c=>{const p=typeof bondOf==='function'&&bondOf(c.id);return p?`絆覚醒「${p[2]}」`:c.t};
 const chatNew=()=>CHATS.filter(c=>chatOpen(c)&&!(G.chatRead||[]).includes(c.id));
-async function playChat(id){const c=CHATS.find(x=>x.id===id);if(!c)return;await talk(c.L);G.chatRead=G.chatRead||[];if(!G.chatRead.includes(id)){G.chatRead.push(id);save()}}
+async function playChat(id){const c=CHATS.find(x=>x.id===id);if(!c)return;await talk(c.L);{const p=bondOf(id);if(p)await talk([N_(`絆覚醒「${p[2]}」が使えるようになった！\n${cnm(p[0])}と${cnm(p[1])}を同じパーティに入れて、出撃中に2人の技を覚醒させてみよう。`)])}G.chatRead=G.chatRead||[];if(!G.chatRead.includes(id)){G.chatRead.push(id);save()}}
 function openChats(){const all=CHATS.filter(chatOpen),rd=G.chatRead||[],lock=CHATS.length-all.length;
  const face=id=>`<img src="${FACE(id)}" alt="">`;
  $('gpBody').innerHTML=`<div class="gph">チャット <small style="font-weight:600;color:var(--sm)">${all.length - all.filter(c=>!rd.includes(c.id)).length}/${CHATS.length}</small></div>
-  <div class="chl">${all.slice().sort((a,b)=>(rd.includes(a.id)?1:0)-(rd.includes(b.id)?1:0)||b.st-a.st).map(c=>`<button class="chr ${rd.includes(c.id)?'':'nw'}" data-ch="${c.id}"><span class="chf">${[...new Set(c.L.map(l=>(l[0]||'').split(':')[0]).filter(Boolean))].slice(0,3).map(face).join('')}</span><b>${c.t}</b>${Object.values(BOND_CHAT).includes(c.id)?'<i class="chb">絆</i>':''}${rd.includes(c.id)?'':'<i>NEW</i>'}</button>`).join('')||'<div class="note">まだチャットはない</div>'}</div>
+  <div class="chl">${all.slice().sort((a,b)=>(rd.includes(a.id)?1:0)-(rd.includes(b.id)?1:0)||b.st-a.st).map(c=>`<button class="chr ${rd.includes(c.id)?'':'nw'}" data-ch="${c.id}"><span class="chf">${[...new Set(c.L.map(l=>(l[0]||'').split(':')[0]).filter(Boolean))].slice(0,3).map(face).join('')}</span><b>${chatTitle(c)}</b>${Object.values(BOND_CHAT).includes(c.id)?'<i class="chb">絆</i>':''}${rd.includes(c.id)?'':'<i>NEW</i>'}</button>`).join('')||'<div class="note">まだチャットはない</div>'}</div>
   ${lock?`<div class="note" style="margin-top:6px">まだ見られないチャット：${lock}（塔を登る・仲間を増やすと出てくる）</div>`:''}
   <div class="gpf"><button class="btn" id="chBond">絆覚醒</button><button class="btn" id="chStory">ストーリーをふりかえる</button><button class="btn" id="gpClose">とじる</button></div>`;
  $('chStory').onclick=()=>openStory();$('chBond').onclick=()=>openBonds();
@@ -54,9 +56,9 @@ function openChats(){const all=CHATS.filter(chatOpen),rd=G.chatRead||[],lock=CHA
 
 /* ===================== 絆覚醒の一覧（2.2.0）：組み合わせと、条件のそろいぐあい ===================== */
 function openBonds(){const face=id=>`<img src="${FACE(id)}" alt="">`,ok=b=>b?'<b class="bdk">✓</b>':'<b class="bdn">・</b>';
- const rows=EVO.map(p=>{const own=bondOwned(p),c=CHATS.find(x=>x.id===BOND_CHAT[p[0]]),rd=bondRead(p),open=own&&rd,cc=c&&chatOpen(c);
-  return `<div class="bdr ${open?'on':''}"><span class="chf">${face(p[0])}${face(p[1])}</span><div class="bdt"><b>${open?p[2]:'？？？'}</b><small>${open?p[3]:'条件がそろうと、名前と効果が分かる'}</small>
-   <div class="bdc">${ok(own)}${cnm(p[0])}と${cnm(p[1])}を持っている</div><div class="bdc">${ok(rd)}絆のチャット「${c?c.t:'？'}」を読んだ${!rd&&own&&!cc?'<small>（マイスターの塔をもっと登ると出る）</small>':''}</div></div></div>`}).join('');
- $('gpBody').innerHTML=`<div class="gph">絆覚醒</div><div class="note" style="margin-bottom:6px">出撃中に、組み合わせの2人の技を<b>どちらも覚醒</b>させると発動する。そのためには、2人の<b>絆のチャット</b>を読んでおく必要がある。覚醒は、技が最大Lvで、その技の武器がSランク以上のとき。</div>
+ const rows=EVO.map(p=>{const own=bondOwned(p),aw=own&&p.slice(0,2).every(canAwakenOut),rd=bondRead(p),open=own&&rd;
+  return `<div class="bdr ${open?'on':''}"><span class="chf">${face(p[0])}${face(p[1])}</span><div class="bdt"><b>絆覚醒「${p[2]}」</b><small>${p[3]}</small>
+   <div class="bdc">${ok(own)}${cnm(p[0])}と${cnm(p[1])}を持っている</div><div class="bdc">${ok(aw||rd)}2人の武器をSランク以上にする（絆のチャットが出る）</div><div class="bdc">${ok(rd)}絆のチャットを読む</div></div></div>`}).join('');
+ $('gpBody').innerHTML=`<div class="gph">絆覚醒</div><div class="note" style="margin-bottom:6px">2人の武器をSランク以上にすると、<b>絆のチャット</b>が出る。読んだあと、2人を同じパーティに入れて、出撃中に2人の技を<b>どちらも覚醒</b>させると発動する（覚醒は、技が最大Lvで、武器がSランク以上のとき）。</div>
   <div class="bdl">${rows}</div><div class="gpf"><button class="btn" id="bdBack">チャットへ</button><button class="btn" id="gpClose">とじる</button></div>`;
  $('bdBack').onclick=()=>openChats();$('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};$('genPick').classList.add('on')}

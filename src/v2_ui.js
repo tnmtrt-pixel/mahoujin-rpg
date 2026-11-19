@@ -85,7 +85,8 @@ function renderParty(){leadFirst();const showId=pickSlot!=null&&pickSel?pickSel:
    <div class="lvs"><span>攻撃 ×${(starMul(m)*wMul(m)*lvMul(m)*genSup(m.id)).toFixed(2)}${genSup(m.id)>1?'<small class="supt">支援込み</small>':''}</span>${hasW?`<button class="lvw" onclick="goTab('shop')">${UIMG('u_weapon',16)}工房でつくる ›</button>`:''}</div>
    ${max?'<div class="note" style="text-align:center">レベル最大</div>':`<div class="lvc ${(G.coin|0)<cost.coin?'lack':''}">${coinIc(22)}<b>${G.coin|0}</b>/${cost.coin}</div>`}
    <button class="lvup" id="pUp" ${max||!canGrow(m)?'disabled':''}>レベルアップ</button></div></div>
- <div class="prow slots">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x&&x.id===m.id?'on':''} ${x?'':'empty'}" data-slot="${k}">${x?`<img class="pface" src="${FACE(x.id)}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
+ <div class="prow slots">${Array.from({length:PARTY_MAX},(_,k)=>{const x=G.party[k];return `<button class="phex slot ${pickSlot===k?'pk':''} ${x&&x.id===m.id?'on':''} ${x?'':'empty'} ${x&&partyBonds().some(p=>p.ok&&p.ids.includes(x.id))?'bond':''}" data-slot="${k}">${x?`<img class="pface" src="${FACE(x.id)}" alt=""><span class="plv">Lv${x.lv}</span>`:'<span class="pplus">＋</span>'}${k===0?'<span class="ptag">リーダー</span>':''}</button>`}).join('')}</div>
+ ${partyBondsHTML()}
  ${pickSlot==null?equipRowHTML():pickerHTML()}
  `;
  $('partyList').querySelectorAll('.phex.slot').forEach(b=>b.onclick=()=>{const k=+b.dataset.slot,x=G.party[k];if(pickSlot===k){pickSlot=null;pickSel=null;renderParty();return}pickSlot=k;pickSel=x?x.id:null;if(x)partySel=x.id;renderParty();const pp=$('ppick');if(pp)pp.scrollIntoView({block:'nearest',behavior:'smooth'})});
@@ -155,3 +156,8 @@ function reforge(id){const m=owned(id),w=m&&m.weapon;if(!w||!w.attr)return;if(G.
  G.mats.scrap-=REFORGE_COST;const old=w.attr;w.attr=rollAttr(w.rank||'B');save();tone(700,.15,'square',.06,1400);if(onScr('party'))renderParty();else openReforge();say(`鍛え直した！<br><span style="font-size:14px">${ATTRS[old.k].n} → ${ATTRS[w.attr.k].n}（${ATTRS[w.attr.k].d(w.attr.v)}）</span>`,1500)}
 /* 画面を切りかえたら、その画面のスクロールを上にもどす（画面の中でスクロールするため） */
 {const _sh=show;show=function(id){const r=_sh.apply(this,arguments);const el=document.getElementById(id);if(el)el.scrollTop=0;return r}}
+
+/* 編成：パーティの中で絆覚醒できる組み合わせ（2.2.1）。ok＝絆のチャットを読んでいる */
+function partyBonds(){const ids=new Set(G.party.map(x=>x.id));return EVO.filter(p=>ids.has(p[0])&&ids.has(p[1])).map(p=>({p,ids:[p[0],p[1]],ok:bondRead(p)}))}
+function partyBondsHTML(){const L=partyBonds();if(!L.length)return'';const f=id=>`<img src="${FACE(id)}" alt="">`;
+ return `<div class="bondbox">${L.map(({p,ok})=>`<div class="bondln ${ok?'':'off'}"><span class="chf">${f(p[0])}${f(p[1])}</span><span><b>絆覚醒「${p[2]}」</b>${ok?`<br>${p[3]}。出撃中に2人の技を覚醒させると発動`:'<br>2人の武器をSランク以上にして、絆のチャットを読むと使える'}</span></div>`).join('')}</div>`}

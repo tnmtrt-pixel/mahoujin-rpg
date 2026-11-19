@@ -49,7 +49,7 @@ function evoCardHTML(t,k){if(t==='e'){const p=EVO.find(x=>x[0]===k);return `<but
 function evoPick(t,k){FD.evo=FD.evo||{};FD.awk=FD.awk||{};if(t==='e'){FD.evo[k]=true;const p=EVO.find(x=>x[0]===k);fBanner(`進化！「${p[2]}」`,170,EVO_IC[k])}else{FD.awk[k]=true;fBanner(`覚醒！「${ATK[k].n}」`,170,'u_awk');bondCheck()}tone(880,.3,'triangle',.1,1760)}
 /* 覚醒がそろったら絆覚醒 */
 function bondCheck(){const D=FD;if(!D)return;D.evo=D.evo||{};D.awk=D.awk||{};
- EVO.forEach(p=>{if(D.evo[p[0]]||!D.awk[p[0]]||!D.awk[p[1]]||!bondReady(p))return;D.evo[p[0]]=true;setTimeout(()=>{if(FD===D){fBanner(`絆覚醒！「${p[2]}」`,190,EVO_IC[p[0]]);tone(660,.25,'triangle',.1,1320)}},1500)})}
+ EVO.forEach(p=>{if(D.evo[p[0]]||!D.awk[p[0]]||!D.awk[p[1]]||!bondReady(p))return;D.evo[p[0]]=true;setTimeout(()=>{if(FD===D)bondCutIn(p)},1500)})}
 /* 合体の動き（進化したときだけ） */
 {const _fa=fAttacks;fAttacks=function(f){const c=FD.cd,b={...c};_fa(f);const E=FD.evo;if(!E)return;const fired=id=>c[id]!=null&&b[id]!=null&&c[id]>b[id];
  if(E.wolf)FD.shots.forEach(s=>{const t=nearestFoes(1,s.x,s.y,260)[0];if(!t)return;const sp=Math.hypot(s.vx,s.vy)||7,ca=Math.atan2(s.vy,s.vx);let d=Math.atan2(t.y-s.y,t.x-s.x)-ca;d=Math.atan2(Math.sin(d),Math.cos(d));const na=ca+d*Math.min(1,.15*f);s.vx=Math.cos(na)*sp;s.vy=Math.sin(na)*sp});
@@ -151,3 +151,14 @@ ENDING.splice(0,ENDING.length,
  ['gorilla','ボルトゴリラ','ウホッ！？ 塔の上の層から、錆が電線に流れこんでやがる！\nおい、そこの職人たち、手を貸してくれ！'],
  [null,'','後編（11F〜20F）へつづく\n11Fから登れるようになった']);
 JOIN_TALK.owl[1]=['owl','ホー博士','……まちがいない、匠の魔法陣じゃ。\nあやつの線は、ひと目見ればわかる。'];
+
+/* 絆覚醒のテロップ（2.2.1）：2人が左右から飛びこみ、斬りつけるように技名が出る */
+function bondCutIn(p){let el=document.getElementById('bondCut');if(!el){el=document.createElement('div');el.id='bondCut';document.body.appendChild(el)}
+ const img=id=>(CHARS[id]&&CHARS[id].img)||FACE(id);
+ el.innerHTML=`<div class="bcs"></div><img class="bcl" src="${img(p[0])}" alt=""><img class="bcr" src="${img(p[1])}" alt=""><div class="bct"><small>絆覚醒</small><b>${p[2]}</b><i>${cnm(p[0])} × ${cnm(p[1])}</i></div>`;
+ el.classList.remove('on');void el.offsetWidth;el.classList.add('on');
+ try{tone(1200,.06,'sawtooth',.08,200);setTimeout(()=>tone(660,.3,'triangle',.1,1320),120)}catch(_){}
+ clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),2200)}
+/* 試合の外で「覚醒できる状態」か：その技の武器（専用武器か汎用武器）がSランク以上 */
+const canAwakenOut=id=>{const m=findOwn(id),g=genFor(id),r=[m&&m.weapon&&m.weapon.rank,g&&g.rank];return r.some(x=>x==='S'||x==='SS')};
+const bondOf=chatId=>EVO.find(p=>BOND_CHAT[p[0]]===chatId);
