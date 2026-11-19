@@ -39,7 +39,7 @@ return [
 ]})();
 const chatStage=()=>{const f=G.floor|0;return f>=20?7:f>=19?6:f>=16?5:f>=13?4:f>=10?3:f>=6?2:f>=3?1:0};
 /* 絆のチャットは、2人とも「覚醒できる状態」（武器がSランク以上）になると出る（2.2.1） */
-const chatOpen=c=>{const p=typeof bondOf==='function'&&bondOf(c.id);if(p)return bondOwned(p)&&p.slice(0,2).every(canAwakenOut);return c.st<=chatStage()&&c.who.every(id=>id==='wolf'||!!owned(id))};
+let chatOpen=c=>{const p=typeof bondOf==='function'&&bondOf(c.id);if(p)return bondOwned(p)&&p.slice(0,2).every(canAwakenOut);return c.st<=chatStage()&&c.who.every(id=>id==='wolf'||!!owned(id))};
 const chatTitle=c=>{const p=typeof bondOf==='function'&&bondOf(c.id);return p?`絆覚醒「${p[2]}」`:c.t};
 const chatNew=()=>CHATS.filter(c=>chatOpen(c)&&!(G.chatRead||[]).includes(c.id));
 async function playChat(id){const c=CHATS.find(x=>x.id===id);if(!c)return;await talk(c.L);{const p=bondOf(id);if(p)await talk([N_(`絆覚醒「${p[2]}」が使えるようになった！\n${cnm(p[0])}と${cnm(p[1])}を同じパーティに入れて、出撃中に2人の技を覚醒させてみよう。`)])}G.chatRead=G.chatRead||[];if(!G.chatRead.includes(id)){G.chatRead.push(id);save()}}
@@ -58,7 +58,7 @@ function openChats(){const all=CHATS.filter(chatOpen),rd=G.chatRead||[],lock=CHA
 function openBonds(){const face=id=>`<img src="${FACE(id)}" alt="">`,ok=b=>b?'<b class="bdk">✓</b>':'<b class="bdn">・</b>';
  const rows=EVO.map(p=>{const own=bondOwned(p),aw=own&&p.slice(0,2).every(canAwakenOut),rd=bondRead(p),open=own&&rd;
   return `<div class="bdr ${open?'on':''}"><span class="chf">${face(p[0])}${face(p[1])}</span><div class="bdt"><b>絆覚醒「${p[2]}」</b><small>${p[3]}</small>
-   <div class="bdc">${ok(own)}${cnm(p[0])}と${cnm(p[1])}を持っている</div><div class="bdc">${ok(aw||rd)}2人の武器をSランク以上にする（絆のチャットが出る）</div><div class="bdc">${ok(rd)}絆のチャットを読む</div></div></div>`}).join('');
+   <div class="bdc">${ok(own)}${cnm(p[0])}と${cnm(p[1])}を持っている</div><div class="bdc">${ok(aw||rd)}2人の武器をSランク以上にする</div><div class="bdc">${ok(rd)}絆のチャットを読む</div></div></div>`}).join('');
  $('gpBody').innerHTML=ctTabs('bond')+`<div class="gph">絆覚醒</div><div class="note" style="margin-bottom:6px">2人の武器をSランク以上にすると、<b>絆のチャット</b>が出る。読んだあと、2人を同じパーティに入れて、出撃中に2人の技を<b>どちらも覚醒</b>させると発動する（覚醒は、技が最大Lvで、武器がSランク以上のとき）。</div>
   <div class="bdl">${rows}</div><div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;
  ctBind();$('gpClose').onclick=()=>{$('genPick').classList.remove('on');openHome()};$('genPick').classList.add('on')}
