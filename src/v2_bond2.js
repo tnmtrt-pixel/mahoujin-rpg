@@ -71,3 +71,18 @@ Object.assign(BOND_CHAT,{seraph:'c_b_seraph',lionex:'c_b_lionex',okajun:'c_b_oka
   {id:'c_x_nap',t:'年寄りの昼寝',tw:'judge',fl:20,st:7,who:['hakurou','owl'],L:[['owl','ホー博士','ホッホッ。若い者は元気でいいのう。'],['hakurou',HK_,'……風も、若い者のほうへよく吹く。'],N('日なたのベンチ。二人は並んで、工房の若者たちを眺めていた。'),['owl','ホー博士','わしらも、もうひとがんばり……'],['hakurou',HK_,'……ああ……'],N('五分後。ベンチから、二つの寝息が聞こえていた。')]});
  /* 審判の塔の階で出る（20Fは塔のクリアまで） */
  const _co=chatOpen;chatOpen=c=>{if(c.tw)return(c.fl>=20?!!(G.flags&&G.flags['tw_'+c.tw]):towerFloor(c.tw)>=c.fl)&&c.who.every(id=>id==='wolf'||!!owned(id));return _co(c)}}
+
+/* ---------- リブラの丁半（2.3.2）：「丁か、半か」を初めて読み終えたときに一回だけ。自分のコインは賭けない ---------- */
+const CHOHAN={win:500,lose:100};
+function chohanGame(){return new Promise(res=>{const gp=$('genPick'),face=n=>['⚀','⚁','⚂','⚃','⚄','⚅'][n-1];
+ $('gpBody').innerHTML=`<div class="gph">リブラの丁半</div><div class="chh"><img src="${FACE('libra')}" alt=""><p>「……あなたも、一回だけどう？ 白と黒のサイコロの合計が、偶数なら丁、奇数なら半。わたしのおごりよ」</p></div>
+  <div class="chd"><span id="chW" class="w">⚀</span><span id="chB" class="b">⚀</span></div><div class="note" id="chMsg" style="text-align:center">当たれば ${CHOHAN.win} コイン、はずれでも ${CHOHAN.lose} コイン</div>
+  <div class="gpf" id="chBtns"><button class="btn gold" data-ch="0">丁（偶数）</button><button class="btn gold" data-ch="1">半（奇数）</button></div>`;
+ gp.classList.add('on');
+ $('gpBody').querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{const pick=+b.dataset.ch;$('chBtns').innerHTML='';const w=1+Math.floor(Math.random()*6),k=1+Math.floor(Math.random()*6),odd=(w+k)%2;let n=0;
+  const roll=setInterval(()=>{$('chW').textContent=face(1+Math.floor(Math.random()*6));$('chB').textContent=face(1+Math.floor(Math.random()*6));try{tone(600+Math.random()*400,.03,'square',.03)}catch(_){}
+   if(++n>=14){clearInterval(roll);$('chW').textContent=face(w);$('chB').textContent=face(k);const hit=odd===pick,c=hit?CHOHAN.win:CHOHAN.lose;G.coin=(G.coin|0)+c;G.flags.chohan=hit?2:1;save();
+    $('chMsg').innerHTML=`${w}＋${k}＝${w+k}　<b>${odd?'半':'丁'}</b><br>${hit?`当たり！ リブラ「……公平な結果ね。持っていきなさい」`:`はずれ。リブラ「でも、勝負してくれたお礼よ。……掃除は、オカジュンとネロに任せましょう」`}<br>${coinIc(18)} +${c}`;
+    try{hit?(sfx.win&&sfx.win()):tone(300,.2,'triangle',.06,200)}catch(_){}
+    $('chBtns').innerHTML='<button class="btn" id="chOk">とじる</button>';$('chOk').onclick=()=>{gp.classList.remove('on');res(hit)}}},70)})})}
+{const _pc=playChat;playChat=async function(id){const first=!(G.chatRead||[]).includes(id);await _pc.apply(this,arguments);if(id==='c_j_chohan'&&first&&!G.flags.chohan)await chohanGame()}}

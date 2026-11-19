@@ -902,3 +902,6 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .gpov.full .chl,.gpov.full .bdl{max-height:none;flex:1;min-height:0;overflow:auto}
 .gpov.full .gpf{margin-top:auto;padding-top:8px}
 .gpov.full .ctt{position:static}
+/* リブラの丁半（2.3.2） */
+.chh{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}.chh img{width:48px;height:48px;object-fit:contain;background:#0f1626;border:1px solid var(--sl)}.chh p{margin:0;font-size:13px;line-height:1.5}
+.chd{display:flex;justify-content:center;gap:18px;margin:6px 0 4px;font-size:64px;line-height:1}.chd .w{color:#f4f4f4;text-shadow:0 0 8px #fff8}.chd .b{color:#222;text-shadow:0 0 6px #fffa;background:#ddd;border-radius:10px;padding:0 4px}
