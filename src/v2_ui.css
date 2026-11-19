@@ -895,3 +895,10 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .chl .chf.chfr{display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-end;flex:none;margin-left:6px}
 .chl .chf.chfr img{margin-right:0;margin-left:-6px}
 .chl .chf.chfr img:first-child{margin-left:0}
+
+/* チャット・絆覚醒・ストーリーは画面いっぱい（2.2.4）。タブは上、とじるは下に固定し、一覧だけがスクロール */
+.gpov.full{align-items:stretch;background:#121a2c}
+.gpov.full .gpbox{max-height:none;height:100%;display:flex;flex-direction:column;overflow:hidden;border-top:none;padding-top:calc(12px + env(safe-area-inset-top))}
+.gpov.full .chl,.gpov.full .bdl{max-height:none;flex:1;min-height:0;overflow:auto}
+.gpov.full .gpf{margin-top:auto;padding-top:8px}
+.gpov.full .ctt{position:static}
