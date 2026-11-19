@@ -846,3 +846,11 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 #updBar{position:fixed;left:8px;right:8px;top:calc(env(safe-area-inset-top) + 8px);z-index:9999;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:#1d2433f2;border:1px solid #ff8a3d;box-shadow:0 6px 20px #0008;color:#fff;font-size:14px;font-weight:700}
 #updBar span{flex:1}
 #updBar button{flex:none;padding:8px 14px;border-radius:10px;border:0;background:#ff8a3d;color:#1a1208;font-weight:900;font-size:14px}
+
+/* 絆覚醒の一覧（2.2.0） */
+.chr i.chb{background:#ffc94a;color:#2a1b00;margin-right:4px}
+.bdl{display:flex;flex-direction:column;gap:6px;max-height:56vh;overflow:auto}
+.bdr{display:flex;gap:10px;align-items:flex-start;padding:8px;background:var(--sk2);border:1px solid var(--sl);opacity:.8}
+.bdr.on{border-color:#ffc94a;opacity:1}.bdr .chf img{width:38px;height:38px}
+.bdt{flex:1;min-width:0}.bdt>b{display:block;font-size:15px;color:#ffe08a}.bdt>small{display:block;font-size:11px;color:var(--sm);margin-bottom:3px}
+.bdc{font-size:12px;line-height:1.5}.bdc small{display:block;color:var(--sm);font-size:10px}.bdk{color:#7fe08a;margin-right:4px}.bdn{color:#6b7790;margin-right:4px}

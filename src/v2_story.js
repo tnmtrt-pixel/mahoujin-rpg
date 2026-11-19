@@ -32,19 +32,24 @@ function fSay(id,text){const fl=$('field');if(!fl)return;let el=$('fSay');if(!el
 {const _b=fBossCome;fBossCome=async function(){const seen=G.flags['bt_'+AREAS[FD.area].boss];await _b();if(seen&&FD)fSay(G.lead,BOSS_LINES[FD.area]||'ボスだ！')}}
 
 /* ---------- 技の進化と覚醒 ---------- */
-/* 進化：2つの技がどちらも最大Lv → 合わさって進化（2つとも威力1.3倍＋合体の動き） */
+/* 絆覚醒（2.2.0〜。もとの「進化」）：組み合わせの2人の技がどちらも覚醒している＋その2人の「絆のチャット」を読んでいる → 合体の動きが加わる。威力は覚醒の1.5倍のまま */
 const EVO=[['wolf','onmyo','陰陽牙刃','連射の弾が敵を追いかける'],['fox','dodo','歯車の守り','まわる輪が衝撃波を出して敵をはじく'],['gorilla','rocker','雷鳴ライブ','雷のたびに音の波が広がる'],['mouse','robot','プログラム・レーザー','レーザーが次の敵へ飛び移り、少し回復'],['tsukiyo','owl','星図の陣','星の落ちた所に魔法陣が残る']];
+const BOND_CHAT={wolf:'c_onmyo4',fox:'c_fox2',gorilla:'c_live3',mouse:'c_robo5',tsukiyo:'c_owl2'};  /* 組み合わせ（EVOの1人目）→ 絆のチャット */
+const bondOwned=p=>p.slice(0,2).every(id=>id==='wolf'||!!owned(id)),bondRead=p=>(G.chatRead||[]).includes(BOND_CHAT[p[0]]);
+const bondReady=p=>bondOwned(p)&&bondRead(p);
 const EVO_IC={wolf:'ev_wolf',fox:'ev_fox',gorilla:'ev_dodo',mouse:'ev_gorilla',tsukiyo:'ev_tsukiyo'};
 /* 覚醒：技が最大Lv＋その技の武器がSランク以上 → 威力1.5倍。1つの技は進化か覚醒のどちらか */
 const evoOn=id=>!!(FD.evo&&EVO.some(p=>p.includes(id)&&FD.evo[p[0]]));
-function fPowX(id){let m=1;if(!FD)return m;if(FD.awk&&FD.awk[id])m*=1.5;if(evoOn(id))m*=1.3;if(FD.hboost&&FD.hboost[id])m*=FD.hboost[id];return m}
+function fPowX(id){let m=1;if(!FD)return m;if(FD.awk&&FD.awk[id])m*=1.5;if(FD.hboost&&FD.hboost[id])m*=FD.hboost[id];return m}
 function wRank(id){if(FD.helperMs&&FD.helperMs[id])return null;const g=id!==G.lead&&!G.party.some(m=>m.id===id)&&genFor(id);if(g)return g.rank;const m=findOwn(id);return m&&m.weapon&&m.weapon.rank}
 function extraOpts(){const o=[];FD.evo=FD.evo||{};FD.awk=FD.awk||{};const mx=id=>(FD.atk[id]||0)>=ATK_MAX;
- EVO.forEach(p=>{if(!FD.evo[p[0]]&&mx(p[0])&&mx(p[1])&&!FD.awk[p[0]]&&!FD.awk[p[1]])o.push('e:'+p[0])});
  Object.keys(FD.atk).forEach(id=>{if(mx(id)&&!FD.awk[id]&&!evoOn(id)&&['S','SS'].includes(wRank(id)))o.push('w:'+id)});return o}
 function evoCardHTML(t,k){if(t==='e'){const p=EVO.find(x=>x[0]===k);return `<button class="fpick evo" data-k="e:${k}">${UIMG(EVO_IC[k],48)}<span><b>進化！ ${p[2]}</b><small>${ATK[p[0]].type}＋${ATK[p[1]].type}：${p[3]}。2つとも威力1.3倍</small></span><span class="lvt">${UIMG('u_evo',18)}進化</span></button>`}
- return `<button class="fpick evo awk" data-k="w:${k}"><span class="fpi"><img src="${CHARS[k].img}" alt="">${TIC(ATK[k].type,26)}</span><span><b>覚醒！ ${ATK[k].n}</b><small>武器のランク${wRank(k)}で覚醒。威力1.5倍</small></span><span class="lvt">${UIMG('u_awk',18)}覚醒</span></button>`}
-function evoPick(t,k){FD.evo=FD.evo||{};FD.awk=FD.awk||{};if(t==='e'){FD.evo[k]=true;const p=EVO.find(x=>x[0]===k);fBanner(`進化！「${p[2]}」`,170,EVO_IC[k])}else{FD.awk[k]=true;fBanner(`覚醒！「${ATK[k].n}」`,170,'u_awk')}tone(880,.3,'triangle',.1,1760)}
+ return `<button class="fpick evo awk" data-k="w:${k}"><span class="fpi"><img src="${CHARS[k].img}" alt="">${TIC(ATK[k].type,26)}</span><span><b>覚醒！ ${ATK[k].n}</b><small>武器のランク${wRank(k)}で覚醒。威力1.5倍${(()=>{const q=EVO.find(x=>x.includes(k)&&FD.awk&&FD.awk[x[0]===k?x[1]:x[0]]&&bondReady(x));return q?`。<b>絆覚醒「${q[2]}」も発動！</b>`:''})()}</small></span><span class="lvt">${UIMG('u_awk',18)}覚醒</span></button>`}
+function evoPick(t,k){FD.evo=FD.evo||{};FD.awk=FD.awk||{};if(t==='e'){FD.evo[k]=true;const p=EVO.find(x=>x[0]===k);fBanner(`進化！「${p[2]}」`,170,EVO_IC[k])}else{FD.awk[k]=true;fBanner(`覚醒！「${ATK[k].n}」`,170,'u_awk');bondCheck()}tone(880,.3,'triangle',.1,1760)}
+/* 覚醒がそろったら絆覚醒 */
+function bondCheck(){const D=FD;if(!D)return;D.evo=D.evo||{};D.awk=D.awk||{};
+ EVO.forEach(p=>{if(D.evo[p[0]]||!D.awk[p[0]]||!D.awk[p[1]]||!bondReady(p))return;D.evo[p[0]]=true;setTimeout(()=>{if(FD===D){fBanner(`絆覚醒！「${p[2]}」`,190,EVO_IC[p[0]]);tone(660,.25,'triangle',.1,1320)}},1500)})}
 /* 合体の動き（進化したときだけ） */
 {const _fa=fAttacks;fAttacks=function(f){const c=FD.cd,b={...c};_fa(f);const E=FD.evo;if(!E)return;const fired=id=>c[id]!=null&&b[id]!=null&&c[id]>b[id];
  if(E.wolf)FD.shots.forEach(s=>{const t=nearestFoes(1,s.x,s.y,260)[0];if(!t)return;const sp=Math.hypot(s.vx,s.vy)||7,ca=Math.atan2(s.vy,s.vx);let d=Math.atan2(t.y-s.y,t.x-s.x)-ca;d=Math.atan2(Math.sin(d),Math.cos(d));const na=ca+d*Math.min(1,.15*f);s.vx=Math.cos(na)*sp;s.vy=Math.sin(na)*sp});

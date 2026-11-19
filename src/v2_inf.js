@@ -87,9 +87,9 @@ function infPartyHTML(R){const ids=[G.lead,...G.party.map(m=>m.id).filter(id=>id
 async function infGo(cont){const R=cont?infRun():null;if(!R){G.infRun={fl:1,lv:1,got:0,t0:Date.now()};save()}G.infResume=!!R;await goFloor(R?R.fl:1)}
 /* 階に入ったら挑戦の続きを残す。再開のときはレベル・技・体力を戻す */
 function infSnap(){const D=FD;if(!D||towerAt()!=='inf')return;const R=G.infRun||(G.infRun={got:0,t0:Date.now()});
- Object.assign(R,{fl:D.floor,lv:D.lv,xp:D.xp,need:D.need,atk:{...D.atk},ps:{...D.ps},hp:D.maxhp?D.hp/D.maxhp:1,kills:D.kills|0,pend:D.pendingLv|0,rev:D.revived?1:0});save()}
+ Object.assign(R,{fl:D.floor,lv:D.lv,xp:D.xp,need:D.need,atk:{...D.atk},ps:{...D.ps},hp:D.maxhp?D.hp/D.maxhp:1,kills:D.kills|0,pend:D.pendingLv|0,rev:D.revived?1:0,awk:{...(D.awk||{})},evo:{...(D.evo||{})}});save()}
 {const _s=startFloor;startFloor=function(fl){const r=_s(fl);if(towerAt()==='inf'&&FD){const R=infRun();
-  if(G.infResume&&R&&R.fl===fl){const D=FD;D.lv=R.lv||1;D.xp=R.xp||0;D.need=R.need||D.need;if(R.atk)Object.keys(D.atk).forEach(k=>{if(k in R.atk)D.atk[k]=Math.max(D.atk[k],R.atk[k]|0)});  /* 技は今いる仲間（と汎用武器）の分だけ戻す。外した仲間の技は消える（2.1.3） */if(R.ps)Object.assign(D.ps,R.ps);D.hp=Math.max(1,Math.round(D.maxhp*(R.hp||1)));D.kills=R.kills|0;D.pendingLv=R.pend|0;D.revived=!!R.rev;  /* 復活は1回の挑戦で1回だけ（帰っても、編成を変えても戻らない） */D.startFl=R.startFl||1;renderFHud()}
+  if(G.infResume&&R&&R.fl===fl){const D=FD;D.lv=R.lv||1;D.xp=R.xp||0;D.need=R.need||D.need;if(R.atk)Object.keys(D.atk).forEach(k=>{if(k in R.atk)D.atk[k]=Math.max(D.atk[k],R.atk[k]|0)});  /* 技は今いる仲間（と汎用武器）の分だけ戻す。外した仲間の技は消える（2.1.3） */if(R.ps)Object.assign(D.ps,R.ps);D.hp=Math.max(1,Math.round(D.maxhp*(R.hp||1)));D.kills=R.kills|0;D.pendingLv=R.pend|0;D.revived=!!R.rev;D.awk={};D.evo={};if(R.awk)Object.keys(R.awk).forEach(k=>{if(k in D.atk&&R.awk[k])D.awk[k]=true});if(R.evo)EVO.forEach(p=>{if(R.evo[p[0]]&&D.awk[p[0]]&&D.awk[p[1]])D.evo[p[0]]=true});  /* 復活は1回の挑戦で1回だけ（帰っても、編成を変えても戻らない） */D.startFl=R.startFl||1;renderFHud()}
   G.infResume=false;FD.infStart=(infRun()&&infRun().startFl)||1;infSnap()}return r}}
 {const _a=fAdvance;fAdvance=async function(nf){const r=await _a.apply(this,arguments);if(towerAt()==='inf')infSnap();return r}}
 /* アプリを閉じる・ほかのアプリへ切りかえるときも、いまの体力とレベルを残す */
