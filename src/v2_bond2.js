@@ -72,7 +72,7 @@ Object.assign(BOND_CHAT,{seraph:'c_b_seraph',lionex:'c_b_lionex',okajun:'c_b_oka
  /* 審判の塔の階で出る（20Fは塔のクリアまで） */
  const _co=chatOpen;chatOpen=c=>{if(c.tw)return(c.fl>=20?!!(G.flags&&G.flags['tw_'+c.tw]):towerFloor(c.tw)>=c.fl)&&c.who.every(id=>id==='wolf'||!!owned(id));return _co(c)}}
 
-/* ---------- リブラの丁半（2.3.2）：「丁か、半か」を初めて読み終えたときに一回だけ。自分のコインは賭けない ---------- */
+/* ---------- リブラの丁半（2.3.2）：「丁か、半か」を読み終えたとき、まだなら一回だけ。自分のコインは賭けない ---------- */
 const CHOHAN={win:500,lose:100};
 function chohanGame(){return new Promise(res=>{const gp=$('genPick'),face=n=>['⚀','⚁','⚂','⚃','⚄','⚅'][n-1];
  $('gpBody').innerHTML=`<div class="gph">リブラの丁半</div><div class="chh"><img src="${FACE('libra')}" alt=""><p>「……あなたも、一回だけどう？ 白と黒のサイコロの合計が、偶数なら丁、奇数なら半。わたしのおごりよ」</p></div>
@@ -85,4 +85,5 @@ function chohanGame(){return new Promise(res=>{const gp=$('genPick'),face=n=>['�
     $('chMsg').innerHTML=`${w}＋${k}＝${w+k}　<b>${odd?'半':'丁'}</b><br>${hit?`当たり！ リブラ「……公平な結果ね。持っていきなさい」`:`はずれ。リブラ「でも、勝負してくれたお礼よ。……掃除は、オカジュンとネロに任せましょう」`}<br>${coinIc(18)} +${c}`;
     try{hit?(sfx.win&&sfx.win()):tone(300,.2,'triangle',.06,200)}catch(_){}
     $('chBtns').innerHTML='<button class="btn" id="chOk">とじる</button>';$('chOk').onclick=()=>{gp.classList.remove('on');res(hit)}}},70)})})}
-{const _pc=playChat;playChat=async function(id){const first=!(G.chatRead||[]).includes(id);await _pc.apply(this,arguments);if(id==='c_j_chohan'&&first&&!G.flags.chohan)await chohanGame()}}
+/* まだ勝負していなければ、読み終えたときに一回だけ（2.3.3：前に読んでいた人も、もう一度読めばできる） */
+{const _pc=playChat;playChat=async function(id){await _pc.apply(this,arguments);if(id==='c_j_chohan'&&!G.flags.chohan)await chohanGame()}}
