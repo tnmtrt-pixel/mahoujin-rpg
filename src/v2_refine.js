@@ -11,7 +11,7 @@ Object.assign(MATS,{
  kioku: {n:'記憶合金',d:'チタンに記憶の結晶とノイズを溶かしこんだ合金。形を覚えている。伝説の装備に使う'},
  kyomei:{n:'共鳴基板',d:'蓄電池と基板に記憶の結晶を焼きつけた基板。昔の陣とひびき合う。伝説の装備に使う'},
  souen: {n:'蒼炎晶',  d:'カーボン繊維と黒曜石・うろこを、記憶の結晶で固めた青い結晶。伝説の装備に使う'}});
-Object.assign(UI_IC,{kioku:'m_steel',kyomei:'m_board',souen:'m_obsid'});
+Object.assign(UI_IC,{kioku:'m_kioku',kyomei:'m_kyomei',souen:'m_souen'});
 const REF_SPECIAL=['kioku','kyomei','souen'];
 if(V3_OPEN){REF_SPECIAL.forEach(k=>{if(!MAT_ORDER.includes(k))MAT_ORDER.splice(MAT_ORDER.indexOf('core'),0,k)});
  Object.assign(RECIPES.mt_kura.mats={},{kioku:3,core:6});Object.assign(RECIPES.mt_tako.mats={},{kioku:2,kyomei:2,core:6});Object.assign(RECIPES.mt_fairy.mats={},{kyomei:3,core:6});

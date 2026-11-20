@@ -13,7 +13,7 @@ const MT=V3_OPEN?[ // [ボス, レシピ, マイスター, 名前, 種類, 部�
  ['x_shadow','mt_shadow','shadow','影音の手甲',     'gen',  'shadow',['edm','laser'],10,{noise:8,mcrys:40,core:5},'シャドーの技（爪撃と爆音）が使える','音は消えても、ひびきは残る。……続きを、たのむ。'],
  ['x_soul', 'mt_soul', 'soul',  '青炎の杖',         'gen',  'soul',  ['quench','laser'],10,{noise:8,mcrys:40,core:5},'ソウルの技（蒼炎斬）が使える。マイスターの装備5つを全部つけると、全員の攻撃+10%','青い炎は、受けつがれて燃える。……未来の職人へ。']]:[];
 MT.forEach(([b,id,who,n,kind,x,ps,lv,mats,fx])=>{RECIPES[id]={n,kind,tier:6,vol:3,secret:true,patent:true,legend:true,needLv:lv,mats,shape:'ch',area:'inf',proc:ps[0],procs:ps,tools:[...new Set(ps.flatMap(p=>PROC_MAIN[p]))],...(kind==='armor'?{slot:x}:{impl:x})};
- RECIPE_ORDER.push(id);PT_FX[id]=fx;if(kind==='armor')ARMOR_IC[id]='../face/f_'+who;else GEN_IC[id]='../face/f_'+who});
+ RECIPE_ORDER.push(id);PT_FX[id]=fx;if(kind==='armor')ARMOR_IC[id]='ar_'+id;else GEN_IC[id]='wg_'+id});
 const mtArm=id=>typeof armId==='function'&&['head','body','feet'].some(s=>armId(s)===id);
 const mtAll=()=>MT.length>0&&MT.every(([,id,,,kind])=>kind==='armor'?mtArm(id):genEqList().includes(id));
 {const _ab=teamAb;teamAb=function(){const a=_ab();if(typeof armId!=='function')return a;
