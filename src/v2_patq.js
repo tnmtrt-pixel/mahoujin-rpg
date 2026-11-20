@@ -43,8 +43,11 @@ const PATQ=(()=>{let N=6;const SIZE=PATQ_SIZE,MOVES={3:20,4:36,5:60,6:90};
  function step(id,pr){return new Promise(res=>{N=SIZE[id]||5;const moves=MOVES[N];let B=shuffle(moves),cnt=0,hint=false,done=false,img=null,S=0;
   $('cqT').textContent=RECIPES[id]&&RECIPES[id].legend?'マイスターの図面':'特許の図面';$('cqStep').textContent=(pr&&pr.label)||'';$('cqBack').textContent='◀ あとで';
   $('cqMsg').innerHTML=`<img src="${CHARS[(pr&&pr.who)||'nox'].img}" alt=""><span>${(pr&&pr.say)||'ばらばらになった特許の図面を、元の形にもどそう。空いたマスのとなりのマスをタップすると、すべって動く。'}</span>`;
-  $('cqBack').onclick=()=>{if(done)return;cv.style.width='';cv.style.margin='';res(false)};show('cadq');
-  const cv=$('cqViews'),D=Math.min(2,devicePixelRatio||1);const W=Math.max(220,Math.min(380,(cv.parentNode.clientWidth||340)-4));S=W;cv.width=W*D;cv.height=W*D;cv.style.width=W+'px';cv.style.height=W+'px';cv.style.margin='0 auto';const x=cv.getContext('2d');x.setTransform(D,0,0,D,0,0);
+  show('cadq');
+  const old=$('cqViews');old.style.display='none';let cv=$('pqCv');if(!cv){cv=document.createElement('canvas');cv.id='pqCv';old.after(cv)}cv.style.display='block';
+  const D=Math.min(2,devicePixelRatio||1);const W=Math.round(Math.max(240,Math.min(innerWidth-20,innerHeight*.58,480)));S=W;cv.width=W*D;cv.height=W*D;
+  cv.style.cssText=`display:block;width:${W}px;height:${W}px;margin:0 auto;padding:0;border:0;border-radius:10px;touch-action:none;max-height:none`;
+  const close=()=>{cv.style.display='none';old.style.display=''};const x=cv.getContext('2d');x.setTransform(D,0,0,D,0,0);
   img=render(id,Math.round(W*D));const T=W/N,TS=img.width/N;
   function draw(){x.clearRect(0,0,W,W);x.fillStyle='#0b1430';x.fillRect(0,0,W,W);
    B.forEach((v,i)=>{const px=(i%N)*T,py=(i/N|0)*T;if(v===N*N-1&&!done)return;x.drawImage(img,(v%N)*TS,(v/N|0)*TS,TS,TS,px+1,py+1,T-2,T-2);
@@ -55,8 +58,9 @@ const PATQ=(()=>{let N=6;const SIZE=PATQ_SIZE,MOVES={3:20,4:36,5:60,6:90};
    if(tx===ex){const d=ty>ey?N:-N;for(let k=e;k!==i;k+=d){[B[k],B[k+d]]=[B[k+d],B[k]]}}
    else if(ty===ey){const d=tx>ex?1:-1;for(let k=e;k!==i;k+=d){[B[k],B[k+d]]=[B[k+d],B[k]]}}else return;
    cnt++;tone(520,.04,'triangle',.04);draw();upd();if(ok()){done=true;draw();tone(880,.12,'triangle',.1,1320);
-    $('cqFb').innerHTML=`<div class="okc">○ 図面がもどった！（${cnt}手）</div><button class="btn gold" id="cqNext">次へ</button>`;$('cqNext').onclick=()=>{cv.style.width='';cv.style.margin='';res(true)}}}
-  cv.onclick=e=>{const r=cv.getBoundingClientRect(),cx=Math.floor((e.clientX-r.left)/r.width*N),cy=Math.floor((e.clientY-r.top)/r.height*N);if(cx<0||cy<0||cx>=N||cy>=N)return;tap(cy*N+cx)};
+    $('cqFb').innerHTML=`<div class="okc">○ 図面がもどった！（${cnt}手）</div><button class="btn gold" id="cqNext">次へ</button>`;$('cqNext').onclick=()=>{close();res(true)}}}
+  cv.onpointerdown=e=>{e.preventDefault();const r=cv.getBoundingClientRect(),cx=Math.floor((e.clientX-r.left)/r.width*N),cy=Math.floor((e.clientY-r.top)/r.height*N);if(cx<0||cy<0||cx>=N||cy>=N)return;tap(cy*N+cx)};
+  $('cqBack').onclick=()=>{if(done)return;close();res(false)};
   const upd=()=>{if(done)return;$('cqFb').innerHTML=`<div class="note">${cnt}手　そろったマス ${B.filter((v,i)=>v===i&&v!==N*N-1).length} / ${N*N-1}</div>`};
   $('cqCands').innerHTML=`<div class="cand" style="grid-column:1/-1;display:flex;gap:8px;align-items:center;padding:8px"><canvas id="pqPrev" style="width:96px;height:96px;flex:none"></canvas><div style="flex:1"><div class="note" style="margin-bottom:6px">完成した図面（見本）</div><div class="cqrow"><button id="pqHint">番号を出す</button><button id="pqReset">はじめから</button></div></div></div>`;
   {const pc=$('pqPrev');pc.width=pc.height=192;pc.getContext('2d').drawImage(img,0,0,192,192)}
