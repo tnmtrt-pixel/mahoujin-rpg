@@ -208,7 +208,7 @@ function fixV2(g){if(!g.tw||typeof g.tw!=='object')g.tw={judge:{floor:0}};if(g.t
  g.bench=Array.isArray(g.bench)?g.bench.filter(m=>m&&CHARS[m.id]&&!g.party.some(p=>p.id===m.id)):[];g.bench.forEach(m=>{if(!JOBS[m.job])m.job=CHARS[m.id].job;m.lv=Math.max(1,Math.floor(+m.lv)||1)});
  /* パーティはリーダーを入れて PARTY_MAX 人まで。多いぶんは後ろから控えへ（リーダーは残す） */
  for(let i=g.party.length-1;i>=0&&g.party.length>PARTY_MAX;i--)if(g.party[i].id!==g.lead)g.bench.push(g.party.splice(i,1)[0]);
- [...g.party,...g.bench].forEach(m=>{m.star=Math.min(5,Math.max(1,Math.floor(+m.star)||1));m.shard=Math.max(0,Math.floor(+m.shard)||0)+Math.max(0,Math.floor(+m.dup)||0)*2;delete m.dup});
+ [...g.party,...g.bench].forEach(m=>{m.star=Math.min(STAR_MAX,Math.max(1,Math.floor(+m.star)||1));m.shard=Math.max(0,Math.floor(+m.shard)||0)+Math.max(0,Math.floor(+m.dup)||0)*2;delete m.dup});
  if(!g.lead||!g.party.some(m=>m.id===g.lead))g.lead=g.party[0].id;
  {const i=g.party.findIndex(m=>m.id===g.lead);if(i>0)g.party.unshift(g.party.splice(i,1)[0])}
  if(g.where&&g.where.s==='field')g.where={s:'town'};
