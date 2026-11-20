@@ -184,7 +184,7 @@ const PT=[ // [id, 名前, 種類, 部位, 加工, 要る練度, 材料, 効果]
  ['pt_nut',   '不動ハードロックナット','armor','feet',['quench'],6,{titan:3,carbon:3,core:2},'受けるダメージ−8%（ゆるまない・ひるまない）'],
  ['pt_scope', 'アウル・スコープ',     'gen',  null,  ['laser','mirror'],8,{cell:4,carbon:4,core:4},'汎用武器の枠を1つ使う。攻撃はしない。アウルムの近くをタップすると、正体が数秒見える（その間だけダメージが通る）']];
 const PT_FX={};
-PT.forEach(([id,n,kind,slot,ps,lv,mats,fx])=>{RECIPES[id]={n,kind,tier:5,vol:3,secret:true,patent:true,needLv:lv,mats,shape:'ch',area:'s4',proc:ps[0],procs:ps.length>1?ps:undefined,tools:[...new Set(ps.flatMap(p=>PROC_MAIN[p]))],quiz:'net',...(slot?{slot}:{}),...(kind==='gen'?{impl:'scope'}:{})};
+PT.forEach(([id,n,kind,slot,ps,lv,mats,fx])=>{RECIPES[id]={n,kind,tier:5,vol:3,secret:true,patent:true,needLv:lv,mats,shape:'ch',area:'s4',proc:ps[0],procs:ps.length>1?ps:undefined,tools:[...new Set(ps.flatMap(p=>PROC_MAIN[p]))],...(slot?{slot}:{}),...(kind==='gen'?{impl:'scope'}:{})};
  if(!RECIPES[id].procs)delete RECIPES[id].procs;RECIPE_ORDER.push(id);PT_FX[id]=fx});
 Object.assign(ARMOR_IC,{pt_engine:'pt_rotary',pt_osc:'pt_oscillo',pt_aebs:'pt_aebs',pt_nut:'pt_hardlock'});GEN_IC.pt_scope='pt_owlscope';
 ATK.scope={n:'アウル・スコープ',type:'正体を明かす',ic:'pen',d:['攻撃はしない。アウルムの近くをタップすると、ゆがみがはがれて正体が数秒見える','','','','','']};TYPE_IC['正体を明かす']='pt_owlscope';
