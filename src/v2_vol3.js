@@ -148,13 +148,13 @@ function v3Attacks(f){const D=FD,A=D.atk,c=D.cd,cm=fCd(),E=D.evo||{};
   for(const e of D.foes){if(e.hp<=0||b.hit.includes(e.id))continue;if((e.x-b.x)**2+(e.y-b.y)**2<(e.r+9)**2){fDamage(e,b.dmg,b.vx*.5,b.vy*.5);b.hit.push(e.id);if(b.hit.length>=b.pierce){b.life=0;break}}}}
  V.blades=V.blades.filter(b=>b.life>0);
  /* シオン：狐火の切り絵 */
- V.fpos=[];if(A.shion){const L=A.shion,R=L>=2?115:90,dmg=6*(L>=3?1.4:1)*fPow('shion');V.fp=(V.fp+f/(L>=4?90:120))%1;V.fR=R;
+ V.fpos=[];if(A.shion){const L=A.shion,R=(L>=2?115:90)*overRng('shion'),dmg=6*(L>=3?1.4:1)*fPow('shion');V.fp=(V.fp+f/(L>=4?90:120))%1;V.fR=R;
   for(const k in V.fhit){V.fhit[k]-=f;if(V.fhit[k]<=0)delete V.fhit[k]}
   [V.fp].concat(L>=5?[(V.fp+.5)%1]:[]).forEach(u=>{const[px,py]=foxPt(u,R),x=D.x+px,y=D.y-6+py;V.fpos.push([x,y]);V.ftrail.push({x,y,t:0});
    for(const e of D.foes){if(V.fhit[e.id]>0)continue;if((e.x-x)**2+(e.y-y)**2<(e.r+16)**2){fDamage(e,dmg,0,0);V.fhit[e.id]=20}}})}
  for(const p of V.ftrail)p.t+=f;V.ftrail=V.ftrail.filter(p=>p.t<26);
  /* ぷかり：深雷の間合い（狐火と交わると狐雷花火） */
- V.pkR=null;if(A.pukari){const L=A.pukari,w=L>=2?30:22,rings=[110].concat(L>=5?[170]:[]);V.pkR=rings;V.pkW=w;V.pt+=f;
+ V.pkR=null;if(A.pukari){const L=A.pukari,ov=overRng('pukari'),w=(L>=2?30:22)*ov,rings=[110*ov].concat(L>=5?[170*ov]:[]);V.pkR=rings;V.pkW=w;V.pt+=f;
   if(V.pt>=(L>=4?14:20)){V.pt=0;const dmg=4*(L>=3?1.4:1)*fPow('pukari');let z=0;
    for(const e of D.foes){const d=Math.hypot(e.x-D.x,e.y-D.y);if(rings.some(rr=>Math.abs(d-rr)<w+e.r*.5)){fDamage(e,dmg,0,0);if(z++<6)V.fx.push({k:'zap',x:e.x,y:e.y,t:0,life:8})}}}
   V.fw=(V.fw||0)-f;if(E.shion&&A.shion&&V.fw<=0){for(const[x,y]of V.fpos){const d=Math.hypot(x-D.x,y-D.y);if(rings.some(rr=>Math.abs(d-rr)<w)){V.fw=25;const dmg=12*2*(A.shion>=3?1.4:1)*fPow('shion');
