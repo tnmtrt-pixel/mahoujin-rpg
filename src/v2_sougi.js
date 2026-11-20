@@ -121,4 +121,4 @@ const S_BANNER={'錆の大波が近づいている…… あと1分でこの階�
 /* 会話でボスが話すとき、敵の絵を出す */
 ['pistron','alarmga','zumendra','rutsuborn','sparkurage','gantrion'].forEach(k=>{TALK_FOE[FOES[k].n]=k});
 /* アウル・スコープを持っているか（③の工房で作る。いまはまだ作れない） */
-const hasScope=()=>!!(G&&G.flags&&G.flags.owlscope);
+const hasScope=()=>!!(G&&((G.flags&&G.flags.owlscope)||(typeof genEqList==='function'&&genEqList().includes('pt_scope'))));

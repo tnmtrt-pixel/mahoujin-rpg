@@ -1299,7 +1299,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='2.4.4';
+const VERSION='2.4.5';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -3100,7 +3100,7 @@ const TLG={buy:true,have:false,later:false};
 function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make','つくる'],['dec','解読'+(nRaw?`<i class="bpn">${nRaw}</i>`:'')],['tool','工具'],['mat','素材'],['rec','換金所']];
  let h=`<div class="stabs">${tabs.map(([k,n])=>`<button class="stab ${shopTab===k?'on':''}" data-t="${k}">${n}</button>`).join('')}</div>`;
  if(shopTab==='make'||shopTab==='dec')h+=wsListHTML(shopTab);
- if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。使うほど<b>練度</b>が上がって、その工具を使う加工が楽になる（Lv1〜5）。基本の工具は店で買える。溶接機・旋盤などの中級の工具は、塔の資材の箱で見つかる（ボスを倒すと店にも高い値段で並ぶ）。工具ガチャでも出る。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
+ if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。使うほど<b>練度</b>が上がって、その工具を使う加工が楽になる（Lv1〜${TLV_XP.length}）。基本の工具は店で買える。溶接機・旋盤などの中級の工具は、塔の資材の箱で見つかる（ボスを倒すと店にも高い値段で並ぶ）。工具ガチャでも出る。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
   const tg=t=>G.tools.includes(t)?'have':TOOLS[t].limited||(G.floor|0)<(TOOL_GATE[t]||0)||!TOOLS[t].price?'later':'buy';
   const TG=[['buy','店で買える'],['have','持っている工具'],['later','限定・まだ店にない']];
   h+=TG.map(([gk,gn])=>{const ts=TOOL_ORDER.filter(t=>tg(t)===gk);if(!ts.length)return '';const op=TLG[gk];
@@ -3763,13 +3763,13 @@ const tlv=t=>{const x=(G.tlx||{})[t]||0;let l=1;TLV_XP.forEach((v,i)=>{if(x>=v)l
 /* そのレシピで使う工具のうち、いちばん練度の高いもの */
 const recLv=R=>Math.max(1,...R.tools.filter(hasTool).map(t=>tlv(useTool(t))));
 /* グラインダー・旋盤など、ずれの幅を変えにくい加工は点数ボーナスで助ける（Lv5で+8点）。ほかは各ミニゲームで幅が広がる */
-let toolBonus=R=>{const pr=procOf(R);return (['grind','lathe'].includes(pr)||!MINI[pr]?(recLv(R)-1)*2:0)+(pr==='lathe'&&hasLim('cnc')?5:0)};
-let assistMul=o=>1+.08*(((o&&o.assist)||1)-1);   /* Lv5で許す幅が+32% */
+let toolBonus=R=>{const pr=procOf(R);return (['grind','lathe'].includes(pr)||!MINI[pr]?(Math.min(5,recLv(R))-1)*2:0)+(pr==='lathe'&&hasLim('cnc')?5:0)};
+let assistMul=o=>1+.08*(Math.min(5,(o&&o.assist)||1)-1);   /* Lv5で許す幅が+32% */
 function toolXpGain(R,q){G.tlx=G.tlx||{};const g=5+Math.round(q/10),msg=[];
  R.tools.filter(hasTool).map(useTool).forEach(t=>{const b=tlv(t);G.tlx[t]=(G.tlx[t]||0)+g;const a=tlv(t);msg.push(`${MIC(t,18)}${TOOLS[t].n} 練度+${g}${a>b?` <b>Lv${a}に上がった！</b>`:''}`)});
  return msg.join('<br>')}
 function tlvHTML(t){const x=(G.tlx||{})[t]||0,l=tlv(t),nx=TLV_XP[l],pv=TLV_XP[l-1];
- return `<div class="tlv">${UIMG('u_tlv',16)}<span>練度 <b>Lv${l}</b></span><i><u style="width:${l>=5?100:Math.round((x-pv)/(nx-pv)*100)}%"></u></i><small>${l>=5?'最大':`${x}/${nx}`}</small></div>`}
+ return `<div class="tlv">${UIMG('u_tlv',16)}<span>練度 <b>Lv${l}</b></span><i><u style="width:${l>=TLV_XP.length?100:Math.round((x-pv)/(nx-pv)*100)}%"></u></i><small>${l>=TLV_XP.length?'最大':`${x}/${nx}`}</small></div>`}
 
 /* ===================== 限定工具（工具ガチャだけ）・限定装備（図面ガチャだけ） ===================== */
 /* up：いつもの工具の代わりになる（持っていれば、その工具がなくても加工できる）。新品でも練度Lv3から */
@@ -4831,7 +4831,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 2.4.4</b><ul><li>第3章の準備：新しい仲間たちの技・絆覚醒・チャットのしくみを入れました。まだ遊べません</li></ul><b>ver 2.4.3</b><ul><li>第3章「創技の塔」の準備を始めました（塔と物語のしくみ）。まだ遊べません。公開をお楽しみに</li></ul><b>ver 2.4.2</b><ul><li>匠の★を上げられるように：クリアした審判の塔の20階のボスを、もう一度倒すたびに「匠のかけら」が5個もらえる</li></ul></div><div class="news"><b>ver 2.4.1</b><ul><li>はじめて遊ぶ人向けに、編成と工房の画面を初めて開いたとき、使い方の説明が出るように</li></ul></div><div class="news"><b>ver 2.4.0</b><ul><li>はじめての人向けに「練習場」（チュートリアル）を追加。ホー博士の案内で、動き方・戦い方・レベルアップ・拾い方・出口を順に覚えられる。練習場を出ると、はじめてのガチャが1回無料</li><li>ガチャが毎日1回無料に（日本時間で日付が変わると、また引ける）</li><li>会話：「タップで次へ ▶」をボタンにして、押すと進むように。ボタンの列のすき間を押しても進む</li></ul></div><div class="news"><b>ver 2.3.3</b><ul><li>リブラの丁半：前に「丁か、半か」を読んでいた人ができなかったのを修正。もう一度チャットを読むと、一回だけ勝負できる</li></ul></div><div class="news"><b>ver 2.3.2</b><ul><li>チャット「丁か、半か」を初めて読み終えると、リブラと一回だけ丁半勝負ができるように（当たり500コイン、はずれでも100コイン。自分のコインは賭けない）</li></ul></div><div class="news"><b>ver 2.3.1</b><ul><li>ちがう章の仲間どうしのチャットを9本追加（追いかけっこ・昔のなかま・雷くらべ・ニャボの健康診断・段取り八分・天秤座・トゲとギター・腕相撲・年寄りの昼寝）。出てくる仲間を持っていて、審判の塔をクリアすると見られる</li></ul></div><div class="news"><b>ver 2.3.0</b><ul><li>第2章の仲間（vol.2）に絆覚醒が5組：天衣の祝福（セラフ×ハクロウ）・雷鳴の盾（ライオネクス×ガーディアン）・剛疾連拳（オカジュン×ハヤテ）・ニャボのおやつ便（ネロ×クロガネ）・判決の牙（リブラ×スピノボーン）</li><li>vol.2 の絆のチャット5本と、審判の塔の後日談のチャット11本を追加（審判の塔10F・20Fクリアで出る）</li><li>絆覚醒の一覧の条件の書き方を短く</li></ul></div><div class="news"><b>ver 2.2.4</b><ul><li>チャット・絆覚醒・ストーリーの画面を、画面いっぱいに広げて見やすく</li></ul></div><div class="news"><b>ver 2.2.3</b><ul><li>チャットの一覧：題名を左に、出てくる仲間の顔を右に横並びに。「絆」の印は題名の横に</li></ul></div><div class="news"><b>ver 2.2.2</b><ul><li>チャットの画面の上に「チャット・絆覚醒・ストーリー」のタブをいつも出すように</li><li>ストーリーは、塔ごとのタブ（マイスターの塔・審判の塔・無限の塔）で分けて見られるように</li></ul></div><div class="news"><b>ver 2.2.1</b><ul><li>絆覚醒が発動すると、2人が飛びこんでくるテロップが出るように</li><li>絆のチャットは、2人の武器をSランク以上にすると出るように。題名も「絆覚醒「○○」」にして分かりやすく。読み終わると、使い方の案内が出る</li><li>編成：絆覚醒できる2人は金色の枠になり、技の説明が出るように</li></ul></div><div class="news"><b>ver 2.2.0</b><ul><li>「進化」が「絆覚醒」に変わった：組み合わせの2人の技をどちらも覚醒させると発動し、合体の動きが加わる（威力は覚醒の1.5倍）</li><li>絆覚醒には、2人の「絆のチャット」を読んでおく必要がある。チャットの一覧で「絆」の印がついたもの</li><li>チャットの画面に「絆覚醒」ボタン：組み合わせと、条件のそろいぐあいが見られる</li><li>無限の塔：続きから始めても、覚醒と絆覚醒が残るように</li></ul></div><div class="news"><b>ver 2.1.5</b><ul><li>無限の塔・審判の塔のボスが仲間を呼んだとき、「匠空がドローンを呼んだ！」と出ていたのを修正。そのボスの名前で出て、その層の敵を呼ぶように</li></ul></div><div class="news"><b>ver 2.1.4</b><ul><li>「立ち上がる」能力（ギアフォックス・セラフ・クロガネ・チュータ）を見直し：1人25%ずつ、持っている仲間の分だけ足される（4人そろうと100%）。復活は今までどおり全員で1回だけ</li><li>立ち上がったときの文字を「仲間の力で立ち上がった！」に</li></ul></div><div class="news"><b>ver 2.1.3</b><ul><li>無限の塔：出撃の画面で、いまの編成と、この挑戦で覚えている技が見られるように。「編成を変える」ボタンも</li><li>無限の塔：続きから始めるとき、技は今の編成の仲間の分だけ残るように（外した仲間の技は消え、新しく入れた仲間の技は1から）。編成を入れかえるたびに技が増えていたのを修正</li><li>無限の塔：ギアフォックスなどの「1回だけ復活」が、帰って続きにするとまた使えたのを修正（1回の挑戦で1回だけ）</li></ul></div><div class="news"><b>ver 2.1.2</b><ul><li>ランキング：運営がランキングを見守れるように、名前と称号の文字もいっしょに送るように</li></ul></div><div class="news"><b>ver 2.1.1</b><ul><li>無限の塔：とちゅうでホームへ帰って「続きから」にすると、体力が全回復していたのを修正（帰ったときの体力とレベルのまま続く）</li></ul></div><div class="news"><b>ver 2.1.0</b><ul><li>「無限の塔」公開！ 審判の塔の20階をクリアすると、地図の雲海に出る</li><li>毎回1階・Lv1から、終わりのない塔を登る。とちゅうで帰っても、次は続きから。倒れたら挑戦はおしまい</li><li>10階ごとに、塔を建てた時代の何かを写しそこなったボスが待つ。登るほど、陣に残った記録が読めていく</li><li>ランキング開始：1回の挑戦で何階まで登れたかを全国で競う</li><li>新しい素材「ノイズの欠片」「記憶の結晶」（第3章で使えるようになる）</li></ul></div><div class="news"><b>ver 2.0.17</b><ul><li>（準備）無限の塔の絵（床・挿絵・素材のアイコン）を試験中。公開は ver2.1.0 から</li></ul></div><div class="news"><b>ver 2.0.16</b><ul><li>（準備）無限の塔とランキングを試験中。公開は ver2.1.0 から。審判の塔の20階をクリアすると、地図の雲海に塔の名前が出る</li></ul></div><div class="news"><b>ver 2.0.15</b><ul><li>特別な仲間の紹介のセリフを見直し</li></ul></div><div class="news"><b>ver 2.0.14</b><ul><li>SS がとりにくかった加工を見直し：打つ（輪がほぼ重なれば満点）・けがき（数点のずれは満点）・配線のはんだ付け（緑の帯の中なら満点）・穴あけ（押しはじめて緑に届くまでは減点しない）</li></ul></div><div class="news"><b>ver 2.0.13</b><ul><li>溶接（つなぐ）で SS がとれるように：線の近くは満点、当てた瞬間の速さの減点と、線に当てる前のはみ出しの減点をなくした</li></ul></div><div class="news"><b>ver 2.0.12</b><ul><li>セーブのコードとファイルを新しい形（MT2T.）に。書きかえたコードは読みこめないように</li><li>前の形のコード（MT2S.）は11月30日まで読めます。それまでに「セーブの守り」で新しいコードやファイルを取り直してください</li></ul></div><div class="news"><b>ver 2.0.11</b><ul><li>画面が切りかわる途中でタップすると、次の画面のボタンが勝手に押されることがあったのを修正（切りかわった直後の少しの間はタップを受けつけない）</li></ul></div><div class="news"><b>ver 2.0.10</b><ul><li>汎用武器で同じランクができたときは、今のと新しいのを並べて、どちらかを選べるように（残さないほうはコインに替える）</li></ul></div><div class="news"><b>ver 2.0.9</b><ul><li>ボスや敵の絵が読みこめず、丸で表示されることがあったのを修正（出撃の前に先に読みこむ）</li></ul></div><div class="news"><b>ver 2.0.8</b><ul><li>会話で表情の指定がないセリフも、審判の塔の仲間と匠は会話用の表情の絵を出すように</li></ul></div><div class="news"><b>ver 2.0.7</b><ul><li>会話の顔の絵がずれて見えるキャラが多かったのを修正（顔アイコンを使う）</li><li>会話で、前の人の顔が残って見えることがあったのを修正（絵が読みこめてから出す）</li><li>審判の塔のボスが話すとき、ボスの絵を出すように</li></ul></div><div class="news"><b>ver 2.0.6</b><ul><li>キャラの絵の読みこみに失敗すると、丸のまま表示され続けることがある不具合を修正（失敗したら読み直す）</li></ul></div><div class="news"><b>ver 2.0.5</b><ul><li>審判の塔の出撃先の説明を、審判の塔の言葉（ざわめきLv・判決の時）に</li></ul></div><div class="news"><b>ver 2.0.4</b><ul><li>汎用武器は種類ごとに1本。今より低いランクができたときは、換金所の値段ぶんのコインに替えるように（前は素材だけが減っていた）</li></ul></div><div class="news"><b>ver 2.0.3</b><ul><li>匠の顔アイコン・会話の表情・専用武器のアイコンを新しい絵に</li></ul></div><div class="news"><b>ver 2.0.2</b><ul><li>審判の塔では、長居で敵が強くなる段階を「ざわめきLv」に（知らせの文も審判の塔に合わせた）</li></ul></div><div class="news"><b>ver 2.0.1</b><ul><li>審判の塔では、1つの階に長くいると「判決の時」（第1章の錆の大波と同じ削れ方。画面が白黒に点滅し、木槌が鳴る）</li></ul></div><div class="news"><b>ver 2.0.0</b><ul><li>第2章「審判の塔」公開（11/17 0:00から。第1章をクリアすると地図に出る）</li><li>審判の仲間ガチャ（vol.2）・お助けの仲間・段階5の装備・限定工具</li><li>vol.2 の図面は展開図で解読。道場で展開図の練習も</li></ul></div><div class="news"><b>ver 1.11.1</b><ul><li>やすりがけをやさしく：バリの高さのばらつきを小さく、高い所から削れて平らになりやすく、線ぴったりの許す幅を少し広く</li></ul></div><div class="news"><b>ver 1.11.0</b><ul><li>加工ミニゲーム道場で「三面図の解読」を練習できるように</li><li>（準備）vol.2 の図面は、立方体の展開図の問題で解読するように</li></ul></div><div class="news"><b>ver 1.10.10</b><ul><li>PCの大きな画面やブラウザの縮小表示で、敵が出てこなくなる不具合を修正</li></ul></div><div class="news"><b>ver 1.10.9</b><ul><li>出撃中に、まれにスティックが出ず動けなくなることがある不具合への対策</li><li>動けなくなったときは、画面を2回さわると再開できるように</li></ul></div><div class="news"><b>ver 1.10.8</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.7</b><ul><li>特別な仲間の顔アイコンと武器アイコンを新しい絵に変更</li></ul></div><div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 2.4.5</b><ul><li>第3章の準備：工房の新しいしくみ（新しい加工・特許の図面）を入れました。まだ遊べません</li></ul><b>ver 2.4.4</b><ul><li>第3章の準備：新しい仲間たちの技・絆覚醒・チャットのしくみを入れました。まだ遊べません</li></ul><b>ver 2.4.3</b><ul><li>第3章「創技の塔」の準備を始めました（塔と物語のしくみ）。まだ遊べません。公開をお楽しみに</li></ul><b>ver 2.4.2</b><ul><li>匠の★を上げられるように：クリアした審判の塔の20階のボスを、もう一度倒すたびに「匠のかけら」が5個もらえる</li></ul></div><div class="news"><b>ver 2.4.1</b><ul><li>はじめて遊ぶ人向けに、編成と工房の画面を初めて開いたとき、使い方の説明が出るように</li></ul></div><div class="news"><b>ver 2.4.0</b><ul><li>はじめての人向けに「練習場」（チュートリアル）を追加。ホー博士の案内で、動き方・戦い方・レベルアップ・拾い方・出口を順に覚えられる。練習場を出ると、はじめてのガチャが1回無料</li><li>ガチャが毎日1回無料に（日本時間で日付が変わると、また引ける）</li><li>会話：「タップで次へ ▶」をボタンにして、押すと進むように。ボタンの列のすき間を押しても進む</li></ul></div><div class="news"><b>ver 2.3.3</b><ul><li>リブラの丁半：前に「丁か、半か」を読んでいた人ができなかったのを修正。もう一度チャットを読むと、一回だけ勝負できる</li></ul></div><div class="news"><b>ver 2.3.2</b><ul><li>チャット「丁か、半か」を初めて読み終えると、リブラと一回だけ丁半勝負ができるように（当たり500コイン、はずれでも100コイン。自分のコインは賭けない）</li></ul></div><div class="news"><b>ver 2.3.1</b><ul><li>ちがう章の仲間どうしのチャットを9本追加（追いかけっこ・昔のなかま・雷くらべ・ニャボの健康診断・段取り八分・天秤座・トゲとギター・腕相撲・年寄りの昼寝）。出てくる仲間を持っていて、審判の塔をクリアすると見られる</li></ul></div><div class="news"><b>ver 2.3.0</b><ul><li>第2章の仲間（vol.2）に絆覚醒が5組：天衣の祝福（セラフ×ハクロウ）・雷鳴の盾（ライオネクス×ガーディアン）・剛疾連拳（オカジュン×ハヤテ）・ニャボのおやつ便（ネロ×クロガネ）・判決の牙（リブラ×スピノボーン）</li><li>vol.2 の絆のチャット5本と、審判の塔の後日談のチャット11本を追加（審判の塔10F・20Fクリアで出る）</li><li>絆覚醒の一覧の条件の書き方を短く</li></ul></div><div class="news"><b>ver 2.2.4</b><ul><li>チャット・絆覚醒・ストーリーの画面を、画面いっぱいに広げて見やすく</li></ul></div><div class="news"><b>ver 2.2.3</b><ul><li>チャットの一覧：題名を左に、出てくる仲間の顔を右に横並びに。「絆」の印は題名の横に</li></ul></div><div class="news"><b>ver 2.2.2</b><ul><li>チャットの画面の上に「チャット・絆覚醒・ストーリー」のタブをいつも出すように</li><li>ストーリーは、塔ごとのタブ（マイスターの塔・審判の塔・無限の塔）で分けて見られるように</li></ul></div><div class="news"><b>ver 2.2.1</b><ul><li>絆覚醒が発動すると、2人が飛びこんでくるテロップが出るように</li><li>絆のチャットは、2人の武器をSランク以上にすると出るように。題名も「絆覚醒「○○」」にして分かりやすく。読み終わると、使い方の案内が出る</li><li>編成：絆覚醒できる2人は金色の枠になり、技の説明が出るように</li></ul></div><div class="news"><b>ver 2.2.0</b><ul><li>「進化」が「絆覚醒」に変わった：組み合わせの2人の技をどちらも覚醒させると発動し、合体の動きが加わる（威力は覚醒の1.5倍）</li><li>絆覚醒には、2人の「絆のチャット」を読んでおく必要がある。チャットの一覧で「絆」の印がついたもの</li><li>チャットの画面に「絆覚醒」ボタン：組み合わせと、条件のそろいぐあいが見られる</li><li>無限の塔：続きから始めても、覚醒と絆覚醒が残るように</li></ul></div><div class="news"><b>ver 2.1.5</b><ul><li>無限の塔・審判の塔のボスが仲間を呼んだとき、「匠空がドローンを呼んだ！」と出ていたのを修正。そのボスの名前で出て、その層の敵を呼ぶように</li></ul></div><div class="news"><b>ver 2.1.4</b><ul><li>「立ち上がる」能力（ギアフォックス・セラフ・クロガネ・チュータ）を見直し：1人25%ずつ、持っている仲間の分だけ足される（4人そろうと100%）。復活は今までどおり全員で1回だけ</li><li>立ち上がったときの文字を「仲間の力で立ち上がった！」に</li></ul></div><div class="news"><b>ver 2.1.3</b><ul><li>無限の塔：出撃の画面で、いまの編成と、この挑戦で覚えている技が見られるように。「編成を変える」ボタンも</li><li>無限の塔：続きから始めるとき、技は今の編成の仲間の分だけ残るように（外した仲間の技は消え、新しく入れた仲間の技は1から）。編成を入れかえるたびに技が増えていたのを修正</li><li>無限の塔：ギアフォックスなどの「1回だけ復活」が、帰って続きにするとまた使えたのを修正（1回の挑戦で1回だけ）</li></ul></div><div class="news"><b>ver 2.1.2</b><ul><li>ランキング：運営がランキングを見守れるように、名前と称号の文字もいっしょに送るように</li></ul></div><div class="news"><b>ver 2.1.1</b><ul><li>無限の塔：とちゅうでホームへ帰って「続きから」にすると、体力が全回復していたのを修正（帰ったときの体力とレベルのまま続く）</li></ul></div><div class="news"><b>ver 2.1.0</b><ul><li>「無限の塔」公開！ 審判の塔の20階をクリアすると、地図の雲海に出る</li><li>毎回1階・Lv1から、終わりのない塔を登る。とちゅうで帰っても、次は続きから。倒れたら挑戦はおしまい</li><li>10階ごとに、塔を建てた時代の何かを写しそこなったボスが待つ。登るほど、陣に残った記録が読めていく</li><li>ランキング開始：1回の挑戦で何階まで登れたかを全国で競う</li><li>新しい素材「ノイズの欠片」「記憶の結晶」（第3章で使えるようになる）</li></ul></div><div class="news"><b>ver 2.0.17</b><ul><li>（準備）無限の塔の絵（床・挿絵・素材のアイコン）を試験中。公開は ver2.1.0 から</li></ul></div><div class="news"><b>ver 2.0.16</b><ul><li>（準備）無限の塔とランキングを試験中。公開は ver2.1.0 から。審判の塔の20階をクリアすると、地図の雲海に塔の名前が出る</li></ul></div><div class="news"><b>ver 2.0.15</b><ul><li>特別な仲間の紹介のセリフを見直し</li></ul></div><div class="news"><b>ver 2.0.14</b><ul><li>SS がとりにくかった加工を見直し：打つ（輪がほぼ重なれば満点）・けがき（数点のずれは満点）・配線のはんだ付け（緑の帯の中なら満点）・穴あけ（押しはじめて緑に届くまでは減点しない）</li></ul></div><div class="news"><b>ver 2.0.13</b><ul><li>溶接（つなぐ）で SS がとれるように：線の近くは満点、当てた瞬間の速さの減点と、線に当てる前のはみ出しの減点をなくした</li></ul></div><div class="news"><b>ver 2.0.12</b><ul><li>セーブのコードとファイルを新しい形（MT2T.）に。書きかえたコードは読みこめないように</li><li>前の形のコード（MT2S.）は11月30日まで読めます。それまでに「セーブの守り」で新しいコードやファイルを取り直してください</li></ul></div><div class="news"><b>ver 2.0.11</b><ul><li>画面が切りかわる途中でタップすると、次の画面のボタンが勝手に押されることがあったのを修正（切りかわった直後の少しの間はタップを受けつけない）</li></ul></div><div class="news"><b>ver 2.0.10</b><ul><li>汎用武器で同じランクができたときは、今のと新しいのを並べて、どちらかを選べるように（残さないほうはコインに替える）</li></ul></div><div class="news"><b>ver 2.0.9</b><ul><li>ボスや敵の絵が読みこめず、丸で表示されることがあったのを修正（出撃の前に先に読みこむ）</li></ul></div><div class="news"><b>ver 2.0.8</b><ul><li>会話で表情の指定がないセリフも、審判の塔の仲間と匠は会話用の表情の絵を出すように</li></ul></div><div class="news"><b>ver 2.0.7</b><ul><li>会話の顔の絵がずれて見えるキャラが多かったのを修正（顔アイコンを使う）</li><li>会話で、前の人の顔が残って見えることがあったのを修正（絵が読みこめてから出す）</li><li>審判の塔のボスが話すとき、ボスの絵を出すように</li></ul></div><div class="news"><b>ver 2.0.6</b><ul><li>キャラの絵の読みこみに失敗すると、丸のまま表示され続けることがある不具合を修正（失敗したら読み直す）</li></ul></div><div class="news"><b>ver 2.0.5</b><ul><li>審判の塔の出撃先の説明を、審判の塔の言葉（ざわめきLv・判決の時）に</li></ul></div><div class="news"><b>ver 2.0.4</b><ul><li>汎用武器は種類ごとに1本。今より低いランクができたときは、換金所の値段ぶんのコインに替えるように（前は素材だけが減っていた）</li></ul></div><div class="news"><b>ver 2.0.3</b><ul><li>匠の顔アイコン・会話の表情・専用武器のアイコンを新しい絵に</li></ul></div><div class="news"><b>ver 2.0.2</b><ul><li>審判の塔では、長居で敵が強くなる段階を「ざわめきLv」に（知らせの文も審判の塔に合わせた）</li></ul></div><div class="news"><b>ver 2.0.1</b><ul><li>審判の塔では、1つの階に長くいると「判決の時」（第1章の錆の大波と同じ削れ方。画面が白黒に点滅し、木槌が鳴る）</li></ul></div><div class="news"><b>ver 2.0.0</b><ul><li>第2章「審判の塔」公開（11/17 0:00から。第1章をクリアすると地図に出る）</li><li>審判の仲間ガチャ（vol.2）・お助けの仲間・段階5の装備・限定工具</li><li>vol.2 の図面は展開図で解読。道場で展開図の練習も</li></ul></div><div class="news"><b>ver 1.11.1</b><ul><li>やすりがけをやさしく：バリの高さのばらつきを小さく、高い所から削れて平らになりやすく、線ぴったりの許す幅を少し広く</li></ul></div><div class="news"><b>ver 1.11.0</b><ul><li>加工ミニゲーム道場で「三面図の解読」を練習できるように</li><li>（準備）vol.2 の図面は、立方体の展開図の問題で解読するように</li></ul></div><div class="news"><b>ver 1.10.10</b><ul><li>PCの大きな画面やブラウザの縮小表示で、敵が出てこなくなる不具合を修正</li></ul></div><div class="news"><b>ver 1.10.9</b><ul><li>出撃中に、まれにスティックが出ず動けなくなることがある不具合への対策</li><li>動けなくなったときは、画面を2回さわると再開できるように</li></ul></div><div class="news"><b>ver 1.10.8</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.7</b><ul><li>特別な仲間の顔アイコンと武器アイコンを新しい絵に変更</li></ul></div><div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -6796,7 +6796,7 @@ const S_BANNER={'錆の大波が近づいている…… あと1分でこの階�
 /* 会話でボスが話すとき、敵の絵を出す */
 ['pistron','alarmga','zumendra','rutsuborn','sparkurage','gantrion'].forEach(k=>{TALK_FOE[FOES[k].n]=k});
 /* アウル・スコープを持っているか（③の工房で作る。いまはまだ作れない） */
-const hasScope=()=>!!(G&&G.flags&&G.flags.owlscope);
+const hasScope=()=>!!(G&&((G.flags&&G.flags.owlscope)||(typeof genEqList==='function'&&genEqList().includes('pt_scope'))));
 
 /* =====================================================================
    第3章「創技の塔」の会話（設計書 11/19〜11/20 に先生と決めた台本）
@@ -7251,6 +7251,226 @@ const NE3='ネロ',HY3='ハヤテ',KG3='クロガネ',SP3='スピノボーン',O
 VOL3.forEach(id=>{if(!ATK[id])console.warn('vol3 no atk',id)});
 
 /* =====================================================================
+   第3章の工房（③）：新しい加工5つ・特許の図面・練度Lv10・アウル・スコープ
+   ・新しい加工は、創技の塔の後半で出会った5人が教えてくれる（会ったときに工具がもらえ、練度Lv5から）
+     高周波焼入れ＝雷牙／鏡面研削＝クロミオ／レーザー加工＝シオン／放電加工＝ぷかり／ブロック工法＝サカマタ
+   ・どのミニゲームも、押す・離す・タップだけ。練度（Lv1〜10）で幅や速さがやさしくなる
+   ・特許の図面（10Fでノクスが渡す）：工具の練度 Lv6〜10 が要る。アウル・スコープは汎用武器の枠を1つ使う
+   ・練度の上限 Lv10 は、V3_OPEN の間だけ（公開前のふつうの版は Lv5 のまま）
+   ===================================================================== */
+/* ---------- 練度 Lv10 ---------- */
+if(V3_OPEN)TLV_XP.push(380,470,570,680,800);
+/* ---------- 工具と加工 ---------- */
+Object.assign(TOOLS,{
+ ihcoil:{n:'高周波焼入れ機',d:'雷牙が教えてくれる。電気で表面だけを一瞬で熱して硬くする',where:'創技の塔で雷牙に会う'},
+ mgrind:{n:'鏡面研削盤',  d:'クロミオが教えてくれる。影まで映る面に仕上げる',where:'創技の塔でクロミオに会う'},
+ laser: {n:'レーザー加工機',d:'シオンが教えてくれる。光で鉄を切りぬく',where:'創技の塔でシオンに会う'},
+ edm:   {n:'放電加工機',  d:'ぷかりが教えてくれる。ふれずに、電気の火花でけずる',where:'創技の塔でぷかりに会う'},
+ crane: {n:'ブロック工法のクレーン',d:'サカマタが教えてくれる。大きな物をブロックに分けて組み上げる',where:'創技の塔でサカマタに会う'}});
+const S_TOOLS={raiga:'ihcoil',kuromio:'mgrind',shion:'laser',pukari:'edm',sakamata:'crane'};
+Object.assign(UI_IC,{ihcoil:'t_yakiire',mgrind:'t_kyomen',laser:'t_laser',edm:'t_houden',crane:'t_block'});
+Object.assign(PROC_MAIN,{quench:['ihcoil'],mirror:['mgrind'],laser:['laser'],edm:['edm'],block:['crane']});
+Object.assign(PROC_LBL,{quench:'高周波焼入れ',mirror:'鏡面研削',laser:'レーザー加工',edm:'放電加工',block:'ブロック工法'});
+Object.assign(PROC_TOOL,{quench:'ihcoil',mirror:'mgrind',laser:'laser',edm:'edm',block:'crane'});
+Object.assign(PROC_HOW,{quench:'高周波焼入れ：押して熱する→オレンジで離す→下へはらって冷やす（3か所）',mirror:'鏡面研削：回る砥石の金色の印が、いちばん下に来た瞬間にタップ',
+ laser:'レーザー加工：光の点が線を進む。厚いところは押し、うすいところは離す',edm:'放電加工：押すと電極が下がり、離すと上がる。すき間を青い帯に保つ',block:'ブロック工法：ゆれるブロックが点線の真上に来たらタップして積む'});
+if(V3_OPEN){PROC_ORDER.push('quench','mirror','laser','edm','block');Object.values(S_TOOLS).forEach(t=>{if(!TOOL_ORDER.includes(t))TOOL_ORDER.push(t)});PRACTICE_LIST.push('quench','mirror','laser','edm','block')}
+/* 新しい工具は練度の上がり方を大きく（3倍）。道場の練習でも少し上がる */
+const S_NEWT=Object.values(S_TOOLS);
+{const _x=toolXpGain;toolXpGain=function(R,q){const before={};S_NEWT.forEach(t=>before[t]=(G.tlx||{})[t]||0);const m=_x(R,q);S_NEWT.forEach(t=>{const d=((G.tlx||{})[t]||0)-before[t];if(d>0)G.tlx[t]+=d*2});return m}}
+/* ミニゲームに渡す練度（道場では、その工具の練度を使う） */
+const sLv=(o,t)=>{const p=/^練習・/.test(o.title||'');return Math.max(1,Math.min(10,p&&typeof G!=='undefined'&&G&&G.tools&&G.tools.includes(t)?tlv(t):(o.assist||1)))};
+function sPracXp(o,t,score){if(!/^練習・/.test(o.title||'')||typeof G==='undefined'||!G||!G.tools||!G.tools.includes(t))return;G.tlx=G.tlx||{};G.tlx[t]=(G.tlx[t]||0)+8+Math.round(score/8);save()}
+const sRank=v=>Math.round(Math.max(0,Math.min(1,v))*100);
+
+/* ---------- 高周波焼入れ ---------- */
+function runQuench(o){return new Promise(res=>{const LV=sLv(o,'ihcoil');
+ const {cv,g,W,H}=forgeOpen(o.title||'高周波焼入れ','押して熱する→オレンジで離す→下へはらって冷やす。3か所','t_yakiire');
+ const band=18+LV*2.2,spd=1-LV*.035,TGT=860,CRACK=1080,LOW=780,ROOM=30;
+ const S={i:0,ph:'ready',T:ROOM,spots:[0,1,2].map(()=>({T:ROOM})),out:[],relT:0,y0:0,dn:false,steam:[],shake:0};let raf=0,last=0,done=false;
+ const col=T=>{const k=[[ROOM,[60,62,70]],[500,[70,40,40]],[700,[150,20,15]],[800,[220,50,20]],[860,[255,130,30]],[930,[255,200,60]],[1000,[255,240,170]],[1100,[255,255,255]]];
+  for(let i=1;i<k.length;i++)if(T<=k[i][0]){const a=k[i-1],b=k[i],t=(T-a[0])/(b[0]-a[0]);return a[1].map((v,j)=>Math.round(v+(b[1][j]-v)*t))}return[255,255,255]};
+ const name=T=>T>=CRACK?'白（割れる！）':T>=960?'黄色（熱しすぎ）':T>=TGT-band&&T<=TGT+band?'オレンジ（いま！）':T>=LOW?'赤オレンジ':T>=600?'赤（まだ）':'黒';
+ const spotX=i=>W*(.25+i*.25);
+ function fin1(dt,late){const sp=S.spots[S.i],T=sp.T;let ts;if(T>=CRACK)ts=0;else if(T<LOW)ts=.15;else{const d=Math.abs(T-TGT);ts=d<=band*.5?1:d<=band?.85:d<=band*2?.5:.25}
+  const qs=late?0:dt<=.5?1:dt<=1?.7:dt<=2?.4:0,sc=T>=CRACK?0:ts*.7+qs*.3;S.out.push(sc);sp.q=1;sp.ok=sc>=.6;
+  for(let i=0;i<26;i++)S.steam.push({x:spotX(S.i)+(Math.random()-.5)*40,y:H*.5,vx:(Math.random()-.5)*1.2,vy:-1-Math.random()*2,t:0});
+  tone(T>=CRACK?120:1400,T>=CRACK?.4:.25,T>=CRACK?'square':'sine',.06);if(T>=CRACK)S.shake=12;S.i++;S.T=ROOM;
+  $('fgInfo').textContent=`${S.i} / 3`;if(S.i>=3){S.ph='done';setTimeout(finish,700)}else S.ph='ready'}
+ function finish(){if(done)return;done=true;cancelAnimationFrame(raf);cv.onpointerdown=cv.onpointermove=cv.onpointerup=null;const sc=sRank(S.out.reduce((a,b)=>a+b,0)/3);sPracXp(o,'ihcoil',sc);res({score:sc,reach:1})}
+ cv.onpointerdown=e=>{e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}if(S.ph==='ready'){S.ph='heat';S.T=ROOM;tone(220,.2,'sawtooth',.03)}else if(S.ph==='wait'){S.dn=true;S.y0=e.clientY}};
+ cv.onpointermove=e=>{if(S.ph==='wait'&&S.dn&&e.clientY-S.y0>40)fin1((performance.now()-S.relT)/1000,false)};
+ cv.onpointerup=()=>{if(S.ph==='heat'){S.ph='wait';S.relT=performance.now();S.dn=false;S.spots[S.i].T=S.T;tone(660,.08,'triangle')}else S.dn=false};
+ function loop(ts){const dt=last?Math.min(50,ts-last)/16.67:0;last=ts;
+  if(S.ph==='heat'){S.T+=(4+S.T*.012)/spd*dt*.9;if(S.T>=CRACK){S.spots[S.i].T=S.T;fin1(0,true)}}
+  if(S.ph==='wait'){if((performance.now()-S.relT)/1000>2.2)fin1(9,true);else{const sp=S.spots[S.i];sp.T=Math.max(ROOM,sp.T-1.2*dt)}}
+  g.clearRect(0,0,W,H);g.save();if(S.shake>0){g.translate((Math.random()-.5)*S.shake,(Math.random()-.5)*S.shake);S.shake*=.85}
+  const y=H*.5,r=H*.07+10,grd=g.createLinearGradient(0,y-r,0,y+r);grd.addColorStop(0,'#7a808c');grd.addColorStop(.5,'#c9ced8');grd.addColorStop(1,'#565b66');g.fillStyle=grd;g.fillRect(W*.08,y-r,W*.84,r*2);
+  for(let i=0;i<3;i++){const x=spotX(i),sp=S.spots[i],T=i===S.i&&S.ph==='heat'?S.T:sp.T,c=col(T),a=Math.min(1,(T-ROOM)/500);
+   if(sp.q){g.fillStyle=sp.ok?'#3a4258':'#5a3a3a';g.fillRect(x-r*.9,y-r,r*1.8,r*2)}
+   else if(a>0){g.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${a})`;g.shadowColor=`rgb(${c})`;g.shadowBlur=T>700?20:0;g.fillRect(x-r*.9,y-r,r*1.8,r*2);g.shadowBlur=0}
+   g.strokeStyle=i===S.i&&S.ph!=='done'?'#ffd25a':'#ffffff55';g.setLineDash([4,4]);g.strokeRect(x-r*.9,y-r-2,r*1.8,r*2+4);g.setLineDash([])}
+  if(S.ph!=='done'&&S.i<3){const x=spotX(S.i);g.strokeStyle=S.ph==='heat'?'#ffb347':'#b87333';g.lineWidth=5;for(let k=-2;k<=2;k++){g.beginPath();g.ellipse(x+k*9,y,6,r+14,0,0,TAU);g.stroke()}}
+  S.steam=S.steam.filter(p=>p.t<60);for(const p of S.steam){p.t++;p.x+=p.vx;p.y+=p.vy;g.fillStyle=`rgba(220,230,255,${.5*(1-p.t/60)})`;g.beginPath();g.arc(p.x,p.y,6+p.t*.3,0,TAU);g.fill()}
+  const tx=W-26,ty=18,th=H*.36,T=S.ph==='heat'?S.T:S.ph==='wait'?S.spots[S.i].T:ROOM,f=Math.min(1,(T-ROOM)/(1150-ROOM)),yb=v=>ty+th*(1-(v-ROOM)/(1150-ROOM));
+  g.fillStyle='#1a2140';g.fillRect(tx-7,ty,14,th);g.fillStyle='rgba(255,150,40,.45)';g.fillRect(tx-12,yb(TGT+band),24,yb(TGT-band)-yb(TGT+band));g.fillStyle=`rgb(${col(T)})`;g.fillRect(tx-5,ty+th*(1-f),10,th*f);
+  g.fillStyle='#e8ecf6';g.font='800 16px sans-serif';g.textAlign='left';g.fillText(S.ph==='ready'?`${S.i+1}か所目：押して熱する`:S.ph==='heat'?name(T)+'　→ 離す':S.ph==='wait'?'↓ 下へはらって冷やす！':'',12,28);
+  g.restore();if(!done)raf=requestAnimationFrame(loop)}
+ $('fgDone').style.display='none';$('fgInfo').textContent='0 / 3';raf=requestAnimationFrame(loop)})}
+
+/* ---------- 鏡面研削 ---------- */
+function runMirror(o){return new Promise(res=>{const LV=sLv(o,'mgrind');
+ const {cv,g,W,H}=forgeOpen(o.title||'鏡面研削','回る砥石の金色の印が、いちばん下に来た瞬間にタップ。3段階、だんだん速くなる','t_kyomen');
+ const tol=.16+LV*.012,spm=1-LV*.03,STG=[{n:'#400 荒仕上げ',rps:.55},{n:'#1000 中仕上げ',rps:.8},{n:'#3000 鏡面仕上げ',rps:1.1}],NEED=4;
+ const S={k:0,a:0,hit:0,log:[],fx:[],shine:0,scr:0,flash:0,msg:'',mt:0};let raf=0,last=0,done=false;
+ const cx=W/2,cy=H*.36,R=Math.min(W,H)*.22,off=()=>((S.a-Math.PI/2)%TAU+Math.PI*3)%TAU-Math.PI;
+ function finish(){if(done)return;done=true;cancelAnimationFrame(raf);cv.onpointerdown=null;const sc=sRank(S.log.reduce((a,b)=>a+b,0)/Math.max(1,S.log.length));sPracXp(o,'mgrind',sc);res({score:sc,reach:1})}
+ cv.onpointerdown=e=>{e.preventDefault();if(S.k>=3)return;const d=Math.abs(off()),sc=d<=tol*.45?1:d<=tol?.75:0;S.log.push(sc);S.msg=sc>=1?'ぴったり！':sc>0?'よい':'はずれ…';S.mt=1;
+  if(sc>0){S.hit++;S.shine=Math.min(1,S.shine+1/12);S.flash=1;tone(sc>=1?2400:1800,.08,'triangle',.06);for(let i=0;i<14;i++)S.fx.push({x:cx,y:cy+R,vx:(Math.random()-.5)*6,vy:-Math.random()*4,t:0})}
+  else{S.scr++;tone(200,.15,'square',.05)}
+  if(S.hit>=(S.k+1)*NEED){S.k++;$('fgInfo').textContent=`${Math.min(3,S.k+1)} / 3`;if(S.k>=3)setTimeout(finish,800)}};
+ function loop(ts){const dt=last?Math.min(50,ts-last)/1000:0;last=ts;if(S.k<3)S.a+=dt*TAU*STG[S.k].rps/spm;S.mt=Math.max(0,S.mt-dt);
+  g.clearRect(0,0,W,H);const sh=S.shine,py=cy+R,pw=W*.8,ph=H*.16,gr=g.createLinearGradient(cx-pw/2,py,cx+pw/2,py+ph);gr.addColorStop(0,`hsl(225,8%,${30+sh*35}%)`);gr.addColorStop(.5,`hsl(225,12%,${45+sh*45}%)`);gr.addColorStop(1,`hsl(225,8%,${28+sh*35}%)`);
+  g.fillStyle=gr;g.fillRect(cx-pw/2,py,pw,ph);g.save();g.beginPath();g.rect(cx-pw/2,py,pw,ph);g.clip();g.strokeStyle=`rgba(20,22,30,${.5*(1-sh)})`;g.lineWidth=1;for(let i=0;i<40;i++){const yy=py+((i*37)%100)/100*ph;g.beginPath();g.moveTo(cx-pw/2,yy);g.lineTo(cx+pw/2,yy);g.stroke()}
+  g.strokeStyle='rgba(200,60,60,.5)';for(let i=0;i<S.scr;i++){const xx=cx-pw/2+((i*53)%97)/97*pw;g.beginPath();g.moveTo(xx,py+4);g.lineTo(xx+18,py+ph-4);g.stroke()}g.restore();
+  g.strokeStyle='rgba(255,210,90,.4)';g.lineWidth=14;g.beginPath();g.arc(cx,cy,R+10,Math.PI/2-tol,Math.PI/2+tol);g.stroke();
+  g.fillStyle='#6b6f80';g.beginPath();g.arc(cx,cy,R,0,TAU);g.fill();g.fillStyle='#545867';for(let i=0;i<60;i++){const a=S.a+i*.7,rr=R*(.25+((i*13)%10)/12*.7);g.fillRect(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,2,2)}
+  g.fillStyle='#2a2e3a';g.beginPath();g.arc(cx,cy,R*.18,0,TAU);g.fill();g.fillStyle='#ffd25a';g.beginPath();g.arc(cx+Math.cos(S.a)*R*.86,cy+Math.sin(S.a)*R*.86,R*.11,0,TAU);g.fill();
+  S.fx=S.fx.filter(f=>++f.t<22);for(const f of S.fx){f.x+=f.vx;f.y+=f.vy;f.vy+=.3;g.fillStyle=`rgba(255,${220-f.t*6},120,${1-f.t/22})`;g.fillRect(f.x,f.y,2,2)}
+  if(S.flash>0){g.fillStyle=`rgba(255,255,255,${S.flash*.15})`;g.fillRect(0,0,W,H);S.flash*=.85}
+  g.fillStyle='#e8ecf6';g.font='800 15px sans-serif';g.textAlign='left';g.fillText(S.k<3?STG[S.k].n:'仕上がり！',12,24);g.textAlign='right';g.fillText(`なめらかさ ${Math.round(sh*100)}%`,W-12,24);
+  if(S.mt>0){g.globalAlpha=S.mt;g.fillStyle='#ffe066';g.font='800 22px sans-serif';g.textAlign='center';g.fillText(S.msg,cx,H*.94);g.globalAlpha=1}
+  if(!done)raf=requestAnimationFrame(loop)}
+ $('fgDone').style.display='none';$('fgInfo').textContent='1 / 3';raf=requestAnimationFrame(loop)})}
+
+/* ---------- レーザー加工 ---------- */
+function runLaser(o){return new Promise(res=>{const LV=sLv(o,'laser');
+ const {cv,g,W,H}=forgeOpen(o.title||'レーザー加工','光の点が線を進む。厚いところ（太い青）は押したまま、うすいところは離す','t_laser');
+ const dur=9-LV*.25,grace=.012+LV*.0025,THICK=[[.06,.18],[.30,.42],[.55,.62],[.74,.90]],thickAt=u=>THICK.some(([a,b])=>u>=a&&u<=b);
+ const cx=W/2,cy=H*.48,s=Math.min(W,H)*.36,raw=[[0,-.15],[.35,-.75],[.5,-.15],[.7,.1],[.45,.55],[0,.8],[-.45,.55],[-.7,.1],[-.5,-.15],[-.35,-.75],[0,-.15]],PTS=[];
+ for(let i=0;i<raw.length-1;i++){const a=raw[i],b=raw[i+1];for(let k=0;k<12;k++){const t=k/12;PTS.push([cx+(a[0]+(b[0]-a[0])*t)*s,cy+(a[1]+(b[1]-a[1])*t)*s])}}PTS.push(PTS[0]);
+ const CUM=[0];for(let i=1;i<PTS.length;i++)CUM.push(CUM[i-1]+Math.hypot(PTS[i][0]-PTS[i-1][0],PTS[i][1]-PTS[i-1][1]));const LEN=CUM[CUM.length-1];
+ const at=u=>{const d=u*LEN;let i=1;while(i<CUM.length&&CUM[i]<d)i++;i=Math.min(i,CUM.length-1);const a=PTS[i-1],b=PTS[i],t=(d-CUM[i-1])/Math.max(1e-6,CUM[i]-CUM[i-1]);return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]};
+ const S={ph:'ready',u:0,pw:0,marks:[],ok:0,n:0,sparks:[],drop:0};let down=false,raf=0,last=0,done=false;
+ function finish(){if(done)return;done=true;cancelAnimationFrame(raf);cv.onpointerdown=cv.onpointerup=cv.onpointercancel=null;const sc=sRank(S.ok/Math.max(1,S.n));sPracXp(o,'laser',sc);res({score:sc,reach:1})}
+ cv.onpointerdown=e=>{e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}down=true;if(S.ph==='ready')S.ph='cut'};cv.onpointerup=cv.onpointercancel=()=>{down=false};
+ function loop(ts){const dt=last?Math.min(50,ts-last)/1000:0;last=ts;S.pw+=((down?1:0)-S.pw)*Math.min(1,dt*14);
+  if(S.ph==='cut'){S.u+=dt/dur;const u=S.u,th=thickAt(u),near=THICK.some(([a,b])=>Math.abs(u-a)<grace||Math.abs(u-b)<grace);let k;
+   if(S.pw>.5)k=th||near?'ok':'burn';else k=!th||near?'ok':'uncut';if(k==='ok')S.ok++;S.n++;S.marks.push({u,k});
+   if(S.pw>.5){const p=at(u);for(let i=0;i<2;i++)S.sparks.push({x:p[0],y:p[1],vx:(Math.random()-.5)*4,vy:-Math.random()*3,t:0})}
+   $('fgInfo').textContent=k==='burn'?'焦げてる！ 離して':k==='uncut'?'切れてない！ 押して':Math.round(Math.min(1,u)*100)+'%';
+   if(S.u>=1){S.ph='done';tone(660,.2,'triangle');setTimeout(finish,1200)}}
+  g.clearRect(0,0,W,H);g.fillStyle='#3a4258';g.fillRect(W*.06,H*.06,W*.88,H*.84);const good=S.ok/Math.max(1,S.n)>=.7;if(S.ph==='done'&&good)S.drop=Math.min(1,S.drop+.03);
+  g.save();if(S.ph==='done'&&good){g.translate(0,S.drop*H*.6);g.globalAlpha=1-S.drop}g.beginPath();PTS.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();g.fillStyle='#4a5470';g.fill();g.restore();
+  g.lineCap='round';for(let i=0;i<120;i++){const u0=i/120,u1=(i+1)/120,a=at(u0),b=at(u1),th=thickAt((u0+u1)/2);g.strokeStyle=th?'#2b6cff':'#9fb4dd';g.lineWidth=th?9:3;g.globalAlpha=.55;g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke()}g.globalAlpha=1;
+  for(let i=1;i<S.marks.length;i++){const m=S.marks[i],a=at(S.marks[i-1].u),b=at(m.u);g.strokeStyle=m.k==='ok'?'#120a1a':m.k==='burn'?'#ff7a2a':'#cfd6e6';g.lineWidth=m.k==='burn'?10:m.k==='ok'?4:2;g.setLineDash(m.k==='uncut'?[3,4]:[]);g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke()}g.setLineDash([]);
+  if(S.ph!=='done'){const p=at(Math.min(1,S.u)),r=6+S.pw*10,rg=g.createRadialGradient(p[0],p[1],0,p[0],p[1],r*3);rg.addColorStop(0,'#fff');rg.addColorStop(.3,`rgba(220,120,255,${.6+.4*S.pw})`);rg.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=rg;g.beginPath();g.arc(p[0],p[1],r*3,0,TAU);g.fill();
+   const nx=at(Math.min(1,S.u+.05)),th=thickAt(Math.min(1,S.u+.05));g.fillStyle=th?'#7fb0ff':'#e8ecf6';g.font='800 13px sans-serif';g.textAlign='center';g.fillText(th?'厚い':'うすい',nx[0],nx[1]-16)}
+  S.sparks=S.sparks.filter(q=>++q.t<20);for(const q of S.sparks){q.x+=q.vx;q.y+=q.vy;q.vy+=.2;g.fillStyle=`rgba(255,${180-q.t*6},80,${1-q.t/20})`;g.fillRect(q.x,q.y,2,2)}
+  if(S.ph==='ready'){g.fillStyle='#e8ecf6';g.font='800 16px sans-serif';g.textAlign='center';g.fillText('押すとスタート',W/2,H*.96)}
+  if(!done)raf=requestAnimationFrame(loop)}
+ $('fgDone').style.display='none';raf=requestAnimationFrame(loop)})}
+
+/* ---------- 放電加工 ---------- */
+function runEdm(o){return new Promise(res=>{const LV=sLv(o,'edm');
+ const {cv,g,W,H}=forgeOpen(o.title||'放電加工','押すと電極が下がり、離すと上がる。すき間を青い帯に保つ（近すぎるとショート）','t_houden');
+ const lo=14-LV*.5,hi=26+LV*.8,cut=.065+LV*.002;const S={ph:'ready',gap:45,v:0,depth:0,t:0,inb:0,tot:0,short:0,shortT:0,debris:0,sparks:[],bub:[]};let down=false,raf=0,last=0,done=false,zt=0;
+ function finish(){if(done)return;done=true;cancelAnimationFrame(raf);cv.onpointerdown=cv.onpointerup=cv.onpointercancel=null;const ib=S.inb/Math.max(1,S.tot),sc=sRank(Math.max(0,ib-S.short*.06)*(S.t<14?1:S.t<20?.9:.8));sPracXp(o,'edm',sc);res({score:sc,reach:1})}
+ cv.onpointerdown=e=>{e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}down=true;if(S.ph==='ready')S.ph='run'};cv.onpointerup=cv.onpointercancel=()=>{down=false};
+ function loop(ts){const dt=last?Math.min(50,ts-last)/1000:0;last=ts;
+  if(S.ph==='run'){S.t+=dt;const tv=down?-38:30;S.v+=(tv-S.v)*Math.min(1,dt*6);if(S.shortT>0){S.shortT-=dt;S.v=40}S.gap+=S.v*dt;
+   S.debris+=dt;if(S.debris>1.6+Math.random()*1.6){S.debris=0;S.gap-=7+Math.random()*6;for(let i=0;i<8;i++)S.bub.push({x:W/2+(Math.random()-.5)*60,y:H*.62,t:0,r:2+Math.random()*3})}
+   S.gap=Math.max(0,Math.min(60,S.gap));const inb=S.gap>=lo&&S.gap<=hi;S.tot++;if(inb)S.inb++;
+   if(S.gap<=2&&S.shortT<=0){S.short++;S.shortT=.5;tone(110,.3,'square',.07);$('fgInfo').textContent='ショート！'}
+   else if(inb){S.depth+=cut*dt*1.5*(1-Math.abs((S.gap-(lo+hi)/2)/((hi-lo)/2))*.4);$('fgInfo').textContent=`深さ ${Math.round(S.depth*100)}%`;if(ts-zt>60){zt=ts;tone(2600+Math.random()*1600,.03,'square',.015)}for(let i=0;i<3;i++)S.sparks.push({x:W/2+(Math.random()-.5)*70,t:0})}
+   else $('fgInfo').textContent=S.gap>hi?'遠すぎ。押して近づける':'近すぎ！ 離して';
+   if(S.depth>=1){S.ph='done';setTimeout(finish,600)}}
+  g.clearRect(0,0,W,H);g.fillStyle='#10304a';g.fillRect(W*.08,H*.28,W*.84,H*.66);const top=H*.62,dep=Math.min(1,S.depth)*H*.18;g.fillStyle='#8a92a6';g.fillRect(W*.1,top,W*.8,H*.3);g.fillStyle='#10304a';g.fillRect(W/2-46,top,92,dep);
+  const gx=W-34,gy=H*.12,gh=H*.5,yv=v=>gy+gh*(1-v/60);g.fillStyle='#1a2140';g.fillRect(gx,gy,14,gh);g.fillStyle='rgba(60,200,255,.45)';g.fillRect(gx-4,yv(hi),22,yv(lo)-yv(hi));g.fillStyle='rgba(255,80,80,.5)';g.fillRect(gx-4,yv(4),22,yv(0)-yv(4));g.fillStyle='#fff';g.fillRect(gx-6,yv(S.gap)-2,26,4);
+  const ey=top+dep-S.gap*1.6-6;g.fillStyle='#c98a3a';g.fillRect(W/2-40,H*.08,80,Math.max(4,ey-H*.08));g.fillStyle='#e0a050';g.fillRect(W/2-44,ey-10,88,10);
+  S.sparks=S.sparks.filter(q=>++q.t<6);for(const q of S.sparks){g.strokeStyle=`rgba(180,240,255,${1-q.t/6})`;g.lineWidth=1.5;g.beginPath();g.moveTo(q.x,ey);let y=ey;for(let k=0;k<3;k++){y+=(top+dep-ey)/3;g.lineTo(q.x+(Math.random()-.5)*10,y)}g.stroke()}
+  if(S.shortT>0){g.fillStyle=`rgba(255,255,255,${S.shortT})`;g.fillRect(0,0,W,H)}
+  S.bub=S.bub.filter(b=>++b.t<60);for(const b of S.bub){b.y-=1.2;g.strokeStyle=`rgba(200,230,255,${.6*(1-b.t/60)})`;g.beginPath();g.arc(b.x,b.y,b.r,0,TAU);g.stroke()}
+  g.fillStyle='#1a2140';g.fillRect(14,14,110,10);g.fillStyle='#7fe0ff';g.fillRect(14,14,110*Math.min(1,S.depth),10);
+  if(S.ph==='ready'){g.fillStyle='#e8ecf6';g.font='800 16px sans-serif';g.textAlign='center';g.fillText('押すとスタート',W/2,H*.2)}
+  if(!done)raf=requestAnimationFrame(loop)}
+ $('fgDone').style.display='none';raf=requestAnimationFrame(loop)})}
+
+/* ---------- ブロック工法 ---------- */
+function runBlock(o){return new Promise(res=>{const LV=sLv(o,'crane');
+ const {cv,g,W,H}=forgeOpen(o.title||'ブロック工法','クレーンでゆれるブロックが、点線の真上に来たらタップして積む（船底→船体→甲板→船橋→マスト）','t_block');
+ const spd=2.6-LV*.1,tol=(5+LV*.6)*W/360,BL=[{n:'船底',w:.78,h:.09,c:'#a33'},{n:'船体',w:.70,h:.10,c:'#c44'},{n:'甲板',w:.62,h:.05,c:'#ccb88a'},{n:'船橋',w:.30,h:.12,c:'#e8ecf6'},{n:'マスト',w:.06,h:.16,c:'#d9a441'}];
+ const S={i:0,ph:'swing',t:0,placed:[],fall:null,shake:0};let raf=0,last=0,done=false;
+ const target=()=>S.placed.length?S.placed[S.placed.length-1].x:W/2,baseY=()=>H*.86-S.placed.reduce((a,p)=>a+BL[p.i].h*H*.75,0),hookX=()=>W/2+Math.sin(S.t*spd)*W*.32;
+ function finish(){if(done)return;done=true;cancelAnimationFrame(raf);cv.onpointerdown=null;const av=S.placed.reduce((a,p)=>a+p.sc,0)/S.placed.length*(S.placed[4].sc>=.85?1:.9);const sc=sRank(av);sPracXp(o,'crane',sc);res({score:sc,reach:1})}
+ cv.onpointerdown=e=>{e.preventDefault();if(S.ph!=='swing')return;S.ph='fall';S.fall={x:hookX(),y:H*.16,vy:0};tone(300,.08,'triangle')};
+ function land(){const a=Math.abs(S.fall.x-target()),sc=a<=tol*.5?1:a<=tol?.85:a<=tol*3?.5:.15;S.placed.push({i:S.i,x:S.fall.x,sc});S.shake=a>tol?8:3;tone(a<=tol?880:180,.2,a<=tol?'triangle':'square',.07);
+  $('fgInfo').textContent=a<=tol*.5?'ぴったり！':a<=tol?'よい':a<=tol*3?'ずれ':'大ずれ…';S.i++;S.fall=null;if(S.i>=BL.length){S.ph='done';setTimeout(finish,1100)}else S.ph='swing'}
+ function blk(i,x,yTop){const b=BL[i],w=b.w*W*.8,h=b.h*H*.75;g.fillStyle=b.c;if(i===0){g.beginPath();g.moveTo(x-w/2,yTop);g.lineTo(x+w/2,yTop);g.lineTo(x+w/2-w*.12,yTop+h);g.lineTo(x-w/2+w*.12,yTop+h);g.closePath();g.fill()}else g.fillRect(x-w/2,yTop,w,h);
+  g.strokeStyle='#0008';g.lineWidth=1;g.strokeRect(x-w/2,yTop,w,h);if(i===3){g.fillStyle='#4a7fd0';for(let k=0;k<3;k++)g.fillRect(x-w*.4+k*w*.3,yTop+h*.3,w*.18,h*.3)}}
+ function loop(ts){const dt=last?Math.min(50,ts-last)/1000:0;last=ts;S.t+=dt;
+  if(S.ph==='fall'){S.fall.vy+=1400*dt;S.fall.y+=S.fall.vy*dt;const bh=BL[S.i].h*H*.75;if(S.fall.y+bh>=baseY()){S.fall.y=baseY()-bh;land()}}
+  g.clearRect(0,0,W,H);g.save();if(S.shake>0){g.translate((Math.random()-.5)*S.shake,0);S.shake*=.85}
+  g.fillStyle='#183a5a';g.fillRect(0,H*.88,W,H*.12);g.fillStyle='#3a4258';g.fillRect(0,H*.86,W,H*.02);
+  let y=H*.86;for(const p of S.placed){y-=BL[p.i].h*H*.75;blk(p.i,p.x,y)}
+  if(S.ph!=='done'&&S.i<BL.length){const b=BL[S.i],w=b.w*W*.8,h=b.h*H*.75,tx=target(),by=baseY();g.setLineDash([5,5]);g.strokeStyle='#ffffffaa';g.strokeRect(tx-w/2,by-h,w,h);g.setLineDash([])}
+  g.strokeStyle='#d9a441';g.lineWidth=6;g.beginPath();g.moveTo(0,H*.06);g.lineTo(W,H*.06);g.stroke();
+  if(S.ph==='swing'&&S.i<BL.length){const x=hookX();g.strokeStyle='#ccc';g.lineWidth=2;g.beginPath();g.moveTo(x,H*.06);g.lineTo(x,H*.16);g.stroke();blk(S.i,x,H*.16)}
+  if(S.ph==='fall')blk(S.i,S.fall.x,S.fall.y);
+  g.fillStyle='#e8ecf6';g.font='800 14px sans-serif';g.textAlign='left';g.fillText(`${Math.min(S.i+1,5)}/5　${BL[Math.min(S.i,4)].n}`,10,H*.12);g.restore();if(!done)raf=requestAnimationFrame(loop)}
+ $('fgDone').style.display='none';raf=requestAnimationFrame(loop)})}
+Object.assign(MINI,{quench:{f:runQuench,t:'高周波焼入れ',n:'焼入れ'},mirror:{f:runMirror,t:'鏡面研削',n:'鏡面研削'},laser:{f:runLaser,t:'レーザー加工',n:'レーザー'},edm:{f:runEdm,t:'放電加工',n:'放電'},block:{f:runBlock,t:'ブロック工法',n:'組み立て'}});
+
+/* ---------- 新しい加工の工具をもらう（創技の塔の後半で出会ったとき） ---------- */
+async function sGrantTools(show){if(!G||!V3_OPEN)return;const got=[];
+ Object.entries(S_TOOLS).forEach(([id,t])=>{if(G.flags['hp_'+id]&&!G.tools.includes(t)){G.tools.push(t);G.tlx=G.tlx||{};G.tlx[t]=Math.max(G.tlx[t]||0,TLV_XP[4]);got.push([id,t])}});
+ if(!got.length)return;save();if(show)for(const[id,t]of got)await say(`${MIC(t,40)} <b>${TOOLS[t].n}</b>をもらった！<br><span style="font-size:14px">${CHARS[id].name}が「${PROC_LBL[Object.keys(PROC_TOOL).find(p=>PROC_TOOL[p]===t)]}」を教えてくれた。練度Lv5から</span>`,1900)}
+{const _j=fJoin;fJoin=async function(){const r=await _j.apply(this,arguments);if(towerAt()==='sougi')await sGrantTools(true);return r}}
+{const _o=openShop;openShop=function(){sGrantTools(false);return _o.apply(this,arguments)}}
+
+/* ---------- 特許の図面（10Fでノクスが渡す）：工具の練度 Lv6〜10 が要る ---------- */
+const PT=[ // [id, 名前, 種類, 部位, 加工, 要る練度, 材料, 効果]
+ ['pt_engine','黒閃ロータリーエンジン','armor','feet',['block','quench'],6,{carbon:4,cell:3,core:3},'移動の速さ+10%（ほかの足の装備より速い）'],
+ ['pt_osc',   '雷眼オシロスコープ',   'armor','head',['edm'],7,{cell:4,titan:3,core:3},'ボスに与えるダメージ+12%（弱点が見える）'],
+ ['pt_aebs',  '鉄壁AEBS',            'armor','body',['mirror'],7,{titan:4,carbon:3,core:3},'体力が3割以下のとき、受けるダメージ−25%（ぶつかる直前に守る）'],
+ ['pt_nut',   '不動ハードロックナット','armor','feet',['quench'],6,{titan:3,carbon:3,core:2},'受けるダメージ−8%（ゆるまない・ひるまない）'],
+ ['pt_scope', 'アウル・スコープ',     'gen',  null,  ['laser','mirror'],8,{cell:4,carbon:4,core:4},'汎用武器の枠を1つ使う。攻撃はしない。アウルムの近くをタップすると、正体が数秒見える（その間だけダメージが通る）']];
+const PT_FX={};
+PT.forEach(([id,n,kind,slot,ps,lv,mats,fx])=>{RECIPES[id]={n,kind,tier:5,vol:3,secret:true,patent:true,needLv:lv,mats,shape:'ch',area:'s4',proc:ps[0],procs:ps.length>1?ps:undefined,tools:[...new Set(ps.flatMap(p=>PROC_MAIN[p]))],quiz:'net',...(slot?{slot}:{}),...(kind==='gen'?{impl:'scope'}:{})};
+ if(!RECIPES[id].procs)delete RECIPES[id].procs;RECIPE_ORDER.push(id);PT_FX[id]=fx});
+Object.assign(ARMOR_IC,{pt_engine:'pt_rotary',pt_osc:'pt_oscillo',pt_aebs:'pt_aebs',pt_nut:'pt_hardlock'});GEN_IC.pt_scope='pt_owlscope';
+ATK.scope={n:'アウル・スコープ',type:'正体を明かす',ic:'pen',d:['攻撃はしない。アウルムの近くをタップすると、ゆがみがはがれて正体が数秒見える','','','','','']};TYPE_IC['正体を明かす']='pt_owlscope';
+J_NET_LV.s4=2;
+/* 要る練度 */
+const ptLack=R=>R&&R.needLv?R.tools.filter(t=>hasTool(t)&&tlv(t)<R.needLv):[];
+{const _c=canMake;canMake=function(id){const r=_c(id),R=RECIPES[id],l=ptLack(R);if(l.length){r.ok=false;r.lackLv=l}return r}}
+{const _rf=recipeFx;recipeFx=function(R){let o=_rf(R);const id=Object.keys(RECIPES).find(k=>RECIPES[k]===R);if(id==='pt_scope')o=o.filter(([k])=>!['強くなると','使いかた','威力'].includes(k));if(PT_FX[id])o.push(['特許の効果',PT_FX[id]]);
+ if(R.needLv)o.push(['要る練度',R.tools.map(t=>`${TOOLS[t].n} Lv${R.needLv}以上（いま ${G.tools.includes(t)?'Lv'+tlv(t):'持っていない'}）`).join('<br>')]);return o}}
+/* 10Fをこえたら、特許の図面（要解読）を受け取る */
+{const _cf=commitFloor;commitFloor=function(fl){const r=_cf(fl);if(towerAt()==='sougi'&&fl>=10&&V3_OPEN){G.bpRaw=G.bpRaw||[];PT.forEach(([id])=>{if(!G.bps.includes(id)&&!G.bpRaw.includes(id))G.bpRaw.push(id)});save()}return r}}
+/* 効き目 */
+{const _ab=teamAb;teamAb=function(){const a=_ab();if(typeof armId==='function'){if(armId('feet')==='pt_engine')a.wspd=(a.wspd||0)+.1;if(armId('feet')==='pt_nut')a.cut=(a.cut||0)+.08}return a}}
+{const _fd=fDamage;fDamage=function(e,d,kx,ky){if(e&&e.boss&&typeof armId==='function'&&armId('head')==='pt_osc')d*=1.12;return _fd(e,d,kx,ky)}}
+{const _h=fHurt;fHurt=function(v,src){v=_h(v,src);if(typeof armId==='function'&&armId('body')==='pt_aebs'&&FD&&FD.hp<FD.maxhp*.3)v*=.75;return v}}
+
+/* ---------- アウル・スコープ：攻撃はしない（技にならない）。20Fのアウルムで、タップした場所の正体を明かす ---------- */
+{const _s=startFloor;startFloor=function(fl){const r=_s.apply(this,arguments);if(FD&&FD.atk&&'scope' in FD.atk)delete FD.atk.scope;return r}}
+const scopeOn=()=>typeof genEqList==='function'&&genEqList().includes('pt_scope');
+const auBoss=()=>FD&&FD.run&&towerAt()==='sougi'&&FD.boss&&FD.boss.k==='s_aurum'&&FD.boss.hp>0?FD.boss:null;
+{let t0=0,x0=0,y0=0;const c=$('fcv');
+ c.addEventListener('pointerdown',e=>{t0=performance.now();x0=e.clientX;y0=e.clientY});
+ c.addEventListener('pointerup',e=>{const B=auBoss();if(!B||!scopeOn()||FD.paused)return;if(performance.now()-t0>280||Math.hypot(e.clientX-x0,e.clientY-y0)>14)return;
+  const wx=FD.x+(e.clientX-fW/2)/fZ,wy=FD.y+(e.clientY-fH/2)/fZ;FD.scopeFx={x:wx,y:wy,t:0};
+  if(Math.hypot(wx-B.x,wy-B.y)<B.r+110){FD.reveal=210;tone(1600,.12,'sine',.06,2400);fBanner('正体が見えた！ 今だ！',90,'pt_owlscope')}else tone(500,.08,'triangle',.03)})}
+{const _fd=fDamage;fDamage=function(e,d,kx,ky){if(e&&e.k==='s_aurum'&&towerAt()==='sougi'&&scopeOn())d*=(FD.reveal>0?1.5:.2);return _fd(e,d,kx,ky)}}
+{const _u=fUpdate;fUpdate=function(f){_u(f);if(FD&&FD.run&&!FD.paused){if(FD.reveal>0)FD.reveal-=f;if(FD.scopeFx){FD.scopeFx.t+=f;if(FD.scopeFx.t>24)FD.scopeFx=null}}}}
+{const _b=fBossCome;fBossCome=async function(){const r=await _b.apply(this,arguments);if(auBoss()&&scopeOn())setTimeout(()=>{if(auBoss())fBanner('アウル・スコープ：アウルムの近くをタップすると正体が見える。見えている間だけダメージが通る',300,'pt_owlscope')},600);return r}}
+{const _d=fDrawExtra;fDrawExtra=function(g,D){_d(g,D);const B=auBoss();if(!B||!scopeOn())return;g.save();
+ if(D.reveal>0){g.globalAlpha=.8;g.strokeStyle='#ffe066';g.lineWidth=4;g.beginPath();g.arc(B.x,B.y,B.r+18,-Math.PI/2,-Math.PI/2+TAU*D.reveal/210);g.stroke()}
+ else{for(let i=0;i<6;i++){g.globalAlpha=.35;g.fillStyle=i%2?'#c060ff':'#ff40c0';const y=B.y-B.r+Math.random()*B.r*2;g.fillRect(B.x-B.r-10+Math.random()*16,y,B.r*2+Math.random()*20,4+Math.random()*6)}}
+ if(D.scopeFx){const k=D.scopeFx.t/24;g.globalAlpha=1-k;g.strokeStyle='#ffd25a';g.lineWidth=3;g.beginPath();g.arc(D.scopeFx.x,D.scopeFx.y,20+60*k,0,TAU);g.stroke()}g.restore()}}
+
+/* =====================================================================
    新しいバージョンの知らせ
    ・GitHub Pages はページを最大10分ほど覚えておく（キャッシュ）ので、更新してもすぐに新しい版にならないことがある
    ・起動したときと、アプリにもどってきたときに、公開中の index.html の VERSION を「覚えていない状態」で読みに行く
@@ -7284,7 +7504,7 @@ function preloadFoes(fl){try{const F=FLOORS[fl],A=F&&FAREA[F.area];if(!A)return;
 {const _sh=show;show=function(id){const cur=document.querySelector('.scr.on');const r=_sh.apply(this,arguments);if(id!=='field'&&(!cur||cur.id!==id))lockInput(300);return r}}
 {const sh=document.getElementById('sheet');if(sh&&window.MutationObserver)new MutationObserver(()=>{if(sh.classList.contains('on')&&!sh._on){sh._on=1;lockInput(250)}else if(!sh.classList.contains('on'))sh._on=0}).observe(sh,{attributes:true,attributeFilter:['class']})}
 
-const BUILD='11/20 11:01';
+const BUILD='11/20 11:42';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 

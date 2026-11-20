@@ -242,13 +242,13 @@ const tlv=t=>{const x=(G.tlx||{})[t]||0;let l=1;TLV_XP.forEach((v,i)=>{if(x>=v)l
 /* そのレシピで使う工具のうち、いちばん練度の高いもの */
 const recLv=R=>Math.max(1,...R.tools.filter(hasTool).map(t=>tlv(useTool(t))));
 /* グラインダー・旋盤など、ずれの幅を変えにくい加工は点数ボーナスで助ける（Lv5で+8点）。ほかは各ミニゲームで幅が広がる */
-let toolBonus=R=>{const pr=procOf(R);return (['grind','lathe'].includes(pr)||!MINI[pr]?(recLv(R)-1)*2:0)+(pr==='lathe'&&hasLim('cnc')?5:0)};
-let assistMul=o=>1+.08*(((o&&o.assist)||1)-1);   /* Lv5で許す幅が+32% */
+let toolBonus=R=>{const pr=procOf(R);return (['grind','lathe'].includes(pr)||!MINI[pr]?(Math.min(5,recLv(R))-1)*2:0)+(pr==='lathe'&&hasLim('cnc')?5:0)};
+let assistMul=o=>1+.08*(Math.min(5,(o&&o.assist)||1)-1);   /* Lv5で許す幅が+32% */
 function toolXpGain(R,q){G.tlx=G.tlx||{};const g=5+Math.round(q/10),msg=[];
  R.tools.filter(hasTool).map(useTool).forEach(t=>{const b=tlv(t);G.tlx[t]=(G.tlx[t]||0)+g;const a=tlv(t);msg.push(`${MIC(t,18)}${TOOLS[t].n} 練度+${g}${a>b?` <b>Lv${a}に上がった！</b>`:''}`)});
  return msg.join('<br>')}
 function tlvHTML(t){const x=(G.tlx||{})[t]||0,l=tlv(t),nx=TLV_XP[l],pv=TLV_XP[l-1];
- return `<div class="tlv">${UIMG('u_tlv',16)}<span>練度 <b>Lv${l}</b></span><i><u style="width:${l>=5?100:Math.round((x-pv)/(nx-pv)*100)}%"></u></i><small>${l>=5?'最大':`${x}/${nx}`}</small></div>`}
+ return `<div class="tlv">${UIMG('u_tlv',16)}<span>練度 <b>Lv${l}</b></span><i><u style="width:${l>=TLV_XP.length?100:Math.round((x-pv)/(nx-pv)*100)}%"></u></i><small>${l>=TLV_XP.length?'最大':`${x}/${nx}`}</small></div>`}
 
 /* ===================== 限定工具（工具ガチャだけ）・限定装備（図面ガチャだけ） ===================== */
 /* up：いつもの工具の代わりになる（持っていれば、その工具がなくても加工できる）。新品でも練度Lv3から */
