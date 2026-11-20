@@ -1,10 +1,10 @@
 /* ===================== 第3章「創技の塔」（1〜20F）：黄金の港町 =====================
  * 特許の図面がしまわれた「技の保管庫」の塔。敵は無限の塔からしみ出したゆがみ。
  * 層：1〜3 発動機／4〜6 計器／7〜9 古図／10 保管庫の扉（ノクス）／11〜13 炉と砥石／14〜16 光と雷／17〜19 大ドック／20 黄金の登録所（アウルム）
- * まだ公開しない（S_LIVE=false）。URL に ?sougi をつけたときだけ出撃できるテスト版。
+ * ver3.0.0 で公開（S_LIVE=true）。?sougi は無限の塔50Fクリアの前でも入れるテスト用の入口として残す。
  * 仲間（vol.3）の技・ガチャは ②、工房（新しい加工・特許の図面・アウル・スコープ）は ③ で足す */
 const S_TEST=/[?&]sougi\b/.test(location.search);
-const S_LIVE=S_TEST;
+const S_LIVE=true;  /* ver3.0.0（2026-11-20）で公開 */
 /* vol.3 の10人（②で技とガチャを足す。いまは会話に出るだけ） */
 var VOL3=['raika','tsubasa','shiranagi','safegear','gennou','raiga','kuromio','shion','pukari','sakamata'];
 Object.assign(CHARS,{
