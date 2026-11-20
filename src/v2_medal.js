@@ -7,8 +7,8 @@
    ===================================================================== */
 const MEDAL={mint:10,one:3,ten:30},PK_POOL=['soul','fairy','shadow','kura','tako'];
 const pkOpen=()=>V3_OPEN&&G&&G.flags&&G.flags.s_true;
-const medalIc=s=>`<img class="ic" src="img/ui/coin.webp" alt="" style="width:${s}px;height:${s}px;vertical-align:middle;filter:hue-rotate(160deg) saturate(1.4)">`;
-if(V3_OPEN)GACHA_BANNERS[3]={id:'pk',vol:'刻印',n:'刻印メダルガチャ（塔を建てたマイスター）',img:'img/tower-inf.webp',pool:PK_POOL};
+const medalIc=s=>`<img class="ic" src="img/ui/u_medal.webp" alt="" style="width:${s}px;height:${s}px;vertical-align:middle">`;
+if(V3_OPEN)GACHA_BANNERS[3]={id:'pk',vol:'刻印',n:'刻印メダルガチャ（塔を建てたマイスター）',img:'img/gacha-pk.webp',pool:PK_POOL};
 {const _r=renderCharGacha;renderCharGacha=function(){if(GACHA_BANNERS[3]&&!pkOpen()&&gaBan===3)gaBan=0;
  const keep=GACHA_BANNERS[3];if(keep&&!pkOpen())GACHA_BANNERS.length=3;try{_r.apply(this,arguments)}finally{if(keep&&GACHA_BANNERS.length===3)GACHA_BANNERS[3]=keep}
  const vb=$('gaBody').querySelector('[data-gb="3"]');if(vb)vb.textContent='刻印';if(GACHA_BANNERS[gaBan]&&GACHA_BANNERS[gaBan].id==='pk'){const sp=$('gaBody').querySelector('.gaban span');if(sp)sp.textContent=GACHA_BANNERS[gaBan].n}
