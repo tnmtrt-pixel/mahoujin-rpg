@@ -910,7 +910,7 @@ function migrate(g){if(!g||typeof g!=='object'||Array.isArray(g)||!Array.isArray
  if(!g.hero||!CHARS[g.hero])g.hero=g.party[0].id;
  g.party.forEach(m=>{if(!JOBS[m.job])m.job=CHARS[m.id].job;m.lv=clamp(Math.floor(+m.lv)||1,1,LV_CAP);m.exp=m.lv>=LV_CAP?0:Math.max(0,+m.exp||0);m.sp=clamp(+m.sp||0,0,SP_MAX)});
  /* 主人公がパーティにいなければ戻す（JOIN_ORDER は主人公を飛ばすので、二度と加わらなくなるのを防ぐ） */
- if(!g.party.some(m=>m.id===g.hero))g.party.unshift(newMember(g.hero,Math.max(...g.party.map(m=>m.lv))));
+ if(!g.party.some(m=>m.id===g.hero)&&!(Array.isArray(g.bench)&&g.bench.some(m=>m&&m.id===g.hero)))g.party.unshift(newMember(g.hero,Math.max(...g.party.map(m=>m.lv))));  /* 控えにいるなら戻さない（3.0.5：控えのウルフが★1の新しいウルフに置きかわっていた） */
  g.party.forEach(m=>{m.learned=Array.isArray(m.learned)?m.learned.filter(s=>SKILLS[s]):[];m.skills=Array.isArray(m.skills)?m.skills.filter(s=>SKILLS[s]&&m.learned.includes(s)).slice(0,4):[];
   m.fresh=Array.isArray(m.fresh)?m.fresh.filter(s=>SKILLS[s]):[];learnUpTo(m);if(!m.skills.length&&m.learned.length)m.skills.push(m.learned[0]);
   m.weapon=fixWeapon(m);
