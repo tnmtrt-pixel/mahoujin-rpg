@@ -4,9 +4,10 @@
    ・ハードロックナット3×3／ロータリーエンジン4×4／オシロスコープ・AEBS 5×5／アウル・スコープ6×6
    ・「番号を出す」で、マスに小さな番号を出せる（ヒント）
    ===================================================================== */
-const PATQ=(()=>{let N=6;const SIZE={pt_nut:3,pt_engine:4,pt_osc:5,pt_aebs:5,pt_scope:6},MOVES={3:20,4:36,5:60,6:90};
+const PATQ_ART={},PATQ_SIZE={pt_nut:3,pt_engine:4,pt_osc:5,pt_aebs:5,pt_scope:6};
+const PATQ=(()=>{let N=6;const SIZE=PATQ_SIZE,MOVES={3:20,4:36,5:60,6:90};
  /* 図面の線画（青図）。ctx の 0〜1 の正方形にかく */
- const ART={
+ const ART=Object.assign(PATQ_ART,{
   pt_engine:(x,S)=>{const c=S/2;x.beginPath();x.ellipse(c,c,S*.36,S*.27,0,0,TAU);x.stroke();x.beginPath();x.ellipse(c,c,S*.3,S*.21,0,0,TAU);x.stroke();
    const R=S*.2;x.beginPath();for(let i=0;i<3;i++){const a=-Math.PI/2+i*TAU/3,b=a+TAU/3,p=[c+Math.cos(a)*R,c+Math.sin(a)*R],q=[c+Math.cos(b)*R,c+Math.sin(b)*R];i?0:x.moveTo(...p);x.quadraticCurveTo(c+Math.cos(a+TAU/6)*R*.75,c+Math.sin(a+TAU/6)*R*.75,...q)}x.closePath();x.stroke();
    x.beginPath();x.arc(c,c,S*.05,0,TAU);x.stroke();x.beginPath();x.arc(c,c,S*.025,0,TAU);x.stroke();
@@ -26,7 +27,7 @@ const PATQ=(()=>{let N=6;const SIZE={pt_nut:3,pt_engine:4,pt_osc:5,pt_aebs:5,pt_
    x.beginPath();x.moveTo(S*.3,S*.2);x.lineTo(S*.24,S*.08);x.lineTo(S*.38,S*.17);x.moveTo(S*.7,S*.2);x.lineTo(S*.76,S*.08);x.lineTo(S*.62,S*.17);x.stroke();
    x.strokeRect(S*.74,S*.36,S*.14,S*.12);for(let i=0;i<8;i++){const a=i*TAU/8;x.beginPath();x.moveTo(S*.81+Math.cos(a)*S*.06,S*.42+Math.sin(a)*S*.06);x.lineTo(S*.81+Math.cos(a)*S*.08,S*.42+Math.sin(a)*S*.08);x.stroke()}
    x.beginPath();x.moveTo(S*.42,S*.66);x.lineTo(S*.36,S*.86);x.lineTo(S*.64,S*.86);x.lineTo(S*.58,S*.66);x.stroke();x.strokeRect(S*.28,S*.86,S*.44,S*.05);
-   return[[c,S*.18,'1'],[c,S*.42,'2'],[S*.81,S*.36,'3'],[c,S*.86,'4']]}};
+   return[[c,S*.18,'1'],[c,S*.42,'2'],[S*.81,S*.36,'3'],[c,S*.86,'4']]}});
  /* 図面の絵をキャンバスにかく（青図・方眼・番号） */
  function render(id,S){const c=document.createElement('canvas');c.width=c.height=S;const x=c.getContext('2d');
   x.fillStyle='#1d4a8f';x.fillRect(0,0,S,S);x.strokeStyle='rgba(255,255,255,.12)';x.lineWidth=1;for(let i=0;i<=S;i+=S/24){x.beginPath();x.moveTo(i,0);x.lineTo(i,S);x.stroke();x.beginPath();x.moveTo(0,i);x.lineTo(S,i);x.stroke()}
@@ -40,7 +41,7 @@ const PATQ=(()=>{let N=6;const SIZE={pt_nut:3,pt_engine:4,pt_osc:5,pt_aebs:5,pt_
    const c=nb.filter(n=>n!==prev);const n=c[Math.floor(Math.random()*c.length)];[b[e],b[n]]=[b[n],b[e]];prev=e;e=n}
   if(b.every((v,i)=>v===i))return shuffle(moves);return b}
  function step(id,pr){return new Promise(res=>{N=SIZE[id]||5;const moves=MOVES[N];let B=shuffle(moves),cnt=0,hint=false,done=false,img=null,S=0;
-  $('cqT').textContent='特許の図面';$('cqStep').textContent=(pr&&pr.label)||'';$('cqBack').textContent='◀ あとで';
+  $('cqT').textContent=RECIPES[id]&&RECIPES[id].legend?'マイスターの図面':'特許の図面';$('cqStep').textContent=(pr&&pr.label)||'';$('cqBack').textContent='◀ あとで';
   $('cqMsg').innerHTML=`<img src="${CHARS[(pr&&pr.who)||'nox'].img}" alt=""><span>${(pr&&pr.say)||'ばらばらになった特許の図面を、元の形にもどそう。空いたマスのとなりのマスをタップすると、すべって動く。'}</span>`;
   $('cqBack').onclick=()=>{if(done)return;cv.style.width='';cv.style.margin='';res(false)};show('cadq');
   const cv=$('cqViews'),D=Math.min(2,devicePixelRatio||1);const W=Math.max(220,Math.min(380,(cv.parentNode.clientWidth||340)-4));S=W;cv.width=W*D;cv.height=W*D;cv.style.width=W+'px';cv.style.height=W+'px';cv.style.margin='0 auto';const x=cv.getContext('2d');x.setTransform(D,0,0,D,0,0);
@@ -64,7 +65,7 @@ const PATQ=(()=>{let N=6;const SIZE={pt_nut:3,pt_engine:4,pt_osc:5,pt_aebs:5,pt_
  return{step,render}})();
 /* 特許の図面はスライドパズルで解読する */
 {const _d=decodeBp;decodeBp=async function(id){const R=RECIPES[id];if(!R||!R.patent)return _d(id);if(!(G.bpRaw||[]).includes(id))return;
- const ok=await PATQ.step(id,{who:'nox',label:'図面の解読',say:`「${R.n}」の特許の図面が、ばらばらになっている。空いたマスのとなりをタップしてすべらせ、元の図面にもどそう。`});
+ const ok=await PATQ.step(id,{who:'nox',label:'図面の解読',say:`「${R.n}」の${R.legend?'マイスターの':'特許の'}図面が、ばらばらになっている。空いたマスのとなりをタップしてすべらせ、元の図面にもどそう。`});
  openShop(shopFrom);
  if(ok){G.bpRaw=G.bpRaw.filter(b=>b!==id);if(!G.bps.includes(id))G.bps.push(id);save();sfx.win&&sfx.win();renderShop();
   await say(`${RIC(id,40)} 解読できた！<br><span style="font-size:14px">「${R.n}」をつくれるようになった（要る練度に注意）</span>`,1600)}
