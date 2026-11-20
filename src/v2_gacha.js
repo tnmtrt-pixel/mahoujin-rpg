@@ -29,17 +29,17 @@ Object.assign(ABIL,{
  rocker: ab4(['lvSpd',.05],['teamAtk',.05],['xp',.08],['teamAtk',.1])});
 /* ウルフは最初からいる。ほかの仲間はすべてガチャで手に入れる */
 const GACHA_POOL=['wolf','fox','dodo','owl','gorilla','mouse','robot','tsukiyo','onmyo','rocker'];
-const GACHA_COST=50,GACHA10_COST=450,STAR_MAX=5,PARTY_MAX=5;
+const GACHA_COST=50,GACHA10_COST=450,STAR_MAX=10,PARTY_MAX=5;
 const STAR_RATE=[[3,.05],[2,.25],[1,.70]];
 /* コインの入り方（階の突破） */
 const COIN_FIRST=40,COIN_FIRST_BOSS=80,COIN_AGAIN=20,COIN_DROP=10;  /* COIN_DROP：強敵が落とすコイン1枚ぶん（ボスは3枚） */
 /* かけら：同じキャラが出ると、出た★に応じてもらえる。かけらで★を上げる */
-const SHARD_GAIN={1:1,2:3,3:10},STAR_COST={1:5,2:10,3:20,4:40};
+const SHARD_GAIN={1:1,2:3,3:10},STAR_COST={1:5,2:10,3:20,4:40,5:60,6:80,7:100,8:130,9:160};
 const starMul=m=>1;  /* ★は攻撃ではなく能力（パッシブ）に効く */
 function starHTML(m){const s=m.star||1,c=STAR_COST[s],h=m.shard||0;return `<span class="pstar">${starTxt(s)}</span><span class="shd">かけら <b>${h}</b>${c?'/'+c:''}</span>${c?`<button class="hexb sbtn" id="pStar" ${h<c?'disabled':''}><span>★${s+1}にする</span></button>`:'<span class="shd">★最大</span>'}`}
 function starUp(id){const m=owned(id);if(!m)return;const s=m.star||1,c=STAR_COST[s];if(!c||(m.shard||0)<c)return;m.shard-=c;m.star=s+1;save();tone(880,.2,'triangle',.1,1760);renderParty();
- const ab=ABIL[id]||[],i=m.star-1;say(m.star>=5?`${CHARS[id].name} ★5！<br><span style="font-size:14px">覚醒：全部の能力が1.5倍</span>`:`${CHARS[id].name} ★${m.star}！<br><span style="font-size:14px">${ABIL_RANK[i]?ABIL_RANK[i][0]+'能力が開いた：'+(ab[i]?ab[i].d:''):''}</span>`,1800)}
-const starTxt=n=>'★'.repeat(n)+'<span class="st0">'+'★'.repeat(Math.max(0,STAR_MAX-n))+'</span>';
+ const ab=ABIL[id]||[],i=m.star-1;say(m.star>5?`${CHARS[id].name} ★${m.star}！ 限界突破！<br><span style="font-size:14px">技のLvの上限が ${ATK_MAX+m.star-1} に。Lv6からは手数が増える</span>`:m.star===5?`${CHARS[id].name} ★5！<br><span style="font-size:14px">覚醒：全部の能力が1.5倍</span>`:`${CHARS[id].name} ★${m.star}！<br><span style="font-size:14px">${ABIL_RANK[i]?ABIL_RANK[i][0]+'能力が開いた：'+(ab[i]?ab[i].d:''):''}</span>`,1800)}
+const starTxt=n=>n<=5?'★'.repeat(n)+'<span class="st0">'+'★'.repeat(Math.max(0,5-n))+'</span>':'<span style="color:#ff7ad9">'+'★'.repeat(n-5)+'</span>'+'★'.repeat(10-n);  /* ★6〜10は桃色の星が増える（限界突破） */
 const owned=id=>G.party.find(m=>m.id===id)||(G.bench||[]).find(m=>m.id===id);
 
 function rollStar(){let r=Math.random();for(const[s,p]of STAR_RATE){if(r<p)return s;r-=p}return 1}

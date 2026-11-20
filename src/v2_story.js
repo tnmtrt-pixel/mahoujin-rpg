@@ -13,7 +13,7 @@ function helperSetup(){if(!FD)return;FD.helped=FD.helped||{};const id=(typeof HE
 {const _j=fJoin;fJoin=async function(){const J=FD&&FD.join;if(!J||!J.helper)return _j();FD.paused=true;fReleaseStick();const id=J.id,nm=CHARS[id].name;
  try{const first=!G.flags['hp_'+id];await talk(first?(JOIN_TALK[id]||[]):[[id,nm,HELPER_AGAIN[id]]]);if(first){G.flags['hp_'+id]=1;save()}
   FD.helped[id]=true;FD.join=null;
-  if(G.party.some(m=>m.id===id)||FD.atk[id]!=null){FD.atk[id]=Math.min(ATK_MAX,(FD.atk[id]||0)+2);FD.hboost=FD.hboost||{};FD.hboost[id]=1.2;
+  if(G.party.some(m=>m.id===id)||FD.atk[id]!=null){FD.atk[id]=Math.min(atkMax(id),(FD.atk[id]||0)+2);FD.hboost=FD.hboost||{};FD.hboost[id]=1.2;
    await say(`${UIMG('u_help',44)} <span class="nw">${nm}が</span><span class="nw">力を貸してくれた！</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n} Lv+2・威力1.2倍（この挑戦の間）</span>`,1900)}
   else{const L=findOwn(G.lead),m=newMember(id,1);m.lv=(L&&L.lv)||1;FD.helperMs=FD.helperMs||{};FD.helperMs[id]=m;FD.atk[id]=2;
    await say(`${UIMG('u_help',44)} <span class="nw">お助け仲間！</span><br><span class="nw">${nm}が一緒に戦う</span><br><span style="font-size:14px">${TIC(ATK[id].type,20)}${ATK[id].n}（Lv2）が加わった。この挑戦の間だけ</span>`,2000)}}

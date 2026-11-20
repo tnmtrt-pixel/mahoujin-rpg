@@ -90,6 +90,8 @@ const ATK={
  dodo:{n:'籠手の衝撃波',type:'範囲',ic:'hammer', d:['地面をなぐって、まわりをまとめて吹き飛ばす','範囲が広がる','間隔が短くなる','威力アップ','範囲が広がる']},
  owl: {n:'魔法陣の設置',type:'設置',ic:'pen',    d:['杖で敵の群れに魔法陣を描く','魔法陣が広がる','2つ置ける','威力アップ','3つ置ける']}};
 const ATK_MAX=5;
+/* 技のLvの上限：★1つごとに+1（★5でLv9、★10でLv14）。Lv6からは手数が増える（3.0.1） */
+const atkMax=k=>{const m=typeof owned==='function'&&G&&owned(k);return ATK_MAX+Math.max(0,((m&&m.star)||1)-1)};
 /* 強化カードのうち、キャラの攻撃以外のもの */
 const PASSIVE={
  spd:{n:'作業靴のひも',d:'移動の速さ +10%',max:3},
@@ -363,7 +365,7 @@ function fOpenChest(c){c.open=true;const A=FAREA[FD.area],got=[];
 function fGainXp(v){FD.xp+=v*(1+(FD.ab.xp||0));while(FD.xp>=FD.need){FD.xp-=FD.need;FD.lv++;FD.need=Math.round(3+FD.lv*2.6+FD.lv*FD.lv*.16);FD.pendingLv++}
  if(FD.pendingLv&&!$('fLevel').classList.contains('on'))fOpenLevel()}
 function fOpenLevel(){FD.paused=true;fReleaseStick();FD.pendingLv--;tone(660,.12,'triangle',.08,1320);
- const opts=[];Object.keys(FD.atk).forEach(k=>{if((FD.atk[k]||0)<ATK_MAX)opts.push('a:'+k)});Object.keys(PASSIVE).forEach(k=>{if(FD.ps[k]<PASSIVE[k].max)opts.push('p:'+k)});
+ const opts=[];Object.keys(FD.atk).forEach(k=>{if((FD.atk[k]||0)<atkMax(k))opts.push('a:'+k)});Object.keys(PASSIVE).forEach(k=>{if(FD.ps[k]<PASSIVE[k].max)opts.push('p:'+k)});
  /* 仲間の攻撃が少なくとも1つは入るようにする */
  let pk=opts.sort(()=>Math.random()-.5).slice(0,3);const atkOpts=opts.filter(o=>o[0]==='a');if(atkOpts.length&&!pk.some(o=>o[0]==='a'))pk[0]=pick(atkOpts);
  {const ex=extraOpts();if(ex.length)pk=[ex[0],...pk.filter(x=>x!==ex[0])].slice(0,3)}
