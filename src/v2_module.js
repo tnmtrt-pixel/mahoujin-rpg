@@ -623,7 +623,7 @@ const TLG={buy:true,have:false,later:false};
 function renderShop(){const nRaw=(G.bpRaw||[]).length,tabs=[['make','つくる'],['dec','解読'+(nRaw?`<i class="bpn">${nRaw}</i>`:'')],['tool','工具'],['mat','素材'],['rec','換金所']];
  let h=`<div class="stabs">${tabs.map(([k,n])=>`<button class="stab ${shopTab===k?'on':''}" data-t="${k}">${n}</button>`).join('')}</div>`;
  if(shopTab==='make'||shopTab==='dec')h+=wsListHTML(shopTab);
- if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。使うほど<b>練度</b>が上がって、その工具を使う加工が楽になる（Lv1〜5）。基本の工具は店で買える。溶接機・旋盤などの中級の工具は、塔の資材の箱で見つかる（ボスを倒すと店にも高い値段で並ぶ）。工具ガチャでも出る。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
+ if(shopTab==='tool'){h+=`<div class="note">工具は何度でも使える。使うほど<b>練度</b>が上がって、その工具を使う加工が楽になる（Lv1〜${TLV_XP.length}）。基本の工具は店で買える。溶接機・旋盤などの中級の工具は、塔の資材の箱で見つかる（ボスを倒すと店にも高い値段で並ぶ）。工具ガチャでも出る。</div><div style="font-weight:800;margin:6px 0">${coinIc(22)} コイン ${G.coin|0}</div>`;
   const tg=t=>G.tools.includes(t)?'have':TOOLS[t].limited||(G.floor|0)<(TOOL_GATE[t]||0)||!TOOLS[t].price?'later':'buy';
   const TG=[['buy','店で買える'],['have','持っている工具'],['later','限定・まだ店にない']];
   h+=TG.map(([gk,gn])=>{const ts=TOOL_ORDER.filter(t=>tg(t)===gk);if(!ts.length)return '';const op=TLG[gk];
