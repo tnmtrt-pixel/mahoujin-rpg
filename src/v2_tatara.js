@@ -18,8 +18,8 @@ Object.assign(FFOE,{
  t_flame:{hp:24, spd:1.3, dmg:10,xp:2, r:18},
  t_bat:  {hp:18, spd:1.75,dmg:9, xp:2, r:16,fly:1},
  t_slag: {hp:64, spd:.65, dmg:14,xp:4, r:23},
- t_golem:{hp:520,spd:.55, dmg:22,xp:24,r:38,big:1},
- t_fuigo:{hp:2600,spd:.7, dmg:30,xp:90,r:60,big:1}});
+ t_golem:{hp:200,spd:.55, dmg:22,xp:24,r:38,big:1},
+ t_fuigo:{hp:1000,spd:.7, dmg:30,xp:90,r:60,big:1}});
 Object.assign(FOES,{t_flame:{n:'炎の精',col:'#ffa030'},t_bat:{n:'火の粉コウモリ',col:'#ff6a30'},t_slag:{n:'スラグ',col:'#c06a2a'},t_golem:{n:'炭ゴーレム',col:'#ff5a20'},t_fuigo:{n:'鞴鬼',col:'#e03a2a'}});
 FOE_IMG_OK.push('t_flame','t_bat','t_slag','t_golem','t_fuigo');
 Object.assign(AREAS,{tt:{n:'たたら場',need:null,lv:'',bossLv:0,tier:3,boss:null,bg:'#1e120a'}});
@@ -51,8 +51,10 @@ async function ttGo(){enterTower('tatara');if(TW)TW.busy=true;
 /* 敵の波：20秒ごとに一段（チュートリアルはゆるやか） */
 {const _w=waveNow;waveNow=function(){const T=FD&&FD.tr;if(!T)return _w();const s=Math.floor(T.tk/TT.STEP),
  P=s<3?['t_flame','t_bat']:s<6?['t_flame','t_bat','t_slag']:['t_slag','t_flame','t_bat','t_slag'];return[0,P,(T.tut?1.4:1.6+.42*s)*(1+.25*(T.stage-1))]}}
-/* 錆はない：錆のしくみ（FT.RUST）を、たたら場の間だけ止める */
 const ttNoRust=fn=>{const r0=FT.RUST;FT.RUST=1e9;try{return fn()}finally{FT.RUST=r0}};
+/* 敵の体力：ふつうの塔は「その階にいた時間」で体力が増えるが、たたら場ではそれを使わない（強さは20秒ごとの段と火入れの回数で上がる） */
+{const _sp=fSpawn;fSpawn=function(){const a=arguments,tr=FD&&FD.tr,e=tr?ttNoRust(()=>_sp.apply(this,a)):_sp.apply(this,a);if(e&&tr&&!e.boss){const k=1+fSearchT()/60;e.hp/=k;e.max/=k}return e}}
+/* 錆はない：錆のしくみ（FT.RUST）を、たたら場の間だけ止める */
 {const _u=fUpdate;fUpdate=function(f){const D=FD,T=D&&D.tr;if(!T)return _u(f);ttNoRust(()=>_u(f));
  if(FD!==D||!D.run||D.ending||T.ending)return;
  T.tk+=f/60;D.st=Math.min(T.tk,FLOOR_MAX-61);
