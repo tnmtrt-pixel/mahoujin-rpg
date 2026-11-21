@@ -1299,7 +1299,7 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 <script>
 'use strict';
 /* ゲームの版（タイトル画面に「β版 ver ○」と出る）。更新したらここを書きかえる */
-const VERSION='3.0.6';
+const VERSION='3.1.0';
 /* =====================================================================
    データ表（授業ではここを書きかえて、職業・技・敵・セリフを増やす）
    ===================================================================== */
@@ -4833,7 +4833,7 @@ function openReforge(){const ms=ownedAll().filter(m=>m.weapon&&m.weapon.attr);
 
 /* ===================== お知らせ（ver1.0.0 第1章 公開） ===================== */
 function openNews(){$('sheetT').textContent='お知らせ';
- $('sheetB').innerHTML=`<div class="news"><b>ver 3.0.6</b><ul><li>技のエフェクトを派手にしました：当たったときの火花、大きい一撃の閃光、倒したときのかけら、強敵・ボスの爆発、レベルアップの魔法陣、雷・爆発・回復の技にも光のエフェクトが重なります</li></ul><b>ver 3.0.5</b><ul><li>ウルフを控えに入れていると、読みこみ直したときに★1の新しいウルフがパーティに入り、控えのウルフが消えてしまう不具合を直しました</li></ul><b>ver 3.0.4</b><ul><li>限界突破（★6〜★10）した仲間が、読みこみ直すと★5にもどってしまう不具合を直しました</li></ul><b>ver 3.0.3</b><ul><li>特許・マイスターの図面のスライドパズルを大きくし、タップした場所がずれないように直しました</li></ul><b>ver 3.0.2</b><ul><li>階に入ってすぐの1分間は、弱い敵の群れがたくさん押し寄せるように。まとめて一掃しよう</li><li>いつも出ている技（ギアフォックスの歯車・セラフの光輪・ぷかりの輪など）は、Lv6から威力が上がるように</li></ul><b>ver 3.0.1</b><ul><li>★を上げるほど、技のLvの上限が上がるように（★5でLv9）。Lv6からは攻撃の手数が増える</li><li>限界突破：かけらで★6〜★10まで上げられるように（★10で技Lv14）</li></ul><b>ver 3.0.0　第3章「創技の塔」公開！</b><ul><li>新しい塔「創技の塔」（黄金の港町）：特許の図面がしまわれた技の保管庫。無限の塔の50Fをクリアすると世界地図に出る</li><li>新しい仲間10人（ガチャ vol.3「創技のなかまガチャ」）と、絆覚醒5組・チャット25本</li><li>工房：新しい加工5つ（高周波焼入れ・鏡面研削・レーザー加工・放電加工・ブロック工法）、工具の練度が Lv10 まで</li><li>図面の解読：vol.3 の図面は「回転体」、特許とマイスターの図面は「スライドパズル」</li><li>アウル・スコープ：アウルムの正体を明かす道具。本当のエンディングと、無限の塔の「試練」（伝説のマイスターの装備）へ</li><li>刻印メダルガチャ：本当のエンディングのあと、記憶の結晶から刻印メダルを鋳なおして、塔を建てたマイスターたちを呼べる</li></ul><b>ver 2.5.3</b><ul><li>第3章の準備：技の種類のアイコンと、刻印メダルガチャの看板を入れました。まだ遊べません</li></ul><b>ver 2.5.2</b><ul><li>第3章の準備：刻印メダルとガチャのしくみを入れました。まだ遊べません</li></ul><b>ver 2.5.1</b><ul><li>第3章の準備：伝説の装備と特殊な素材のアイコンを入れました。まだ遊べません</li></ul><b>ver 2.5.0</b><ul><li>工房に「精錬」タブ：たまった素材を、チタン・蓄電池・カーボン繊維や錆の核に変えられるように</li><li>素材のバランスを調整：段階3〜5の装備は、使う素材が多くなりました（段階3は2倍、段階4は2.5倍、段階5は3倍）</li></ul><b>ver 2.4.8</b><ul><li>第3章の準備：無限の塔の「試練」とマイスターの図面を入れました。まだ遊べません</li></ul><b>ver 2.4.7</b><ul><li>第3章の準備：特許の図面の解読（スライドパズル）を入れました。まだ遊べません</li></ul><b>ver 2.4.6</b><ul><li>第3章の準備：新しい仲間の図面の解読「回転体を見極める」を入れました。まだ遊べません</li></ul><b>ver 2.4.5</b><ul><li>第3章の準備：工房の新しいしくみ（新しい加工・特許の図面）を入れました。まだ遊べません</li></ul><b>ver 2.4.4</b><ul><li>第3章の準備：新しい仲間たちの技・絆覚醒・チャットのしくみを入れました。まだ遊べません</li></ul><b>ver 2.4.3</b><ul><li>第3章「創技の塔」の準備を始めました（塔と物語のしくみ）。まだ遊べません。公開をお楽しみに</li></ul><b>ver 2.4.2</b><ul><li>匠の★を上げられるように：クリアした審判の塔の20階のボスを、もう一度倒すたびに「匠のかけら」が5個もらえる</li></ul></div><div class="news"><b>ver 2.4.1</b><ul><li>はじめて遊ぶ人向けに、編成と工房の画面を初めて開いたとき、使い方の説明が出るように</li></ul></div><div class="news"><b>ver 2.4.0</b><ul><li>はじめての人向けに「練習場」（チュートリアル）を追加。ホー博士の案内で、動き方・戦い方・レベルアップ・拾い方・出口を順に覚えられる。練習場を出ると、はじめてのガチャが1回無料</li><li>ガチャが毎日1回無料に（日本時間で日付が変わると、また引ける）</li><li>会話：「タップで次へ ▶」をボタンにして、押すと進むように。ボタンの列のすき間を押しても進む</li></ul></div><div class="news"><b>ver 2.3.3</b><ul><li>リブラの丁半：前に「丁か、半か」を読んでいた人ができなかったのを修正。もう一度チャットを読むと、一回だけ勝負できる</li></ul></div><div class="news"><b>ver 2.3.2</b><ul><li>チャット「丁か、半か」を初めて読み終えると、リブラと一回だけ丁半勝負ができるように（当たり500コイン、はずれでも100コイン。自分のコインは賭けない）</li></ul></div><div class="news"><b>ver 2.3.1</b><ul><li>ちがう章の仲間どうしのチャットを9本追加（追いかけっこ・昔のなかま・雷くらべ・ニャボの健康診断・段取り八分・天秤座・トゲとギター・腕相撲・年寄りの昼寝）。出てくる仲間を持っていて、審判の塔をクリアすると見られる</li></ul></div><div class="news"><b>ver 2.3.0</b><ul><li>第2章の仲間（vol.2）に絆覚醒が5組：天衣の祝福（セラフ×ハクロウ）・雷鳴の盾（ライオネクス×ガーディアン）・剛疾連拳（オカジュン×ハヤテ）・ニャボのおやつ便（ネロ×クロガネ）・判決の牙（リブラ×スピノボーン）</li><li>vol.2 の絆のチャット5本と、審判の塔の後日談のチャット11本を追加（審判の塔10F・20Fクリアで出る）</li><li>絆覚醒の一覧の条件の書き方を短く</li></ul></div><div class="news"><b>ver 2.2.4</b><ul><li>チャット・絆覚醒・ストーリーの画面を、画面いっぱいに広げて見やすく</li></ul></div><div class="news"><b>ver 2.2.3</b><ul><li>チャットの一覧：題名を左に、出てくる仲間の顔を右に横並びに。「絆」の印は題名の横に</li></ul></div><div class="news"><b>ver 2.2.2</b><ul><li>チャットの画面の上に「チャット・絆覚醒・ストーリー」のタブをいつも出すように</li><li>ストーリーは、塔ごとのタブ（マイスターの塔・審判の塔・無限の塔）で分けて見られるように</li></ul></div><div class="news"><b>ver 2.2.1</b><ul><li>絆覚醒が発動すると、2人が飛びこんでくるテロップが出るように</li><li>絆のチャットは、2人の武器をSランク以上にすると出るように。題名も「絆覚醒「○○」」にして分かりやすく。読み終わると、使い方の案内が出る</li><li>編成：絆覚醒できる2人は金色の枠になり、技の説明が出るように</li></ul></div><div class="news"><b>ver 2.2.0</b><ul><li>「進化」が「絆覚醒」に変わった：組み合わせの2人の技をどちらも覚醒させると発動し、合体の動きが加わる（威力は覚醒の1.5倍）</li><li>絆覚醒には、2人の「絆のチャット」を読んでおく必要がある。チャットの一覧で「絆」の印がついたもの</li><li>チャットの画面に「絆覚醒」ボタン：組み合わせと、条件のそろいぐあいが見られる</li><li>無限の塔：続きから始めても、覚醒と絆覚醒が残るように</li></ul></div><div class="news"><b>ver 2.1.5</b><ul><li>無限の塔・審判の塔のボスが仲間を呼んだとき、「匠空がドローンを呼んだ！」と出ていたのを修正。そのボスの名前で出て、その層の敵を呼ぶように</li></ul></div><div class="news"><b>ver 2.1.4</b><ul><li>「立ち上がる」能力（ギアフォックス・セラフ・クロガネ・チュータ）を見直し：1人25%ずつ、持っている仲間の分だけ足される（4人そろうと100%）。復活は今までどおり全員で1回だけ</li><li>立ち上がったときの文字を「仲間の力で立ち上がった！」に</li></ul></div><div class="news"><b>ver 2.1.3</b><ul><li>無限の塔：出撃の画面で、いまの編成と、この挑戦で覚えている技が見られるように。「編成を変える」ボタンも</li><li>無限の塔：続きから始めるとき、技は今の編成の仲間の分だけ残るように（外した仲間の技は消え、新しく入れた仲間の技は1から）。編成を入れかえるたびに技が増えていたのを修正</li><li>無限の塔：ギアフォックスなどの「1回だけ復活」が、帰って続きにするとまた使えたのを修正（1回の挑戦で1回だけ）</li></ul></div><div class="news"><b>ver 2.1.2</b><ul><li>ランキング：運営がランキングを見守れるように、名前と称号の文字もいっしょに送るように</li></ul></div><div class="news"><b>ver 2.1.1</b><ul><li>無限の塔：とちゅうでホームへ帰って「続きから」にすると、体力が全回復していたのを修正（帰ったときの体力とレベルのまま続く）</li></ul></div><div class="news"><b>ver 2.1.0</b><ul><li>「無限の塔」公開！ 審判の塔の20階をクリアすると、地図の雲海に出る</li><li>毎回1階・Lv1から、終わりのない塔を登る。とちゅうで帰っても、次は続きから。倒れたら挑戦はおしまい</li><li>10階ごとに、塔を建てた時代の何かを写しそこなったボスが待つ。登るほど、陣に残った記録が読めていく</li><li>ランキング開始：1回の挑戦で何階まで登れたかを全国で競う</li><li>新しい素材「ノイズの欠片」「記憶の結晶」（第3章で使えるようになる）</li></ul></div><div class="news"><b>ver 2.0.17</b><ul><li>（準備）無限の塔の絵（床・挿絵・素材のアイコン）を試験中。公開は ver2.1.0 から</li></ul></div><div class="news"><b>ver 2.0.16</b><ul><li>（準備）無限の塔とランキングを試験中。公開は ver2.1.0 から。審判の塔の20階をクリアすると、地図の雲海に塔の名前が出る</li></ul></div><div class="news"><b>ver 2.0.15</b><ul><li>特別な仲間の紹介のセリフを見直し</li></ul></div><div class="news"><b>ver 2.0.14</b><ul><li>SS がとりにくかった加工を見直し：打つ（輪がほぼ重なれば満点）・けがき（数点のずれは満点）・配線のはんだ付け（緑の帯の中なら満点）・穴あけ（押しはじめて緑に届くまでは減点しない）</li></ul></div><div class="news"><b>ver 2.0.13</b><ul><li>溶接（つなぐ）で SS がとれるように：線の近くは満点、当てた瞬間の速さの減点と、線に当てる前のはみ出しの減点をなくした</li></ul></div><div class="news"><b>ver 2.0.12</b><ul><li>セーブのコードとファイルを新しい形（MT2T.）に。書きかえたコードは読みこめないように</li><li>前の形のコード（MT2S.）は11月30日まで読めます。それまでに「セーブの守り」で新しいコードやファイルを取り直してください</li></ul></div><div class="news"><b>ver 2.0.11</b><ul><li>画面が切りかわる途中でタップすると、次の画面のボタンが勝手に押されることがあったのを修正（切りかわった直後の少しの間はタップを受けつけない）</li></ul></div><div class="news"><b>ver 2.0.10</b><ul><li>汎用武器で同じランクができたときは、今のと新しいのを並べて、どちらかを選べるように（残さないほうはコインに替える）</li></ul></div><div class="news"><b>ver 2.0.9</b><ul><li>ボスや敵の絵が読みこめず、丸で表示されることがあったのを修正（出撃の前に先に読みこむ）</li></ul></div><div class="news"><b>ver 2.0.8</b><ul><li>会話で表情の指定がないセリフも、審判の塔の仲間と匠は会話用の表情の絵を出すように</li></ul></div><div class="news"><b>ver 2.0.7</b><ul><li>会話の顔の絵がずれて見えるキャラが多かったのを修正（顔アイコンを使う）</li><li>会話で、前の人の顔が残って見えることがあったのを修正（絵が読みこめてから出す）</li><li>審判の塔のボスが話すとき、ボスの絵を出すように</li></ul></div><div class="news"><b>ver 2.0.6</b><ul><li>キャラの絵の読みこみに失敗すると、丸のまま表示され続けることがある不具合を修正（失敗したら読み直す）</li></ul></div><div class="news"><b>ver 2.0.5</b><ul><li>審判の塔の出撃先の説明を、審判の塔の言葉（ざわめきLv・判決の時）に</li></ul></div><div class="news"><b>ver 2.0.4</b><ul><li>汎用武器は種類ごとに1本。今より低いランクができたときは、換金所の値段ぶんのコインに替えるように（前は素材だけが減っていた）</li></ul></div><div class="news"><b>ver 2.0.3</b><ul><li>匠の顔アイコン・会話の表情・専用武器のアイコンを新しい絵に</li></ul></div><div class="news"><b>ver 2.0.2</b><ul><li>審判の塔では、長居で敵が強くなる段階を「ざわめきLv」に（知らせの文も審判の塔に合わせた）</li></ul></div><div class="news"><b>ver 2.0.1</b><ul><li>審判の塔では、1つの階に長くいると「判決の時」（第1章の錆の大波と同じ削れ方。画面が白黒に点滅し、木槌が鳴る）</li></ul></div><div class="news"><b>ver 2.0.0</b><ul><li>第2章「審判の塔」公開（11/17 0:00から。第1章をクリアすると地図に出る）</li><li>審判の仲間ガチャ（vol.2）・お助けの仲間・段階5の装備・限定工具</li><li>vol.2 の図面は展開図で解読。道場で展開図の練習も</li></ul></div><div class="news"><b>ver 1.11.1</b><ul><li>やすりがけをやさしく：バリの高さのばらつきを小さく、高い所から削れて平らになりやすく、線ぴったりの許す幅を少し広く</li></ul></div><div class="news"><b>ver 1.11.0</b><ul><li>加工ミニゲーム道場で「三面図の解読」を練習できるように</li><li>（準備）vol.2 の図面は、立方体の展開図の問題で解読するように</li></ul></div><div class="news"><b>ver 1.10.10</b><ul><li>PCの大きな画面やブラウザの縮小表示で、敵が出てこなくなる不具合を修正</li></ul></div><div class="news"><b>ver 1.10.9</b><ul><li>出撃中に、まれにスティックが出ず動けなくなることがある不具合への対策</li><li>動けなくなったときは、画面を2回さわると再開できるように</li></ul></div><div class="news"><b>ver 1.10.8</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.7</b><ul><li>特別な仲間の顔アイコンと武器アイコンを新しい絵に変更</li></ul></div><div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
+ $('sheetB').innerHTML=`<div class="news"><b>ver 3.1.0</b><ul><li>新しい場所「たたら島（鍛錬の間）」：マイスターの塔をクリアすると、世界地図に開きます（いたずらの島と入れかわり）</li><li>1回の火入れは5分。20秒ごとに敵が増え、4分で炉の番人「鞴鬼」が現れます。倒した敵が落とす炭を拾うと炉の温度が上がり、5分たつと温度に応じて「玉鋼」ができます。続けて次の火入れに進むと、玉鋼が×1.5、×2…と増えます</li><li>工房に「鍛錬」タブ：玉鋼で装備の出来ばえを1段ずつ上げられます。SSからは＋1〜＋10（1つにつき強さ＋3%）</li><li>ドド先輩の修業時代の物語と、師匠の鉄斎が登場します。はじめての火入れはチュートリアル付きです</li><li>世界地図の絵を新しくしました</li></ul><b>ver 3.0.6</b><ul><li>技のエフェクトを派手にしました：当たったときの火花、大きい一撃の閃光、倒したときのかけら、強敵・ボスの爆発、レベルアップの魔法陣、雷・爆発・回復の技にも光のエフェクトが重なります</li></ul><b>ver 3.0.5</b><ul><li>ウルフを控えに入れていると、読みこみ直したときに★1の新しいウルフがパーティに入り、控えのウルフが消えてしまう不具合を直しました</li></ul><b>ver 3.0.4</b><ul><li>限界突破（★6〜★10）した仲間が、読みこみ直すと★5にもどってしまう不具合を直しました</li></ul><b>ver 3.0.3</b><ul><li>特許・マイスターの図面のスライドパズルを大きくし、タップした場所がずれないように直しました</li></ul><b>ver 3.0.2</b><ul><li>階に入ってすぐの1分間は、弱い敵の群れがたくさん押し寄せるように。まとめて一掃しよう</li><li>いつも出ている技（ギアフォックスの歯車・セラフの光輪・ぷかりの輪など）は、Lv6から威力が上がるように</li></ul><b>ver 3.0.1</b><ul><li>★を上げるほど、技のLvの上限が上がるように（★5でLv9）。Lv6からは攻撃の手数が増える</li><li>限界突破：かけらで★6〜★10まで上げられるように（★10で技Lv14）</li></ul><b>ver 3.0.0　第3章「創技の塔」公開！</b><ul><li>新しい塔「創技の塔」（黄金の港町）：特許の図面がしまわれた技の保管庫。無限の塔の50Fをクリアすると世界地図に出る</li><li>新しい仲間10人（ガチャ vol.3「創技のなかまガチャ」）と、絆覚醒5組・チャット25本</li><li>工房：新しい加工5つ（高周波焼入れ・鏡面研削・レーザー加工・放電加工・ブロック工法）、工具の練度が Lv10 まで</li><li>図面の解読：vol.3 の図面は「回転体」、特許とマイスターの図面は「スライドパズル」</li><li>アウル・スコープ：アウルムの正体を明かす道具。本当のエンディングと、無限の塔の「試練」（伝説のマイスターの装備）へ</li><li>刻印メダルガチャ：本当のエンディングのあと、記憶の結晶から刻印メダルを鋳なおして、塔を建てたマイスターたちを呼べる</li></ul><b>ver 2.5.3</b><ul><li>第3章の準備：技の種類のアイコンと、刻印メダルガチャの看板を入れました。まだ遊べません</li></ul><b>ver 2.5.2</b><ul><li>第3章の準備：刻印メダルとガチャのしくみを入れました。まだ遊べません</li></ul><b>ver 2.5.1</b><ul><li>第3章の準備：伝説の装備と特殊な素材のアイコンを入れました。まだ遊べません</li></ul><b>ver 2.5.0</b><ul><li>工房に「精錬」タブ：たまった素材を、チタン・蓄電池・カーボン繊維や錆の核に変えられるように</li><li>素材のバランスを調整：段階3〜5の装備は、使う素材が多くなりました（段階3は2倍、段階4は2.5倍、段階5は3倍）</li></ul><b>ver 2.4.8</b><ul><li>第3章の準備：無限の塔の「試練」とマイスターの図面を入れました。まだ遊べません</li></ul><b>ver 2.4.7</b><ul><li>第3章の準備：特許の図面の解読（スライドパズル）を入れました。まだ遊べません</li></ul><b>ver 2.4.6</b><ul><li>第3章の準備：新しい仲間の図面の解読「回転体を見極める」を入れました。まだ遊べません</li></ul><b>ver 2.4.5</b><ul><li>第3章の準備：工房の新しいしくみ（新しい加工・特許の図面）を入れました。まだ遊べません</li></ul><b>ver 2.4.4</b><ul><li>第3章の準備：新しい仲間たちの技・絆覚醒・チャットのしくみを入れました。まだ遊べません</li></ul><b>ver 2.4.3</b><ul><li>第3章「創技の塔」の準備を始めました（塔と物語のしくみ）。まだ遊べません。公開をお楽しみに</li></ul><b>ver 2.4.2</b><ul><li>匠の★を上げられるように：クリアした審判の塔の20階のボスを、もう一度倒すたびに「匠のかけら」が5個もらえる</li></ul></div><div class="news"><b>ver 2.4.1</b><ul><li>はじめて遊ぶ人向けに、編成と工房の画面を初めて開いたとき、使い方の説明が出るように</li></ul></div><div class="news"><b>ver 2.4.0</b><ul><li>はじめての人向けに「練習場」（チュートリアル）を追加。ホー博士の案内で、動き方・戦い方・レベルアップ・拾い方・出口を順に覚えられる。練習場を出ると、はじめてのガチャが1回無料</li><li>ガチャが毎日1回無料に（日本時間で日付が変わると、また引ける）</li><li>会話：「タップで次へ ▶」をボタンにして、押すと進むように。ボタンの列のすき間を押しても進む</li></ul></div><div class="news"><b>ver 2.3.3</b><ul><li>リブラの丁半：前に「丁か、半か」を読んでいた人ができなかったのを修正。もう一度チャットを読むと、一回だけ勝負できる</li></ul></div><div class="news"><b>ver 2.3.2</b><ul><li>チャット「丁か、半か」を初めて読み終えると、リブラと一回だけ丁半勝負ができるように（当たり500コイン、はずれでも100コイン。自分のコインは賭けない）</li></ul></div><div class="news"><b>ver 2.3.1</b><ul><li>ちがう章の仲間どうしのチャットを9本追加（追いかけっこ・昔のなかま・雷くらべ・ニャボの健康診断・段取り八分・天秤座・トゲとギター・腕相撲・年寄りの昼寝）。出てくる仲間を持っていて、審判の塔をクリアすると見られる</li></ul></div><div class="news"><b>ver 2.3.0</b><ul><li>第2章の仲間（vol.2）に絆覚醒が5組：天衣の祝福（セラフ×ハクロウ）・雷鳴の盾（ライオネクス×ガーディアン）・剛疾連拳（オカジュン×ハヤテ）・ニャボのおやつ便（ネロ×クロガネ）・判決の牙（リブラ×スピノボーン）</li><li>vol.2 の絆のチャット5本と、審判の塔の後日談のチャット11本を追加（審判の塔10F・20Fクリアで出る）</li><li>絆覚醒の一覧の条件の書き方を短く</li></ul></div><div class="news"><b>ver 2.2.4</b><ul><li>チャット・絆覚醒・ストーリーの画面を、画面いっぱいに広げて見やすく</li></ul></div><div class="news"><b>ver 2.2.3</b><ul><li>チャットの一覧：題名を左に、出てくる仲間の顔を右に横並びに。「絆」の印は題名の横に</li></ul></div><div class="news"><b>ver 2.2.2</b><ul><li>チャットの画面の上に「チャット・絆覚醒・ストーリー」のタブをいつも出すように</li><li>ストーリーは、塔ごとのタブ（マイスターの塔・審判の塔・無限の塔）で分けて見られるように</li></ul></div><div class="news"><b>ver 2.2.1</b><ul><li>絆覚醒が発動すると、2人が飛びこんでくるテロップが出るように</li><li>絆のチャットは、2人の武器をSランク以上にすると出るように。題名も「絆覚醒「○○」」にして分かりやすく。読み終わると、使い方の案内が出る</li><li>編成：絆覚醒できる2人は金色の枠になり、技の説明が出るように</li></ul></div><div class="news"><b>ver 2.2.0</b><ul><li>「進化」が「絆覚醒」に変わった：組み合わせの2人の技をどちらも覚醒させると発動し、合体の動きが加わる（威力は覚醒の1.5倍）</li><li>絆覚醒には、2人の「絆のチャット」を読んでおく必要がある。チャットの一覧で「絆」の印がついたもの</li><li>チャットの画面に「絆覚醒」ボタン：組み合わせと、条件のそろいぐあいが見られる</li><li>無限の塔：続きから始めても、覚醒と絆覚醒が残るように</li></ul></div><div class="news"><b>ver 2.1.5</b><ul><li>無限の塔・審判の塔のボスが仲間を呼んだとき、「匠空がドローンを呼んだ！」と出ていたのを修正。そのボスの名前で出て、その層の敵を呼ぶように</li></ul></div><div class="news"><b>ver 2.1.4</b><ul><li>「立ち上がる」能力（ギアフォックス・セラフ・クロガネ・チュータ）を見直し：1人25%ずつ、持っている仲間の分だけ足される（4人そろうと100%）。復活は今までどおり全員で1回だけ</li><li>立ち上がったときの文字を「仲間の力で立ち上がった！」に</li></ul></div><div class="news"><b>ver 2.1.3</b><ul><li>無限の塔：出撃の画面で、いまの編成と、この挑戦で覚えている技が見られるように。「編成を変える」ボタンも</li><li>無限の塔：続きから始めるとき、技は今の編成の仲間の分だけ残るように（外した仲間の技は消え、新しく入れた仲間の技は1から）。編成を入れかえるたびに技が増えていたのを修正</li><li>無限の塔：ギアフォックスなどの「1回だけ復活」が、帰って続きにするとまた使えたのを修正（1回の挑戦で1回だけ）</li></ul></div><div class="news"><b>ver 2.1.2</b><ul><li>ランキング：運営がランキングを見守れるように、名前と称号の文字もいっしょに送るように</li></ul></div><div class="news"><b>ver 2.1.1</b><ul><li>無限の塔：とちゅうでホームへ帰って「続きから」にすると、体力が全回復していたのを修正（帰ったときの体力とレベルのまま続く）</li></ul></div><div class="news"><b>ver 2.1.0</b><ul><li>「無限の塔」公開！ 審判の塔の20階をクリアすると、地図の雲海に出る</li><li>毎回1階・Lv1から、終わりのない塔を登る。とちゅうで帰っても、次は続きから。倒れたら挑戦はおしまい</li><li>10階ごとに、塔を建てた時代の何かを写しそこなったボスが待つ。登るほど、陣に残った記録が読めていく</li><li>ランキング開始：1回の挑戦で何階まで登れたかを全国で競う</li><li>新しい素材「ノイズの欠片」「記憶の結晶」（第3章で使えるようになる）</li></ul></div><div class="news"><b>ver 2.0.17</b><ul><li>（準備）無限の塔の絵（床・挿絵・素材のアイコン）を試験中。公開は ver2.1.0 から</li></ul></div><div class="news"><b>ver 2.0.16</b><ul><li>（準備）無限の塔とランキングを試験中。公開は ver2.1.0 から。審判の塔の20階をクリアすると、地図の雲海に塔の名前が出る</li></ul></div><div class="news"><b>ver 2.0.15</b><ul><li>特別な仲間の紹介のセリフを見直し</li></ul></div><div class="news"><b>ver 2.0.14</b><ul><li>SS がとりにくかった加工を見直し：打つ（輪がほぼ重なれば満点）・けがき（数点のずれは満点）・配線のはんだ付け（緑の帯の中なら満点）・穴あけ（押しはじめて緑に届くまでは減点しない）</li></ul></div><div class="news"><b>ver 2.0.13</b><ul><li>溶接（つなぐ）で SS がとれるように：線の近くは満点、当てた瞬間の速さの減点と、線に当てる前のはみ出しの減点をなくした</li></ul></div><div class="news"><b>ver 2.0.12</b><ul><li>セーブのコードとファイルを新しい形（MT2T.）に。書きかえたコードは読みこめないように</li><li>前の形のコード（MT2S.）は11月30日まで読めます。それまでに「セーブの守り」で新しいコードやファイルを取り直してください</li></ul></div><div class="news"><b>ver 2.0.11</b><ul><li>画面が切りかわる途中でタップすると、次の画面のボタンが勝手に押されることがあったのを修正（切りかわった直後の少しの間はタップを受けつけない）</li></ul></div><div class="news"><b>ver 2.0.10</b><ul><li>汎用武器で同じランクができたときは、今のと新しいのを並べて、どちらかを選べるように（残さないほうはコインに替える）</li></ul></div><div class="news"><b>ver 2.0.9</b><ul><li>ボスや敵の絵が読みこめず、丸で表示されることがあったのを修正（出撃の前に先に読みこむ）</li></ul></div><div class="news"><b>ver 2.0.8</b><ul><li>会話で表情の指定がないセリフも、審判の塔の仲間と匠は会話用の表情の絵を出すように</li></ul></div><div class="news"><b>ver 2.0.7</b><ul><li>会話の顔の絵がずれて見えるキャラが多かったのを修正（顔アイコンを使う）</li><li>会話で、前の人の顔が残って見えることがあったのを修正（絵が読みこめてから出す）</li><li>審判の塔のボスが話すとき、ボスの絵を出すように</li></ul></div><div class="news"><b>ver 2.0.6</b><ul><li>キャラの絵の読みこみに失敗すると、丸のまま表示され続けることがある不具合を修正（失敗したら読み直す）</li></ul></div><div class="news"><b>ver 2.0.5</b><ul><li>審判の塔の出撃先の説明を、審判の塔の言葉（ざわめきLv・判決の時）に</li></ul></div><div class="news"><b>ver 2.0.4</b><ul><li>汎用武器は種類ごとに1本。今より低いランクができたときは、換金所の値段ぶんのコインに替えるように（前は素材だけが減っていた）</li></ul></div><div class="news"><b>ver 2.0.3</b><ul><li>匠の顔アイコン・会話の表情・専用武器のアイコンを新しい絵に</li></ul></div><div class="news"><b>ver 2.0.2</b><ul><li>審判の塔では、長居で敵が強くなる段階を「ざわめきLv」に（知らせの文も審判の塔に合わせた）</li></ul></div><div class="news"><b>ver 2.0.1</b><ul><li>審判の塔では、1つの階に長くいると「判決の時」（第1章の錆の大波と同じ削れ方。画面が白黒に点滅し、木槌が鳴る）</li></ul></div><div class="news"><b>ver 2.0.0</b><ul><li>第2章「審判の塔」公開（11/17 0:00から。第1章をクリアすると地図に出る）</li><li>審判の仲間ガチャ（vol.2）・お助けの仲間・段階5の装備・限定工具</li><li>vol.2 の図面は展開図で解読。道場で展開図の練習も</li></ul></div><div class="news"><b>ver 1.11.1</b><ul><li>やすりがけをやさしく：バリの高さのばらつきを小さく、高い所から削れて平らになりやすく、線ぴったりの許す幅を少し広く</li></ul></div><div class="news"><b>ver 1.11.0</b><ul><li>加工ミニゲーム道場で「三面図の解読」を練習できるように</li><li>（準備）vol.2 の図面は、立方体の展開図の問題で解読するように</li></ul></div><div class="news"><b>ver 1.10.10</b><ul><li>PCの大きな画面やブラウザの縮小表示で、敵が出てこなくなる不具合を修正</li></ul></div><div class="news"><b>ver 1.10.9</b><ul><li>出撃中に、まれにスティックが出ず動けなくなることがある不具合への対策</li><li>動けなくなったときは、画面を2回さわると再開できるように</li></ul></div><div class="news"><b>ver 1.10.8</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.7</b><ul><li>特別な仲間の顔アイコンと武器アイコンを新しい絵に変更</li></ul></div><div class="news"><b>ver 1.10.6</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.5</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.4</b><ul><li>一部の仲間の顔アイコンが大きく写っていたのを、ほかの仲間とそろえた</li></ul></div><div class="news"><b>ver 1.10.3</b><ul><li>プレゼントコードで受け取れる特別な仲間を、もう一人追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.10.2</b><ul><li>第2章の準備（素材・装備・ガチャ vol.2）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.1</b><ul><li>第2章の準備（会話）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.10.0</b><ul><li>中級の工具（溶接機・旋盤・ボール盤／電工ペンチ・はんだごて・タップハンドル）は、塔の中層・上層の資材の箱で必ず見つかるようにした。店では、その層のボスを倒すと高い値段で買える</li><li>工房の上のタブのアイコンをなくし、文字だけにそろえた</li></ul></div><div class="news"><b>ver 1.9.7</b><ul><li>図面ガチャから、まだ出ないはずの図面が出ることがあったのを直した</li></ul></div><div class="news"><b>ver 1.9.6</b><ul><li>メニューの「プレゼントコード」の絵文字をなくした</li></ul></div><div class="news"><b>ver 1.9.5</b><ul><li>メニューを整理：ホームにある「チャット」をメニューから外し、かわりに「お知らせ」を入れた</li></ul></div><div class="news"><b>ver 1.9.4</b><ul><li>プレゼントコードで図面も受け取れるようにした</li></ul></div><div class="news"><b>ver 1.9.3</b><ul><li>特別な仲間の武器のアイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.9.2</b><ul><li>新しいバージョンが出ていたら、画面の上に「更新する」ボタンが出るようにした</li></ul></div><div class="news"><b>ver 1.9.1</b><ul><li>プレゼントコードで受け取れる特別な仲間を追加（ガチャには出ません）</li></ul></div><div class="news"><b>ver 1.9.0</b><ul><li>メニューに「プレゼントコード」を追加。運営からもらったコードで、コインや特別な仲間を受け取れる</li></ul></div><div class="news"><b>ver 1.8.3</b><ul><li>ランキングの名前と称号の一覧には、使えるものだけを出すようにした</li></ul></div><div class="news"><b>ver 1.8.2</b><ul><li>ウルフの会話の表情（笑う・真剣・困る）と顔アイコンを新しい絵にした</li></ul></div><div class="news"><b>ver 1.8.1</b><ul><li>噴射安全靴の絵が、第2章の防具の絵になっていたのを直した</li></ul></div><div class="news"><b>ver 1.8.0</b><ul><li>メニューに「バグを報告」を追加。おかしなところを運営に直接送れるようにした</li><li>ランキングのプロフィールに、称号とアイコン（持っているキャラから選べる）を追加。名前の単語はサイコロ版と同じになった</li><li>サイコロ版マイスターの塔から、ID・名前・称号・アイコンと、解放した単語・称号を引き継げるようにした</li></ul></div><div class="news"><b>ver 1.7.7</b><ul><li>ランキングの説明を「無限の塔の攻略階数（何階まで登ったか）」に直した</li></ul></div><div class="news"><b>ver 1.7.6</b><ul><li>ホームに「ランキング」を追加。名前（3つの単語の組み合わせ）を登録できるようにした。ランキングは無限の塔（ver2.0.0）から</li><li>ホームの一番下の到達階の表示をなくした</li></ul></div><div class="news"><b>ver 1.7.5</b><ul><li>第2章の準備：ガチャ vol.2 の仲間10人（技・能力・専用武器・お守り）を試験中。公開は ver2.0.0 から</li></ul></div><div class="news"><b>ver 1.7.4</b><ul><li>新しいお知らせがあるとき、ホームの帯に「NEWS」で出るようにした（読むといつもの NEXT にもどる）</li></ul>
   <b>ver 1.7.3</b><ul><li>工房「つくる」の専用武器を「専用武器 vol1」→ キャラ の2段にした（第2章の仲間は vol2 にまとまる）</li></ul>
   <b>ver 1.7.2</b><ul><li>換金所で段階4の装備の値段が「NaN」になっていた不具合を直した（B 150コイン）</li><li>ドド先輩の衝撃波とネズミの応急修理のアイコンを、工具の絵から拳とハートの絵に変えた（工具を武器にしない）</li></ul>
   <b>ver 1.7.1</b><ul><li>審判の塔の床を新しい絵に（法廷・書庫・雷雲）。第2章の仲間のアイコン・表情・装備の絵を準備</li></ul>
@@ -7828,6 +7828,207 @@ function vfxImg(k){return fspr('img/fx/'+k+'.webp',128)}
  g.restore()}}
 
 /* =====================================================================
+   鍛錬の間（たたら島）ver3.1.0
+   ・世界地図の「いたずらの島（ハロウィンの塔）」を置きかえ。マイスターの塔をクリア（ch1）すると開く
+   ・1回の火入れ＝5分。20秒ごとに敵が一段増える（15段）。4分で鞴鬼（仲間にしたあとは炭ゴーレムの群れ）
+   ・倒した敵が落とす炭を拾うと、炉の温度が上がる。温度は時間とともに下がる。5分たつと、平均温度で玉鋼 1〜3個
+   ・5分のあと「次の火入れ／帰る」。続けるほど敵が強くなり、玉鋼の倍率が上がる（×1.5, ×2 …）。やられたら、その火入れの分だけなくなる
+   ・玉鋼の使い道：工房の「鍛錬」。SSまでは出来ばえを1段ずつ、SSからは＋1〜＋10（1つにつき強さ＋3%）
+   ・はじめての火入れはチュートリアル（1分・倒れない・鞴鬼なし）。帰ったら工房で鍛錬を1回
+   ・物語：ドド先輩の修業時代の炉。師匠の村下・鉄斎（てっさい）。島にいた時間の合計でチャットが開く
+   ===================================================================== */
+const TT={STAGE:300,TUT:60,STEP:20,BOSS:240,SUMI:5,DROP:.45,DECAY0:1,DECAY1:.03,RANK_COST:{D:1,C:1,B:2,A:3,S:4},PLUS_MAX:10,PLUS:.03};
+/* ---------- 人と敵と素材 ---------- */
+Object.assign(CHARS,{tessai:{name:'鉄斎',img:'img/tessai.webp',job:'kaji',pass:{n:'',d:'',k:''},sp:{n:'',d:'',shape:'ch'},lines:['鉄は、待つ者にしか応えん。']}});
+FACES.tessai=['neutral','smile','worry','serious','surprise'];
+Object.assign(MATS,{tama:{n:'玉鋼',d:'たたら島の炉でできる、混じりけの少ない鋼。工房の「鍛錬」で装備を強くする'}});
+UI_IC.tama='u_tama';if(!MAT_ORDER.includes('tama'))MAT_ORDER.push('tama');
+Object.assign(FFOE,{
+ t_flame:{hp:24, spd:1.3, dmg:10,xp:2, r:18},
+ t_bat:  {hp:18, spd:1.75,dmg:9, xp:2, r:16,fly:1},
+ t_slag: {hp:64, spd:.65, dmg:14,xp:4, r:23},
+ t_golem:{hp:520,spd:.55, dmg:22,xp:24,r:38,big:1},
+ t_fuigo:{hp:2600,spd:.7, dmg:30,xp:90,r:60,big:1}});
+Object.assign(FOES,{t_flame:{n:'炎の精',col:'#ffa030'},t_bat:{n:'火の粉コウモリ',col:'#ff6a30'},t_slag:{n:'スラグ',col:'#c06a2a'},t_golem:{n:'炭ゴーレム',col:'#ff5a20'},t_fuigo:{n:'鞴鬼',col:'#e03a2a'}});
+FOE_IMG_OK.push('t_flame','t_bat','t_slag','t_golem','t_fuigo');
+Object.assign(AREAS,{tt:{n:'たたら場',need:null,lv:'',bossLv:0,tier:3,boss:null,bg:'#1e120a'}});
+LAYER_NAME.tt='たたら場';
+FAREA.tt={mix:[[0,['t_flame','t_bat'],1.6]],elite:'t_golem',boss:null,drop:{scrap:.02,plate:.01,brass:.008},chestTool:null,ground:['#1e120a','255,140,50']};
+FLOOR_IMG.tatara='img/floor/tatara.webp';FLOOR_TINT.tt=['tatara','rgba(0,0,0,.05)'];
+/* 敵の強さ：いちばん進んでいる塔に合わせる（マイスターの塔クリア直後で、第1章の頂上の少し下から） */
+function ttBase(){const tw=G.tw||{},j=(tw.judge&&tw.judge.floor)|0,s=(tw.sougi&&tw.sougi.floor)|0;return Math.max(14,j?14+1.5*j:0,s?44+1.5*s:0)}
+const ttEff=()=>{const T=FD&&FD.tr;return ttBase()+(T?.45*Math.floor(T.tk/TT.STEP)+3.5*(T.stage-1):0)};
+TW_TABLE.tatara={FLOORS:[null,{n:'たたら場',area:'tt',step:0,stair:600,boss:false}],FLOOR_MATS:{1:['scrap','plate']},BOSS_HP:{},REC_POW:{1:0},HELPER_FL:{},FLOOR_LINES:{},START_LV:{},feff:()=>ttEff()};
+TOWERS.tatara={n:'鍛錬の間',ready:true,go:()=>ttGo()};
+/* ---------- 世界地図：新しい絵に合わせて位置を直す。いたずらの島 → たたら島 ---------- */
+{const P=WMAP.places,at=(k,x,y)=>{const p=P.find(q=>q.k===k);if(p)Object.assign(p,{x,y})};
+ at('tetto',.43,.70);at('judge',.21,.13);at('sougi',.83,.24);at('inf',.54,.05);
+ const i=P.findIndex(q=>q.k==='hw'),tt={k:'tatara',tw:'tatara',x:.83,y:.60,r:.13,n:'たたら島',t:'鍛錬の間',
+  d:'ドド先輩が若いころ修業した、古いたたら製鉄の炉がある島。敵を倒して炭をくべ、5分ごとに火を守りきると玉鋼ができる。玉鋼は工房の「鍛錬」で装備を強くする。',
+  open:()=>!!(G.flags&&G.flags.ch1),hint:'海の向こうに、細い煙が一すじ上がっている……'};
+ if(i>=0)P.splice(i,1,tt);else P.push(tt)}
+{const _w=openWorldMap;openWorldMap=function(sortie){const r=_w.apply(this,arguments);const b=document.querySelector('#wmap [data-wm="tatara"]');
+ if(b)b.addEventListener('click',()=>{const s=document.querySelector('#wmD .wmgo span');if(s)s.textContent=`玉鋼 ${G.mats.tama|0}個`});return r}}
+
+/* ---------- 出撃 ---------- */
+async function ttGo(){enterTower('tatara');if(TW)TW.busy=true;
+ if(!G.flags.ttOpen){G.flags.ttOpen=1;save();await talk(TT_OPEN)}
+ await say(`${UIMG('u_tatara',44)} たたら島へ……${G.flags.ttTut?'':'<br><span style="font-size:13px">はじめての火入れ（1分）</span>'}`,800);startFloor(1)}
+{const _s=startFloor;startFloor=function(fl){const r=_s.apply(this,arguments);if(towerAt()==='tatara'&&FD){const D=FD;D.stairs=null;
+ D.tr={stage:1,tk:0,heat:15,hsum:0,step:0,gT:60,bossOut:false,got:0,sumiN:0,tut:!G.flags.ttTut,tutS:0,tutT:0,ending:0};
+ fBanner(D.tr.tut?'ドド先輩「敵が落とす黒い炭を拾え！ 拾えば炉にくべられる」':'第1火　炉に火が入った！ 敵を倒して炭をくべろ',220,'u_heat')}return r}}
+/* 敵の波：20秒ごとに一段（チュートリアルはゆるやか） */
+{const _w=waveNow;waveNow=function(){const T=FD&&FD.tr;if(!T)return _w();const s=Math.floor(T.tk/TT.STEP),
+ P=s<3?['t_flame','t_bat']:s<6?['t_flame','t_bat','t_slag']:['t_slag','t_flame','t_bat','t_slag'];return[0,P,(T.tut?1.4:1.6+.42*s)*(1+.25*(T.stage-1))]}}
+/* 錆はない：錆のしくみ（FT.RUST）を、たたら場の間だけ止める */
+const ttNoRust=fn=>{const r0=FT.RUST;FT.RUST=1e9;try{return fn()}finally{FT.RUST=r0}};
+{const _u=fUpdate;fUpdate=function(f){const D=FD,T=D&&D.tr;if(!T)return _u(f);ttNoRust(()=>_u(f));
+ if(FD!==D||!D.run||D.ending||T.ending)return;
+ T.tk+=f/60;D.st=Math.min(T.tk,FLOOR_MAX-61);
+ const dec=(TT.DECAY0+T.heat*TT.DECAY1)*(G.flags.ttOni?.75:1);T.heat=Math.max(0,T.heat-dec*f/60);T.hsum+=T.heat*f/60;
+ const s=Math.floor(T.tk/TT.STEP);if(s>T.step){T.step=s;if(!T.tut&&s<15)fBanner(`敵が増えてきた！（${s+1}/15）`,90,'n_boss')}
+ if(!T.tut&&T.tk>=T.gT){T.gT+=60;fSpawn('t_golem')}
+ if(!T.tut&&!T.bossOut&&T.tk>=TT.BOSS){T.bossOut=true;
+  if(G.flags.ttOni){for(let i=0;i<3;i++)fSpawn('t_golem',i/3*TAU,null);fBanner('炭ゴーレムの群れが来た！ 鞴鬼が風を強めている',200,'n_boss')}
+  else{const e=fSpawn('t_fuigo');if(e)e.oni=1;fBanner('鞴鬼が現れた！ 炉の番人が暴れている',220,'n_boss');tone(110,.5,'sawtooth',.08,70)}}
+ if(T.tut)ttTutStep(D,T);
+ if(T.tk>=(T.tut?TT.TUT:TT.STAGE))ttStageEnd()}}
+{const _d=fDraw;fDraw=function(){const D=FD,T=D&&D.tr;if(!T)return _d();ttNoRust(_d);if(FD!==D)return;
+ const len=T.tut?TT.TUT:TT.STAGE,rem=Math.max(0,Math.ceil(len-T.tk)),hc=T.heat<35?'#ff6a3a':T.heat<70?'#ffb040':'#fff2c0',hp=Math.round(T.heat);
+ const h=`${UIMG('u_heat',22)}<span class="ffl">第${T.stage}火</span> <span class="ftm ${rem<=30?'warn':''}">${Math.floor(rem/60)}:${String(rem%60).padStart(2,'0')}</span><span class="tth" style="display:inline-block;width:72px;height:10px;border-radius:5px;background:#0009;border:1px solid #fff3;margin-left:6px;vertical-align:middle;overflow:hidden"><i style="display:block;height:100%;width:${hp}%;background:${hc}"></i></span><b style="font-size:12px;margin-left:4px;color:${hc}">${ttHeatName(T.heat)}</b>`;
+ const te=$('fTime');if(te&&(te._tt!==h||te._ttHo!==te._h)){te.innerHTML=h;te._tt=h;te._ttHo=te._h}}}
+const ttHeatName=v=>v<35?'赤':v<70?'橙':'白';
+/* 炉：開始の場所（0,0）に置く。床の上に描く */
+{const _f=fDrawRuleFloor;fDrawRuleFloor=function(g,D,cx0,cy0,z){_f.apply(this,arguments);const T=D&&D.tr;if(!T)return;const t=D.t,k=T.heat/100;
+ g.save();const gr=g.createRadialGradient(0,-10,10,0,-10,120+80*k);gr.addColorStop(0,`rgba(255,${140+80*k|0},60,${.25+.4*k})`);gr.addColorStop(1,'rgba(255,120,40,0)');g.fillStyle=gr;g.beginPath();g.arc(0,-10,200,0,TAU);g.fill();
+ const s=fspr('img/ui/f_tatara.webp',140);if(s)g.drawImage(s,-60,-92,120,120*s.height/s.width);
+ if(G.flags.ttOni){const o=fspr('img/foe/t_fuigo.webp',90);if(o){const b=Math.sin(t*5)*3;g.drawImage(o,62,-70+b,70,70)}}
+ g.restore()}}
+/* 炭：倒すと落ちる。拾うと炉の温度が上がる */
+{const _k=fKill;fKill=function(e){const r=_k.apply(this,arguments);const D=FD,T=D&&D.tr;if(!T||!e)return r;
+ const n=e.k==='t_fuigo'?12:e.big?5:Math.random()<TT.DROP?1:0;for(let i=0;i<n;i++)D.items.push({x:e.x+(n>1?Math.random()*50-25:0),y:e.y+(n>1?Math.random()*50-25:0),k:'sumi'});
+ if(e.oni&&!G.flags.ttOni){G.flags.ttOni=1;save();ttTalk(TT_ONI)}return r}}
+{const _g=fGot;fGot=function(it){const T=FD&&FD.tr;if(it.k!=='sumi'||!T)return _g.apply(this,arguments);
+ T.heat=Math.min(100,T.heat+TT.SUMI);T.sumiN++;tone(520+T.heat*6,.04,'triangle',.03);if(T.sumiN%5===0)FD.pops.push({x:FD.x,y:FD.y-44,v:'炉の温度 '+Math.round(T.heat),t:0,heal:1})}}
+{const _di=drawItem;drawItem=function(g,it,t){if(it.k!=='sumi')return _di.apply(this,arguments);const s=fspr('img/ui/f_sumi.webp',26),y=it.y+Math.sin(t*4+it.x)*2;
+ if(s)g.drawImage(s,it.x-11,y-11,22,22);else{g.fillStyle='#222';g.fillRect(it.x-7,y-5,14,10)}}}
+/* チュートリアルでは倒れない */
+{const _h=fHurt;fHurt=function(v,src){v=_h(v,src);const T=FD&&FD.tr;if(T&&T.tut)v=Math.max(0,Math.min(v,FD.hp-1));return v}}
+function ttTutStep(D,T){T.tutT+=1;const say2=(t)=>{if(D.warn<40)fBanner(t,160,'u_heat')};
+ if(T.tutS===0){say2(`ドド先輩「黒い炭を拾え！ 拾えば炉にくべられる」（${Math.min(3,T.sumiN)}/3）`);if(T.sumiN>=3){T.tutS=1;D.warn=0}}
+ else if(T.tutS===1){say2('ドド先輩「上の温度計を見ろ。赤から橙へ。熱いほど鉄はよう育つ」');if(T.heat>=35){T.tutS=2;T.tutT=0;D.warn=0}}
+ else if(T.tutS===2){say2('ドド先輩「炭が途切れると、すぐ冷める。炉のそばで戦い続けるんや」');if(T.tutT>420){T.tutS=3;D.warn=0}}
+ else say2('ドド先輩「ええぞ、そのまま火を守れ。もうすぐ鉧（けら）ができる」')}
+/* 戦いの途中の会話（止めて、終わったら続き） */
+async function ttTalk(L){const D=FD;if(!D)return;D.paused=true;fReleaseStick();try{await talk(L)}finally{if(FD===D&&D.run&&!(D.tr&&D.tr.ending)){D.paused=false;fLast=0;show('field');resizeField();if(!fRaf)fRaf=requestAnimationFrame(fLoop)}}}
+/* ---------- 5分たった：鉧ができる → 次の火入れ／帰る ---------- */
+async function ttStageEnd(){const D=FD,T=D.tr;if(T.ending)return;T.ending=1;D.paused=true;D.warn=0;fReleaseStick();
+ const avg=T.hsum/Math.max(1,T.tk),base=T.tut?3:avg>=60?3:avg>=30?2:1,mult=1+.5*(T.stage-1),n=Math.round(base*mult);
+ G.mats.tama=(G.mats.tama|0)+n;T.got+=n;G.ttTime=(G.ttTime|0)+Math.round(T.tk);if(!T.tut)G.ttBest=Math.max(G.ttBest|0,T.stage);save();
+ sfx.win&&sfx.win();
+ await say(`${UIMG('u_tama',52)} 鉧（けら）ができた！<br><span style="font-size:13px">炉の温度 平均 ${Math.round(avg)}（${ttHeatName(avg)}）</span><br><b style="font-size:22px">玉鋼 ×${n}</b>${mult>1?`<br><span style="font-size:13px">第${T.stage}火なので ×${mult}</span>`:''}`,1800);
+ if(FD!==D)return;
+ await ttStory(T);
+ if(FD!==D)return;
+ if(T.tut){G.flags.ttTut=1;save();fEnd('retreat');return}
+ if(!await ttChoice(T)){fEnd('retreat');return}
+ Object.assign(T,{stage:T.stage+1,tk:0,hsum:0,step:0,gT:60,bossOut:false,ending:0});D.st=0;D.hp=Math.min(D.maxhp,D.hp+Math.round(D.maxhp*.2));
+ fBanner(`第${T.stage}火　敵がさらに強くなる！ 玉鋼は ×${1+.5*(T.stage-1)}`,220,'u_heat');
+ D.paused=false;fLast=0;show('field');resizeField();renderFHud();if(!fRaf)fRaf=requestAnimationFrame(fLoop)}
+function ttChoice(T){return new Promise(res=>{let el=$('fNext');if(!el){el=document.createElement('div');el.className='fov';el.id='fNext';$('fPause').parentNode.appendChild(el)}const D=FD,m=1+.5*T.stage;
+ el.innerHTML=`<div class="fcard"><div class="fnx">${UIMG('u_tama',40)}<div><b>第${T.stage}火 おわり</b><small>この挑戦で 玉鋼 ×${T.got}</small></div></div>
+  <div class="note fnn">次の火入れは、敵がさらに強く、多くなる。そのかわり玉鋼は <b>×${m}</b>。<br>やられたら、その火入れの分だけなくなる（いままでの玉鋼は持ち帰れる）<br>体力 ${Math.ceil(D.hp)}/${D.maxhp}　Lv${D.lv}</div>
+  <button class="btn gold" id="fnGo">次の火入れへ（第${T.stage+1}火）</button><button class="btn" id="fnHome">帰る<small class="bsm">玉鋼 ×${T.got} を持ち帰る</small></button></div>`;
+ el.classList.add('on');$('fnGo').onclick=()=>{el.classList.remove('on');res(true)};$('fnHome').onclick=()=>{el.classList.remove('on');res(false)}})}
+/* 終わり：とちゅうで帰ったら、その時点の分だけ少し。結果画面をたたら島用に */
+{const _e=fEnd;fEnd=function(why){const D=FD,T=D&&D.tr;if(!T||D.ending)return _e.apply(this,arguments);
+ let part=0;if(!T.ending){G.ttTime=(G.ttTime|0)+Math.round(T.tk);if(why!=='dead'&&!T.tut){const avg=T.hsum/Math.max(1,T.tk),base=avg>=60?3:avg>=30?2:1;part=Math.floor(base*(1+.5*(T.stage-1))*T.tk/TT.STAGE);if(part){G.mats.tama=(G.mats.tama|0)+part;T.got+=part}}save()}
+ const st=T.stage,got=T.got,dead=why==='dead';const r=_e.apply(this,arguments);
+ const q=s=>document.querySelector('#resP '+s);const fl=q('.rzfl');if(fl)fl.innerHTML=`${st}<small>火</small>`;
+ const ti=q('.rzti b');if(ti)ti.textContent=dead?'火が消えた':st>1||T.ending?'火を守りきった':'たたら島から帰った';
+ const sb=q('.rzsb');if(sb)sb.innerHTML=`第${st}火まで　たたら島にいた時間 合計 ${Math.floor((G.ttTime|0)/60)}分`+(dead?'<br>この火入れの玉鋼はなくなった（それまでの分は持ち帰れた）':part?`<br>とちゅうで帰ったので、玉鋼は少しだけ（×${part}）`:'');
+ const gz=q('.rzg');if(gz&&got){if(!gz.querySelector('.rzt'))gz.innerHTML='';gz.insertAdjacentHTML('afterbegin',`<div class="rzt gold">${MIC('tama',34)}<b>×${got}</b><i>玉鋼</i></div>`)}
+ const nx=q('.rznx');if(nx)nx.innerHTML=`${UIMG('u_tama',26)}<span>玉鋼 <b>${G.mats.tama|0}個</b>　工房の「鍛錬」で装備を強くできる</span>`;
+ const b=$('resBtns');if(b){b.innerHTML='';addBtn('もう一度 火入れ',()=>{$('result').classList.remove('fres');ttGo()},'gold');addBtn('ホームへ',afterField)}
+ return r}}
+/* はじめての火入れのあと：工房で鍛錬を1回 */
+{const _a=afterField;afterField=async function(){if(G.flags.ttTut&&!G.flags.ttTut2){G.flags.ttTut2=1;save();$('result').classList.remove('fres');openHome();await talk(TT_TUT_FORGE);shopTab='tforge';openShop('tab');return}return _a.apply(this,arguments)}}
+
+/* ---------- 工房：鍛錬（玉鋼で出来ばえを上げる・SSから＋） ---------- */
+function ttGear(){const L=[];ownedAll().forEach(m=>{const w=m.weapon;if(w&&w.rid&&RECIPES[w.rid]&&w.rank)L.push({o:w,rid:w.rid,kind:'w',lb:CHARS[m.id].name})});
+ Object.keys(G.gen||{}).forEach(r=>{const o=G.gen[r];if(o&&o.rank&&RECIPES[r])L.push({o,rid:r,kind:'g',lb:'汎用'})});
+ Object.keys(G.arm||{}).forEach(s=>{const a=G.arm[s];if(a&&a.rid&&a.rank&&RECIPES[a.rid])L.push({o:a,rid:a.rid,kind:'a',lb:'防具'})});return L}
+const ttCost=o=>o.rank!=='SS'?TT.RANK_COST[o.rank]||1:(o.tp|0)<TT.PLUS_MAX?3+(o.tp|0):0;
+const ttRankTxt=o=>o.rank+((o.tp|0)?'＋'+o.tp:'');
+function ttForgeHTML(){const L=ttGear(),have=G.mats.tama|0;
+ let h=`<div class="note">${MIC('tama',22)} 玉鋼 <b>${have}個</b>　たたら島で火を守るとできる。<br>出来ばえを1段ずつ上げられる（SSまで）。SSになったら＋1〜＋${TT.PLUS_MAX}を重ねられる（1つにつき強さ＋3%）。装備しているものだけ鍛えられる。</div>`;
+ if(!L.length)return h+'<div class="note">鍛えられる装備がない。工房で装備をつくって、装備しよう</div>';
+ L.forEach((x,i)=>{const o=x.o,c=ttCost(o),R=RECIPES[x.rid],mx=o.rank==='SS'&&(o.tp|0)>=TT.PLUS_MAX;
+  h+=`<div class="rcp"><div class="rh" style="align-items:center;gap:8px">${RIC(x.rid,36)}<span style="flex:1;line-height:1.3"><b>${R.n}</b><br><small>${x.lb}　出来ばえ <b style="color:var(--gold)">${ttRankTxt(o)}</b>　強さ ×${(+o.mul).toFixed(2)}</small></span>
+   ${mx?'<small style="color:var(--gold)">極めた！</small>':`<button class="btn" data-tf="${i}" ${have<c?'disabled':''} style="width:auto;margin:0;padding:8px 10px;font-size:13px;line-height:1.2">${o.rank==='SS'?'＋'+((o.tp|0)+1)+'にする':RANK_ORDER[RANK_ORDER.indexOf(o.rank)+1]+'に上げる'}<br><small>${MIC('tama',14)}×${c}</small></button>`}</div></div>`});
+ return h}
+function ttForge(i){const x=ttGear()[i];if(!x)return;const o=x.o,c=ttCost(o);if(!c||(G.mats.tama|0)<c)return;G.mats.tama-=c;
+ if(o.rank!=='SS'){const nr=RANK_ORDER[RANK_ORDER.indexOf(o.rank)+1];o.mul=+(o.mul*RANK_MUL[nr]/RANK_MUL[o.rank]).toFixed(3);o.rank=nr}
+ else{const p=o.tp|0;o.mul=+(o.mul/(1+TT.PLUS*p)*(1+TT.PLUS*(p+1))).toFixed(3);o.tp=p+1}
+ if(x.kind==='w'){o.v=Math.round(o.mul*5);o.bv=o.v;o.name=RECIPES[x.rid].n+'（'+ttRankTxt(o)+'）'}
+ save();tone(660,.08,'square',.06);setTimeout(()=>tone(990,.15,'triangle',.08,1480),90);renderShop();
+ say(`${UIMG('u_tforge',44)} カーン！ 「${RECIPES[x.rid].n}」を鍛えた<br><b style="font-size:20px">出来ばえ ${ttRankTxt(o)}</b>`,1100)}
+{const _r=renderShop;renderShop=function(){const tf=shopTab==='tforge';if(tf)shopTab='__tf';_r.apply(this,arguments);if(tf)shopTab='tforge';
+ if(!G.flags||!G.flags.ttOpen)return;const tabs=$('shopBody').querySelector('.stabs');
+ if(tabs&&!tabs.querySelector('[data-t3="tforge"]')){const b=document.createElement('button');b.className='stab'+(tf?' on':'');b.dataset.t3='tforge';b.textContent='鍛錬';
+  const rec=tabs.querySelector('[data-t="rec"]');tabs.insertBefore(b,rec);b.onclick=()=>{shopTab='tforge';renderShop()}}
+ if(tf){$('shopBody').insertAdjacentHTML('beforeend',ttForgeHTML());$('shopBody').querySelectorAll('[data-tf]').forEach(b=>b.onclick=()=>ttForge(+b.dataset.tf))}}}
+
+/* ---------- 物語 ---------- */
+const tD='dodo',tDN='ドド先輩',tW='wolf',tWN='ウルフ',tTS='tessai',tTSN='鉄斎';
+const TT_OPEN=[N_('鉄灯の街の港から、小舟で東の海へ。細い煙の上がる小さな島に、古いたたら場があった。'),
+ [tD,tDN,'……やっぱりや。ワシが若いころ、修業しとった炉や。'],[tW,tWN,'先輩、ここで修業してたのか？'],
+ [tD,tDN,'鉄斎師匠のもとでな。……せやけど、火が消えて何年もたつはずや。なんで煙が……'],
+ N_('炉は半分だけ燃えていた。そのまわりを、炎の精やスラグがうろついている。'),
+ [tD,tDN,'炉の残り火から生まれたんやな。番をする者がおらんようになって、勝手に燃えとる。'],
+ N_('炉の柱に、古い木札がかかっていた。'),[null,'木札','「鉄は、待つ者にしか応えん。三日三晩、火を守れ。——鉄斎」'],
+ [tD,tDN,'師匠の字や……。よし、ワシらで火を守ったる。敵を倒して炭をくべ続ければ、炉は鉄を育ててくれる。'],
+ [tD,tDN,'できた鉄のかたまりを鉧（けら）、その中のいちばんええところを玉鋼（たまはがね）っちゅうんや。玉鋼があれば、装備をもっと強く鍛えられるで。'],
+ [tD,tDN,'まずは1分だけ、火を入れてみよか。ワシの言うとおりにやってみ。']];
+const TT_TUT_END=[[tD,tDN,'ええ鉧や！ これを割ると……ほれ、玉鋼や。'],[tD,tDN,'出口はいつでも開いとる。できた分は持って帰れるし、長くおるほど、ようけ取れる。'],
+ [tD,tDN,'ほんまの火入れは5分や。20秒ごとに敵が増えて、4分たつと……炉の番人が来るかもしれん。気ぃつけや。']];
+const TT_TUT_FORGE=[[tD,tDN,'工房に「鍛錬」ができたで。玉鋼で、装備の出来ばえを1段ずつ鍛え上げられる。'],[tD,tDN,'さっそく1つ鍛えてみ。……SSまで上げたら、そこから先は＋を重ねられる。極めたいなら、また火を守りに来い。']];
+const TT_S1=[[tD,tDN,'5分、火を守りきったな。……師匠は、これを三日三晩やっとったんや。'],[tW,tWN,'三日三晩！？ 寝ないで？'],
+ [tD,tDN,'村下（むらげ）っちゅうてな、炉の親方は火の色だけ見て、ずっと風と炭を加減するんや。片目が細うなってしまうまでな。']];
+const TT_ONI=[N_('鞴鬼が膝をついた。赤い顔から、すうっと怒りが抜けていく。'),[null,'鞴鬼','……フゥ……フゥ……。火ノ番……戻ッタカ……。'],
+ [tD,tDN,'おまえ、師匠の鞴（ふいご）を押しとった番人か！ 番がおらんで、ひとりで暴れとったんやな。'],[null,'鞴鬼','鉄斎……イナイ……。風、送ル相手、イナカッタ……。'],
+ [tD,tDN,'ほんなら、ワシらに風を送ってくれ。いっしょに火を守ろうや。'],
+ N_('鞴鬼が炉のそばに座り、大きな鞴を押しはじめた。\n\n（これからは鞴鬼が手伝ってくれる：炉の温度が下がりにくくなる）')];
+const TT_M1=[[tD,tDN,'……ウルフ。ワシな、昔ここで、炉をひとつだめにしたんや。'],
+ [tD,tDN,'師匠が寝とる間に、早う鉄がほしくて、炭を山ほどくべた。温度は上がったけど、鉄は焼けすぎて、ぼろぼろや。'],
+ [tD,tDN,'師匠はなんも怒らんかった。「鉄は、待つ者にしか応えん」とだけ言うた。……それが、いちばんこたえてな。'],
+ [tD,tDN,'次の日、ワシは島を出た。それきりや。'],[tW,tWN,'……だから先輩は、いつも「あわてるな」って言うのか。'],[tD,tDN,'せや。ワシにできるのは、待つことを教えることだけやからな。']];
+const TT_M2=[N_('火入れを終えたあと。小屋の陰から、白いひげの老人がゆっくりと歩いてきた。'),
+ [tTS+':neutral',tTSN,'……ええ火やった。'],[tD,tDN,'し、師匠！？'],
+ [tTS+':smile',tTSN,'鞴の音が聞こえての。火の番が戻ったと思うて、見に来たんじゃ。'],
+ [tD,tDN,'師匠……あのときは、すんませんでした。ワシ……'],
+ [tTS+':serious',tTSN,'謝るな。おまえは待てるようになった。火の色を見れば、わかる。'],
+ [tTS+':worry',tTSN,'わしはな、目がもう、炎の色を見分けられん。だから炉を閉じて、島を出た。'],
+ [tTS+':neutral',tTSN,'……じゃが、おまえらの火なら、まかせられる。この炉は、おまえらのものじゃ。'],
+ [tTS+':surprise',tTSN,'そうじゃ、ひとつだけ。雲の上の塔から、ときどき妙な鉄が流れつく。……いつか、あれを打てる職人が来ると、わしは思うとる。'],
+ [tD,tDN,'……はい！'],N_('（鉄斎は、ときどき島の小屋にいるようになった）')];
+async function ttStory(T){const f=G.flags;
+ if(T.tut){await talk(TT_TUT_END);return}
+ if(!f.ttS1){f.ttS1=1;save();await talk(TT_S1)}
+ if((G.ttTime|0)>=1800&&!f.ttM1){f.ttM1=1;save();await talk(TT_M1)}
+ if((G.ttTime|0)>=3600&&f.ttM1&&!f.ttM2){f.ttM2=1;save();await talk(TT_M2)}}
+/* ストーリーをふりかえる */
+{const _ss=storyScenes;storyScenes=function(){const S=_ss(),f=G.flags||{};
+ if(f.ttOpen)S.push({n:400,lb:'た',t:'たたら島　師匠の炉',run:()=>talk(TT_OPEN)});
+ if(f.ttS1)S.push({n:401,lb:'た',t:'三日三晩',run:()=>talk(TT_S1)});
+ if(f.ttOni)S.push({n:402,lb:'た',t:'鞴鬼',run:()=>talk(TT_ONI)});
+ if(f.ttM1)S.push({n:403,lb:'た',t:'ドド先輩の昔話',run:()=>talk(TT_M1)});
+ if(f.ttM2)S.push({n:404,lb:'た',t:'鉄斎',run:()=>talk(TT_M2)});
+ return S.sort((a,b)=>a.n-b.n)}}
+/* セーブの補い */
+{const _fx=fixV2;fixV2=function(g){const r=_fx.apply(this,arguments);if(g){g.ttTime=g.ttTime|0;if(g.mats)g.mats.tama=g.mats.tama|0}return r}}
+
+/* =====================================================================
    新しいバージョンの知らせ
    ・GitHub Pages はページを最大10分ほど覚えておく（キャッシュ）ので、更新してもすぐに新しい版にならないことがある
    ・起動したときと、アプリにもどってきたときに、公開中の index.html の VERSION を「覚えていない状態」で読みに行く
@@ -7861,7 +8062,7 @@ function preloadFoes(fl){try{const F=FLOORS[fl],A=F&&FAREA[F.area];if(!A)return;
 {const _sh=show;show=function(id){const cur=document.querySelector('.scr.on');const r=_sh.apply(this,arguments);if(id!=='field'&&(!cur||cur.id!==id))lockInput(300);return r}}
 {const sh=document.getElementById('sheet');if(sh&&window.MutationObserver)new MutationObserver(()=>{if(sh.classList.contains('on')&&!sh._on){sh._on=1;lockInput(250)}else if(!sh.classList.contains('on'))sh._on=0}).observe(sh,{attributes:true,attributeFilter:['class']})}
 
-const BUILD='11/21 09:55';
+const BUILD='11/21 10:19';
 const CHEST_ITEMS2={'3,12':{oil:2,scrap:2},'17,2':{scrap:3,wire:1}};
 function cadBack(){}
 
