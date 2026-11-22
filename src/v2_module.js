@@ -146,7 +146,7 @@ const rustK=()=>Math.max(0,(FD.st-FT.RUST)/25),rustLv=()=>FD.st>=FT.RUST?Math.fl
 /* 1つの階にいられるのは5分まで。錆が出てから経験値はだんだん減り、5分で0。5分をこえると「錆の大波」でHPがけずれ続ける */
 const FLOOR_MAX=300,xpT=()=>!FD||FD.boss||FD.st<FT.RUST?1:Math.max(0,1-(FD.st-FT.RUST)/(FLOOR_MAX-FT.RUST));
 const rustHp=k=>1+.6*k+.25*k*k,rustDm=k=>1+.5*k+.2*k*k;
-const FCFG={HP:100,SPD:1.9,PICK:70,MAX_FOES:170};
+const FCFG={HP:100,SPD:1.9,PICK:70,MAX_FOES:260};
 const AREA_JOIN={alley:'fox',factory:'dodo',under:'owl'};
 /* 塔の階（第1章＝1〜10階）。area：敵・地面・素材の種類（下層 alley／中層 factory／上層 under）
    step：その層の中で何段目か（敵が少しずつ強くなる）。boss・join・ev は、その階で起きること。stair：階段までの距離 */
@@ -442,7 +442,7 @@ function fUpdate(f){const D=FD;D.t+=f/60;
 
 /* ---------- 描く ---------- */
 function fDraw(){const D=FD,c=fcv(),g=c.getContext('2d'),z=fZ;g.setTransform(fDPR,0,0,fDPR,0,0);
- const sx=D.shake?Math.random()*6-3:0,sy=D.shake?Math.random()*6-3:0,cx0=D.x-fW/2/z,cy0=D.y-fH/2/z;
+ const SA=D.shakeA||3,sx=D.shake?(Math.random()*2-1)*SA:0,sy=D.shake?(Math.random()*2-1)*SA:0,cx0=D.x-fW/2/z,cy0=D.y-fH/2/z;
  g.save();g.scale(z,z);g.translate(-cx0+sx,-cy0+sy);
  g.fillStyle=groundFor(D.area);g.fillRect(cx0-20,cy0-20,fW/z+40,fH/z+40);fDrawRuleFloor(g,D,cx0,cy0,z);
  // 魔法陣・衝撃波
