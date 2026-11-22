@@ -97,7 +97,7 @@ const PASSIVE={
  spd:{n:'作業靴のひも',d:'移動の速さ +10%',max:6},
  mag:{n:'磁石',       d:'素材や経験値を遠くから吸い寄せる',max:6},
  hp: {n:'安全帯',     d:'最大体力 +20、体力を回復',max:6},
- cd: {n:'冷却水',     d:'すべての攻撃の間隔 −8%（Lv4からは −5%）',max:6}};
+ cd: {n:'冷却水',     d:'すべての攻撃の間隔 −8%',max:6}};
 
 /* ---------- 町の外の敵とエリア ---------- */
 const FFOE={
@@ -273,7 +273,7 @@ async function fMirror(){FD.paused=true;fReleaseStick();try{await talk(storyFit(
  await say(`${IC('shine',30)} 心の錆が消えた！<br><span style="font-size:14px">この先、ウルフの攻撃が少し強くなる</span>`,1600)}finally{if(FD){FD.paused=false;fLast=0;show('field');resizeField();if(!fRaf)fRaf=requestAnimationFrame(fLoop)}}}
 function fBanner(t,frames,ic){if(!FD)return;FD.warnTxt=t;FD.warnIc=ic||'';FD.warn=frames||120}
 const fSpd=()=>FCFG.SPD*(1+.1*FD.ps.spd)*(1+.08*armMul('feet'))*(1+Math.min(FD.ab.lvSpd||0,.01*(FD.lv-1)))*(1+(FD.ab.wspd||0));
-const fCd=()=>{const c=FD.ps.cd;return 1-.08*Math.min(3,c)-.05*Math.max(0,c-3)};
+const fCd=()=>1-.08*FD.ps.cd;
 const fPick=()=>FCFG.PICK*(1+.6*FD.ps.mag)*(1+(FD.ab.pick||0));
 const fCut=()=>(1-Math.min(.45,.14*armMul('body')))*(1-(FD.ab.cut||0))*ruleCut();
 const fPow0=id=>fPow0b(id)*ruleAtk();
