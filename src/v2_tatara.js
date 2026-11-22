@@ -42,8 +42,8 @@ TOWERS.tatara={n:'鍛錬の間',ready:true,go:()=>ttGo()};
  if(b)b.addEventListener('click',()=>{const s=document.querySelector('#wmD .wmgo span');if(s)s.textContent=`玉鋼 ${G.mats.tama|0}個`});return r}}
 
 /* ---------- 出撃 ---------- */
-async function ttGo(){enterTower('tatara');if(TW)TW.busy=true;
- if(!G.flags.ttOpen){G.flags.ttOpen=1;save();await talk(TT_OPEN)}
+async function ttGo(again){enterTower('tatara');if(TW)TW.busy=true;
+ if(!G.flags.ttOpen){G.flags.ttOpen=1;save();await talk(TT_OPEN)}else if(!again)await talk(TT_OPEN.slice(0,-1));  /* 3.1.7：入るたびに、はじまりの話（もう一度の火入れでは出さない） */
  await say(`${UIMG('u_tatara',44)} たたら島へ……${G.flags.ttTut?'':'<br><span style="font-size:13px">はじめての火入れ（1分）</span>'}`,800);startFloor(1)}
 {const _s=startFloor;startFloor=function(fl){const r=_s.apply(this,arguments);if(towerAt()==='tatara'&&FD){const D=FD;D.stairs=null;
  D.tr={stage:1,tk:0,heat:15,hsum:0,step:0,gT:60,bossOut:false,got:0,sumiN:0,tut:!G.flags.ttTut,tutS:0,tutT:0,ending:0};
@@ -127,7 +127,7 @@ function ttChoice(T){return new Promise(res=>{let el=$('fNext');if(!el){el=docum
  const sb=q('.rzsb');if(sb)sb.innerHTML=`第${st}火まで　たたら島にいた時間 合計 ${Math.floor((G.ttTime|0)/60)}分`+(dead?'<br>この火入れの玉鋼はなくなった（それまでの分は持ち帰れた）':part?`<br>とちゅうで帰ったので、玉鋼は少しだけ（×${part}）`:'');
  const gz=q('.rzg');if(gz&&got){if(!gz.querySelector('.rzt'))gz.innerHTML='';gz.insertAdjacentHTML('afterbegin',`<div class="rzt gold">${MIC('tama',34)}<b>×${got}</b><i>玉鋼</i></div>`)}
  const nx=q('.rznx');if(nx)nx.innerHTML=`${UIMG('u_tama',26)}<span>玉鋼 <b>${G.mats.tama|0}個</b>　工房の「鍛錬」で装備を強くできる</span>`;
- const b=$('resBtns');if(b){b.innerHTML='';addBtn('もう一度 火入れ',()=>{$('result').classList.remove('fres');ttGo()},'gold');addBtn('ホームへ',afterField)}
+ const b=$('resBtns');if(b){b.innerHTML='';addBtn('もう一度 火入れ',()=>{$('result').classList.remove('fres');ttGo(true)},'gold');addBtn('ホームへ',afterField)}
  return r}}
 /* はじめての火入れのあと：工房で鍛錬を1回 */
 {const _a=afterField;afterField=async function(){if(G.flags.ttTut&&!G.flags.ttTut2){G.flags.ttTut2=1;save();$('result').classList.remove('fres');openHome();await talk(TT_TUT_FORGE);shopTab='tforge';openShop('tab');return}return _a.apply(this,arguments)}}
