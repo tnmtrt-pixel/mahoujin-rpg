@@ -749,7 +749,9 @@ body.hasTabs .scr.on{position:fixed;left:0;right:0;top:0;bottom:calc(59px + env(
 .ftm.warn{color:#ff6a3d;font-weight:800;animation:fwarn 1s infinite}@keyframes fwarn{50%{opacity:.45}}
 /* 会話：もどる・ログ */
 #talk .tbar{display:flex;gap:6px;margin-top:4px;flex:none}
-#talk .tbar button{font:inherit;font-size:12px;font-weight:700;color:var(--sub,#9aa5cc);background:#0b1024;border:1px solid #33406e;border-radius:8px;padding:4px 10px;min-height:30px}
+#talk .tbar button{font:inherit;font-size:12px;font-weight:700;color:var(--sub,#9aa5cc);background:#0b1024;border:1px solid #33406e;border-radius:8px;padding:4px 8px;min-height:34px;white-space:nowrap;flex:none;width:auto;margin:0;line-height:1.2}
+#talk .tbar .tnx{flex:1;color:var(--gold,#e8c35a);border-color:#8a7330}
+#talk .nx{display:none}
 #talk .tbar button:disabled{opacity:.35}
 #talk .box>div:last-child{position:relative}
 #talk .nx{margin-top:-26px;pointer-events:none}
