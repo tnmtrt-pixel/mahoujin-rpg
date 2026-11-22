@@ -12,7 +12,7 @@ def R(a,b,cnt=1):
     n=s.count(a)
     assert n==cnt,(n,a[:80])
     s=s.replace(a,b)
-R("const VERSION='0.1.0'","const VERSION='3.1.8'")
+R("const VERSION='0.1.0'","const VERSION='3.1.9'")
 R("const KEY='mmrpg1',OPT_KEY='mmrpg1_opt',BROKEN_KEY='mmrpg1_broken'","const KEY='mmrpg2',OPT_KEY='mmrpg2_opt',BROKEN_KEY='mmrpg2_broken'")
 R("$('tVer').textContent=`β版 ver ${VERSION}`;$('tNote').textContent=loadNote;","$('tVer').textContent=`ver ${VERSION}`;$('tNote').textContent=loadNote;saveGuardBoot();")
 R('<button class="btn ghost" id="opX">閉じる</button>','<button class="btn" id="opSG">💾 セーブの守り（保存・引っ越し）</button><button class="btn ghost" id="opX">閉じる</button>')
