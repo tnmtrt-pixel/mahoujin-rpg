@@ -47,7 +47,7 @@ async function ttGo(){enterTower('tatara');if(TW)TW.busy=true;
  await say(`${UIMG('u_tatara',44)} たたら島へ……${G.flags.ttTut?'':'<br><span style="font-size:13px">はじめての火入れ（1分）</span>'}`,800);startFloor(1)}
 {const _s=startFloor;startFloor=function(fl){const r=_s.apply(this,arguments);if(towerAt()==='tatara'&&FD){const D=FD;D.stairs=null;
  D.tr={stage:1,tk:0,heat:15,hsum:0,step:0,gT:60,bossOut:false,got:0,sumiN:0,tut:!G.flags.ttTut,tutS:0,tutT:0,ending:0};
- fBanner(D.tr.tut?'ドド先輩「敵が落とす黒い炭を拾ってみて〜。拾うと炉にくべられるよ」':'第1火　炉に火が入った！ 敵を倒して炭をくべろ',220,'u_heat')}return r}}
+ fBanner(D.tr.tut?'ドド先輩「敵が落とす黒い炭を拾ってみて〜。拾うと炉にくべられるよ」':(G.flags.ttOni?'第1火　鞴鬼が炉に風を送ってくれている！（温度が下がりにくい）':'第1火　炉に火が入った！ 敵を倒して炭をくべろ'),220,'u_heat')}return r}}
 /* 敵の波：20秒ごとに一段（チュートリアルはゆるやか） */
 {const _w=waveNow;waveNow=function(){const T=FD&&FD.tr;if(!T)return _w();const s=Math.floor(T.tk/TT.STEP),
  P=s<3?['t_flame','t_bat']:s<6?['t_flame','t_bat','t_slag']:['t_slag','t_flame','t_bat','t_slag'];return[0,P,(T.tut?1.4:1.6+.42*s)*(1+.25*(T.stage-1))]}}
@@ -75,7 +75,12 @@ const ttHeatName=v=>v<35?'赤':v<70?'橙':'白';
 {const _f=fDrawRuleFloor;fDrawRuleFloor=function(g,D,cx0,cy0,z){_f.apply(this,arguments);const T=D&&D.tr;if(!T)return;const t=D.t,k=T.heat/100;
  g.save();const gr=g.createRadialGradient(0,-10,10,0,-10,120+80*k);gr.addColorStop(0,`rgba(255,${140+80*k|0},60,${.25+.4*k})`);gr.addColorStop(1,'rgba(255,120,40,0)');g.fillStyle=gr;g.beginPath();g.arc(0,-10,200,0,TAU);g.fill();
  const s=fspr('img/ui/f_tatara.webp',140);if(s)g.drawImage(s,-60,-92,120,120*s.height/s.width);
- if(G.flags.ttOni){const o=fspr('img/foe/t_fuigo.webp',90);if(o){const b=Math.sin(t*5)*3;g.drawImage(o,62,-70+b,70,70)}}
+ if(G.flags.ttOni){const o=fspr('img/foe/t_fuigo.webp',110),ph=(t*1.6)%1,push=Math.sin(ph*TAU),ox=78,oy=-8;
+  /* 鞴を押す：体を縮めたり伸ばしたり。押すたびに風（白い息）が炉へ流れる */
+  if(o){g.save();g.translate(ox,oy);g.scale(-1,1);g.scale(1+.05*push,1-.06*push);g.drawImage(o,-42,-84,84,84);g.restore()}
+  for(let i=0;i<3;i++){const q=(ph+i/3)%1,x=ox-30-q*60,y=oy-30-Math.sin(q*Math.PI)*10;g.globalAlpha=(1-q)*.7;g.fillStyle='#fff';g.beginPath();g.arc(x,y,5+q*7,0,TAU);g.fill()}
+  g.globalAlpha=1;g.font='bold 12px sans-serif';g.textAlign='center';const lb='鞴鬼 手伝い中',w=g.measureText(lb).width+14;
+  g.fillStyle='rgba(30,120,60,.9)';g.beginPath();g.roundRect?g.roundRect(ox-w/2,oy-104,w,18,9):g.rect(ox-w/2,oy-104,w,18);g.fill();g.fillStyle='#fff';g.fillText(lb,ox,oy-91)}
  g.restore()}}
 /* 炭：倒すと落ちる。拾うと炉の温度が上がる */
 {const _k=fKill;fKill=function(e){const r=_k.apply(this,arguments);const D=FD,T=D&&D.tr;if(!T||!e)return r;
