@@ -20,7 +20,7 @@ Object.assign(CHARS,{
  sakamata: {name:'サカマタ',    img:'img/sakamata.webp', job:'kaji',  pass:{n:'',d:'',k:''},sp:{n:'',d:'',shape:'ch'},lines:['オレが最強だっつってんだろ！']},
  aurum:    {name:'アウルム',    img:'img/aurum.webp',    job:'sekkei',pass:{n:'',d:'',k:''},sp:{n:'',d:'',shape:'hikari'},lines:['図面を置いていけ。名前は、わしが書く。']},
  nox:      {name:'ノクス',      img:'img/nox.webp',      job:'sekkei',pass:{n:'',d:'',k:''},sp:{n:'',d:'',shape:'yami'},lines:['……帰れ。ここで渡せる図面はない。']}});
-[...VOL3,'aurum','nox'].forEach(id=>{FACES[id]=['smile','worry','serious']});
+[...VOL3,'aurum','nox'].filter(id=>!['shion','tsubasa'].includes(id)).forEach(id=>{FACES[id]=['smile','worry','serious']});  /* 3.2.2：シオンとツバサは表情の絵がまだないので、顔アイコンを使う */
 
 const SFLOORS=[null,
  {n:'止まった発動機',area:'s1',step:0,stair:1500},
