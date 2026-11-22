@@ -288,6 +288,11 @@ const BP_POOL_V=v=>{const a=BP_POOL(),b=a.filter(id=>bpVol(RECIPES[id])===v);ret
 const bpVisV=()=>{const f=G.flags||{};return[1,...(f.j_open?[2]:[]),...(f.s_open&&(typeof V3_OPEN==='undefined'||V3_OPEN)?[3]:[])]};
 const BP_POOL_ALL=()=>{const a=BP_POOL(),vs=bpVisV(),top=Math.max(...vs),b=a.filter(id=>vs.includes(bpVol(RECIPES[id])));return b.length?b.concat(b.filter(id=>vs.length>1&&bpVol(RECIPES[id])===top)):a};
 const BP_LIM_ALL=()=>{const L=bpVisV().flatMap(v=>BP_LIM(v));return L.length?L:BP_LIM(1)};
+/* 3.2.0：工具ガチャもひとつに。ふつう枠＝行ったことのある塔の工具。限定枠＝行ったvolの限定をまとめて。天井はひとつ */
+const toolVol=t=>typeof S_TOOLS!=='undefined'&&Object.values(S_TOOLS).includes(t)?3:typeof LIM_TOOLS2!=='undefined'&&LIM_TOOLS2.includes(t)?2:1;
+const TOOL_POOL_ALL=()=>{const vs=bpVisV(),a=TOOL_POOL(),b=a.filter(t=>vs.includes(toolVol(t)));return b.length?b:a};
+const TOOL_LIM_ALL=()=>bpVisV().flatMap(v=>gaLims('tool',v)).filter((t,i,A)=>A.indexOf(t)===i);
+const toolPityK=()=>{G.pity=G.pity||{};if(G.pity.toolAll==null)G.pity.toolAll=Math.max(G.pity.tool|0,G.pity.tool2|0,G.pity.tool3|0);return'toolAll'};
 const bpPityK=()=>{G.pity=G.pity||{};if(G.pity.bpAll==null)G.pity.bpAll=Math.max(G.pity.bp|0,G.pity.bp2|0,G.pity.bp3|0);return'bpAll'};
 const BP_LIM=(v=1)=>RECIPE_ORDER.filter(id=>RECIPES[id].limited&&(RECIPES[id].vol||1)===v);
 /* vol.2 以降は章ごとの限定（V2_OPEN の間だけ開く） */
@@ -298,25 +303,25 @@ function gaHead(){return `<div class="gacoin">${coinIc(22)}<b>${G.coin}</b><smal
  <div class="gatype">${[['char','キャラ'],['tool','工具'],['bp','図面']].map(([k,n])=>`<button class="${gaType===k?'on':''}" data-gt="${k}">${UIMG('g_'+k,26)}${n}</button>`).join('')}</div>`}
 function gaBind(){$('gaBody').querySelectorAll('[data-gt]').forEach(b=>b.onclick=()=>{gaType=b.dataset.gt;renderGacha()})}
 function renderGacha(){if(gaType==='char'){renderCharGacha();return}
- const tool=gaType==='tool',C=tool?TOOL_G:BP_G,gv=gaVolOpen(gaVolI[gaType])?gaVolI[gaType]:1,pity=((G.pity||{})[tool?pityKey(gaType,gv):bpPityK()])||0,lims=tool?gaLims(gaType,gv):BP_LIM_ALL();
+ const tool=gaType==='tool',C=tool?TOOL_G:BP_G,gv=gaVolOpen(gaVolI[gaType])?gaVolI[gaType]:1,pity=((G.pity||{})[tool?toolPityK():bpPityK()])||0,lims=tool?TOOL_LIM_ALL():BP_LIM_ALL();
  const icons=lims.map(k=>tool?MIC(k,44):RIC(k,44)).join('');
- $('gaBody').innerHTML=gaHead()+(tool?`<div class="gavol">${[1,2,3].map(v=>`<button class="${v===gv?'on':''} ${gaVolOpen(v)?'':'soon'}" data-giv="${v}">vol.${v}</button>`).join('')}</div>`:'')+`
- <div class="gaban gaimg"><img src="img/${tool?'gacha-tool':'gacha-bp'}.webp" alt=""><div class="gcb"><small>${tool?'TOOL':'BLUEPRINT'} GACHA</small><b>${tool?'工具ガチャ':'図面ガチャ'}${tool&&gv>1?' vol.'+gv:''}</b><em class="${tool?'':'bp'}">${UIMG('u_limited',16)}限定${tool?'工具':'装備の図面'} ${Math.round(C.lim*100)}%</em></div><div class="gci">${icons}</div></div>
+ $('gaBody').innerHTML=gaHead()+(false?`<div class="gavol">${[1,2,3].map(v=>`<button class="${v===gv?'on':''} ${gaVolOpen(v)?'':'soon'}" data-giv="${v}">vol.${v}</button>`).join('')}</div>`:'')+`
+ <div class="gaban gaimg"><img src="img/${tool?'gacha-tool':'gacha-bp'}.webp" alt=""><div class="gcb"><small>${tool?'TOOL':'BLUEPRINT'} GACHA</small><b>${tool?'工具ガチャ':'図面ガチャ'}</b><em class="${tool?'':'bp'}">${UIMG('u_limited',16)}限定${tool?'工具':'装備の図面'} ${Math.round(C.lim*100)}%</em></div><div class="gci">${icons}</div></div>
  <div class="gapity">${UIMG('u_pity',20)} 限定まで あと <b>${C.pity-pity}</b> 回（${C.pity}回で必ず出る）</div>
  <div class="galink"><button data-ga="rate">提供割合</button><button data-ga="list">${tool?'工具':'図面'}の一覧（図鑑）</button></div>
  <div class="gabtns"><button class="gab" data-gp="1" ${G.coin<C.cost?'disabled':''}><b>1回</b><small>${coinIc(16)} ${C.cost}</small></button><button class="gab ten" data-gp="11" ${G.coin<C.cost11?'disabled':''}><b>11回</b><small>${coinIc(16)} ${C.cost11}</small></button></div>`;
  gaBind();$('gaBody').querySelectorAll('[data-giv]').forEach(b=>b.onclick=()=>{const v=+b.dataset.giv;if(!gaVolOpen(v))return;gaVolI[gaType]=v;renderGacha()});
  $('gaBody').querySelectorAll('[data-gp]').forEach(b=>b.onclick=()=>pullItems(gaType,+b.dataset.gp));
  $('gaBody').querySelector('[data-ga=list]').onclick=()=>{ZK.tab=tool?'tool':'bp';goTab('zukan')};
- $('gaBody').querySelector('[data-ga=rate]').onclick=()=>{$('gpBody').innerHTML=`<div class="gph">提供割合　${tool?'工具ガチャ vol.'+gv:'図面ガチャ'}</div><div class="rdt">
+ $('gaBody').querySelector('[data-ga=rate]').onclick=()=>{$('gpBody').innerHTML=`<div class="gph">提供割合　${tool?'工具ガチャ':'図面ガチャ'}</div><div class="rdt">
   <div><span>限定</span><p>${Math.round(C.lim*100)}%：${lims.map(k=>tool?TOOLS[k].n:RECIPES[k].n).join('・')}</p></div>
-  <div><span>ふつう</span><p>${100-Math.round(C.lim*100)}%：${tool?'工房で売っている工具（やすり以外）':'行ったことのある塔で見つかる図面（いちばん先まで進んだ塔の図面は2倍出やすい。仲間の専用武器は、持っているキャラのぶんだけ）'}</p></div>
+  <div><span>ふつう</span><p>${100-Math.round(C.lim*100)}%：${tool?'行ったことのある塔で使う工具（やすり以外）':'行ったことのある塔で見つかる図面（いちばん先まで進んだ塔の図面は2倍出やすい。仲間の専用武器は、持っているキャラのぶんだけ）'}</p></div>
   <div><span>天井</span><p>${C.pity}回引くと限定が必ず出る（限定が出たら数えなおし）</p></div>
   <div><span>被ったら</span><p>${tool?'工具の練度が大きく上がる（+40）。練度Lv5のあとは基本素材になる':'改良図面：その装備の威力+3%（最大+3回）。そのあとは基本素材になる'}</p></div>
   <div><span>11回</span><p>10回分の値段で11回</p></div></div><div class="gpf"><button class="btn" id="gpClose">とじる</button></div>`;$('gpClose').onclick=()=>$('genPick').classList.remove('on');$('genPick').classList.add('on')}}
-function pullItems(type,n){const tool=type==='tool',C=tool?TOOL_G:BP_G,cost=n>1?C.cost11:C.cost,gv=gaVolOpen(gaVolI[type])?gaVolI[type]:1,pk=tool?pityKey(type,gv):bpPityK(),LIMS=tool?gaLims(type,gv):BP_LIM_ALL();if(G.coin<cost){say('コインが足りない',1000);return}
+function pullItems(type,n){const tool=type==='tool',C=tool?TOOL_G:BP_G,cost=n>1?C.cost11:C.cost,gv=gaVolOpen(gaVolI[type])?gaVolI[type]:1,pk=tool?toolPityK():bpPityK(),LIMS=tool?TOOL_LIM_ALL():BP_LIM_ALL();if(G.coin<cost){say('コインが足りない',1000);return}
  G.coin-=cost;G.pity=G.pity||{};G.bpPlus=G.bpPlus||{};const res=[];
- for(let i=0;i<n;i++){G.pity[pk]=(G.pity[pk]||0)+1;let lim=Math.random()<C.lim||G.pity[pk]>=C.pity;const pool=lim?LIMS:(tool?TOOL_POOL():BP_POOL_ALL());if(lim)G.pity[pk]=0;
+ for(let i=0;i<n;i++){G.pity[pk]=(G.pity[pk]||0)+1;let lim=Math.random()<C.lim||G.pity[pk]>=C.pity;const pool=lim?LIMS:(tool?TOOL_POOL_ALL():BP_POOL_ALL());if(lim)G.pity[pk]=0;
   const k=pick(pool);res.push(tool?getTool(k,lim):getBp(k,lim))}
  save();showItemResult(res);renderGacha()}
 function getTool(t,lim){if(!G.tools.includes(t)){G.tools.push(t);return{ic:MIC(t,56),n:TOOLS[t].n,lim,tag:'NEW',cls:'new'}}
