@@ -17,14 +17,14 @@ talk=function(list,bg){if(!list||!list.length)return Promise.resolve();try{list.
   fb.style.display=src?'block':'none';
   if(src){const css=mode==='ex'?'width:118%;margin-left:-9%;margin-top:0':mode==='ic'?'width:100%;margin:0':mode==='foe'?'width:100%;height:100%;object-fit:contain;margin:0':null;
    const apply=()=>{if(css!=null)im.style.cssText=css;else portrait(im,id);im.style.visibility='visible'};
-   im.onerror=()=>{fb.style.display='none'};
+   im.onerror=()=>{const f=c&&FACE(id);if(f&&im.getAttribute('src')!==f){im.style.cssText='width:100%;margin:0';im.src=f}else fb.style.display='none'};  /* 3.2.2：表情の絵がないときは顔アイコンに */
    if(im.getAttribute('src')===src&&im.complete){apply()}else{im.style.visibility='hidden';im.onload=()=>{if(im.getAttribute('src')===src)apply()};im.src=src;if(im.complete&&im.naturalWidth)apply()}}$('tWho').textContent=who||'';$('tTxt').textContent=txt;$('tTxt').scrollTop=0;
   $('tBack').disabled=i===0};
  const stop=e=>{e.stopPropagation();e.preventDefault()};
  $('tBack').onclick=e=>{stop(e);if(i>0){i--;sh()}};
  $('tLog').onclick=e=>{stop(e);logShow(list.slice(0,i+1),'この会話のログ')};
- $('tSkip').onclick=e=>{stop(e);i=list.length-1;T.onclick({target:T})};  /* 3.1.6：会話をまとめて飛ばす */
- sh();T.onclick=e=>{if(e.target.closest('#tBack,#tLog'))return;i++;  /* 2.4.0：ボタンの列のすき間や「タップで次へ」を押しても進む */
+ $('tSkip').onclick=e=>{stop(e);i=list.length-1;T.onclick({target:T,skip:1})};  /* 3.1.6：会話をまとめて飛ばす */
+ let lastT=0;sh();T.onclick=e=>{if(e.target.closest('#tBack,#tLog'))return;const now=performance.now();if(!e.skip&&now-lastT<220)return;lastT=now;i++;  /* 3.2.2：すばやい2回タップで2つ進まないように */  /* 2.4.0：ボタンの列のすき間や「タップで次へ」を押しても進む */
   if(i>=list.length){T.classList.remove('on','ev');T.style.backgroundImage='';T.onclick=null;bar.innerHTML='';document.body.classList.remove('talking');lockInput(350);res()}else sh()}})};
 /* ログの一覧（会話の上に重ねる） */
 function logShow(L,title){let o=$('logOv');if(!o){o=document.createElement('div');o.id='logOv';o.className='logov';document.body.append(o)}
