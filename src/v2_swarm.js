@@ -11,3 +11,7 @@ const swK=()=>{if(!FD||!FD.run||FD.boss||FD.bossDone||towerAt()==='tut')return 0
  const w=waveNow();D.swAcc=(D.swAcc||0)+w[2]*SW.RATE*k*f/60;while(D.swAcc>=1){D.swAcc--;fSpawn(pick(w[1]))}
  D.swT=(D.swT||0)+f;if(D.swT>=SW.EVERY){D.swT=0;const a0=Math.random()*TAU,kind=pick(w[1]),n=Math.round(SW.PACK*(.6+.4*k));
   for(let i=0;i<n;i++)fSpawn(kind,a0+(i-(n-1)/2)*.11,null)}}}
+/* 3.2.1：ザコをもっと柔らかく、もっと多く（強敵・ボスはそのまま）。たたら島は自分の波を使うので、出る速さはそのまま */
+const MOB={HP:.6,RATE:1.3};
+{const _sp=fSpawn;fSpawn=function(kind){const e=_sp.apply(this,arguments);if(e&&!e.big&&!e.boss){e.hp*=MOB.HP;e.max*=MOB.HP}return e}}
+{const _w=waveNow;waveNow=function(){const w=_w.apply(this,arguments);return w&&w.length>2?[w[0],w[1],w[2]*MOB.RATE,...w.slice(3)]:w}}
